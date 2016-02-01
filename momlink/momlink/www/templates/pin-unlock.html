@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+
+    <link href="http://code.ionicframework.com/1.2.4/css/ionic.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+
+    <script src="http://code.ionicframework.com/1.2.4/js/ionic.bundle.min.js"></script>
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+
+    <!-- your app's js -->
+    <script src="../js/app.js"></script>
+    <script src="../js/controllers.js"></script>
+    <script src="../js/services.js"></script>
+</head>
+<body ng-app="starter">
+    <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
+        <h1 class="title">MomLink</h1>
+        <div class="buttons">
+            <button class="button" ng-click="goBack()">Back</button>
+        </div>
+    </ion-header-bar>
+    <ion-view title="Pin Code Unlock">
+        <ion-content class="has-header center-vertical" overflow-scroll="false" ng-controller="UnlockController" ng-init="init()">
+            <center>
+                <div>
+                    <img src="../img/buttons/btn-13.png" height="150" width="150" alt="Key">
+                </div>
+                <div>
+                    <span style="font-size: 125%;">Type the key combination of your lock</span>
+                    <img src="../img/icons/btn_t-11.png" style="width:50px;height:50px;vertical-align:middle" alt="Sound">
+                </div>
+            </center>
+            <div>
+                <div class="row" style="text-align: center">
+                    <div class="col col-10 col-offset-15" style="border-bottom: 1px solid black">
+                        <div ng-if="passcode.length &gt;= 1">*</div>
+                    </div>
+                    <div class="col col-10 col-offset-10" style="border-bottom: 1px solid black">
+                        <div ng-if="passcode.length &gt;= 2">*</div>
+                    </div>
+                    <div class="col col-10 col-offset-10" style="border-bottom: 1px solid black">
+                        <div ng-if="passcode.length &gt;= 3">*</div>
+                    </div>
+                    <div class="col col-10 col-offset-10" style="border-bottom: 1px solid black">
+                        <div ng-if="passcode.length &gt;= 4">*</div>
+                    </div>
+                    <div class="col col-10 col-offset-10" style="border-bottom: 1px solid black">
+                        <div ng-if="passcode.length &gt;= 5">*</div>
+                    </div>
+                    <div class="col col-10 col-offset-10" style="border-bottom: 1px solid black">
+                        <div ng-if="passcode.length &gt;= 6">*</div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 50px">
+                <div class="row">
+                    <div class="col col-20 col-offset-20">
+                        <button class="button button-light button-stretch" ng-click="add(1)">1</button>
+                    </div>
+                    <div class="col col-20">
+                        <button class="button button-light button-stretch" ng-click="add(2)">2</button>
+                    </div>
+                    <div class="col col-20">
+                        <button class="button button-light button-stretch" ng-click="add(3)">3</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col col-20 col-offset-20">
+                        <button class="button button-light button-stretch" ng-click="add(4)">4</button>
+                    </div>
+                    <div class="col col-20">
+                        <button class="button button-light button-stretch" ng-click="add(5)">5</button>
+                    </div>
+                    <div class="col col-20">
+                        <button class="button button-light button-stretch" ng-click="add(6)">6</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col col-20 col-offset-20">
+                        <button class="button button-light button-stretch" ng-click="add(7)">7</button>
+                    </div>
+                    <div class="col col-20">
+                        <button class="button button-light button-stretch" ng-click="add(8)">8</button>
+                    </div>
+                    <div class="col col-20">
+                        <button class="button button-light button-stretch" ng-click="add(9)">9</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col col-20 col-offset-20">
+                        <button class="button icon ion-arrow-left-a button-light button-stretch" ng-click="delete()"></button>
+                    </div>
+                    <div class="col col-20">
+                        <button class="button button-light button-stretch" ng-click="add(0)">0</button>
+                    </div>
+                    <div class="col col-20">
+                        <button class="button icon ion-checkmark-round button-light button-stretch" ng-click="confirm()"></button>
+                    </div>
+                </div>
+            </div>
+        </ion-content>
+    </ion-view>
+</body>
+</html>

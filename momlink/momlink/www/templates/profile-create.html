@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+
+    <link href="http://code.ionicframework.com/1.2.4/css/ionic.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+
+    <script src="http://code.ionicframework.com/1.2.4/js/ionic.bundle.min.js"></script>
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+
+    <!-- your app's js -->
+    <script src="../js/app.js"></script>
+    <script src="../js/controllers.js"></script>
+    <script src="../js/services.js"></script>
+</head>
+<body ng-app="starter">
+    <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
+        <h1 class="title">MomLink</h1>
+        <div class="buttons">
+            <button class="button" ng-click="goBack()">Back</button>
+        </div>
+    </ion-header-bar>
+    <ion-view title="Profile Picture Selector">
+        <ion-content class="has-header" overflow-scroll="false" ng-controller="PopupCtrl">
+                <div class="row padding text-center">
+                    Select an image from below to use as your profile picture.
+                </div>
+                <div class="row">
+                    <input id="P01" class="col" type="image" ng-click="createImage('P01')" src="../img/profiles/profile-01.svg" style="width:75px;height:75px;vertical-align:middle"/>
+                    <input id="P02" class="col" type="image" ng-click="createImage('P02')" src="../img/profiles/profile-02.svg" style="width:75px;height:75px;vertical-align:middle"/>
+                    <input id="P03" class="col" type="image" ng-click="createImage('P03')" src="../img/profiles/profile-03.svg" style="width:75px;height:75px;vertical-align:middle"/>
+                    <input id="P04" class="col" type="image" ng-click="createImage('P04')" src="../img/profiles/profile-04.svg" style="width:75px;height:75px;vertical-align:middle"/>
+                </div>
+                <div class="row">
+                    <input id="P05" class="col" type="image" ng-click="createImage('P05')" src="../img/profiles/profile-05.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P06" class="col" type="image" ng-click="createImage('P06')" src="../img/profiles/profile-06.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P07" class="col" type="image" ng-click="createImage('P07')" src="../img/profiles/profile-07.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P08" class="col" type="image" ng-click="createImage('P08')" src="../img/profiles/profile-08.svg" style="width:75px;height:75px;vertical-align:middle" />
+                </div>
+                <div class="row">
+                    <input id="P09" class="col" type="image" ng-click="createImage('P09')" src="../img/profiles/profile-09.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P10" class="col" type="image" ng-click="createImage('P10')" src="../img/profiles/profile-10.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P11" class="col" type="image" ng-click="createImage('P11')" src="../img/profiles/profile-11.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P12" class="col" type="image" ng-click="createImage('P12')" src="../img/profiles/profile-12.svg" style="width:75px;height:75px;vertical-align:middle" />
+                </div>
+                <div class="row">
+                    <input id="P13" class="col" type="image" ng-click="createImage('P13')" src="../img/profiles/profile-13.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P14" class="col" type="image" ng-click="createImage('P14')" src="../img/profiles/profile-14.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P15" class="col" type="image" ng-click="createImage('P15')" src="../img/profiles/profile-15.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P16" class="col" type="image" ng-click="createImage('P16')" src="../img/profiles/profile-16.svg" style="width:75px;height:75px;vertical-align:middle" />
+                </div>
+                <div class="row">
+                    <input id="P17" class="col" type="image" ng-click="createImage('P17')" src="../img/profiles/profile-17.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P18" class="col" type="image" ng-click="createImage('P18')" src="../img/profiles/profile-18.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P19" class="col" type="image" ng-click="createImage('P19')" src="../img/profiles/profile-19.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P20" class="col" type="image" ng-click="createImage('P20')" src="../img/profiles/profile-20.svg" style="width:75px;height:75px;vertical-align:middle" />
+                </div>
+                <div class="row">
+                    <input id="P21" class="col" type="image" ng-click="createImage('P21')" src="../img/profiles/profile-21.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P22" class="col" type="image" ng-click="createImage('P22')" src="../img/profiles/profile-22.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P23" class="col" type="image" ng-click="createImage('P23')" src="../img/profiles/profile-23.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P24" class="col" type="image" ng-click="createImage('P24')" src="../img/profiles/profile-24.svg" style="width:75px;height:75px;vertical-align:middle" />
+                </div>
+                <div class="row">
+                    <input id="P25" class="col" type="image" ng-click="createImage('P25')" src="../img/profiles/profile-25.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P26" class="col" type="image" ng-click="createImage('P26')" src="../img/profiles/profile-26.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P27" class="col" type="image" ng-click="createImage('P27')" src="../img/profiles/profile-27.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P28" class="col" type="image" ng-click="createImage('P28')" src="../img/profiles/profile-28.svg" style="width:75px;height:75px;vertical-align:middle" />
+                </div>
+                <div class="row">
+                    <input id="P29" class="col" type="image" ng-click="createImage('P29')" src="../img/profiles/profile-29.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P30" class="col" type="image" ng-click="createImage('P30')" src="../img/profiles/profile-30.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P31" class="col" type="image" ng-click="createImage('P31')" src="../img/profiles/profile-31.svg" style="width:75px;height:75px;vertical-align:middle" />
+                    <input id="P32" class="col" type="image" ng-click="createImage('P32')" src="../img/profiles/profile-32.svg" style="width:75px;height:75px;vertical-align:middle" />
+                </div>
+        </ion-content>
+    </ion-view>
+</body>
+</html>
