@@ -6,10 +6,32 @@ angular.module('starter.controllers', [])
     $scope.goBack = function (value) {
         window.history.back();
     };
+    $scope.home = function () {
+        window.location = "main.html";
+    };
     $scope.toggleTopMenu = function () {
         var menu = document.getElementsByTagName('ion-top-menu')[0];
         var pane = document.getElementsByTagName('ion-pane')[0];
         menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
+    };
+//Menu Links
+    $scope.mail = function () {
+        window.location = "mail.html";
+    };
+    $scope.communities = function () {
+        window.location = "communities.html";
+    };
+    $scope.track = function () {
+        window.location = "track.html";
+    };
+    $scope.coupons = function () {
+        window.location = "coupons.html";
+    };
+    $scope.content = function () {
+        window.location = "content.html";
+    };
+    $scope.myProfile = function () {
+        window.location = "myProfile.html";
     };
     $scope.logout = function () {
         window.location = "../index.html";

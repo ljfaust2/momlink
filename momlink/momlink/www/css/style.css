@@ -80,12 +80,14 @@ ion-pane {
         vertical-align: middle;
         line-height: 100px; 
     }
-.slider-pager-page
-{
-    color: whitesmoke !important;
-}
-.slider-pager-page.active
-{
-    color: white !important;
-}
+
+.centerVH{
+        text-align: center;
+        vertical-align: middle;
+    }
+
+.swiper-pagination-bullet{
+        background-color: #fff;
+    }
+
 
