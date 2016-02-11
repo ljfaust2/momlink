@@ -46,9 +46,26 @@ angular.module('starter.controllers', [])
             template: 'Is this the picture you would like to use?'
         });
             document.getElementById(imageId).style.border = "1px solid black";
-        confirmPopup.then(function (res) {
-            if(res) {
-                window.location = "pin-create.html";
+            confirmPopup.then(function (res) {
+            if (res) {
+
+                var db = new PouchDB('http://localhost:5984/users888');
+
+                db.info();
+
+               /* var doc = {
+                    "_id": "user",
+                    "profileimage": imageId,
+                    "password": "",
+                    "name": "",
+                };
+                db.put(doc);
+
+                db.get('user').then(function (doc) {
+                    console.log(doc);
+                });*/
+
+                document.getElementById(imageId).style.border = "none";
             }
             else {
                 document.getElementById(imageId).style.border = "none";
@@ -70,6 +87,40 @@ angular.module('starter.controllers', [])
             }
         });
     };
+
+    $scope.uploadMood = function () {
+        var alertPopup = $ionicPopup.alert({
+            title: 'Your moods have been sent'
+        });
+        alertPopup.then(function (res) {
+            //sendMoods
+        });
+    };
+
+})
+
+.controller('PopOverController', function($scope, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('popover.html', {
+        scope: $scope
+    }).then(function(popover) {
+        $scope.popover = popover;
+    });
+
+    $scope.openPopover = function($event) {
+        $scope.popover.show($event);
+    };
+    $scope.closePopover = function() {
+        $scope.popover.hide();
+    };
+    $scope.$on('$destroy', function() {
+        $scope.popover.remove();
+    });
+    $scope.$on('popover.hidden', function() {
+        // Execute action
+    });
+    $scope.$on('popover.removed', function() {
+        // Execute action
+    });
 })
 
 .controller('SliderController', function ($scope, $ionicSlideBoxDelegate) {

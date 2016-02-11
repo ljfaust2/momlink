@@ -64,54 +64,26 @@
             </script>
         </ion-subheader-bar>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <ion-slides options="options" slider="data.slider" style="height: 100px; background-color:deeppink;">
-                    <ion-slide-page>
-                        <div class="centerWhite">Content from EverydayHealth</div>
-                    </ion-slide-page>
-                    <ion-slide-page>
-                        <div class="centerWhite"></div>
-                    </ion-slide-page>
-                    <ion-slide-page>
-                        <div class="centerWhite"></div>
-                    </ion-slide-page>
-                </ion-slides>
+            <ion-content overflow-scroll="false" class="has-header has-subheader" ng-controller="PopOverController">
+                <!--Display moods for today-->
+                
+                <script id="popover.html" type="text/ng-template">
+                    <ion-popover-view>
+                        <ion-header-bar>
+                            <h1 class="title">Add Mood</h1>
+                        </ion-header-bar>
+                        <ion-content class="has-header">
+                            <div class="row">
+                                <div class="col"><center><img src="../img/temp/mood.png" style="width:75px;height:75px;vertical-align:middle" alt="Happy"><p>Happy</p></center></div>
+                                <div class="col"><center><img src="../img/temp/sick.png" style="width:75px;height:75px;vertical-align:middle" alt="Sick"><p>Sick</p></center></div>
+                            </div>
+                        </ion-content>
+                    </ion-popover-view>
+                </script>
 
-                <div class="row">
-                    <div class="col" style="height: 150px; background-color:rebeccapurple; border:2px solid white;">
-                        <center>
-                            <img src="../img/temp/agenda.png" style="width:80px;height:80px;" alt="Agenda">
-                            <p><font color="white">Today's Agenda</font> </p>
-                        </center>
-                    </div>
-                    <div class="col" style="height: 150px; background-color:orange; border:2px solid white;">
-                        <center>
-                            <img src="../img/temp/bell.png" style="width:80px;height:80px;" alt="Appointments">
-                            <p><font color="white">Appointments</font> </p>
-                        </center>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col" style="height: 150px; background-color:yellowgreen; border:2px solid white;">
-                            <center>
-                                <img src="../img/temp/mood.png" style="width:80px;height:80px;" alt="Learn More">
-                                <p><font color="white">Learn More</font> </p>
-                            </center>
-                    </div>
-                    <div class="col" style="height: 150px; background-color:cornflowerblue; border:2px solid white;">
-                        <ion-slides options="options" slider="data.slider">
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data</div>
-                            </ion-slide-page>
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data 2</div>
-                            </ion-slide-page>
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data 3</div>
-                            </ion-slide-page>
-                        </ion-slides>
-                    </div>
+                <div class="row" ng-controller="PopupCtrl">
+                    <img class="padding" ng-click="uploadMood()" src="/../img/temp/cloud.png" style="width:60px;height:50px; position:absolute; left:10px;" />
+                    <img class="padding" ng-click="openPopover($event)" src="/../img/temp/add.png" style="width:50px;height:50px; position:absolute; right:10px;" />
                 </div>
             </ion-content>
         </ion-view>
