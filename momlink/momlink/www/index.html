@@ -22,38 +22,6 @@
 </head>
 <body ng-app="starter">
     <center>
-
-        <button onclick="myFunction()">Click me</button>
-
-        <script>
-            var doc = {
-                "_id": "mittens",
-                "name": "Mittens",
-                "occupation": "kitten",
-                "age": 3,
-                "hobbies": [
-                  "playing with balls of yarn",
-                  "chasing laser pointers",
-                  "lookin' hella cute"
-                ]
-            };
-
-             function myFunction() {
-                 var db = new PouchDB('http://localhost:5984/kittenssz');
-
-                 db.info().then(function (info) {
-                     console.log("whut")
-                 });
-
-                 db.put(doc);
-
-                 db.info().then(function (info) {
-                     console.log("whut")
-                 });
-
-            }
-        </script>
-
         <div class="padding-top"><img src="img/logo.png" height="175" width="175" alt="Unlock"></div>
         <a href="templates/profile-unlock.html">
             <img src="img/buttons/btn-10.png" height="125" width="125" alt="Unlock">

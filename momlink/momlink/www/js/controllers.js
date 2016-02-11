@@ -48,24 +48,27 @@ angular.module('starter.controllers', [])
             document.getElementById(imageId).style.border = "1px solid black";
             confirmPopup.then(function (res) {
             if (res) {
+                    var db = new PouchDB('http://localhost:5984/' + imageId);
+                    db.info().then(function (info) {
+                        console.log("check1")
+                    });
 
-                var db = new PouchDB('http://localhost:5984/users888');
+                    var doc = {
+                        "_id": "userInfo",
+                        "profileimage": imageId,
+                        "password": "",
+                        "name": "",
+                        "age": "",
+                        "psd": "",
+                        "edd": ""
+                    };
+                    db.put(doc);
+                    db.info().then(function (info) {
+                        console.log("check2")
+                    });
 
-                db.info();
-
-               /* var doc = {
-                    "_id": "user",
-                    "profileimage": imageId,
-                    "password": "",
-                    "name": "",
-                };
-                db.put(doc);
-
-                db.get('user').then(function (doc) {
-                    console.log(doc);
-                });*/
-
-                document.getElementById(imageId).style.border = "none";
+                    document.getElementById(imageId).style.border = "none";
+                    window.location = "pin-create.html";
             }
             else {
                 document.getElementById(imageId).style.border = "none";
@@ -141,6 +144,13 @@ angular.module('starter.controllers', [])
     $scope.delete = function () {
         if ($scope.passcode.length > 0) {
             $scope.passcode = $scope.passcode.substring(0, $scope.passcode.length - 1);
+        }
+    }
+    $scope.create = function () {
+        if ($scope.passcode.length == 6) {
+            //get db by imageid
+            //add password to imageid doc
+            window.location = "main.html";
         }
     }
     $scope.confirm = function () {
