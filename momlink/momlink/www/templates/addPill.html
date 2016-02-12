@@ -48,28 +48,21 @@
         </ion-content>
     </ion-top-menu>
     <ion-pane>
+        <ion-subheader-bar class="bar bar-subheader">
+            <h2 class="title">New Pill</h2>
+        </ion-subheader-bar>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header">
-                <div class="row">
-                    <div class="col centerVH">
-                        <img src="../img/temp/safeSleep.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Safe Sleep">
-                        <p>Safe Sleep</p>
-                    </div>
-                    <div class="col centerVH">
-                        <img src="../img/temp/apple.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Nutrition">
-                        <p>Nutrition</p>
-                    </div>
+            <ion-content overflow-scroll="false" class="has-header has-subheader">
+                <div class="padding">
+                    <label for="myName">Pill Name:</label>
+                    <input type="text" id="myName" value="Pill name" style="width:100%; border-style:solid; border-width:1px;"/>
                 </div>
 
-                <div class="row">
-                    <div class="col centerVH">
-                        <img src="../img/temp/labor.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Labor">
-                        <p>Labor</p>
-                    </div>
-                    <div class="col centerVH"">
-                        <img src="../img/temp/insurance.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Insurance">
-                        <p>Insurance</p>
-                    </div>
+                <div class="padding">
+                    <center>
+                        <img src="../img/temp/floppyDelete.png" style="width:50px; height:50px;" />
+                        <img src="../img/temp/floppySave.png" style="width:50px; height:50px;" />
+                    </center>
                 </div>
             </ion-content>
         </ion-view>

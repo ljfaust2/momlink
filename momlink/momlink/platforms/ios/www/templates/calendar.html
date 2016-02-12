@@ -21,11 +21,11 @@
 <body ng-app="starter" ng-controller="HeaderBarController">
     <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
         <div class="buttons">
-            <button class="button button-icon icon ion-ios-home" ng-click="home()"></button>
+            <button class="button ion-ios-home" ng-click="home()"></button>
         </div>
         <h1 class="title">MomLink</h1>
         <div class="buttons">
-            <button class="button button-icon icon ion-navicon-round" ng-click="toggleTopMenu()"></button>
+            <button class="button ion-navicon-round" ng-click="toggleTopMenu()"></button>
         </div>
     </ion-header-bar>
     <ion-top-menu class="text-center has-header">
@@ -50,27 +50,22 @@
     <ion-pane>
         <ion-view>
             <ion-content overflow-scroll="false" class="has-header">
-                <div class="row">
-                    <div class="col centerVH">
-                        <img src="../img/temp/safeSleep.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Safe Sleep">
-                        <p>Safe Sleep</p>
-                    </div>
-                    <div class="col centerVH">
-                        <img src="../img/temp/apple.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Nutrition">
-                        <p>Nutrition</p>
-                    </div>
-                </div>
+               
+                <mwl-calendar view="calendarView"
+                              view-date="calendarDate"
+                              events="events"
+                              view-title="calendarTitle"
+                              on-event-click="eventClicked(calendarEvent)"
+                              on-event-times-changed="calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd"
+                              edit-event-html="'<i class=\'glyphicon glyphicon-pencil\'></i>'"
+                              delete-event-html="'<i class=\'glyphicon glyphicon-remove\'></i>'"
+                              on-edit-event-click="eventEdited(calendarEvent)"
+                              on-delete-event-click="eventDeleted(calendarEvent)"
+                              cell-is-open="true">
+                </mwl-calendar>
 
-                <div class="row">
-                    <div class="col centerVH">
-                        <img src="../img/temp/labor.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Labor">
-                        <p>Labor</p>
-                    </div>
-                    <div class="col centerVH"">
-                        <img src="../img/temp/insurance.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Insurance">
-                        <p>Insurance</p>
-                    </div>
-                </div>
+
+
             </ion-content>
         </ion-view>
     </ion-pane>

@@ -21,11 +21,11 @@
 <body ng-app="starter" ng-controller="HeaderBarController">
     <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
         <div class="buttons">
-            <button class="button ion-ios-home" ng-click="home()"></button>
+            <button class="button button-icon icon ion-ios-home" ng-click="home()"></button>
         </div>
         <h1 class="title">MomLink</h1>
         <div class="buttons">
-            <button class="button ion-navicon-round" ng-click="toggleTopMenu()"></button>
+            <button class="button button-icon icon ion-navicon-round" ng-click="toggleTopMenu()"></button>
         </div>
     </ion-header-bar>
     <ion-top-menu class="text-center has-header">
@@ -52,18 +52,18 @@
             <ion-content overflow-scroll="false" class="has-header">
                 <div class="row">
                     <div class="col centerVH">
-                        <img src="../img/temp/nutrition.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Nutrition">
+                        <img src="../img/temp/nutrition.png" ng-click="trackFood()" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Nutrition">
                         <p>Nutrition</p>
                     </div>
                     <div class="col centerVH">
-                        <img src="../img/temp/pills.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Pills">
+                        <img src="../img/temp/pills.png" ng-click="trackPills()" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Pills">
                         <p>Pills</p>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col centerVH">
-                        <img src="../img/temp/mood.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Mood">
+                        <img src="../img/temp/mood.png" ng-click="trackMoods()" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Mood">
                         <p>Mood</p>
                     </div>
                     <div class="col centerVH">

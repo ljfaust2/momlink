@@ -20,6 +20,9 @@
 </head>
 <body ng-app="starter" ng-controller="HeaderBarController">
     <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
+        <div class="buttons">
+            <button class="button button-icon icon ion-ios-home" ng-click="home()"></button>
+        </div>
         <h1 class="title">MomLink</h1>
         <div class="buttons">
             <button class="button button-icon icon ion-navicon-round" ng-click="toggleTopMenu()"></button>
@@ -65,53 +68,23 @@
         </ion-subheader-bar>
         <ion-view>
             <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <ion-slides options="options" slider="data.slider" style="height: 100px; background-color:deeppink;">
-                    <ion-slide-page>
-                        <div class="centerWhite">Content from EverydayHealth</div>
-                    </ion-slide-page>
-                    <ion-slide-page>
-                        <div class="centerWhite"></div>
-                    </ion-slide-page>
-                    <ion-slide-page>
-                        <div class="centerWhite"></div>
-                    </ion-slide-page>
-                </ion-slides>
-
-                <div class="row">
-                    <div class="col" style="height: 150px; background-color:rebeccapurple; border:2px solid white;">
-                        <center>
-                            <img src="../img/temp/agenda.png" ng-click="today()" style="width:80px;height:80px;" alt="Agenda">
-                            <p><font color="white">Today's Agenda</font> </p>
-                        </center>
-                    </div>
-                    <div class="col" style="height: 150px; background-color:orange; border:2px solid white;">
-                        <center>
-                            <img src="../img/temp/bell.png" style="width:80px;height:80px;" alt="Appointments">
-                            <p><font color="white">Appointments</font> </p>
-                        </center>
-                    </div>
+                <div class="padding">
+                    <input type="text" id="searchFood" value="Type Food" style="width:100%; border-style:solid; border-width:1px;" />
                 </div>
-
+                <div class="row padding-bottom">
+                    <center><img src="../img/temp/camera.png" style="width:60px; height:50px;" /></center>
+                </div>
                 <div class="row">
-                    <div class="col" style="height: 150px; background-color:yellowgreen; border:2px solid white;">
-                            <center>
-                                <img src="../img/temp/mood.png" style="width:80px;height:80px;" alt="Learn More">
-                                <p><font color="white">Learn More</font> </p>
-                            </center>
-                    </div>
-                    <div class="col" style="height: 150px; background-color:cornflowerblue; border:2px solid white;">
-                        <ion-slides options="options" slider="data.slider">
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data</div>
-                            </ion-slide-page>
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data 2</div>
-                            </ion-slide-page>
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data 3</div>
-                            </ion-slide-page>
-                        </ion-slides>
-                    </div>
+                    <div class="col"><center><input id="obappt" class="col" type="image" src="../img/temp/breakfast.PNG" style="width:80px;height:80px;vertical-align:middle" />Breakfast</center></div>
+                    <div class="col"><center><input id="tests" class="col" type="image" src="../img/temp/lunch.PNG" style="width:80px;height:80px;vertical-align:middle" />Lunch</center></div>
+                    <div class="col"><center><input id="visits" class="col" type="image" src="../img/temp/dinner.PNG" style="width:80px;height:80px;vertical-align:middle" />Dinner</center></div>
+                    <div class="col"><center><input id="ultra" class="col" type="image" src="../img/temp/snack.PNG" style="width:80px;height:80px;vertical-align:middle" />Snack</center></div>
+                </div>
+                <div class="padding">
+                    <center>
+                        <img src="../img/temp/floppyDelete.png" style="width:50px; height:50px;" />
+                        <img src="../img/temp/floppySave.png" style="width:50px; height:50px;" />
+                    </center>
                 </div>
             </ion-content>
         </ion-view>

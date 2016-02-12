@@ -21,11 +21,11 @@
 <body ng-app="starter" ng-controller="HeaderBarController">
     <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
         <div class="buttons">
-            <button class="button ion-ios-home" ng-click="home()"></button>
+            <button class="button button-icon icon ion-ios-home" ng-click="home()"></button>
         </div>
         <h1 class="title">MomLink</h1>
         <div class="buttons">
-            <button class="button ion-navicon-round" ng-click="toggleTopMenu()"></button>
+            <button class="button button-icon icon ion-navicon-round" ng-click="toggleTopMenu()"></button>
         </div>
     </ion-header-bar>
     <ion-top-menu class="text-center has-header">
@@ -48,25 +48,60 @@
         </ion-content>
     </ion-top-menu>
     <ion-pane>
-        <ion-view>
-            <ion-content overflow-scroll="false" class="has-header">
-               
-                <mwl-calendar view="calendarView"
-                              view-date="calendarDate"
-                              events="events"
-                              view-title="calendarTitle"
-                              on-event-click="eventClicked(calendarEvent)"
-                              on-event-times-changed="calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd"
-                              edit-event-html="'<i class=\'glyphicon glyphicon-pencil\'></i>'"
-                              delete-event-html="'<i class=\'glyphicon glyphicon-remove\'></i>'"
-                              on-edit-event-click="eventEdited(calendarEvent)"
-                              on-delete-event-click="eventDeleted(calendarEvent)"
-                              cell-is-open="true">
-                </mwl-calendar>
+        <ion-view overflow-scroll="false">
 
+            <ion-nav-view></ion-nav-view>
 
+                <ion-tabs class="has-header tabs-positive tabs-icon-top">
+                    <ion-tab title="Monthly" icon-on="ion-ios-calendar" icon-off="ion-ios-calendar-outline">
+                        <ion-view>
+                            <ion-content class="has-header padding">
+                                <div class="row">
 
-            </ion-content>
+                                </div>
+                                <div class="row">
+                                    <div class="col"><center><input id="obappt" class="col" type="image" src="../img/temp/obappt.PNG" style="width:50px;height:50px;vertical-align:middle" />OB Appt</center></div>
+                                    <div class="col"><center><input id="tests" class="col" type="image" src="../img/temp/tests.PNG" style="width:50px;height:50px;vertical-align:middle" />Tests</center></div>
+                                    <div class="col"><center><input id="visits" class="col" type="image" src="../img/temp/visits.PNG" style="width:50px;height:50px;vertical-align:middle" />Visits</center></div>
+                                    <div class="col"><center><input id="ultra" class="col" type="image" src="../img/temp/ultra.PNG" style="width:50px;height:50px;vertical-align:middle" />Ultra</center></div>
+                                    <div class="col"><center><input id="classes" class="col" type="image" src="../img/temp/classes.PNG" style="width:50px;height:50px;vertical-align:middle" />Classes</center></div>
+                                </div>
+                            </ion-content>
+                        </ion-view>
+                    </ion-tab>
+                    <ion-tab title="Weekly" icon-on="ion-ios-list" icon-off="ion-ios-list-outline">
+                        <ion-view>
+                            <ion-content class="has-header padding">
+                                <div class="row">
+                                    <div class="col" style="border:2px solid black;">Monday</div>
+                                    <div class="col" style="border:2px solid black;">Tuesday</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col" style="border:2px solid black;">Wednesday</div>
+                                    <div class="col" style="border:2px solid black;">Thursday</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col" style="border:2px solid black;">Friday</div>
+                                    <div class="col" style="border:2px solid black;">Saturday</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col" style="border:2px solid black;">Sunday</div>
+                                    <div class="col" style="border:2px solid black;"></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col"><center><input id="obappt" class="col" type="image" src="../img/temp/obappt.PNG" style="width:50px;height:50px;vertical-align:middle" />OB Appt</center></div>
+                                    <div class="col"><center><input id="tests" class="col" type="image" src="../img/temp/tests.PNG" style="width:50px;height:50px;vertical-align:middle" />Tests</center></div>
+                                    <div class="col"><center><input id="visits" class="col" type="image" src="../img/temp/visits.PNG" style="width:50px;height:50px;vertical-align:middle" />Visits</center></div>
+                                    <div class="col"><center><input id="ultra" class="col" type="image" src="../img/temp/ultra.PNG" style="width:50px;height:50px;vertical-align:middle" />Ultra</center></div>
+                                    <div class="col"><center><input id="classes" class="col" type="image" src="../img/temp/classes.PNG" style="width:50px;height:50px;vertical-align:middle" />Classes</center></div>
+                                </div> 
+                            </ion-content>
+                        </ion-view>
+                    </ion-tab>
+                    <ion-tab title="Add Event" ng-click="event()" icon-on="ion-ios-plus" icon-off="ion-ios-plus-outline">
+                    </ion-tab>
+                </ion-tabs>
         </ion-view>
     </ion-pane>
 </body>
