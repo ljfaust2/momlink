@@ -91,5 +91,114 @@ ion-pane {
     }
 
 /*calendar*/
+.novavozila {
+  font-size: 90%;
+}
 
+.novavozila .ui-widget {
+  font-family: font-family: 'Source Sans Pro', sans-serif;
+  background: #ffffff;
+  border: none;
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+}
+
+.novavozila .ui-datepicker {
+  padding: 0;
+}
+
+.novavozila .ui-datepicker-header {
+  border: none;
+  background: transparent;
+  font-weight: normal;
+  font-size: 13px;
+}
+
+.novavozila .ui-datepicker-header .ui-state-hover {
+  background: transparent;
+  border-color: transparent;
+  cursor: pointer;
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+}
+
+.novavozila .ui-datepicker .ui-datepicker-title {
+  margin-top: .4em;
+  margin-bottom: .3em;
+  color: #000000;
+}
+
+.novavozila .ui-datepicker .ui-datepicker-prev-hover,
+.novavozila .ui-datepicker .ui-datepicker-next-hover,
+.novavozila .ui-datepicker .ui-datepicker-next,
+.novavozila .ui-datepicker .ui-datepicker-prev {
+  top: .9em;
+  border: none;
+}
+
+.novavozila .ui-datepicker .ui-datepicker-prev-hover {
+  left: 2px;
+}
+
+.novavozila .ui-datepicker .ui-datepicker-next-hover {
+  right: 2px;
+}
+
+.novavozila .ui-datepicker .ui-datepicker-next span,
+.novavozila .ui-datepicker .ui-datepicker-prev span {
+  background-position: -32px 0;
+  margin-top: 0;
+  top: 0;
+  font-weight: normal;
+  color: white;
+}
+
+.novavozila .ui-datepicker .ui-datepicker-prev span {
+  background-position: -96px 0;
+}
+
+.novavozila .ui-datepicker table {
+  margin: 0;
+}
+
+.novavozila .ui-datepicker th {
+  padding: 1em 0;
+  color: black;
+  font-size: 13px;
+  font-weight: normal;
+  border: none;
+  border-top: 1px solid #3a414d;
+}
+
+.novavozila .ui-datepicker td {
+  background: #ffffff;
+  border: none;
+  padding: 0;
+}
+
+.novavozila td .ui-state-default {
+  background: transparent;
+  border: none;
+  text-align: center;
+  padding: .5em;
+  margin: 0;
+  font-weight: normal;
+  color: black;
+  font-size: 13px;
+}
+
+.novavozila .ui-state-disabled {
+  opacity: 1;
+}
+
+.novavozila .ui-state-disabled .ui-state-default {
+  color: #666;
+}
+
+.novavozila td .ui-state-active,
+.novavozila td .ui-state-hover {
+  background: #A9A9A9;
+}
 

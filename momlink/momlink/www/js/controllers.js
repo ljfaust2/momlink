@@ -14,7 +14,7 @@ angular.module('starter.controllers', [])
     };
 //Menu Links
     $scope.mail = function () {
-        window.location = "mail.html";
+        window.location = "inbox.html";
     };
     $scope.calendar = function () {
         window.location = "calendar.html";
