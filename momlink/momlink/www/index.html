@@ -23,24 +23,32 @@
     <script src="../js/controllers.js"></script>
     <script src="../js/services.js"></script>
 </head>
-<body ng-app="starter">
+<body ng-app="starter" bgcolor="#0866c6" ng-controller="HeaderBarController">
     <center>
-        <div class="padding-top"><img src="img/logo.png" height="175" width="175" alt="Unlock"></div>
-        <a href="templates/profile-unlock.html">
-            <img src="img/buttons/btn-10.png" height="125" width="125" alt="Unlock">
-        </a>
-        <div>
-            <span style="font-size: 125%;">Unlock</span>
-            <img src="img/icons/btn_t-11.png" style="width:50px;height:50px;vertical-align:middle" alt="Sound">
+        <div class="padding-top"><img src="img/temp/logo.png" height="175" width="175" alt="Momlink"></div>
+        <br/>
+        <div class="list list-inset">
+            <label class="item item-input">
+                <input type="text" placeholder="Username">
+            </label>
+            <label class="item item-input">
+                <input type="password" placeholder="Password">
+            </label>
         </div>
-        <p style="font-size: 150%;">_________________Or_________________</p>
-        <a href="templates/profile-create.html">
-            <img src="img/buttons/btn-11.png" height="125" width="125" alt="Get Key">
+        <div class="padding">
+            <button class="button button-positive" ng-onclick="login()">
+                LOGIN
+            </button>
+         </div>       
+            <p style="font-size: 200%; color:white">______________________________</p>
+        <br />
+            <a href="" style="font-size: 105%; color:lightsteelblue;">
+                Forgot Password?
+            </a>
+        <br />
+        <a href="templates/register.html" style="font-size: 105%; color:lightsteelblue;">
+            New User?
         </a>
-        <div>
-            <span style="font-size: 125%;">Get Key</span>
-            <img src="img/icons/btn_t-11.png" style="width:50px;height:50px;vertical-align:middle" alt="Sound">
-        </div>
-    </center>
+</center>
     </body>
 </html>

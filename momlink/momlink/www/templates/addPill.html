@@ -53,27 +53,32 @@
         </ion-subheader-bar>
         <ion-view>
             <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <div class="padding">
-                    <label for="myName">Pill Name:</label>
-                    <input type="text" id="myName" value="Pill name" style="width:100%; border-style:solid; border-width:1px;"/>
+                <div class="padding-top">
+                    <center><img style="width:90%; height:150px;" /></center>
                 </div>
-                <div class="padding">
-                    <label for="pillStartDate">Start Day:</label>
-                    <input type="date" id="pillStartDate" style="width:100%; border-style:solid; border-width:1px;" />
+                <div class="padding-bottom" style="position:absolute; right:30px;">
+                    <center><img src="../img/temp/camera.png" style="width:25px; height:25px;" /></center>
                 </div>
-                <center><div class="row padding">
+                <div class="list">
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Pill name</span>
+                        <input type="text" placeholder="Pill name">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">When should this pill be taken?</span>
+                        <input type="time" placeholder="Time">
+                    </label>
+                </div>
+                <center>
+                    <div class="row">
                         <div class="col">
-                            <img src="../img/temp/bell.png" style="width:50px;height:50px;" alt="Appointments">
-                            <label class="toggle">
-                                <input type="checkbox">
-                                <div class="track">
-                                    <div class="handle"></div>
-                                </div>
-                            </label>
+                            <img src="../img/temp/save.png" style="width:25px; height:25px;" />
                         </div>
-                        <div class="col"><img src="../img/temp/floppyDelete.png" style="width:50px; height:50px;" /></div>
-                        <div class="col"><img src="../img/temp/floppySave.png" style="width:50px; height:50px;" /></div>
-                </div></center>
+                        <div class="col">
+                            <img src="../img/temp/delete.png" style="width:25px; height:25px;" />
+                        </div>
+                    </div>
+                </center>
             </ion-content>
         </ion-view>
     </ion-pane>

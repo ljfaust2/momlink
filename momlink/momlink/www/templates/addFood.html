@@ -68,8 +68,14 @@
         </ion-subheader-bar>
         <ion-view>
             <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <div class="padding">
-                    <input type="text" id="searchFood" value="Type Food" style="width:100%; border-style:solid; border-width:1px;" />
+                <div class="bar bar-header item-input-inset">
+                    <label class="item-input-wrapper">
+                        <i class="icon ion-ios-search placeholder-icon"></i>
+                        <input type="search" placeholder="Search food..">
+                    </label>
+                    <button class="button button-clear">
+                        Cancel
+                    </button>
                 </div>
                 <div class="row padding-bottom">
                     <center><img src="../img/temp/camera.png" style="width:60px; height:50px;" /></center>
@@ -80,12 +86,16 @@
                     <div class="col"><center><input id="visits" class="col" type="image" src="../img/temp/dinner.PNG" style="width:80px;height:80px;vertical-align:middle" />Dinner</center></div>
                     <div class="col"><center><input id="ultra" class="col" type="image" src="../img/temp/snack.PNG" style="width:80px;height:80px;vertical-align:middle" />Snack</center></div>
                 </div>
-                <div class="padding">
-                    <center>
-                        <img src="../img/temp/floppyDelete.png" style="width:50px; height:50px;" />
-                        <img src="../img/temp/floppySave.png" style="width:50px; height:50px;" />
-                    </center>
-                </div>
+                <center>
+                    <div class="row" ng-controller="PopupCtrl">
+                        <div class="col">
+                            <img src="../img/temp/save.png" style="width:25px; height:25px;" />
+                        </div>
+                        <div class="col">
+                            <img src="../img/temp/delete.png" style="width:25px; height:25px;" />
+                        </div>
+                    </div>
+                </center>
             </ion-content>
         </ion-view>
     </ion-pane>

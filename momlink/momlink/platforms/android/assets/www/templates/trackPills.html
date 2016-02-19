@@ -48,30 +48,30 @@
         </ion-content>
     </ion-top-menu>
     <ion-pane>
+        <ion-subheader-bar class="bar bar-subheader">
+            <h2 class="title">My Pills</h2>
+        </ion-subheader-bar>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header">
-                <div class="row">
-                    <div class="col centerVH">
-                        <img src="../img/temp/birthClub.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Birth Club">
-                        <p>Birth Club</p>
-                    </div>
-                    <div class="col centerVH">
-                        <img src="../img/temp/tobaccoQuit.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Tobacco Quit">
-                        <p>Tobacco Quit</p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col centerVH">
-                        <img src="../img/temp/secondPregnancy.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Second Pregnancy">
-                        <p>2nd Pregnancy</p>
-                    </div>
-                    <div class="col centerVH">
-                        <img src="../img/temp/teenPregnancy.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Teen Pregnancy">
-                        <p>Birth Club</p>
-                    </div>
+            <ion-content overflow-scroll="false" class="has-header has-subheader">
+                <div class="bar bar-header item-input-inset">
+                    <label class="item-input-wrapper">
+                        <i class="icon ion-ios-search placeholder-icon"></i>
+                        <input type="search" placeholder="Search">
+                    </label>
+                    <button class="button button-clear">
+                        Cancel
+                    </button>
                 </div>
             </ion-content>
+            <ion-footer-bar class="bar-positive">
+                <div class="buttons">
+                    <button class="button button-icon icon ion-ios-trash-outline" ng-click=""></button>
+                </div>
+                <h1 class="title"></h1>
+                <div class="buttons">
+                    <button class="button button-icon icon ion-ios-plus-outline" ng-click="addPills()"></button>
+                </div>
+            </ion-footer-bar>
         </ion-view>
     </ion-pane>
 </body>

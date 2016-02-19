@@ -56,32 +56,39 @@
                 <div class="padding-bottom" style="position:absolute; right:30px;">
                     <center><img src="../img/temp/camera.png"style="width:25px; height:25px;" /></center>
                 </div>
-                <div class="padding">
-                    <label for="myName">Name:</label>
-                    <input type="text" id="myName" value="My name" style="width:100%; border-style:solid; border-width:1px;"/>
+
+                <div class="list">
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Name</span>
+                        <input type="text" placeholder="Name">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Age</span>
+                        <input type="number" placeholder="Age">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Pregnancy Start Date</span>
+                        <input type="date">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Expected Delivery Date</span>
+                        <input type="date">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">About Me</span>
+                        <textarea placeholder="About Me"></textarea>
+                    </label>
                 </div>
-                <div class="padding">
-                    <label for="myAge">Age:</label>
-                    <input type="number" id="myAge" value="0" style="width:100%; border-style:solid; border-width:1px;" />
-                </div>
-                <div class="padding">
-                    <label for="myStartDate">Pregnancy Start Date:</label>
-                    <input type="date" id="myStartDate" style="width:100%; border-style:solid; border-width:1px;" />
-                </div>
-                <div class="padding">
-                    <label for="myExpectedDate">Expected Delivery Date:</label>
-                    <input type="date" id="myExpectedDate" style="width:100%; border-style:solid; border-width:1px;" />
-                </div>
-                <div class="padding">
-                    <label for="myAboutMe">About Me:</label>
-                    <textarea id="myAboutMe" rows="10" cols="10" style="width:100%; border-style:solid; border-width:1px;"></textarea>
-                </div>
-                <div class="padding">
-                    <center>
-                        <img src="../img/temp/floppyDelete.png" style="width:50px; height:50px;" />
-                        <img src="../img/temp/floppySave.png" style="width:50px; height:50px;" />
-                    </center>
-                </div>
+                <center>
+                    <div class="row">
+                        <div class="col">
+                            <img src="../img/temp/save.png" style="width:25px; height:25px;" />
+                        </div>
+                        <div class="col">
+                            <img src="../img/temp/delete.png" style="width:25px; height:25px;" />
+                        </div>
+                    </div>
+                </center>
             </ion-content>
         </ion-view>
     </ion-pane>

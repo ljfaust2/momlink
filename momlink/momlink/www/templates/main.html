@@ -27,21 +27,6 @@
     </ion-header-bar>
     <ion-top-menu class="text-center has-header">
         <ion-content overflow-scroll="false">
-            <div class="row">
-                <div class="col"><img src="../img/buttons/btn-04.png" ng-click="mail()" style="width:75px;height:75px;vertical-align:middle" alt="Mail"><p>Mail</p></div>
-                <div class="col"><img src="../img/buttons/btn-05.png" ng-click="calendar()" style="width:75px;height:75px;vertical-align:middle" alt="Calendar"><p>Calendar</p></div>
-                <div class="col"><img src="../img/buttons/btn-06.png" ng-click="communities()" style="width:75px;height:75px;vertical-align:middle" alt="Communities"><p>Communities</p></div>
-            </div>
-            <div class="row">
-                <div class="col"><img src="../img/buttons/btn-08.png" ng-click="track()" style="width:75px;height:75px;vertical-align:middle" alt="Track"><p>Track</p></div>
-                <div class="col"><img src="../img/buttons/btn-07.png" ng-click="coupons()" style="width:75px;height:75px;vertical-align:middle" alt="Coupons"><p>Coupons</p></div>
-                <div class="col"><img src="../img/buttons/btn-09.png" ng-click="content()" style="width:75px;height:75px;vertical-align:middle" alt="Communities"><p>Content</p></div>
-            </div>
-            <div class="row">
-                <div class="col"></div>
-                <div class="col"><img src="../img/buttons/btn-12.png" ng-click="myProfile()" style="width:75px;height:75px;vertical-align:middle" alt="My Profile"><p>My Profile</p></div>
-                <div class="col"><img src="../img/buttons/btn-11.png" ng-click="logout()" style="width:75px;height:75px;vertical-align:middle" alt="Logout"><p>Logout</p></div>
-            </div>
         </ion-content>
     </ion-top-menu>
     <ion-pane>
@@ -65,9 +50,9 @@
         </ion-subheader-bar>
         <ion-view>
             <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <ion-slides options="options" slider="data.slider" style="height: 100px; background-color:deeppink;">
+                <ion-slides options="options" slider="data.slider" style="height: 80px; background-color:deeppink;">
                     <ion-slide-page>
-                        <div class="centerWhite">Content from EverydayHealth</div>
+                        <div class="centerWhite">Appointments</div>
                     </ion-slide-page>
                     <ion-slide-page>
                         <div class="centerWhite"></div>
@@ -76,43 +61,23 @@
                         <div class="centerWhite"></div>
                     </ion-slide-page>
                 </ion-slides>
-
-                <div class="row">
-                    <div class="col" style="height: 150px; background-color:rebeccapurple; border:2px solid white;">
-                        <center>
-                            <img src="../img/temp/agenda.png" ng-click="today()" style="width:80px;height:80px;" alt="Agenda">
-                            <p><font color="white">Today's Agenda</font> </p>
-                        </center>
+                <center>
+                    <div class="row">
+                        <div class="col"><img src="../img/buttons/btn-04.png" ng-click="mail()" style="width:75px;height:75px;vertical-align:middle" alt="Mail"><p>Mail</p></div>
+                        <div class="col"><img src="../img/buttons/btn-05.png" ng-click="calendar()" style="width:75px;height:75px;vertical-align:middle" alt="Calendar"><p>Calendar</p></div>
+                        <div class="col"><img src="../img/buttons/btn-06.png" ng-click="referrals()" style="width:75px;height:75px;vertical-align:middle" alt="Referrals"><p>Referrals</p></div>
                     </div>
-                    <div class="col" style="height: 150px; background-color:orange; border:2px solid white;">
-                        <center>
-                            <img src="../img/temp/bell.png" style="width:80px;height:80px;" alt="Appointments">
-                            <p><font color="white">Appointments</font> </p>
-                        </center>
+                    <div class="row">
+                        <div class="col"><img src="../img/buttons/btn-08.png" ng-click="track()" style="width:75px;height:75px;vertical-align:middle" alt="Track"><p>Track</p></div>
+                        <div class="col"><img src="../img/buttons/btn-07.png" ng-click="coupons()" style="width:75px;height:75px;vertical-align:middle" alt="Coupons"><p>Coupons</p></div>
+                        <div class="col"><img src="../img/buttons/btn-09.png" ng-click="content()" style="width:75px;height:75px;vertical-align:middle" alt="Communities"><p>Education</p></div>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col" style="height: 150px; background-color:yellowgreen; border:2px solid white;">
-                            <center>
-                                <img src="../img/temp/mood.png" style="width:80px;height:80px;" alt="Learn More">
-                                <p><font color="white">Learn More</font> </p>
-                            </center>
+                    <div class="row">
+                        <div class="col"></div>
+                        <div class="col"><img src="../img/buttons/btn-12.png" ng-click="myProfile()" style="width:75px;height:75px;vertical-align:middle" alt="My Profile"><p>My Profile</p></div>
+                        <div class="col"><img src="../img/buttons/btn-11.png" ng-click="logout()" style="width:75px;height:75px;vertical-align:middle" alt="Logout"><p>Logout</p></div>
                     </div>
-                    <div class="col" style="height: 150px; background-color:cornflowerblue; border:2px solid white;">
-                        <ion-slides options="options" slider="data.slider">
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data</div>
-                            </ion-slide-page>
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data 2</div>
-                            </ion-slide-page>
-                            <ion-slide-page>
-                                <div class="centerWhite">Other Data 3</div>
-                            </ion-slide-page>
-                        </ion-slides>
-                    </div>
-                </div>
+                </center>
             </ion-content>
         </ion-view>
     </ion-pane>

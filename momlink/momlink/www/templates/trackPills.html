@@ -20,9 +20,12 @@
 </head>
 <body ng-app="starter" ng-controller="HeaderBarController">
     <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
+        <div class="buttons">
+            <button class="button button-icon icon ion-ios-home" ng-click="home()"></button>
+        </div>
         <h1 class="title">MomLink</h1>
         <div class="buttons">
-            <button class="button ion-navicon-round" ng-click="toggleTopMenu()"></button>
+            <button class="button button-icon icon ion-navicon-round" ng-click="toggleTopMenu()"></button>
         </div>
     </ion-header-bar>
     <ion-top-menu class="text-center has-header">
@@ -46,32 +49,29 @@
     </ion-top-menu>
     <ion-pane>
         <ion-subheader-bar class="bar bar-subheader">
-            <h2 class="title" id="todaysDate"></h2>
-            <script>
-                var d = new Date(),
-                    date = d.getDate(),
-                    month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
-                function nth(d) {
-                    if (d > 3 && d < 21) return 'th';
-                    switch (d % 10) {
-                        case 1: return "st";
-                        case 2: return "nd";
-                        case 3: return "rd";
-                        default: return "th";
-                    }
-                }
-                document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
-            </script>
+            <h2 class="title">My Pills</h2>
         </ion-subheader-bar>
         <ion-view>
             <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <!--Display pills for today-->
-
-                <div class="row" ng-controller="PopupCtrl">
-                    <img class="padding" ng-click="uploadPill()" src="/../img/temp/cloud.png" style="width:60px;height:50px; position:absolute; left:10px;" />
-                    <img class="padding" ng-click="myPills()" src="/../img/buttons/btn_t-04.png" style="width:50px;height:50px; position:absolute; right:10px;" />
+                <div class="bar bar-header item-input-inset">
+                    <label class="item-input-wrapper">
+                        <i class="icon ion-ios-search placeholder-icon"></i>
+                        <input type="search" placeholder="Search">
+                    </label>
+                    <button class="button button-clear">
+                        Cancel
+                    </button>
                 </div>
             </ion-content>
+            <ion-footer-bar class="bar-positive">
+                <div class="buttons">
+                    <button class="button button-icon icon ion-ios-trash-outline" ng-click=""></button>
+                </div>
+                <h1 class="title"></h1>
+                <div class="buttons">
+                    <button class="button button-icon icon ion-ios-plus-outline" ng-click="addPills()"></button>
+                </div>
+            </ion-footer-bar>
         </ion-view>
     </ion-pane>
 </body>

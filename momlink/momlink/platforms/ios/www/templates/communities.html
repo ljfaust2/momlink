@@ -21,11 +21,11 @@
 <body ng-app="starter" ng-controller="HeaderBarController">
     <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
         <div class="buttons">
-            <button class="button button-icon icon ion-ios-home" ng-click="home()"></button>
+            <button class="button ion-ios-home" ng-click="home()"></button>
         </div>
         <h1 class="title">MomLink</h1>
         <div class="buttons">
-            <button class="button button-icon icon ion-navicon-round" ng-click="toggleTopMenu()"></button>
+            <button class="button ion-navicon-round" ng-click="toggleTopMenu()"></button>
         </div>
     </ion-header-bar>
     <ion-top-menu class="text-center has-header">
@@ -48,27 +48,30 @@
         </ion-content>
     </ion-top-menu>
     <ion-pane>
-        <ion-subheader-bar class="bar bar-subheader">
-            <h2 class="title">My Pills</h2>
-        </ion-subheader-bar>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <div class="padding">
-                    <label for="myName">Pill Name:</label>
-                    <input type="text" id="myName" value="Pill name" style="width:100%; border-style:solid; border-width:1px;"/>
+            <ion-content overflow-scroll="false" class="has-header">
+                <div class="row">
+                    <div class="col centerVH">
+                        <img src="../img/temp/birthClub.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Birth Club">
+                        <p>Birth Club</p>
+                    </div>
+                    <div class="col centerVH">
+                        <img src="../img/temp/tobaccoQuit.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Tobacco Quit">
+                        <p>Tobacco Quit</p>
+                    </div>
                 </div>
 
-
+                <div class="row">
+                    <div class="col centerVH">
+                        <img src="../img/temp/secondPregnancy.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Second Pregnancy">
+                        <p>2nd Pregnancy</p>
+                    </div>
+                    <div class="col centerVH">
+                        <img src="../img/temp/teenPregnancy.png" style="width:100px;height:100px;vertical-align:middle; border:1px solid black;" alt="Teen Pregnancy">
+                        <p>Birth Club</p>
+                    </div>
+                </div>
             </ion-content>
-            <ion-footer-bar class="bar-positive">
-                <div class="buttons">
-                    <button class="button button-icon icon ion-ios-trash-outline" ng-click=""></button>
-                </div>
-                <h1 class="title"></h1>
-                <div class="buttons">
-                    <button class="button button-icon icon ion-ios-plus-outline" ng-click="addPills()"></button>
-                </div>
-            </ion-footer-bar>
         </ion-view>
     </ion-pane>
 </body>
