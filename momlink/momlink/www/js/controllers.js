@@ -13,27 +13,6 @@ angular.module('starter.controllers', [])
         menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
     };
     //Menu Links
-    $scope.mail = function () {
-        window.location = "inbox.html";
-    };
-    $scope.calendar = function () {
-        window.location = "calendar.html";
-    };
-    $scope.referrals = function () {
-        window.location = "referrals.html";
-    };
-    $scope.track = function () {
-        window.location = "track.html";
-    };
-    $scope.coupons = function () {
-        window.location = "coupons.html";
-    };
-    $scope.content = function () {
-        window.location = "content.html";
-    };
-    $scope.myProfile = function () {
-        window.location = "myProfile.html";
-    };
     $scope.login = function (value) {
         window.location = "templates/main.html";
     };
@@ -49,15 +28,6 @@ angular.module('starter.controllers', [])
     };
     $scope.today = function () {
         window.location = "today.html";
-    };
-    $scope.trackFood = function () {
-        window.location = "trackFood.html";
-    };
-    $scope.trackPills = function () {
-        window.location = "trackPills.html";
-    };
-    $scope.trackMoods = function () {
-        window.location = "trackMoods.html";
     };
     $scope.addPill = function () {
         window.location = "addPill.html";
