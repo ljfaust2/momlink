@@ -112,12 +112,63 @@ angular.module('starter.controllers', [])
         document.getElementById("count").innerHTML = countEl.value + label;
     }
     $scope.minus =  function (label) {
-        if (count > 0) {
+        if (countEl.value > 0) {
             count--;
             countEl.value = count;
             document.getElementById("count").innerHTML = countEl.value + label;
         }
     }
+    $scope.clear = function (label) {
+        count = 0;
+        document.getElementById("count").innerHTML = "0" + label;
+    }
+})
+
+.controller('ActivityController', function ($scope) {
+    var hour = 0;
+    var minute = 0;
+    var totalHours = document.getElementById("hour");
+    var totalMinutes = document.getElementById("minute");
+    $scope.addHour = function () {
+        hour++;
+        totalHours.value = hour;
+        document.getElementById("hour").innerHTML = ("0" + totalHours.value).slice(-2);
+    }
+    $scope.addMinute = function () {
+        minute++;
+        totalMinutes.value = minute;
+        document.getElementById("minute").innerHTML = ("0" + totalMinutes.value).slice(-2);
+    }
+    $scope.clear = function () {
+        minute = 0;
+        totalMinutes.value = minute;
+        document.getElementById("minute").innerHTML = ("0" + totalMinutes.value).slice(-2);
+        hour = 0;        
+        totalHours.value = hour;    
+        document.getElementById("hour").innerHTML = ("0" + totalHours.value).slice(-2);
+    }
+})
+
+.controller('PainScaleController', function ($scope) {
+    $scope.updateFace = function (value) {
+        face = "";
+        if (value == 1) {
+            face = "noHurt";
+        }
+        if (value == 2) {
+            face = "hurtsLittleBit";
+        }
+        if (value == 3) {
+            face = "hurtsLittleMore";
+        }
+        if (value == 4) {
+            face = "hurtsEvenMore";
+        }
+        if (value == 5) {
+            face = "hurtsWholeLot";
+        }     
+        document.getElementById("face").src = "../img/temp/painScale/" + face + ".png";
+    };
 })
 
 .controller('EventController', function ($scope, $ionicPopover) {
