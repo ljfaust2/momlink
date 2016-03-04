@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+
+    <link href="http://code.ionicframework.com/1.2.4/css/ionic.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+
+    <script src="http://code.ionicframework.com/1.2.4/js/ionic.bundle.min.js"></script>
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+
+    <!-- your app's js -->
+    <script src="../js/app.js"></script>
+    <script src="../js/controllers.js"></script>
+    <script src="../js/services.js"></script>
+</head>
+<body ng-app="starter" ng-controller="HeaderBarController">
+    <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
+        <div class="buttons">
+            <button class="button ion-ios-home" ng-click="home()"></button>
+        </div>
+        <h1 class="title">MomLink</h1>
+        <div class="buttons">
+            <button class="button ion-navicon-round" ng-click="toggleTopMenu()"></button>
+        </div>
+    </ion-header-bar>
+    <ion-top-menu class="text-center has-header">
+        <ion-content overflow-scroll="false">
+            <div class="row">
+                <div class="col"><img src="../img/buttons/btn-04.png" ng-click="mail()" style="width:75px;height:75px;vertical-align:middle" alt="Mail"><p>Mail</p></div>
+                <div class="col"><img src="../img/buttons/btn-05.png" ng-click="calendar()" style="width:75px;height:75px;vertical-align:middle" alt="Calendar"><p>Calendar</p></div>
+                <div class="col"><img src="../img/buttons/btn-06.png" ng-click="communities()" style="width:75px;height:75px;vertical-align:middle" alt="Communities"><p>Communities</p></div>
+            </div>
+            <div class="row">
+                <div class="col"><img src="../img/buttons/btn-08.png" ng-click="track()" style="width:75px;height:75px;vertical-align:middle" alt="Track"><p>Track</p></div>
+                <div class="col"><img src="../img/buttons/btn-07.png" ng-click="coupons()" style="width:75px;height:75px;vertical-align:middle" alt="Coupons"><p>Coupons</p></div>
+                <div class="col"><img src="../img/buttons/btn-09.png" ng-click="content()" style="width:75px;height:75px;vertical-align:middle" alt="Communities"><p>Content</p></div>
+            </div>
+            <div class="row">
+                <div class="col"></div>
+                <div class="col"><img src="../img/buttons/btn-12.png" ng-click="myProfile()" style="width:75px;height:75px;vertical-align:middle" alt="My Profile"><p>My Profile</p></div>
+                <div class="col"><img src="../img/buttons/btn-11.png" ng-click="logout()" style="width:75px;height:75px;vertical-align:middle" alt="Logout"><p>Logout</p></div>
+            </div>
+        </ion-content>
+    </ion-top-menu>
+    <ion-pane>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header">
+                <div class="padding-top">
+                    <center><img style="width:90%; height:150px;"/></center>
+                </div>
+                <div class="padding-bottom" style="position:absolute; right:30px;">
+                    <center><img src="../img/temp/camera.png"style="width:25px; height:25px;" /></center>
+                </div>
+                <div class="padding">
+                    <label for="myName">Name:</label>
+                    <input type="text" id="myName" value="My name" style="width:100%; border-style:solid; border-width:1px;"/>
+                </div>
+                <div class="padding">
+                    <label for="myAge">Age:</label>
+                    <input type="number" id="myAge" value="0" style="width:100%; border-style:solid; border-width:1px;" />
+                </div>
+                <div class="padding">
+                    <label for="myStartDate">Pregnancy Start Date:</label>
+                    <input type="date" id="myStartDate" style="width:100%; border-style:solid; border-width:1px;" />
+                </div>
+                <div class="padding">
+                    <label for="myExpectedDate">Expected Delivery Date:</label>
+                    <input type="date" id="myExpectedDate" style="width:100%; border-style:solid; border-width:1px;" />
+                </div>
+                <div class="padding">
+                    <label for="myAboutMe">About Me:</label>
+                    <textarea id="myAboutMe" rows="10" cols="10" style="width:100%; border-style:solid; border-width:1px;"></textarea>
+                </div>
+                <div class="padding">
+                    <center>
+                        <img src="../img/temp/floppyDelete.png" style="width:50px; height:50px;" />
+                        <img src="../img/temp/floppySave.png" style="width:50px; height:50px;" />
+                    </center>
+                </div>
+            </ion-content>
+        </ion-view>
+    </ion-pane>
+</body>
+</html>

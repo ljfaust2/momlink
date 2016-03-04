@@ -1,0 +1,46 @@
+﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+<body ng-app="starter" ng-controller="HeaderBarController">
+    <script type="text/javascript" src="../js/header.js"></script>
+    <ion-pane>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">   
+                <div class="row padding">
+                    <div class="col">
+                        <p>
+                            To calculate your unborn baby's fetal heart rate simply count the heartbeats you hear for 15 seconds and multiply that number times 4.
+                            (Courtesy of fetaldopplerfacts.org)
+                        </p>
+                    </div>
+                </div>           
+                <div class="row">                   
+                    <div class="col">
+                        <center>
+                            <p id="count" style="font-size: 70px; line-height: 70px; color:palevioletred;">0 bpm♥
+                        </center>
+                    </div>                    
+                </div>
+                <br />
+                <div class="row padding">
+                    <div class="col">
+                        <center>
+                            <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plus(' bpm♥')" style="width:115px;height:115px;">
+                            <img type="button" src="../img/temp/minus.png" id="minus" ng-click="minus(' bpm♥')" style="width:65px;height:65px;">
+                        </center>
+                    </div>
+                </div>
+                <br />
+                <div class="row padding">
+                    <div class="col">
+                        <center>
+                            <button class="button button-stable">
+                                SUBMIT
+                            </button>
+                        </center>
+                    </div>
+                </div>
+
+            </ion-content>
+        </ion-view>
+    </ion-pane>
+</body>
+<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>

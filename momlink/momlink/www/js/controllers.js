@@ -133,6 +133,23 @@ angular.module('starter.controllers', [])
     });
 })
 
+.controller('AddSubController', function ($scope) {
+    var count = 0;
+    var countEl = document.getElementById("count");
+    $scope.plus = function (label) {
+        count++;
+        countEl.value = count;
+        document.getElementById("count").innerHTML = countEl.value + label;
+    }
+    $scope.minus =  function (label) {
+        if (count > 0) {
+            count--;
+            countEl.value = count;
+            document.getElementById("count").innerHTML = countEl.value + label;
+        }
+    }
+})
+
 .controller('EventController', function ($scope, $ionicPopover) {
     $scope.select = function (eventType) {
         document.getElementById(eventType).style.border = "1px solid black";
