@@ -9,7 +9,9 @@
     '<link href="http://code.ionicframework.com/1.2.4/css/ionic.css" rel="stylesheet">'+
     '<link href="../css/style.css" rel="stylesheet">'+
 
-    '<script src="http://code.ionicframework.com/1.2.4/js/ionic.bundle.min.js"></script>'+
+    '<script src="http://code.ionicframework.com/1.2.4/js/ionic.bundle.min.js"></script>' +
+
+    '<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>'+
 
     '<!-- cordova script (this will be a 404 during development) -->'+
     '<script src="cordova.js"></script>'+

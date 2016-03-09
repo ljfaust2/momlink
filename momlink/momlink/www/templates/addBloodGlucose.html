@@ -15,27 +15,27 @@
                     <div class="col text-right">
                         <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
                     </div>
-                </div>            
+                </div>             
                 <div class="row">                   
                     <div class="col text-center">
-                        <p id="count" style="font-size: 70px; line-height: 70px;">0 lbs
+                        <p id="count" style="font-size: 70px; line-height: 70px; color:palevioletred;">0 mg/dL
                     </div>                    
                 </div>
                 <br />
                 <div class="row padding">
                     <div class="col text-center">
-                        <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plus(' lbs')" style="width:115px;height:115px;">
-                        <img type="button" src="../img/temp/minus.png" id="minus" ng-click="minus(' lbs')" style="width:65px;height:65px;">
+                        <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plus(' mg/dL')" style="width:115px;height:115px;">
+                        <img type="button" src="../img/temp/minus.png" id="minus" ng-click="minus(' mg/dL')" style="width:65px;height:65px;">
                     </div>
                 </div>
                 <br />
                 <div class="row padding">
                     <div class="col text-center">
-                        <button class="button button-stable">
-                            SUBMIT
-                        </button>
+                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear(' mg/dL')">
+                        <input type="button" class="button button-block button-positive" value="SUBMIT">
                     </div>
                 </div>
+
             </ion-content>
         </ion-view>
     </ion-pane>

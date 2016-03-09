@@ -7,8 +7,7 @@
                 <script id="popover.html" type="text/ng-template">
                     <ion-popover-view>
                         <div class="padding">
-                            To calculate your unborn baby's fetal heart rate simply count the heartbeats you hear for 15 seconds and multiply that number times 4.
-                            (Courtesy of fetaldopplerfacts.org)
+                            Description
                         </div>
                     </ion-popover-view>
                 </script>
@@ -16,29 +15,26 @@
                     <div class="col text-right">
                         <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
                     </div>
-                </div>    
-                <div style="background-image: url('../img/temp/cardiogram.png'); background-size: contain; background-repeat: no-repeat;">
-                    <div class="row">
-                        <div class="col text-center">
-                            <p id="count" style="font-size: 70px; line-height: 70px; color:palevioletred;">0 bpm♥
-                        </div>
-                    </div>
-                    <br />
-                    <div class="row padding">
-                        <div class="col text-center">
-                            <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plus(' bpm♥')" style="width:115px;height:115px;">
-                            <img type="button" src="../img/temp/minus.png" id="minus" ng-click="minus(' bpm♥')" style="width:65px;height:65px;">
-                        </div>
+                </div>   
+                <div class="row">                   
+                    <div class="col text-center">
+                        <p id="count" style="font-size: 70px; line-height: 70px; color:palevioletred;">0 g/dL
+                    </div>                    
+                </div>
+                <br />
+                <div class="row padding">
+                    <div class="col text-center">
+                        <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plus(' g/dL')" style="width:115px;height:115px;">
+                        <img type="button" src="../img/temp/minus.png" id="minus" ng-click="minus(' g/dL')" style="width:65px;height:65px;">
                     </div>
                 </div>
                 <br />
                 <div class="row padding">
                     <div class="col text-center">
-                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear(' bpm♥')">
+                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear(' g/dL')">
                         <input type="button" class="button button-block button-positive" value="SUBMIT">
                     </div>
                 </div>
-
             </ion-content>
         </ion-view>
     </ion-pane>

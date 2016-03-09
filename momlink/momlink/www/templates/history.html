@@ -1,0 +1,27 @@
+﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+
+    <body ng-app="starter" ng-controller="HeaderBarController">
+        <script type="text/javascript" src="../js/header.js"></script>
+        <script type="text/javascript" src="../js/subheader.js"></script>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header has-subheader has-footer">
+                <!--generate history-->
+            </ion-content>
+        </ion-view>
+        <script type="text/javascript" src="../js/subheaderEnd.js"></script>
+        <script>
+                var query = window.location.search;
+                var vars = query.split('=');
+                var el = vars[3];
+                document.write(
+                    '<ion-footer-bar class="bar-positive" ng-controller="PopupCtrl">' +
+                    '<div id="uploadHistory" class="buttons" ng-click="uploadTrack()">' +
+                    '<button class="button button-icon icon ion-ios-cloud-upload-outline"></button>' +
+                    '</div>' +
+                    '<h1 class="title"></h1>' +
+                    '<div class="buttons" ng-click="goToAddEvent(' + "'" + el + "'" + ')"><button class="button button-icon icon ion-ios-plus-outline"></button></div>' +
+                    '</ion-footer-bar>'
+                              );
+        </script>
+    </body>
+<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>

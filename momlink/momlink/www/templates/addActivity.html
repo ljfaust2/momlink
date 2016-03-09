@@ -1,38 +1,31 @@
 ﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
-<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/raphael/1.5.2/raphael-min.js"></script>
 <body ng-app="starter" ng-controller="HeaderBarController">
     <script type="text/javascript" src="../js/header.js"></script>
     <ion-pane>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header" ng-controller="ActivityController">  
-                <div class="row padding">
-                    <div class="col">
-                        CLOCK                      
-                    </div>  
-                    <div class="col">
-                        <div class="row">
-                            <p style="font-size: 25px; line-height: 25px;">Time Active:</p>
-                        </div>
-                        <div class="row padding">
-                            <p id="hour" style="font-size: 50px; line-height: 50px;">00</p><p id="hour" style="font-size: 50px; line-height: 50px;">:</p><p id="minute" style="font-size: 50px; line-height: 50px;">00</p>
-                        </div>
-                        <div class="row padding">
-                            <input type="button" class="button button-small button-balanced" value="+1 Hour" ng-click="addHour()">
-                        </div>
-                        <div class="row padding">
-                            <input type="button" class="button button-small button-balanced" value="+1 Minute" ng-click="addMinute()">
-                        </div>
-                    </div>
-                </div>           
-                <div class="row padding">
-                    <div class="col">
-                        <center>
-                            <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear()">
-                            <input type="button" class="button button-block button-positive" value="SUBMIT">
-                        </center>
-                    </div>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
+                <div>
+                    <form action="addActivityTime.html" method="GET">
+                        <ul>
+                            <li ng-repeat="act in actList">
+                                <div ng-show="$index % 2 == 0">
+                                    <div class="row">
+                                        <div class="col text-center">
+                                            <input type="image" src={{act.image}} value={{act.type}} name="type" style="width:100px;height:100px; border:1px solid black;" alt={{act.type}}>
+                                            <p>{{act.type}}</p>
+                                        </div>
+                                        <div ng-show="actList[$index+1] != null" class="col text-center">
+                                            <input type="image" src={{actList[$index+1].image}} value={{actList[$index+1].type}} name="type" style="width:100px;height:100px; border:1px solid black;" alt={{actList[$index+1].type}}>
+                                            <p>{{actList[$index+1].type}}</p>
+                                        </div>
+                                        <div ng-show="actList[$index+1] == null" class="col text-center">
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </form>
                 </div>
-
             </ion-content>
         </ion-view>
     </ion-pane>
