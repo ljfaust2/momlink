@@ -20,21 +20,22 @@
                 <div style="background-image: url('../img/temp/cardiogram.png'); background-size: contain; background-repeat: no-repeat;">
                     <div class="row">
                         <div class="col text-center">
-                            <p id="count" style="font-size: 70px; line-height: 70px; color:palevioletred;">0 bpm♥
+                            <p class="trackingText" id="count">130</p>
+                            <p class="trackingText">&nbsp;bpm♥</p>
                         </div>
                     </div>
                     <br />
                     <div class="row padding">
                         <div class="col text-center">
-                            <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plus(' bpm♥')" style="width:115px;height:115px;">
-                            <img type="button" src="../img/temp/minus.png" id="minus" ng-click="minus(' bpm♥')" style="width:65px;height:65px;">
+                            <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plusMinus('plus','count')" style="width:115px;height:115px;">
+                            <img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus('minus','count')" style="width:65px;height:65px;">
                         </div>
                     </div>
                 </div>
                 <br />
                 <div class="row padding">
                     <div class="col text-center">
-                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear(' bpm♥')">
+                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count', 130)">
                         <input type="button" class="button button-block button-positive" value="SUBMIT">
                     </div>
                 </div>

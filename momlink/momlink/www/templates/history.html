@@ -13,6 +13,9 @@
                 var query = window.location.search;
                 var vars = query.split('=');
                 var el = vars[3];
+                if (el == 'addFood') {
+                    window.location = "addFood.html";
+                };
                 document.write(
                     '<ion-footer-bar class="bar-positive" ng-controller="PopupCtrl">' +
                     '<div id="uploadHistory" class="buttons" ng-click="uploadTrack()">' +

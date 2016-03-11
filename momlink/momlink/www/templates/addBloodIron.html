@@ -18,20 +18,21 @@
                 </div>   
                 <div class="row">                   
                     <div class="col text-center">
-                        <p id="count" style="font-size: 70px; line-height: 70px; color:palevioletred;">0 g/dL
+                        <p class="trackingText" id="count">15</p>
+                        <p class="trackingText">&nbsp;g/dL</p>
                     </div>                    
                 </div>
                 <br />
                 <div class="row padding">
                     <div class="col text-center">
-                        <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plus(' g/dL')" style="width:115px;height:115px;">
-                        <img type="button" src="../img/temp/minus.png" id="minus" ng-click="minus(' g/dL')" style="width:65px;height:65px;">
+                        <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plusMinus('plus','count')" style="width:115px;height:115px;">
+                        <img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus('minus','count')" style="width:65px;height:65px;">
                     </div>
                 </div>
                 <br />
                 <div class="row padding">
                     <div class="col text-center">
-                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear(' g/dL')">
+                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count', 15)">
                         <input type="button" class="button button-block button-positive" value="SUBMIT">
                     </div>
                 </div>

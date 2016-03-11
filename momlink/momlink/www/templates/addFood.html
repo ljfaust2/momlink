@@ -2,54 +2,91 @@
 <body ng-app="starter" ng-controller="HeaderBarController">
     <script type="text/javascript" src="../js/header.js"></script>
     <ion-pane>
-        <ion-subheader-bar class="bar bar-subheader">
-            <h2 class="title" id="todaysDate"></h2>
-            <script>
-                var d = new Date(),
-                    date = d.getDate(),
-                    month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
-                function nth(d) {
-                    if (d > 3 && d < 21) return 'th';
-                    switch (d % 10) {
-                        case 1: return "st";
-                        case 2: return "nd";
-                        case 3: return "rd";
-                        default: return "th";
-                    }
-                }
-                document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
-            </script>
-        </ion-subheader-bar>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <div class="bar bar-header item-input-inset">
-                    <label class="item-input-wrapper">
-                        <i class="icon ion-ios-search placeholder-icon"></i>
-                        <input type="search" placeholder="Search food..">
-                    </label>
-                    <button class="button button-clear">
-                        Cancel
-                    </button>
-                </div>
-                <div class="row padding-bottom">
-                    <center><img src="../img/temp/camera.png" style="width:60px; height:50px;" /></center>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="PopupCtrl">
+                <div class="row" ng-controller="PopOverController">
+
+
+
+                    <div class="col text-center">
+                        <script id="popover.html" type="text/ng-template">
+                            <ion-popover-view>
+                                <div class="padding">
+                                    Description
+                                </div>
+                            </ion-popover-view>
+                        </script>
+                        <div class="text-left">
+                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                        </div>
+                        <canvas id="counter" width="200" height="200" style="display: block; background:url('../img/food/food-29.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                        <script>
+                            var bg = document.getElementById('counter');
+                            var ctx = ctx = bg.getContext('2d');
+                            var imd = null;
+                            var circ = Math.PI * 2;
+                            var quart = Math.PI / 2;
+                            var size = 100;
+                            ctx.beginPath();
+                            ctx.strokeStyle = '#99CC33';
+                            ctx.lineCap = 'square';
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.lineWidth = 10.0;
+                            imd = ctx.getImageData(0, 0, 200, 200);
+                            var draw = function (current) {
+                                ctx.putImageData(imd, 0, 0);
+                                ctx.beginPath();
+                                ctx.arc(100, 100, 85, -(quart), ((circ) * current) - quart, false);
+                                ctx.stroke();
+                                if (x == 100) {
+                                    //add crown
+                                }
+                            }
+                            draw(size / 100);
+                            document.write('')
+                        </script>
+                        <img src="../img/food/food-29.png" ng-click="showFoodFluid('food-29.png','food-30.png','fruitVeg12','fruitVeg1')" style="width:150px; height:150px;"/>
+                        <p>Fruits</p>
+                    </div>
+
+
+
+                    <div class="col text-center">
+                        <img src="../img/food/food-28.png" ng-click="showFoodFluid('food-28.png','food-31.png','fruitVeg12','fruitVeg1')" style="width:150px; height:150px;" />
+                        <p>Vegetables</p>
+                    </div>
                 </div>
                 <div class="row">
-                    <div class="col"><center><input id="obappt" class="col" type="image" src="../img/temp/breakfast.PNG" style="width:80px;height:80px;vertical-align:middle" />Breakfast</center></div>
-                    <div class="col"><center><input id="tests" class="col" type="image" src="../img/temp/lunch.PNG" style="width:80px;height:80px;vertical-align:middle" />Lunch</center></div>
-                    <div class="col"><center><input id="visits" class="col" type="image" src="../img/temp/dinner.PNG" style="width:80px;height:80px;vertical-align:middle" />Dinner</center></div>
-                    <div class="col"><center><input id="ultra" class="col" type="image" src="../img/temp/snack.PNG" style="width:80px;height:80px;vertical-align:middle" />Snack</center></div>
-                </div>
-                <center>
-                    <div class="row" ng-controller="PopupCtrl">
-                        <div class="col">
-                            <img src="../img/temp/save.png" style="width:25px; height:25px;" />
-                        </div>
-                        <div class="col">
-                            <img src="../img/temp/delete.png" style="width:25px; height:25px;" />
-                        </div>
+                    <div class="col text-center">
+                        <img src="../img/food/food-35.png" ng-click="showAmount('eat')" style="width:150px; height:150px;" />
+                        <p>Proteins</p>
                     </div>
-                </center>
+                    <div class="col text-center">
+                        <img src="../img/food/grains.png" ng-click="showAmount('eat')" style="width:150px; height:150px;" />
+                        <p>Grains</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col text-center">
+                        <img src="../img/food/dairy.png" ng-click="showFoodFluid('food-26.png','food-27.png','dairy12.png','dairy1.png')" style="width:150px; height:150px;" />
+                        <p>Dairy</p>
+                    </div>
+                    <div class="col text-center">
+                        <img src="../img/food/food-34.png" ng-click="showAmount('drink')" style="width:150px; height:150px;" />
+                        <p>Fluids</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col text-center">
+                        <img src="../img/food/food-40.png" ng-click="showAmount('eat')" style="width:150px; height:150px;" />
+                        <p>Sweets</p>
+                    </div>
+                    <div class="col text-center">
+                        <img src="../img/food/food-43.png" ng-click="showAmount('eat')" style="width:150px; height:150px;" />
+                        <p>Fats & Oils</p>
+                    </div>
+                </div>
             </ion-content>
         </ion-view>
     </ion-pane>

@@ -46,7 +46,12 @@
     align-self: auto;
 }
 
-
+.trackingText {
+    font-size: 70px; 
+    line-height: 70px; 
+    color:palevioletred; 
+    display: inline;
+}
 
 .button-stretch {
     width: 100%;

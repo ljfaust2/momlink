@@ -31,38 +31,38 @@ angular.module('starter.controllers', [])
     };
     //Track Link
     $scope.goToAddEvent = function (type) {
-        window.location = type + ".html";       
+        window.location = type + ".html";
     };
 })
 
 .controller('DataController', function ($scope, $ionicSideMenuDelegate) {
     $scope.actList = [
       { type: "Bike", image: "../img/activities/bike.png" },
-      {type: "Clean", image: "../img/activities/clean.png" },
-      {type: "Dance", image: "../img/activities/dance.png" },
-      {type: "Exercise", image: "../img/activities/exercise.png" },
-      {type: "Run", image: "../img/activities/run.png" },
-      {type: "Shop", image: "../img/activities/shop.png" },
-      {type: "Walk", image: "../img/activities/walk_dog.png" },
-      {type: "Walk Dog", image: "../img/activities/walk.png" }
+      { type: "Clean", image: "../img/activities/clean.png" },
+      { type: "Dance", image: "../img/activities/dance.png" },
+      { type: "Exercise", image: "../img/activities/exercise.png" },
+      { type: "Run", image: "../img/activities/run.png" },
+      { type: "Shop", image: "../img/activities/shop.png" },
+      { type: "Walk", image: "../img/activities/walk_dog.png" },
+      { type: "Walk Dog", image: "../img/activities/walk.png" }
     ]
     $scope.trackList = [
-      {type: "Activity", link: "addActivity", image: "../img/activities/run.png"},
-      {type: "Baby Heart Rate", link: "addBabyHeartRate", image: "../img/buttons/btn-12.png"},
-      {type: "Blood Glucose", link: "addBloodGlucose", image: "../img/temp/bloodGlucose.png"},
-      {type: "Blood Iron", link: "addBloodIron", image: "../img/temp/bloodDrop.png"},
-      {type: "Blood Pressure", link: "addBloodPressure", image: "../img/temp/blood-pressure.jpg"},
-      {type: "Diet", link: "addFood", image: "../img/buttons/btn_t-03.png"},
-      {type: "Fluid", link: "addFluid", image: "../img/food/food-34.png"},
-      {type: "Mood", link: "addMood", image: "../img/temp/moods/cheerful.png"},
-      {type: "Pain", link: "addPain", image: "../img/buttons/btn_t-05.png"},
-      {type: "Pills", link: "addPill", image: "../img/buttons/btn_t-04.png"},
-      {type: "Weight", link: "addWeight", image: "../img/temp/scale.jpg"}
+      { type: "Activity", link: "addActivity", image: "../img/activities/run.png" },
+      { type: "Baby Heart Rate", link: "addBabyHeartRate", image: "../img/buttons/btn-12.png" },
+      { type: "Blood Glucose", link: "addBloodGlucose", image: "../img/temp/bloodGlucose.png" },
+      { type: "Blood Iron", link: "addBloodIron", image: "../img/temp/bloodDrop.png" },
+      { type: "Blood Pressure", link: "addBloodPressure", image: "../img/temp/blood-pressure.jpg" },
+      { type: "Cigarettes", link: "addCigarette", image: "../img/temp/cigarette.png" },
+      { type: "Diet", link: "addFood", image: "../img/buttons/btn_t-03.png" },
+      { type: "Mood", link: "addMood", image: "../img/moods/cheerful.png" },
+      { type: "Pain", link: "addPain", image: "../img/buttons/btn_t-05.png" },
+      { type: "Pills", link: "addPill", image: "../img/buttons/btn_t-04.png" },
+      { type: "Weight", link: "addWeight", image: "../img/temp/scale.jpg" }
     ]
 })
 
 .controller('ContentController', function ($scope, $ionicSideMenuDelegate) {
-    $scope.toggleLeft = function() {
+    $scope.toggleLeft = function () {
         $ionicSideMenuDelegate.toggleLeft();
     };
 })
@@ -85,50 +85,82 @@ angular.module('starter.controllers', [])
             window.location = "calendar.html"
         });
     };
+
+    $scope.showFoodFluid = function (food, fluid, hp1, hp2) {
+        $scope.choice = $ionicPopup.show({
+            template: '<style>.popup { height:400px; }</style>' +
+                        '<div class="text-center">' +
+                        '<img src="../img/food/' + food + '" ng-click="showFoodFluidAmount()" style="width:100px; height:100px" />' +
+                        '<img src="../img/food/' + fluid + '" ng-click="showFoodFluidAmount()" style="width:100px; height:100px" />' +
+                      '</div>',
+            title: 'What did you eat?',
+            scope: $scope
+        });
+        $scope.showFoodFluidAmount = function () {
+            ffAmountPopup = $ionicPopup.show({
+                template: '<style>.popup { height:400px; }</style>',
+                templateUrl: '../templates/handPortions.html',
+                title: 'How much?',
+                buttons: [
+                  { text: 'Save', onTap: function (e) { return 'Saved'; } },
+                  { text: 'Cancel', onTap: function (e) { return 'Cancel'; } }
+                ]
+            });
+            ffAmountPopup.then(function (res) {
+                $scope.choice.close();
+            });
+        };
+    };
+    $scope.showAmount = function (type) {
+        $ionicPopup.show({
+            template: '<style>.popup { height:400px; }</style>',
+            templateUrl: '../templates/handPortions.html',
+            title: 'How much did you ' + type + '?',
+            buttons: [
+              { text: 'Save', onTap: function (e) { return 'Saved'; } },
+              { text: 'Cancel', onTap: function (e) { return 'Cancel'; } }
+            ]
+        });
+    };
 })
 
-.controller('PopOverController', function($scope, $ionicPopover) {
+.controller('PopOverController', function ($scope, $ionicPopover) {
     $ionicPopover.fromTemplateUrl('popover.html', {
         scope: $scope
-    }).then(function(popover) {
+    }).then(function (popover) {
         $scope.popover = popover;
     });
-
-    $scope.openPopover = function($event) {
+    $scope.openPopover = function ($event) {
         $scope.popover.show($event);
     };
-    $scope.closePopover = function() {
+    $scope.closePopover = function () {
         $scope.popover.hide();
     };
-    $scope.$on('$destroy', function() {
+    $scope.$on('$destroy', function () {
         $scope.popover.remove();
     });
-    $scope.$on('popover.hidden', function() {
+    $scope.$on('popover.hidden', function () {
         // Execute action
     });
-    $scope.$on('popover.removed', function() {
+    $scope.$on('popover.removed', function () {
         // Execute action
     });
 })
 
 .controller('AddSubController', function ($scope) {
-    var count = 0;
-    var countEl = document.getElementById("count");
-    $scope.plus = function (label) {
-        count++;
-        countEl.value = count;
-        document.getElementById("count").innerHTML = countEl.value + label;
-    }
-    $scope.minus =  function (label) {
-        if (countEl.value > 0) {
-            count--;
-            countEl.value = count;
-            document.getElementById("count").innerHTML = countEl.value + label;
+    $scope.plusMinus = function (pm, id) {
+        var countEl = document.getElementById(id).innerHTML;
+        if (pm == 'plus') {
+            countEl++;
+            document.getElementById(id).innerHTML = countEl;
+        }
+        if (pm == 'minus' && countEl > 0) {
+            countEl--;
+            document.getElementById(id).innerHTML = countEl;
         }
     }
-    $scope.clear = function (label) {
-        count = 0;
-        document.getElementById("count").innerHTML = "0" + label;
+    $scope.clear = function (id, num) {
+        document.getElementById(id).innerHTML = num;
     }
 })
 
@@ -142,7 +174,7 @@ angular.module('starter.controllers', [])
         document.getElementById("hour").innerHTML = ("0" + totalHours.value).slice(-2);
     }
     $scope.subtractHour = function () {
-        if(totalHours.value > 0){
+        if (totalHours.value > 0) {
             hour--;
             totalHours.value = hour;
             document.getElementById("hour").innerHTML = ("0" + totalHours.value).slice(-2);
@@ -152,8 +184,8 @@ angular.module('starter.controllers', [])
         minute = 0;
         totalMinutes.value = minute;
         document.getElementById("minute").innerHTML = ("0" + totalMinutes.value).slice(-2);
-        hour = 0;        
-        totalHours.value = hour;    
+        hour = 0;
+        totalHours.value = hour;
         document.getElementById("hour").innerHTML = ("0" + totalHours.value).slice(-2);
     }
 })
@@ -257,7 +289,7 @@ angular.module('starter.controllers', [])
                     }
                 }
             };
-            this.minute.drag(fnMinute_OnDragMove);         
+            this.minute.drag(fnMinute_OnDragMove);
         }
     };
     $(document).ready(function () {
@@ -292,16 +324,16 @@ angular.module('starter.controllers', [])
             face = "hurtsWorst";
             description = "Hurts worst";
         }
-        document.getElementById("face").src = "../img/temp/painScale/" + face + ".png";
+        document.getElementById("face").src = "../img/painScale/" + face + ".png";
         document.getElementById("description").innerHTML = description;
     };
 })
 
-.controller('EventController', function ($scope, $ionicPopover) {
+/*.controller('EventController', function ($scope, $ionicPopover) {
     $scope.select = function (eventType) {
         document.getElementById(eventType).style.border = "1px solid black";
     };
-})
+})*/
 
 .controller('SliderController', function ($scope, $ionicSlideBoxDelegate) {
     $scope.nextSlide = function () {

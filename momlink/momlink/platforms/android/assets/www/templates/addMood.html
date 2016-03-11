@@ -2,44 +2,26 @@
 <body ng-app="starter" ng-controller="HeaderBarController">
     <script type="text/javascript" src="../js/header.js"></script>
     <ion-pane>
-        <ion-subheader-bar class="bar bar-subheader">
-            <h2 class="title" id="todaysDate"></h2>
-            <script>
-                var d = new Date(),
-                    date = d.getDate(),
-                    month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
-                function nth(d) {
-                    if (d > 3 && d < 21) return 'th';
-                    switch (d % 10) {
-                        case 1: return "st";
-                        case 2: return "nd";
-                        case 3: return "rd";
-                        default: return "th";
-                    }
-                }
-                document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
-            </script>
-        </ion-subheader-bar>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header has-subheader" ng-controller="PopOverController">
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="PopOverController">
                 <div class="row">
-                    <div class="col text-center"><img src="../img/temp/moods/bored.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Bored"><p>Bored</p></div>
-                    <div class="col text-center"><img src="../img/temp/moods/calm.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Calm"><p>Calm</p></div>
+                    <div class="col text-center"><img src="../img/moods/bored.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Bored"><p>Bored</p></div>
+                    <div class="col text-center"><img src="../img/moods/calm.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Calm"><p>Calm</p></div>
                 </div>
                 <div class="row">
-                    <div class="col text-center"><img src="../img/temp/moods/cheerful.png" style="max-width:75px;height:75px;vertical-align:middle" alt="Cheerful"><p>Cheerful</p></div>
-                    <div class="col text-center"><img src="../img/temp/moods/excited.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Excited"><p>Excited</p></div>
+                    <div class="col text-center"><img src="../img/moods/cheerful.png" style="max-width:75px;height:75px;vertical-align:middle" alt="Cheerful"><p>Cheerful</p></div>
+                    <div class="col text-center"><img src="../img/moods/excited.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Excited"><p>Excited</p></div>
                 </div>
                 <div class="row">
-                    <div class="col text-center"><img src="../img/temp/moods/irritated.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Irritated"><p>Irritated</p></div>
-                    <div class="col text-center"><img src="../img/temp/moods/neutral.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Neutral"><p>Neutral</p></div>
+                    <div class="col text-center"><img src="../img/moods/irritated.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Irritated"><p>Irritated</p></div>
+                    <div class="col text-center"><img src="../img/moods/neutral.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Neutral"><p>Neutral</p></div>
                 </div>
                 <div class="row">
-                    <div class="col text-center"><img src="../img/temp/moods/relaxed.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Relaxed"><p>Relaxed</p></div>
-                    <div class="col text-center"><img src="../img/temp/moods/sad.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Sad"><p>Sad</p></div>
+                    <div class="col text-center"><img src="../img/moods/relaxed.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Relaxed"><p>Relaxed</p></div>
+                    <div class="col text-center"><img src="../img/moods/sad.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Sad"><p>Sad</p></div>
                 </div>
                 <div class="row">
-                    <div class="col text-center"><img src="../img/temp/moods/tense.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Tense"><p>Tense</p></div>
+                    <div class="col text-center"><img src="../img/moods/tense.png" style="max-width:75px;max-height:75px;vertical-align:middle" alt="Tense"><p>Tense</p></div>
                     <div class="col text-center"></div>
                 </div>
             </ion-content>
