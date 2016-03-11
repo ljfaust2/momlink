@@ -53,6 +53,10 @@
     display: inline;
 }
 
+.no-padding {
+    padding: 0px !important;
+}
+
 .button-stretch {
     width: 100%;
 }

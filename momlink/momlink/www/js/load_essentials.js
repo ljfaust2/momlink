@@ -18,7 +18,6 @@
 
     "<!-- your app's js -->"+
     '<script src="../js/app.js"></script>'+
-    '<script src="../js/controllers.js"></script>'+
-    '<script src="../js/services.js"></script>'+
+    '<script src="../js/controllers.js"></script>' +
     '</head>'
 );

@@ -4,87 +4,186 @@
     <ion-pane>
         <ion-view>
             <ion-content overflow-scroll="false" class="has-header" ng-controller="PopupCtrl">
-                <div class="row" ng-controller="PopOverController">
-
-
-
-                    <div class="col text-center">
-                        <script id="popover.html" type="text/ng-template">
-                            <ion-popover-view>
-                                <div class="padding">
-                                    Description
+                <div ng-controller="PopOverController">
+                    <div ng-controller="DietController">
+                        <div ng-controller="DataController">
+                            <div class="row no-padding">
+                                <!--FRUITS-->
+                                <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:1px 1px 1px 0;">
+                                    <div class="row no-padding">
+                                        <script id="popover.html" type="text/ng-template">
+                                            <ion-popover-view><div class="padding">Fruits</div></ion-popover-view>
+                                        </script>
+                                        <div class="col text-left no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                        </div>
+                                        <div class="col text-right no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-navicon-round" ng-click=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="row no-padding">
+                                        <div class="col no-padding">
+                                            <canvas id="fruit" ng-init="dietCircle('fruit', '100', '50')" width="150" height="150" ng-click="showFoodFluid('food-29.png','food-30.png','fruitVeg12.png','fruitVeg1.png','fluids12.png','fluids1.png')"
+                                                    style="background:url('../img/food/food-29.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="row"><div class="col"><p>Fruits</p></div></div>
                                 </div>
-                            </ion-popover-view>
-                        </script>
-                        <div class="text-left">
-                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                <!--VEGETABLES-->
+                                <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:1px 0 1px 1px;">
+                                    <div class="row no-padding">
+                                        <script id="popover.html" type="text/ng-template">
+                                            <ion-popover-view><div class="padding">Vegetables</div></ion-popover-view>
+                                        </script>
+                                        <div class="col text-left no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                        </div>
+                                        <div class="col text-right no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-navicon-round" ng-click=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="row no-padding">
+                                        <div class="col no-padding">
+                                            <canvas id="veg" ng-init="dietCircle('veg', '75', '50')" width="150" height="150" ng-click="showFoodFluid('food-28.png','food-31.png','fruitVeg12.png','fruitVeg1.png','fluids12.png','fluids1.png')"
+                                                    style="background:url('../img/food/food-28.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="row"><div class="col"><p>Vegetables</p></div></div>
+                                </div>
+                            </div>
+                            <div class="row no-padding">
+                                <!--PROTEINS-->
+                                <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 1px 1px 0;">
+                                    <div class="row no-padding">
+                                        <script id="popover.html" type="text/ng-template">
+                                            <ion-popover-view><div class="padding">Proteins</div></ion-popover-view>
+                                        </script>
+                                        <div class="col text-left no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                        </div>
+                                        <div class="col text-right no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-navicon-round" ng-click=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="row no-padding">
+                                        <div class="col no-padding">
+                                            <canvas id="proteins" ng-init="dietCircle('proteins', '32', '50')" width="150" height="150" ng-click="showAmount('eat', 'protein12.png', 'protein1.png')"
+                                                    style="background:url('../img/food/food-35.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="row"><div class="col"><p>Proteins</p></div></div>
+                                </div>
+                                <!--GRAINS-->
+                                <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 0 1px 1px;">
+                                    <div class="row no-padding">
+                                        <script id="popover.html" type="text/ng-template">
+                                            <ion-popover-view><div class="padding">Grains</div></ion-popover-view>
+                                        </script>
+                                        <div class="col text-left no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                        </div>
+                                        <div class="col text-right no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-navicon-round" ng-click=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="row no-padding">
+                                        <div class="col no-padding">
+                                            <canvas id="grains" ng-init="dietCircle('grains', '60', '50')" width="150" height="150" ng-click="showAmount('eat', 'grains12.png', 'grains1.png')"
+                                                    style="background:url('../img/food/grains.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="row"><div class="col"><p>Grains</p></div></div>
+                                </div>
+                            </div>
+                            <div class="row no-padding">
+                                <!--DAIRY-->
+                                <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 1px 1px 0;">
+                                    <div class="row no-padding">
+                                        <script id="popover.html" type="text/ng-template">
+                                            <ion-popover-view><div class="padding">Dairy</div></ion-popover-view>
+                                        </script>
+                                        <div class="col text-left no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                        </div>
+                                        <div class="col text-right no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-navicon-round" ng-click=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="row no-padding">
+                                        <div class="col no-padding">
+                                            <canvas id="dairy" ng-init="dietCircle('dairy', '30', '50')" width="150" height="150" ng-click="showFoodFluid('food-26.png','food-27.png','dairy12.png','dairy1.png','fluids12.png','fluids1.png')"
+                                                    style="background:url('../img/food/dairy.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="row"><div class="col"><p>Dairy</p></div></div>
+                                </div>
+                                <!--FLUIDS-->
+                                <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 0 1px 1px;">
+                                    <div class="row no-padding">
+                                        <script id="popover.html" type="text/ng-template">
+                                            <ion-popover-view><div class="padding">Fluids</div></ion-popover-view>
+                                        </script>
+                                        <div class="col text-left no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                        </div>
+                                        <div class="col text-right no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-navicon-round" ng-click=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="row no-padding">
+                                        <div class="col no-padding">
+                                            <canvas id="fluids" ng-init="dietCircle('fluids', '56', '50')" width="150" height="150" ng-click="showAmount('drink', 'fluids12.png', 'fluids1.png')"
+                                                    style="background:url('../img/food/food-34.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="row"><div class="col"><p>Fluids</p></div></div>
+                                </div>
+                            </div>
+                            <div class="row no-padding">
+                                <!--SWEETS-->
+                                <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 1px 1px 0;">
+                                    <div class="row no-padding">
+                                        <script id="popover.html" type="text/ng-template">
+                                            <ion-popover-view><div class="padding">Sweets</div></ion-popover-view>
+                                        </script>
+                                        <div class="col text-left no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                        </div>
+                                        <div class="col text-right no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-navicon-round" ng-click=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="row no-padding">
+                                        <div class="col no-padding">
+                                            <canvas id="sweets" ng-init="dietCircle('sweets', '100', '50')" width="150" height="150" ng-click="showAmount('eat', 'sweets12.png', 'sweets1.png')"
+                                                    style="background:url('../img/food/food-40.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="row"><div class="col"><p>Sweets</p></div></div>
+                                </div>
+                                <!--FATS AND OILS-->
+                                <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 0 1px 1px;">
+                                    <div class="row no-padding">
+                                        <script id="popover.html" type="text/ng-template">
+                                            <ion-popover-view><div class="padding">Fats and Oils</div></ion-popover-view>
+                                        </script>
+                                        <div class="col text-left no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+                                        </div>
+                                        <div class="col text-right no-padding" style="display:inline">
+                                            <button class="button button-icon icon ion-navicon-round" ng-click=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="row no-padding">
+                                        <div class="col no-padding">
+                                            <canvas id="fatsoils" ng-init="dietCircle('fatsoils', '75', '50')" width="150" height="150" ng-click="showAmount('eat', 'sweets12.png', 'sweets1.png')"
+                                                    style="background:url('../img/food/food-43.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="row"><div class="col"><p>Fats and Oils</p></div></div>
+                                </div>
+                            </div>
                         </div>
-                        <canvas id="counter" width="200" height="200" style="display: block; background:url('../img/food/food-29.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
-                        <script>
-                            var bg = document.getElementById('counter');
-                            var ctx = ctx = bg.getContext('2d');
-                            var imd = null;
-                            var circ = Math.PI * 2;
-                            var quart = Math.PI / 2;
-                            var size = 100;
-                            ctx.beginPath();
-                            ctx.strokeStyle = '#99CC33';
-                            ctx.lineCap = 'square';
-                            ctx.closePath();
-                            ctx.fill();
-                            ctx.lineWidth = 10.0;
-                            imd = ctx.getImageData(0, 0, 200, 200);
-                            var draw = function (current) {
-                                ctx.putImageData(imd, 0, 0);
-                                ctx.beginPath();
-                                ctx.arc(100, 100, 85, -(quart), ((circ) * current) - quart, false);
-                                ctx.stroke();
-                                if (x == 100) {
-                                    //add crown
-                                }
-                            }
-                            draw(size / 100);
-                            document.write('')
-                        </script>
-                        <img src="../img/food/food-29.png" ng-click="showFoodFluid('food-29.png','food-30.png','fruitVeg12','fruitVeg1')" style="width:150px; height:150px;"/>
-                        <p>Fruits</p>
-                    </div>
-
-
-
-                    <div class="col text-center">
-                        <img src="../img/food/food-28.png" ng-click="showFoodFluid('food-28.png','food-31.png','fruitVeg12','fruitVeg1')" style="width:150px; height:150px;" />
-                        <p>Vegetables</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col text-center">
-                        <img src="../img/food/food-35.png" ng-click="showAmount('eat')" style="width:150px; height:150px;" />
-                        <p>Proteins</p>
-                    </div>
-                    <div class="col text-center">
-                        <img src="../img/food/grains.png" ng-click="showAmount('eat')" style="width:150px; height:150px;" />
-                        <p>Grains</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col text-center">
-                        <img src="../img/food/dairy.png" ng-click="showFoodFluid('food-26.png','food-27.png','dairy12.png','dairy1.png')" style="width:150px; height:150px;" />
-                        <p>Dairy</p>
-                    </div>
-                    <div class="col text-center">
-                        <img src="../img/food/food-34.png" ng-click="showAmount('drink')" style="width:150px; height:150px;" />
-                        <p>Fluids</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col text-center">
-                        <img src="../img/food/food-40.png" ng-click="showAmount('eat')" style="width:150px; height:150px;" />
-                        <p>Sweets</p>
-                    </div>
-                    <div class="col text-center">
-                        <img src="../img/food/food-43.png" ng-click="showAmount('eat')" style="width:150px; height:150px;" />
-                        <p>Fats & Oils</p>
                     </div>
                 </div>
             </ion-content>

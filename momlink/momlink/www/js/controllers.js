@@ -61,6 +61,52 @@ angular.module('starter.controllers', [])
     ]
 })
 
+.controller('DietController', function ($scope) {
+    $scope.dietCircle = function (id, size, min) {
+        var bg = document.getElementById(id);
+        var ctx = ctx = bg.getContext('2d');
+        var image = new Image();
+        var circ = Math.PI * 2;
+        var quart = Math.PI / 2;
+        var draw = function (current) {
+            ctx.beginPath();
+            //need to center based on height and width
+            ctx.arc(bg.width/2, bg.height/2, 70, -(quart), ((circ) * current) - quart, false);
+            ctx.stroke();
+        }       
+        if (size >= min && (id != 'sweets' && id != 'fatsoils')) {
+            image.src = '../img/food/star.png';
+            image.onload = function () {
+                ctx.drawImage(image, (bg.width / 2)/2, (bg.height / 2)/2, bg.width / 2, bg.height / 2);
+            }
+        }
+        if (size == 100 && (id != 'sweets' && id != 'fatsoils')) {
+            image.src = '../img/food/crown.png';
+            ctx.clearRect(0, 0, bg.width, bg.height);
+            image.onload = function () {
+                ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
+            }
+        }
+        if ((size >= min || size == 100) && (id == 'sweets' || id == 'fatsoils')) {
+            image.src = '../img/food/sadface.png';
+            image.onload = function () {
+                ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
+            }
+        }
+        ctx.lineWidth = 10.0;
+        //draw background line
+        ctx.strokeStyle = '#b5b5b5';
+        draw(1);
+        //draw progress line
+        if (id == 'sweets' || id == 'fatsoils') {
+            ctx.strokeStyle = '#bb1a1d';
+        }
+        else { ctx.strokeStyle = '#2486ae'; }    
+        draw(size / 100);
+
+    };
+})
+
 .controller('ContentController', function ($scope, $ionicSideMenuDelegate) {
     $scope.toggleLeft = function () {
         $ionicSideMenuDelegate.toggleLeft();
@@ -86,20 +132,68 @@ angular.module('starter.controllers', [])
         });
     };
 
-    $scope.showFoodFluid = function (food, fluid, hp1, hp2) {
+    $scope.showFoodFluid = function (food, fluid, hp1, hp2, f1, f2) {
         $scope.choice = $ionicPopup.show({
             template: '<style>.popup { height:400px; }</style>' +
                         '<div class="text-center">' +
-                        '<img src="../img/food/' + food + '" ng-click="showFoodFluidAmount()" style="width:100px; height:100px" />' +
-                        '<img src="../img/food/' + fluid + '" ng-click="showFoodFluidAmount()" style="width:100px; height:100px" />' +
+                        '<img src="../img/food/' + food + '" ng-click="showFoodAmount()" style="width:100px; height:100px" />' +
+                        '<img src="../img/food/' + fluid + '" ng-click="showFluidAmount()" style="width:100px; height:100px" />' +
                       '</div>',
             title: 'What did you eat?',
             scope: $scope
         });
-        $scope.showFoodFluidAmount = function () {
+        $scope.showFoodAmount = function () {
             ffAmountPopup = $ionicPopup.show({
-                template: '<style>.popup { height:400px; }</style>',
-                templateUrl: '../templates/handPortions.html',
+                template: '<style>.popup { height:400px; }</style>' +
+                          '<div class="row" ng-controller="AddSubController">' +
+                               '<div class="col text-center">' +
+                                   '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
+                                   '<div class="row">' +
+                                       '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                   '</div>' +
+                               '</div>' +
+                               '<div class="col text-center">' +
+                                   '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
+                                   '<div class="row">' +
+                                       '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                   '</div>' +
+                               '</div>' +
+                           '</div>',
+                title: 'How much?',
+                buttons: [
+                  { text: 'Save', onTap: function (e) { return 'Saved'; } },
+                  { text: 'Cancel', onTap: function (e) { return 'Cancel'; } }
+                ]
+            });
+            ffAmountPopup.then(function (res) {
+                $scope.choice.close();
+            });
+        };
+        $scope.showFluidAmount = function () {
+            ffAmountPopup = $ionicPopup.show({
+                template: '<style>.popup { height:400px; }</style>' +
+                          '<div class="row" ng-controller="AddSubController">' +
+                               '<div class="col text-center">' +
+                                   '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + f1 + '" style="width:75px; height:100px;"/></div>' +
+                                   '<div class="row">' +
+                                       '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                   '</div>' +
+                               '</div>' +
+                               '<div class="col text-center">' +
+                                   '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + f2 + '" style="width:75px; height:100px;" /></div>' +
+                                   '<div class="row">' +
+                                       '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                   '</div>' +
+                               '</div>' +
+                           '</div>',
                 title: 'How much?',
                 buttons: [
                   { text: 'Save', onTap: function (e) { return 'Saved'; } },
@@ -111,10 +205,27 @@ angular.module('starter.controllers', [])
             });
         };
     };
-    $scope.showAmount = function (type) {
+    $scope.showAmount = function (type, hp1, hp2) {
         $ionicPopup.show({
-            template: '<style>.popup { height:400px; }</style>',
-            templateUrl: '../templates/handPortions.html',
+            template: '<style>.popup { height:400px; }</style>' +
+                      '<div class="row" ng-controller="AddSubController">' +
+                           '<div class="col text-center">' +
+                               '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                               '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
+                               '<div class="row">' +
+                                   '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                   '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                               '</div>' +
+                           '</div>' +
+                           '<div class="col text-center">' +
+                               '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                               '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
+                               '<div class="row">' +
+                                   '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                   '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                               '</div>' +
+                           '</div>' +
+                       '</div>',
             title: 'How much did you ' + type + '?',
             buttons: [
               { text: 'Save', onTap: function (e) { return 'Saved'; } },
