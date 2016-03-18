@@ -2,8 +2,14 @@
 <body ng-app="starter" ng-controller="HeaderBarController">
     <script type="text/javascript" src="../js/header.js"></script>
     <ion-pane>
+        <ion-subheader-bar class="bar bar-subheader bar-stable">
+            <img src="../img/food/star.png" style="width:30px; height:30px; display:inline;">
+            <p id="stars" style="display:inline">0</p>
+            <img src="../img/food/crown.png" style="width:30px; height:30px; display:inline;">
+            <p id="crowns" style="display:inline">0</p>
+        </ion-subheader-bar>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header" ng-controller="PopupCtrl">
+            <ion-content overflow-scroll="false" class="has-header has-subheader" ng-controller="PopupCtrl">
                 <div ng-controller="PopOverController">
                     <div ng-controller="DietController">
                         <div ng-controller="DataController">
