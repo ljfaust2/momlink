@@ -38,24 +38,12 @@
             <label class="item item-input">
                 <input type="email" placeholder="Email">
             </label>
-            <label class="item item-select">
-                <select name="agency">
-                    <option selected disabled value="">Choose a your agency</option>
-                    <option value="mother">Memorial Hospital</option>
-                </select>
-            </label>
         </div>
 
-        <center>
-            <div class="padding">
-                <button class="button button-positive" ng-onclick="register()">
-                    REGISTER
-                </button>
-            </div>
-            <br />
-            <a href="../index.html" style="font-size: 105%; color:lightsteelblue;">
-                Back to Login
-            </a>
-        </center>
+        <div class="padding">
+            <input type="button" class="button button-block button-positive" value="REGISTER" onclick="register()">
+            <input type="button" class="button button-block button-positive" value="Back to Login" onclick="window.location = '../index.html'">
+        </div>
+
 </body>
 <script type="text/javascript" src="../js/load_essentialsEnd.js"></script>

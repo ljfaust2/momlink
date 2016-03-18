@@ -13,7 +13,7 @@
     <script src="cordova.js"></script>
 
     <!-- pouchDB script -->
-    <script src="lib/pouchdb-5.2.1.min.js"></script>
+    <script src="lib/pouchdb-5.3.0.min.js"></script>
 
     <!-- ionic datepicker -->
     <script src="lib/ionic-datepicker/dist/ionic-datepicker.bundle.min.js"></script>
@@ -26,29 +26,23 @@
 <body ng-app="starter" bgcolor="#0866c6" ng-controller="HeaderBarController">
     <center>
         <div class="padding-top"><img src="img/temp/logo.png" height="175" width="175" alt="Momlink"></div>
-        <br/>
+        <br />
         <div class="list list-inset">
             <label class="item item-input">
-                <input type="text" placeholder="Username">
+                <input type="text" placeholder="Username" ng-model="user">
             </label>
             <label class="item item-input">
-                <input type="password" placeholder="Password">
+                <input type="password" placeholder="Password" ng-model="pass">
             </label>
         </div>
+        <div class="padding-left padding-right">
+            <input type="button" class="button button-block button-positive" value="LOGIN" ng-click="login(user, pass)">
+        </div>
+        <p style="font-size: 200%; color:white">______________________________</p>
         <div class="padding">
-            <button class="button button-positive" ng-onclick="login()">
-                LOGIN
-            </button>
-         </div>       
-            <p style="font-size: 200%; color:white">______________________________</p>
-        <br />
-            <a href="" style="font-size: 105%; color:lightsteelblue;">
-                Forgot Password?
-            </a>
-        <br />
-        <a href="templates/register.html" style="font-size: 105%; color:lightsteelblue;">
-            New User?
-        </a>
-</center>
-    </body>
+            <input type="button" class="button button-block button-positive" value="FORGOT PASSWORD" onclick="window.location='templates/forgotPassword.html'">
+            <input type="button" class="button button-block button-positive" value="NEW USER?" onclick="window.location='templates/register.html'">
+        </div>
+    </center>
+</body>
 </html>

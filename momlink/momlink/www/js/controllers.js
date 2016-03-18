@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('HeaderBarController', function ($scope, $location, $document) {
+.controller('HeaderBarController', function ($scope, $ionicPopup, $location, $document) {
     $scope.goBack = function (value) {
         window.history.back();
     };
@@ -13,8 +13,18 @@ angular.module('starter.controllers', [])
         menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
     };
     //Menu Links
-    $scope.login = function (value) {
-        window.location = "templates/main.html";
+    $scope.login = function (user, pass) {
+        var db = PouchDB('http://localhost:5984/momlink');
+        db.get('loginInfo').then(function (doc) {
+            if (user == doc['username'] && pass == doc['password']) {
+                window.location = "templates/main.html";
+            }
+            else {
+                var alertPopup = $ionicPopup.alert({
+                    title: 'Your username or password is incorrect'
+                });
+            }
+        });
     };
     $scope.register = function (value) {
         window.location = "templates/main.html";
@@ -52,8 +62,10 @@ angular.module('starter.controllers', [])
       { type: "Blood Glucose", link: "addBloodGlucose", image: "../img/temp/bloodGlucose.png" },
       { type: "Blood Iron", link: "addBloodIron", image: "../img/temp/bloodDrop.png" },
       { type: "Blood Pressure", link: "addBloodPressure", image: "../img/temp/blood-pressure.jpg" },
+      { type: "Caffeine", link: "addCaffeine", image: "../img/temp/coffee.jpg" },
       { type: "Cigarettes", link: "addCigarette", image: "../img/temp/cigarette.png" },
       { type: "Diet", link: "addFood", image: "../img/buttons/btn_t-03.png" },
+      { type: "Kicks", link: "addKicks", image: "../img/temp/kicks.png" },
       { type: "Mood", link: "addMood", image: "../img/moods/cheerful.png" },
       { type: "Pain", link: "addPain", image: "../img/buttons/btn_t-05.png" },
       { type: "Pills", link: "addPill", image: "../img/buttons/btn_t-04.png" },
