@@ -33,9 +33,6 @@ angular.module('starter.controllers', [])
         window.location = "../index.html";
     };
     //Other Links
-    $scope.event = function () {
-        window.location = "event.html";
-    };
     $scope.today = function () {
         window.location = "today.html";
     };
@@ -452,14 +449,28 @@ angular.module('starter.controllers', [])
     };
 })
 
-/*.controller('EventController', function ($scope, $ionicPopover) {
+.controller('EventController', function ($scope, $ionicPopover) {
     $scope.select = function (eventType) {
         document.getElementById(eventType).style.border = "1px solid black";
     };
-})*/
+})
 
 .controller('SliderController', function ($scope, $ionicSlideBoxDelegate) {
     $scope.nextSlide = function () {
         $ionicSlideBoxDelegate.next();
+    }
+})
+
+.controller('CameraController', function ($scope) {
+    $scope.takePicture = function () {
+        console.log('e');
+        navigator.camera.getPicture(function (imageURI) {
+            // imageURI is the URL of the image that we can use for
+            // an <img> element or backgroundImage.
+            var image = document.getElementById("image");
+            image.src = imageURI;
+        }, function (err) {
+            console.log('error');
+        }, cameraOptions);
     }
 });
