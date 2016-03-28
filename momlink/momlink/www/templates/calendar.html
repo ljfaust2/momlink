@@ -17,7 +17,37 @@
                                 left: 'prev,next, today',
                                 center: 'title',
                                 right: 'agendaDay, agendaWeek, month'
-                            }                           
+                            },
+ 
+                            eventAfterRender: function (event, element, view) {
+                                element.css('background-color', '#FFB347');
+                                element.css('border', '#FFB347');
+                                element.css('font-size', '13px');
+                                element.css('color', '#000000');
+                                element.css('innerHTML', event.start + " " + event.title);
+                            },
+
+                            eventDrop: function (event, delta) {
+                                var datepicker = moment(event.start).format("MM/DD/YYYY");
+                                var start = moment(event.start).format("HH:mm");
+                                var end = moment(event.end).format("HH:mm");
+                                jQuery.ajax({
+                                    url: 'https://momlink.crc.nd.edu/MomLink-PNCC/utilities/event_db.php?f=update_event',
+                                    data: 'eventname=' + event.title + '&starttime=' + start + '&endtime=' + end + '&id=' + event.id + '&datepicker=' + datepicker,
+                                    type: "POST",
+                                    success: function (json) {
+
+                                    }
+                                });
+                                var source = 'https://momlink.crc.nd.edu/MomLink-PNCC/utilities/event_db.php?f=get_events';
+                                jQuery('#calendar').fullCalendar('removeEvents');
+                                jQuery('#calendar').fullCalendar('addEventSource', source);
+                                jQuery('#calendar').fullCalendar('rerenderEvents');
+
+
+                            },
+
+                            defaultView: 'agendaDay'
                         })
                     });
                 </script>

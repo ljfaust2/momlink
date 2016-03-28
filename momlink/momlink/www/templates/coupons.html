@@ -3,8 +3,20 @@
     <script type="text/javascript" src="../js/header.js"></script>
     <ion-pane>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header">
-
+            <ion-content class="has-header padding" ng-controller="DataController">
+                <ul>
+                    <li ng-repeat="item in couponList">
+                        <div class="row">
+                            <div class="col col-25">
+                                <img src={{item.image}} onclick="{{item.link}}" style="width:50px; height:50px;" />
+                            </div>
+                            <div class="col-75">
+                                <p>Description:{{item.description}}</p>
+                                <p>Recieved:{{item.history}}</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </ion-content>
         </ion-view>
     </ion-pane>

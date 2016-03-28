@@ -2,49 +2,17 @@
 <body ng-app="starter" ng-controller="HeaderBarController">
     <script type="text/javascript" src="../js/header.js"></script>
     <ion-pane>
-        <ion-view overflow-scroll="false">
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
 
-            <ion-nav-view></ion-nav-view>
-               
-                <ion-tabs class="has-header tabs-positive tabs-icon-top">
-                    <ion-tab title="Inbox" icon-on="ion-ios-filing" icon-off="ion-ios-filing-outline">
-                        <ion-view>
-                            <ion-content class="has-header padding">
-                                <p>
-                                    Inbox
-                                </p>
-                            </ion-content>
-                        </ion-view>
-                    </ion-tab>
-                    <ion-tab title="Nutrition" icon-on="ion-ios-nutrition" icon-off="ion-ios-nutrition-outline">
-                        <ion-view>
-                            <ion-content class="has-header padding">
-                                <p>
-                                    Nutrition
-                                </p>
-                            </ion-content>
-                        </ion-view>
-                    </ion-tab>
-                    <ion-tab title="Appointment" icon-on="ion-ios-bell" icon-off="ion-ios-bell-outline">
-                        <ion-view>
-                            <ion-content class="has-header padding">
-                                <p>
-                                    Appointment
-                                </p>
-                            </ion-content>
-                        </ion-view>
-                    </ion-tab>
-                    <ion-tab title="Classes" icon-on="ion-ios-people" icon-off="ion-ios-people-outline">
-                        <ion-view>
-                            <ion-content class="has-header padding">
-                                <p>
-                                    Classes
-                                </p>
-                            </ion-content>
-                        </ion-view>
-                    </ion-tab>
-                </ion-tabs>
+            </ion-content>
         </ion-view>
     </ion-pane>
+    <ion-footer-bar class="bar-positive" style="padding:0px">
+            <div class="col text-left"><button class="button button-icon icon ion-ios-chatbubble-outline" ng-click="inboxAsk()">Ask</button></div>
+            <div class="col text-center"><button class="button button-icon icon ion-ios-paperplane-outline" ng-click="">Request</button></div>
+            <div class="col text-right"><button class="button button-icon icon ion-ios-paper-outline" ng-click="">Notes</button></div>
+     </ion-footer-bar>
 </body>
 <script type="text/javascript" src="../js/load_essentialsEnd.js"></script>
+

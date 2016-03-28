@@ -21,7 +21,7 @@
             '<div class="col"><a href="education.html"><img src="../img/buttons/btn-09.png" style="width:75px;height:75px;vertical-align:middle" alt="Education"></a><p>Education</p></div>' +
         '</div>' +
         '<div class="row">' +
-            '<div class="col"></div>' +
+            '<div class="col"><a href="notes.html"><img src="../img/temp/notes.png" style="width:75px;height:75px;vertical-align:middle" alt="Notes"></a><p>Notes</p></div>' +
             '<div class="col"><a href="myProfile.html"><img src="../img/buttons/btn-12.png" style="width:75px;height:75px;vertical-align:middle" alt="My Profile"></a><p>My Profile</p></div>' +
             '<div class="col"><img src="../img/buttons/btn-11.png" ng-click="logout()" style="width:75px;height:75px;vertical-align:middle" alt="Logout"><p>Logout</p></div>' +
         '</div>' +

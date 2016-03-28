@@ -1,0 +1,45 @@
+﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+<script type="text/javascript" src="../js/header.js"></script>
+    <body ng-app="starter" ng-controller="HeaderBarController">       
+        <script>
+            var query = window.location.search;
+            var vars = query.split('=');
+            var el = vars[3];
+            //console.log(el);
+        </script>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header">
+                <script>
+                    var el = window.localStorage.getItem('recipient');
+                    window.localStorage.removeItem('recipient')
+                    console.log(el);
+                </script>
+                <div class="list list-inset">
+                    <div class="item item-divider">
+                        Subject
+                    </div>
+                    <label class="item item-input">
+                        <input type="text" placeholder="Subject">
+                    </label>
+                    <div class="row">
+                        <div class="col text-right ">
+                            <img src="../img/temp/mic.png" ng-onclick="" style="width:30px; height:25px;" />
+                            <img src="../img/temp/clip.png" ng-onclick="" style="width:30px; height:25px;"/>
+                            <img src="../img/temp/camera.png" ng-onclick="takePicture()" style="width:30px; height:25px;"/>
+                        </div>
+                    </div>
+                    <div class="item item-divider">
+                        Message
+                    </div>
+                    <label class="item item-input">
+                        <textarea placeholder="Message" rows="5"></textarea>
+                    </label>
+                </div>
+                <div class="padding">
+                    <input type="button" class="button button-block button-positive" value="SEND" onclick="">
+                    <input type="button" class="button button-block button-assertive" value="CANCEL" onclick="window.location = 'INBOX.html'">
+                </div>
+            </ion-content>
+        </ion-view>
+    </body>
+<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>

@@ -1,0 +1,26 @@
+﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+<body ng-app="starter" ng-controller="HeaderBarController">
+    <script type="text/javascript" src="../js/header.js"></script>
+    <ion-pane>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
+                <ul>
+                    <li ng-repeat="item in notesList">
+                        <div class="row no-padding">
+                            <div class="col">
+                                <ion-checkbox ng-model="isChecked">
+                                    <p style="font-weight: bold">{{item.subject}}</p>
+                                    <p>{{item.description}}</p>
+                                </ion-checkbox>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </ion-content>
+        </ion-view>
+    </ion-pane>
+    <ion-footer-bar class="bar-positive" style="padding:0px">
+        <div class="col text-right"><button class="button button-icon icon ion-ios-paper-outline" onclick="window.location='addNote.html'"> Add Note</button></div>
+    </ion-footer-bar>
+</body>
+<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>

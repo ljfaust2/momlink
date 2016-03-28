@@ -32,13 +32,26 @@ angular.module('starter.controllers', [])
     $scope.logout = function () {
         window.location = "../index.html";
     };
-    //Other Links
-    $scope.today = function () {
-        window.location = "today.html";
+    //Inbox Footer Links
+    $scope.inboxAsk = function () {
+        window.location = "inboxAsk.html";
     };
     //Track Link
+    $scope.goToHistory = function (type) {
+        window.localStorage.setItem('trackType', type)
+        window.location = 'history.html';
+    };
+    $scope.goToAct = function (act) {
+        window.localStorage.setItem('selectAct', act)
+        window.location = 'addActivityTime.html';
+    };
     $scope.goToAddEvent = function (type) {
         window.location = type + ".html";
+    };
+    //Inbox Link
+    $scope.goToMessage = function (type) {
+        window.localStorage.setItem('recipient', type)
+        window.location = "message.html";
     };
 })
 
@@ -53,6 +66,36 @@ angular.module('starter.controllers', [])
       { type: "Walk", image: "../img/activities/walk_dog.png" },
       { type: "Walk Dog", image: "../img/activities/walk.png" }
     ]
+    $scope.articleList = [
+      { image: "../img/temp/article.jpg", description: "Article 1 Description...", link: "" },
+      { image: "../img/temp/article.jpg", description: "Article 2 Description...", link: "" },
+      { image: "../img/temp/article.jpg", description: "Article 3 Description...", link: "" },
+      { image: "../img/temp/article.jpg", description: "Article 4 Description...", link: "" },
+    ]
+    $scope.couponList = [
+      { image: "../img/temp/coupon.jpg", description: "Coupon 1 Description...", history: "", link: "" },
+      { image: "../img/temp/coupon.jpg", description: "Coupon 2 Description...", history: "", link: "" },
+      { image: "../img/temp/coupon.jpg", description: "Coupon 3 Description...", history: "", link: "" },
+      { image: "../img/temp/coupon.jpg", description: "Coupon 4 Description...", history: "", link: "" },
+    ]
+    $scope.notesList = [
+      { subject: "Note Subject", description: "This is a description" }
+    ]
+    $scope.stressList = [
+      { type: "Family/Relationships", image: "" },
+      { type: "Housing", image: "" },
+      { type: "Finances", image: "" },
+      { type: "Domestic Violence", image: "" },
+      { type: "Material Needs", image: "" }
+    ]
+    $scope.referList = [
+      { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" },
+      { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" }
+    ]
+    $scope.pnccList = [
+      { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc.png" },
+      { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc.png" }
+    ]
     $scope.trackList = [
       { type: "Activity", link: "addActivity", image: "../img/activities/run.png" },
       { type: "Baby Heart Rate", link: "addBabyHeartRate", image: "../img/buttons/btn-12.png" },
@@ -66,6 +109,7 @@ angular.module('starter.controllers', [])
       { type: "Mood", link: "addMood", image: "../img/moods/cheerful.png" },
       { type: "Pain", link: "addPain", image: "../img/buttons/btn_t-05.png" },
       { type: "Pills", link: "addPill", image: "../img/buttons/btn_t-04.png" },
+      { type: "Stressors", link: "addStress", image: "../img/temp/stress.png" },
       { type: "Weight", link: "addWeight", image: "../img/temp/scale.jpg" }
     ]
 })
