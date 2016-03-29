@@ -1,25 +1,29 @@
 ﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
 <body ng-app="starter" ng-controller="HeaderBarController">
     <script type="text/javascript" src="../js/header.js"></script>
+    <script>header('Event')</script>
     <ion-pane>
         <ion-view>
             <ion-content overflow-scroll="false" class="has-header" ng-app="plugins" ng-controller="EventController">
-                <!--<div class="row">
-                    <p style="text-indent: 5px;">Select Event Type</p>
-                </div>  
-                <div class="row row-no-padding padding-bottom">
-                    <div class="col"><center><input id="obappt" class="col" type="image"  ng-click="select('obappt')" src="../img/temp/obappt.PNG" style="width:50px;height:50px;vertical-align:middle" />OB Appt</center></div>
-                    <div class="col"><center><input id="tests" class="col" type="image" ng-click="select('tests')" src="../img/temp/tests.PNG" style="width:50px;height:50px;vertical-align:middle" />Tests</center></div>
-                    <div class="col"><center><input id="visits" class="col" type="image" ng-click="select('visits')" src="../img/temp/visits.PNG" style="width:50px;height:50px;vertical-align:middle" />Visits</center></div>
-                    <div class="col"><center><input id="ultra" class="col" type="image" ng-click="select('ultra')" src="../img/temp/ultra.PNG" style="width:50px;height:50px;vertical-align:middle" />Ultra</center></div>
-                    <div class="col"><center><input id="classes" class="col" type="image" ng-click="select('classes')" src="../img/temp/classes.PNG" style="width:50px;height:50px;vertical-align:middle" />Classes</center></div>
-                </div>-->
                 <div class="list list-inset">
                     <div class="item item-divider">
-                        Event Title:
+                        Event Title/Type:
                     </div>
                     <label class="item item-input">
                         <input type="text" placeholder="Event Name">
+                    </label>
+
+                    <label class="item item-input item-select">
+                        <div class="input-label" style="color:lightgray">
+                            Event Type
+                        </div>
+                        <select>
+                            <option selected>OB Appt</option>
+                            <option>Test</option>
+                            <option>Visit</option>
+                            <option>Ultra</option>
+                            <option>Class</option>
+                        </select>
                     </label>
                     <div class="item item-divider">
                         Date/Time:

@@ -1,9 +1,16 @@
 ﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
 <body ng-app="starter" ng-controller="HeaderBarController">
     <script type="text/javascript" src="../js/header.js"></script>
+    <script>header('Coupons')</script>
     <ion-pane>
         <ion-view>
             <ion-content class="has-header padding" ng-controller="DataController">
+                <div class="row">
+                    <div class="col text-center">
+                        <img src="../img/temp/coupon.jpg" style="width:100px;height:100px;" />
+                        4 Coupons
+                    </div>
+                </div>
                 <ul>
                     <li ng-repeat="item in couponList">
                         <div class="row">
@@ -11,7 +18,7 @@
                                 <img src={{item.image}} onclick="{{item.link}}" style="width:50px; height:50px;" />
                             </div>
                             <div class="col-75">
-                                <p>Description:{{item.description}}</p>
+                                <p>Description: {{item.description}}</p>
                                 <p>Recieved:{{item.history}}</p>
                             </div>
                         </div>
@@ -20,5 +27,10 @@
             </ion-content>
         </ion-view>
     </ion-pane>
+    <ion-footer-bar class="bar-positive" style="padding:0px">
+        <div class="col text-left"><button class="button button-icon icon ion-ios-location-outline" ng-click="">Loc.</button></div>
+        <div class="col text-center"><button class="button button-icon icon ion-ios-clock-outline" ng-click="">Hours</button></div>
+        <div class="col text-right"><button class="button button-icon icon ion-ios-filing-outline" ng-click="">Inv.</button></div>
+    </ion-footer-bar>
 </body>
 <script type="text/javascript" src="../js/load_essentialsEnd.js"></script>
