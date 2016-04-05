@@ -25,6 +25,22 @@ angular.module('starter.controllers', [])
                 });
             }
         });
+        var doc = {
+        "_id": "mittens",
+        "name": "Mittens",
+        "occupation": "kitten",
+        "age": 3,
+        "hobbies": [
+          "playing with balls of yarn",
+          "chasing laser pointers",
+          "lookin' hella cute"
+        ]
+        };
+        db.post(doc).then(function () {
+            return db.get('mittens');
+        }).then(function (doc) {
+            console.log(JSON.stringify(doc));
+        });
     };
     $scope.register = function (value) {
         window.location = "templates/main.html";
