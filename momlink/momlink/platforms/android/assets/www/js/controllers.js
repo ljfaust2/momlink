@@ -73,10 +73,10 @@ angular.module('starter.controllers', [])
       { image: "../img/temp/article.jpg", description: "Article 4 Description...", link: "" },
     ]
     $scope.couponList = [
-      { image: "../img/temp/coupon.jpg", description: "Coupon 1 Description...", history: "", link: "" },
-      { image: "../img/temp/coupon.jpg", description: "Coupon 2 Description...", history: "", link: "" },
-      { image: "../img/temp/coupon.jpg", description: "Coupon 3 Description...", history: "", link: "" },
-      { image: "../img/temp/coupon.jpg", description: "Coupon 4 Description...", history: "", link: "" },
+      { image: "../img/temp/coupon.jpg", description: "Coupon 1 Description...", link: "" },
+      { image: "../img/temp/coupon.jpg", description: "Coupon 2 Description...", link: "" },
+      { image: "../img/temp/coupon.jpg", description: "Coupon 3 Description...", link: "" },
+      { image: "../img/temp/coupon.jpg", description: "Coupon 4 Description...", link: "" },
     ]
     $scope.notesList = [
       { subject: "Note Subject", description: "This is a description" }
@@ -95,6 +95,45 @@ angular.module('starter.controllers', [])
     $scope.pnccList = [
       { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc.png" },
       { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc.png" }
+    ]
+    $scope.inventoryList = [
+      { item: "Baby Carrier", price: "7" },
+      { item: "Baby Wipes", price: "1" },
+      { item: "Baby Lotion", price: "1" },
+      { item: "Baby Wash", price: "1" },
+      { item: "Bath Tub", price: "7" },
+      { item: "Bibs", price: "1" },
+      { item: "Blankets - Large", price: "2-3" },
+      { item: "Blankets - Small", price: "1" },
+      { item: "Booster Seat", price: "7" },
+      { item: "Boppy", price: "8" },
+      { item: "Breastfeeding Pads", price: "2" },
+      { item: "Breastfeeding Cover Ups", price: "3" },
+      { item: "Breastfeeding Storage Bags", price: "2" },
+      { item: "Breastfeeding Lotion", price: "2" },
+      { item: "Cabinet Locks", price: "1" },
+      { item: "Clothing - New", price: "2-4" },
+      { item: "Clothing - Old", price: "1" },
+      { item: "Crib Sheets", price: "2" },
+      { item: "Diapers", price: "1" },
+      { item: "Diaper Bags - Large", price: "8" },
+      { item: "Diaper Bags - Small", price: "7" },
+      { item: "High Chairs", price: "14" },
+      { item: "Hooded Towels", price: "3" },
+      { item: "Nail Clippers", price: "1" },
+      { item: "Nasal Aspirator", price: "1" },
+      { item: "Outlet Covers", price: "1" },
+      { item: "Pack-N-Play", price: "14" },
+      { item: "Pack-N-Play Sheets", price: "2" },
+      { item: "Potty Chair - Large", price: "7" },
+      { item: "Potty Chair - Small", price: "6" },
+      { item: "Scratch Mittens", price: "1" },
+      { item: "Sippy Cups", price: "1" },
+      { item: "Snack Cups", price: "1" },
+      { item: "Strollers", price: "14" },
+      { item: "Thermometers", price: "1" },
+      { item: "Underwear", price: "1" },
+      { item: "Washcloths", price: "2" }
     ]
     $scope.trackList = [
       { type: "Activity", link: "addActivity", image: "../img/activities/run.png" },

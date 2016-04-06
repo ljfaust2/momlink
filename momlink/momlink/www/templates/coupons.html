@@ -3,34 +3,95 @@
     <script type="text/javascript" src="../js/header.js"></script>
     <script>header('Coupons')</script>
     <ion-pane>
-        <ion-view>
-            <ion-content class="has-header padding" ng-controller="DataController">
-                <div class="row">
-                    <div class="col text-center">
-                        <img src="../img/temp/coupon.jpg" style="width:100px;height:100px;" />
-                        4 Coupons
-                    </div>
-                </div>
-                <ul>
-                    <li ng-repeat="item in couponList">
-                        <div class="row">
-                            <div class="col col-25">
-                                <img src={{item.image}} onclick="{{item.link}}" style="width:50px; height:50px;" />
+        <ion-view overflow-scroll="false">
+            <ion-nav-view></ion-nav-view>
+            <ion-tabs class="has-header tabs-positive tabs-icon-top">
+                <ion-tab title="Coupons" icon-on="ion-ios-pricetags" icon-off="ion-ios-pricetags-outline">
+                    <ion-view>
+                        <ion-content class="has-header padding" ng-controller="DataController">
+                            <div class="row">
+                                <div class="col text-center">
+                                    <img src="../img/temp/coupon.jpg" style="width:100px;height:100px;" />
+                                    4 Coupons
+                                </div>
                             </div>
-                            <div class="col-75">
-                                <p>Description: {{item.description}}</p>
-                                <p>Recieved:{{item.history}}</p>
+                            <ul>
+                                <li ng-repeat="item in couponList">
+                                    <div class="row">
+                                        <div class="col text-left">
+                                            <img class="inline" src={{item.image}} onclick="{{item.link}}" style="width:35px; height:35px;" />
+                                            <p class="inline" style="vertical-align:middle">Recieved for {{item.description}}</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </ion-content>
+                    </ion-view>
+                </ion-tab>
+                <ion-tab title="Locations" icon-on="ion-ios-location" icon-off="ion-ios-location-outline">
+                    <ion-view>
+                        <ion-content class="has-header padding" ng-controller="DataController">
+                            <div style="font-size: 110%;">
+                                <div class="row" style="font-weight: bold;">B.A.B.E & More</div>
+                                <div class="row">
+                                    325 N. Lafayette Blvd. <br />
+                                    South Bend, IN <br />
+                                    46601 <br />
+                                    574-647-2201
+                                </div>
+                                <div class="row" style="font-weight: bold;">Hours</div>
+                                <div class="row">
+                                    Mon: 9:00 am - 3:00 pm <br />
+                                    Tue: 12:00 pm - 6:00 pm
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                </ul>
-            </ion-content>
+                            <br />
+                            <div style="font-size: 110%;">
+                                <div class="row" style="font-weight: bold;">B.A.B.E Express</div>
+                                <div class="row">
+                                    201 Lincoln Way West <br />
+                                    Mishawaka, IN <br />
+                                    46544 <br />
+                                    574-647-2175
+                                </div>
+                                <div class="row" style="font-weight: bold;">Hours</div>
+                                <div class="row">
+                                    Tue: 8:00 am - 4:00 pm <br />
+                                    Thur: 8:00 am - 4:00 pm
+                                </div>
+                            </div>
+                        </ion-content>
+                    </ion-view>
+                </ion-tab>
+                <ion-tab title="Inventory" icon-on="ion-ios-filing" icon-off="ion-ios-filing-outline">
+                    <ion-view>
+                        <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
+                            <div class="row">
+                                <div class="col text-left">
+                                    <u style="font-size:x-large;">Item</u>
+                                </div>
+                                <div class="col text-right">
+                                    <u style="font-size:x-large;">Price</u>
+                                </div>
+                            </div>
+                            <ul>
+                                <li ng-repeat="item in inventoryList">
+                                    <div class="row">
+                                        <div class="col-75">
+                                            <p style="font-size:large">{{item.item}}</p>
+                                        </div>
+                                        <div class="col-25 text-right">
+                                            <p class="inline" style="font-size:large; vertical-align:middle;">{{item.price}} </p>
+                                            <img class="inline" src="../img/temp/coupon.jpg" style="width:20px; height:20px;" />
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </ion-content>
+                    </ion-view>
+                </ion-tab>
+            </ion-tabs>
         </ion-view>
     </ion-pane>
-    <ion-footer-bar class="bar-positive" style="padding:0px">
-        <div class="col text-left"><button class="button button-icon icon ion-ios-location-outline" ng-click="">Loc.</button></div>
-        <div class="col text-center"><button class="button button-icon icon ion-ios-clock-outline" ng-click="">Hours</button></div>
-        <div class="col text-right"><button class="button button-icon icon ion-ios-filing-outline" ng-click="">Inv.</button></div>
-    </ion-footer-bar>
 </body>
 <script type="text/javascript" src="../js/load_essentialsEnd.js"></script>

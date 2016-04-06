@@ -1,0 +1,31 @@
+﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+<body ng-app="starter" ng-controller="HeaderBarController">
+    <script type="text/javascript" src="../js/header.js"></script>
+    <script>header('Inbox')</script>
+    <ion-pane>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
+                <ul>
+                    <li ng-repeat="item in pnccList">
+                        <div ng-show="$index % 2 == 0">
+                            <div class="row">
+                                <div class="col text-center">
+                                    <input type="image" src={{item.image}} ng-click=goToMessage(item.email) name="type" style="width:100px;height:100px; border:1px solid black;" alt={{item.name}}>
+                                    <p>{{item.name}}</p>
+                                </div>
+                                <div ng-show="pnccList[$index+1] != null" class="col text-center">
+                                    <input type="image" src={{pnccList[$index+1].image}} ng-click=goToMessage(pnccList[$index+1].email) name="type" style="width:100px;height:100px; border:1px solid black;" alt={{pnccList[$index+1].name}}>
+                                    <p>{{pnccList[$index+1].name}}</p>
+                                </div>
+                                <div ng-show="pnccList[$index+1] == null" class="col text-center">
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </ion-content>
+        </ion-view>
+    </ion-pane>
+</body>
+<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>
+
