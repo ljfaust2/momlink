@@ -25,27 +25,13 @@ angular.module('starter.controllers', [])
                 });
             }
         });
-        var doc = {
-        "_id": "mittens",
-        "name": "Mittens",
-        "occupation": "kitten",
-        "age": 3,
-        "hobbies": [
-          "playing with balls of yarn",
-          "chasing laser pointers",
-          "lookin' hella cute"
-        ]
-        };
-        db.post(doc).then(function () {
-            return db.get('mittens');
-        }).then(function (doc) {
-            console.log(JSON.stringify(doc));
-        });
     };
     $scope.register = function (value) {
         window.location = "templates/main.html";
     };
     $scope.logout = function () {
+        window.localStorage.removeItem('trackType');
+        window.localStorage.removeItem('date');
         window.location = "../index.html";
     };
     //Inbox Footer Links
@@ -71,104 +57,6 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('DataController', function ($scope, $ionicSideMenuDelegate) {
-    $scope.actList = [
-      { type: "Bike", image: "../img/activities/bike.png" },
-      { type: "Clean", image: "../img/activities/clean.png" },
-      { type: "Dance", image: "../img/activities/dance.png" },
-      { type: "Exercise", image: "../img/activities/exercise.png" },
-      { type: "Run", image: "../img/activities/run.png" },
-      { type: "Shop", image: "../img/activities/shop.png" },
-      { type: "Walk", image: "../img/activities/walk_dog.png" },
-      { type: "Walk Dog", image: "../img/activities/walk.png" }
-    ]
-    $scope.articleList = [
-      { image: "../img/temp/article.jpg", description: "Article 1 Description...", link: "" },
-      { image: "../img/temp/article.jpg", description: "Article 2 Description...", link: "" },
-      { image: "../img/temp/article.jpg", description: "Article 3 Description...", link: "" },
-      { image: "../img/temp/article.jpg", description: "Article 4 Description...", link: "" },
-    ]
-    $scope.couponList = [
-      { image: "../img/temp/coupon.jpg", description: "Coupon 1 Description...", link: "" },
-      { image: "../img/temp/coupon.jpg", description: "Coupon 2 Description...", link: "" },
-      { image: "../img/temp/coupon.jpg", description: "Coupon 3 Description...", link: "" },
-      { image: "../img/temp/coupon.jpg", description: "Coupon 4 Description...", link: "" },
-    ]
-    $scope.notesList = [
-      { subject: "Note Subject", description: "This is a description" }
-    ]
-    $scope.stressList = [
-      { type: "Family/Relationships", image: "" },
-      { type: "Housing", image: "" },
-      { type: "Finances", image: "" },
-      { type: "Domestic Violence", image: "" },
-      { type: "Material Needs", image: "" }
-    ]
-    $scope.referList = [
-      { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" },
-      { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" }
-    ]
-    $scope.pnccList = [
-      { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc.png" },
-      { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc.png" }
-    ]
-    $scope.inventoryList = [
-      { item: "Baby Carrier", price: "7" },
-      { item: "Baby Wipes", price: "1" },
-      { item: "Baby Lotion", price: "1" },
-      { item: "Baby Wash", price: "1" },
-      { item: "Bath Tub", price: "7" },
-      { item: "Bibs", price: "1" },
-      { item: "Blankets - Large", price: "2-3" },
-      { item: "Blankets - Small", price: "1" },
-      { item: "Booster Seat", price: "7" },
-      { item: "Boppy", price: "8" },
-      { item: "Breastfeeding Pads", price: "2" },
-      { item: "Breastfeeding Cover Ups", price: "3" },
-      { item: "Breastfeeding Storage Bags", price: "2" },
-      { item: "Breastfeeding Lotion", price: "2" },
-      { item: "Cabinet Locks", price: "1" },
-      { item: "Clothing - New", price: "2-4" },
-      { item: "Clothing - Old", price: "1" },
-      { item: "Crib Sheets", price: "2" },
-      { item: "Diapers", price: "1" },
-      { item: "Diaper Bags - Large", price: "8" },
-      { item: "Diaper Bags - Small", price: "7" },
-      { item: "High Chairs", price: "14" },
-      { item: "Hooded Towels", price: "3" },
-      { item: "Nail Clippers", price: "1" },
-      { item: "Nasal Aspirator", price: "1" },
-      { item: "Outlet Covers", price: "1" },
-      { item: "Pack-N-Play", price: "14" },
-      { item: "Pack-N-Play Sheets", price: "2" },
-      { item: "Potty Chair - Large", price: "7" },
-      { item: "Potty Chair - Small", price: "6" },
-      { item: "Scratch Mittens", price: "1" },
-      { item: "Sippy Cups", price: "1" },
-      { item: "Snack Cups", price: "1" },
-      { item: "Strollers", price: "14" },
-      { item: "Thermometers", price: "1" },
-      { item: "Underwear", price: "1" },
-      { item: "Washcloths", price: "2" }
-    ]
-    $scope.trackList = [
-      { type: "Activity", link: "addActivity", image: "../img/activities/run.png" },
-      { type: "Baby Heart Rate", link: "addBabyHeartRate", image: "../img/buttons/btn-12.png" },
-      { type: "Blood Glucose", link: "addBloodGlucose", image: "../img/temp/bloodGlucose.png" },
-      { type: "Blood Iron", link: "addBloodIron", image: "../img/temp/bloodDrop.png" },
-      { type: "Blood Pressure", link: "addBloodPressure", image: "../img/temp/blood-pressure.jpg" },
-      { type: "Caffeine", link: "addCaffeine", image: "../img/temp/coffee.jpg" },
-      { type: "Cigarettes", link: "addCigarette", image: "../img/temp/cigarette.png" },
-      { type: "Diet", link: "addFood", image: "../img/buttons/btn_t-03.png" },
-      { type: "Kicks", link: "addKicks", image: "../img/temp/kicks.png" },
-      { type: "Mood", link: "addMood", image: "../img/moods/cheerful.png" },
-      { type: "Pain", link: "addPain", image: "../img/buttons/btn_t-05.png" },
-      { type: "Pills", link: "addPill", image: "../img/buttons/btn_t-04.png" },
-      { type: "Stressors", link: "addStress", image: "../img/temp/stress.png" },
-      { type: "Weight", link: "addWeight", image: "../img/temp/scale.jpg" }
-    ]
-})
-
 .controller('DietController', function ($scope) {
     $scope.dietCircle = function (id, size, min) {
         var bg = document.getElementById(id);
@@ -179,13 +67,13 @@ angular.module('starter.controllers', [])
         var draw = function (current) {
             ctx.beginPath();
             //need to center based on height and width
-            ctx.arc(bg.width/2, bg.height/2, 70, -(quart), ((circ) * current) - quart, false);
+            ctx.arc(bg.width / 2, bg.height / 2, 70, -(quart), ((circ) * current) - quart, false);
             ctx.stroke();
-        }       
+        }
         if (size >= min && (id != 'sweets' && id != 'fatsoils')) {
             image.src = '../img/food/star.png';
             image.onload = function () {
-                ctx.drawImage(image, (bg.width / 2)/2, (bg.height / 2)/2, bg.width / 2, bg.height / 2);
+                ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
             }
         }
         if (size == 100 && (id != 'sweets' && id != 'fatsoils')) {
@@ -209,7 +97,7 @@ angular.module('starter.controllers', [])
         if (id == 'sweets' || id == 'fatsoils') {
             ctx.strokeStyle = '#bb1a1d';
         }
-        else { ctx.strokeStyle = '#2486ae'; }    
+        else { ctx.strokeStyle = '#2486ae'; }
         draw(size / 100);
 
     };
@@ -218,6 +106,134 @@ angular.module('starter.controllers', [])
 .controller('ContentController', function ($scope, $ionicSideMenuDelegate) {
     $scope.toggleLeft = function () {
         $ionicSideMenuDelegate.toggleLeft();
+    };
+})
+
+.controller('DBController', function ($scope) {
+    var today = new Date();
+    getDate = function () {
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1;
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd
+        }
+        if (mm < 10) {
+            mm = '0' + mm
+        }
+        date = mm + '/' + dd + '/' + yyyy;
+        return date;
+    }
+    getTime = function () {
+        var hour = today.getHours();
+        var minute = today.getMinutes();
+        var second = today.getSeconds();
+        if (hour.toString().length == 1) {
+            var hour = '0' + hour;
+        }
+        if (minute.toString().length == 1) {
+            var minute = '0' + minute;
+        }
+        if (second.toString().length == 1) {
+            var second = '0' + second;
+        }
+        var time = hour + ':' + minute + ':' + second;
+        return time;
+    }
+    $scope.submit_bhr = function () {
+        var db = PouchDB('http://localhost:5984/track_bhr');
+        log = document.getElementById('count').innerHTML;
+        //if table exists then add info to table
+        db.get(getDate()).then(function (doc) {
+            doc[getTime()] = log;
+            return db.put(doc);
+            //else create new table and add info
+        }).catch(function (err) {
+            var doc = {
+                "_id": getDate()
+            }
+            doc[getTime()] = log;
+            return db.put(doc);
+            //then move back to history page
+        }).then(function (doc) {
+            window.location = 'history.html';
+        });
+    }
+})
+
+.controller('HistoryController', function ($scope) {
+    formatDate = function (d) {
+        var t
+        var date = d.getDate(),
+        month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
+        window.localStorage.setItem('date', d);
+        function nth(d) {
+            if (d > 3 && d < 21) return 'th';
+            switch (d % 10) {
+                case 1: return "st";
+                case 2: return "nd";
+                case 3: return "rd";
+                default: return "th";
+            }
+        }
+        today = new Date();
+        if (String(d).substring(0, 15) == String(today).substring(0, 15)) {
+            t = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
+        }
+        else {
+            t = month + " " + date + nth(date) + ", " + d.getFullYear();
+        }
+        return t;
+    };
+    $scope.increaseDate = function () {
+        var d = new Date(window.localStorage.getItem('date'));
+        d.setDate(d.getDate() + 1)
+        document.getElementById("todaysDate").innerHTML = formatDate(d);
+    };
+    $scope.decreaseDate = function () {
+        var d = new Date(window.localStorage.getItem('date'));
+        d.setDate(d.getDate() - 1)
+        document.getElementById("todaysDate").innerHTML = formatDate(d);
+    };
+
+    $scope.loadHistory = function () {
+        if (window.localStorage.getItem('trackType') == 'addBabyHeartRate') {
+            var db = PouchDB('http://localhost:5984/track_bhr');
+            db.allDocs({ include_docs: true }).then(function (response) {
+                //get correct date
+                var date = new Date(window.localStorage.getItem('date'));
+                date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
+                var index;
+                for (var i in response['rows']) {
+                    if (date == response['rows'][i]['key']) {
+                        index = i;
+                        break;
+                    }
+                }
+                //build history table
+                var hist = '';
+                dict = response['rows'][index]['doc'];
+                for (var i in dict) {
+                    //ignore the meta data
+                    if (i != '_id' && i != '_rev') {
+                        hist += `<div class="row">`;
+                        hist += `<div class="col text-center">`;
+                        hist += '<p> Time: ' + i + '&nbsp; &nbsp; &nbsp; BHR: ';
+                        hist += dict[i] + '</p>';
+                        hist += `</div></div>`;
+                    }
+                }
+                document.getElementById('history').innerHTML = hist;
+            }).catch(function (err) {
+                //insert image to click plus sign
+                var hist = '';
+                hist += `<div class="row">`;
+                hist += `<div class="col text-center">`;
+                hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
+                hist += `</div></div>`;
+                document.getElementById('history').innerHTML = hist;
+            })
+        }
     };
 })
 
@@ -572,4 +588,102 @@ angular.module('starter.controllers', [])
             console.log('error');
         }, cameraOptions);
     }
+})
+
+.controller('DataController', function ($scope, $ionicSideMenuDelegate) {
+    $scope.actList = [
+      { type: "Bike", image: "../img/activities/bike.png" },
+      { type: "Clean", image: "../img/activities/clean.png" },
+      { type: "Dance", image: "../img/activities/dance.png" },
+      { type: "Exercise", image: "../img/activities/exercise.png" },
+      { type: "Run", image: "../img/activities/run.png" },
+      { type: "Shop", image: "../img/activities/shop.png" },
+      { type: "Walk", image: "../img/activities/walk_dog.png" },
+      { type: "Walk Dog", image: "../img/activities/walk.png" }
+    ]
+    $scope.articleList = [
+      { image: "../img/temp/article.jpg", description: "Article 1 Description...", link: "" },
+      { image: "../img/temp/article.jpg", description: "Article 2 Description...", link: "" },
+      { image: "../img/temp/article.jpg", description: "Article 3 Description...", link: "" },
+      { image: "../img/temp/article.jpg", description: "Article 4 Description...", link: "" },
+    ]
+    $scope.couponList = [
+      { description: "Coupon 1 Description..." },
+      { description: "Coupon 2 Description..." },
+      { description: "Coupon 3 Description..." },
+      { description: "Coupon 4 Description..." },
+    ]
+    $scope.notesList = [
+      { subject: "Note Subject", description: "This is a description" }
+    ]
+    $scope.stressList = [
+      { type: "Family/Relationships", image: "" },
+      { type: "Housing", image: "" },
+      { type: "Finances", image: "" },
+      { type: "Domestic Violence", image: "" },
+      { type: "Material Needs", image: "" }
+    ]
+    $scope.referList = [
+      { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" },
+      { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" }
+    ]
+    $scope.pnccList = [
+      { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc.png" },
+      { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc.png" }
+    ]
+    $scope.inventoryList = [
+      { item: "Baby Carrier", price: "7" },
+      { item: "Baby Wipes", price: "1" },
+      { item: "Baby Lotion", price: "1" },
+      { item: "Baby Wash", price: "1" },
+      { item: "Bath Tub", price: "7" },
+      { item: "Bibs", price: "1" },
+      { item: "Blankets - Large", price: "2-3" },
+      { item: "Blankets - Small", price: "1" },
+      { item: "Booster Seat", price: "7" },
+      { item: "Boppy", price: "8" },
+      { item: "Breastfeeding Pads", price: "2" },
+      { item: "Breastfeeding Cover Ups", price: "3" },
+      { item: "Breastfeeding Storage Bags", price: "2" },
+      { item: "Breastfeeding Lotion", price: "2" },
+      { item: "Cabinet Locks", price: "1" },
+      { item: "Clothing - New", price: "2-4" },
+      { item: "Clothing - Old", price: "1" },
+      { item: "Crib Sheets", price: "2" },
+      { item: "Diapers", price: "1" },
+      { item: "Diaper Bags - Large", price: "8" },
+      { item: "Diaper Bags - Small", price: "7" },
+      { item: "High Chairs", price: "14" },
+      { item: "Hooded Towels", price: "3" },
+      { item: "Nail Clippers", price: "1" },
+      { item: "Nasal Aspirator", price: "1" },
+      { item: "Outlet Covers", price: "1" },
+      { item: "Pack-N-Play", price: "14" },
+      { item: "Pack-N-Play Sheets", price: "2" },
+      { item: "Potty Chair - Large", price: "7" },
+      { item: "Potty Chair - Small", price: "6" },
+      { item: "Scratch Mittens", price: "1" },
+      { item: "Sippy Cups", price: "1" },
+      { item: "Snack Cups", price: "1" },
+      { item: "Strollers", price: "14" },
+      { item: "Thermometers", price: "1" },
+      { item: "Underwear", price: "1" },
+      { item: "Washcloths", price: "2" }
+    ]
+    $scope.trackList = [
+      { type: "Activity", link: "addActivity", image: "../img/activities/run.png" },
+      { type: "Baby Heart Rate", link: "addBabyHeartRate", image: "../img/buttons/btn-12.png" },
+      { type: "Blood Glucose", link: "addBloodGlucose", image: "../img/temp/bloodGlucose.png" },
+      { type: "Blood Iron", link: "addBloodIron", image: "../img/temp/bloodDrop.png" },
+      { type: "Blood Pressure", link: "addBloodPressure", image: "../img/temp/blood-pressure.jpg" },
+      { type: "Caffeine", link: "addCaffeine", image: "../img/temp/coffee.jpg" },
+      { type: "Cigarettes", link: "addCigarette", image: "../img/temp/cigarette.png" },
+      { type: "Diet", link: "addFood", image: "../img/buttons/btn_t-03.png" },
+      { type: "Kicks", link: "addKicks", image: "../img/temp/kicks.png" },
+      { type: "Mood", link: "addMood", image: "../img/moods/cheerful.png" },
+      { type: "Pain", link: "addPain", image: "../img/buttons/btn_t-05.png" },
+      { type: "Pills", link: "addPill", image: "../img/buttons/btn_t-04.png" },
+      { type: "Stressors", link: "addStress", image: "../img/temp/stress.png" },
+      { type: "Weight", link: "addWeight", image: "../img/temp/scale.jpg" }
+    ]
 });

@@ -1,32 +1,48 @@
 ﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
 <script type="text/javascript" src="../js/header.js"></script>
-
 <script>header('History')</script>
 <body ng-app="starter" ng-controller="HeaderBarController">
     <script type="text/javascript" src="../js/subheader.js"></script>
-    <script type="text/javascript" src="http://code.angularjs.org/1.2.14/angular-touch.js"></script>
-    <ion-view>
-        <ion-content overflow-scroll="false" class="has-header has-subheader has-footer">
-            <!--generate history-->
-
-        </ion-content>
-    </ion-view>
-    <script type="text/javascript" src="../js/subheaderEnd.js"></script>
-    <script>
-        var el = window.localStorage.getItem('trackType');
-        window.localStorage.removeItem('trackType')
-        if (el == 'addFood') {
-            window.location = "addFood.html";
-        };
-        document.write(
-            '<ion-footer-bar class="bar-positive" ng-controller="PopupCtrl">' +
-            '<div id="uploadHistory" class="buttons" ng-click="uploadTrack()">' +
-            '<button class="button button-icon icon ion-ios-cloud-upload-outline"></button>' +
-            '</div>' +
-            '<h1 class="title"></h1>' +
-            '<div class="buttons"><button class="button button-icon icon ion-ios-plus-outline" ng-click="goToAddEvent(' + "'" + el + "'" + ')"></button></div>' +
-            '</ion-footer-bar>'
-                        );
-    </script>
+    <ion-pane>
+        <ion-subheader-bar class="bar bar-subheader">
+            <h2 class="title" id="todaysDate"></h2>
+            <script>
+                var d = new Date()
+                    date = d.getDate(),
+                    month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
+                    window.localStorage.setItem('date', d);
+                function nth(d) {
+                    if (d > 3 && d < 21) return 'th';
+                    switch (d % 10) {
+                        case 1: return "st";
+                        case 2: return "nd";
+                        case 3: return "rd";
+                        default: return "th";
+                    }
+                }
+                document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
+            </script>
+        </ion-subheader-bar>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header has-subheader has-footer" ng-controller="HistoryController" ng-init="loadHistory()" on-swipe-left="increaseDate(); loadHistory()" on-swipe-right="decreaseDate(); loadHistory()">
+                <div id="history"></div>
+            </ion-content>
+        </ion-view>
+        <script type="text/javascript" src="../js/subheaderEnd.js"></script>
+        <script>
+            var el = window.localStorage.getItem('trackType');
+            if (el == 'addFood') {
+                window.location = "addFood.html";
+            };
+            document.write(
+                '<ion-footer-bar class="bar-positive" ng-controller="PopupCtrl">' +
+                '<div id="uploadHistory" class="buttons" ng-click="uploadTrack()">' +
+                '<button class="button button-icon icon ion-ios-cloud-upload-outline"></button>' +
+                '</div>' +
+                '<h1 class="title"></h1>' +
+                '<div class="buttons"><button class="button button-icon icon ion-ios-plus-outline" ng-click="goToAddEvent(' + "'" + el + "'" + ')"></button></div>' +
+                '</ion-footer-bar>'
+                            );
+        </script>
 </body>
 <script type="text/javascript" src="../js/load_essentialsEnd.js"></script>

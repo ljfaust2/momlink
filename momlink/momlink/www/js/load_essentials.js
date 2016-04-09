@@ -12,8 +12,11 @@ document.write(
 
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 
-    <!-- cordova script (this will be a 404 during development) -->
-    <script src="cordova.js"></script>
+    <!--cordova script (this will be a 404 during development)-->
+    <!--<script src="cordova.js"></script>-->
+
+    <!--pouchDB script-->
+    <script src="../lib/pouchdb-5.3.0.min.js"></script>
 
     <!-- your app's js -->
     <script src="../js/app.js"></script>

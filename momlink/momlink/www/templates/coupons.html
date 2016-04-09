@@ -11,7 +11,7 @@
                         <ion-content class="has-header padding" ng-controller="DataController">
                             <div class="row">
                                 <div class="col text-center">
-                                    <img src="../img/temp/coupon.jpg" style="width:100px;height:100px;" />
+                                    <img src="../img/mainIcons/momlink_icon-20.png" style="width:100px;height:100px;" />
                                     4 Coupons
                                 </div>
                             </div>
@@ -19,8 +19,7 @@
                                 <li ng-repeat="item in couponList">
                                     <div class="row">
                                         <div class="col text-left">
-                                            <img class="inline" src={{item.image}} onclick="{{item.link}}" style="width:35px; height:35px;" />
-                                            <p class="inline" style="vertical-align:middle">Recieved for {{item.description}}</p>
+                                            <p class="inline" style="vertical-align:middle">{{item.description}}</p>
                                         </div>
                                     </div>
                                 </li>
@@ -82,7 +81,7 @@
                                         </div>
                                         <div class="col-25 text-right">
                                             <p class="inline" style="font-size:large; vertical-align:middle;">{{item.price}} </p>
-                                            <img class="inline" src="../img/temp/coupon.jpg" style="width:20px; height:20px;" />
+                                            <img class="inline" src="../img/mainIcons/momlink_icon-20.png" style="width:20px; height:20px;" />
                                         </div>
                                     </div>
                                 </li>

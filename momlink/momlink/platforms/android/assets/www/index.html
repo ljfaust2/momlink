@@ -7,6 +7,8 @@
     <link href="http://code.ionicframework.com/1.2.4/css/ionic.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
 
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,400italic,100,100italic,300,300italic,500,500italic,700,700italic,900italic,900' rel='stylesheet' type='text/css'>
+
     <script src="http://code.ionicframework.com/1.2.4/js/ionic.bundle.min.js"></script>
 
     <!-- cordova script (this will be a 404 during development) -->
@@ -36,6 +38,36 @@
                         <input type="password" placeholder="Password" ng-model="pass">
                     </label>
                 </div>
+
+               <!-- <script>
+                    var today = new Date();
+                    getDate = function () {
+                        var dd = today.getDate();
+                        var mm = today.getMonth() + 1; //January is 0!
+                        var yyyy = today.getFullYear();
+                        if (dd < 10) {
+                            dd = '0' + dd
+                        }
+                        if (mm < 10) {
+                            mm = '0' + mm
+                        }
+                        date = mm + '/' + dd + '/' + yyyy;
+                        return date;
+                    }
+
+                    function doFunction() {
+                        var db = PouchDB('http://localhost:5984/momlink');
+                        //get correct doc
+                        db.get('track_bhr').then(function (doc) {
+                            console.log('wera');
+                            doc[getDate()] += ['whut', 'whut'];
+                            return db.put(doc);
+                        });
+                    };
+                </script>
+                <input id="clickMe" type="button" value="clickme" onclick="doFunction();" />-->
+
+
                 <div class="padding-left padding-right">
                     <input type="button" class="button button-block button-positive" value="LOGIN" ng-click="login(user, pass)">
                 </div>

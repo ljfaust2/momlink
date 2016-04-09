@@ -1,4 +1,7 @@
-/*pin code css*/
+*{
+    font-family: 'Roboto', sans-serif;
+}
+
 .center-vertical {
     display: -webkit-box;
     display: -moz-box;

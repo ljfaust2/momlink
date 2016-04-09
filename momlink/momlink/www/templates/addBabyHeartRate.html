@@ -4,7 +4,7 @@
     <script>header('Baby Heart Rate')</script>
     <ion-pane>
         <ion-view>
-            <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">   
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">
                 <script id="popover.html" type="text/ng-template">
                     <ion-popover-view>
                         <div class="padding">
@@ -17,7 +17,7 @@
                     <div class="col text-right">
                         <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
                     </div>
-                </div>    
+                </div>
                 <div style="background-image: url('../img/temp/cardiogram.png'); background-size: contain; background-repeat: no-repeat;">
                     <div class="row">
                         <div class="col text-center">
@@ -35,9 +35,9 @@
                 </div>
                 <br />
                 <div class="row padding">
-                    <div class="col text-center">
+                    <div class="col text-center" ng-controller="DBController">
                         <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count', 130)">
-                        <input type="button" class="button button-block button-positive" value="SUBMIT">
+                        <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submit_bhr()">
                     </div>
                 </div>
             </ion-content>
