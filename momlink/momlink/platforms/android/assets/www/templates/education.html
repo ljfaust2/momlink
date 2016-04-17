@@ -8,16 +8,13 @@
             <ion-tabs class="has-header tabs-positive tabs-icon-top">
                 <ion-tab title="Shared Articles" icon-on="ion-ios-list" icon-off="ion-ios-list-outline">
                     <ion-view>
-                        <ion-content class="has-header padding" ng-controller="DataController">
+                        <ion-content class="has-header" ng-controller="DataController">
                             <ul>
                                 <li ng-repeat="item in articleList">
-                                    <div class="row">
-                                        <div class="col col-25">
-                                            <img src={{item.image}} onclick="{{item.link}}" style="width:50px; height:50px;" />
-                                        </div>
-                                        <div class="col-75">
-                                            <p>{{item.description}}</p>
-                                        </div>
+                                    <div class="item item-thumbnail-left" onclick="{{item.link}}">
+                                        <img src="{{item.image}}">
+                                        <h2>Article Title</h2>
+                                        <p>{{item.description}}</p>
                                     </div>
                                 </li>
                             </ul>

@@ -109,6 +109,170 @@ angular.module('starter.controllers', [])
     };
 })
 
+.controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
+    $scope.showClasses = function () {
+        var db = PouchDB('http://localhost:5984/momlink');
+        var html = '';
+        db.get('classes').then(function (doc) {
+            classes = doc['class'];
+            statuses = doc['status'];
+            html += '<div class="list">';
+            for (i in classes) {
+                if (i == 0) {
+                    //if all statuses != register? set innerHTML = Complete
+                    html += '<div class="item item-divider">Prenatal Platinum Plan - Crib</div>'
+                }
+                if (i == 12) {
+                    html += '<div class="item item-divider">Prenatal Platinum Plan - Infant Carrier</div>'
+                }
+                html += '<div class="item item-button-right">';
+                html += classes[i];
+                if (statuses[i] == 'Register') {
+                    color = 'button-positive';
+                }
+                else {
+                    color = 'button-stable';
+                }
+                html += `<button class="button button-small ` + color + `" ng-click="showDates(` + `'` + classes[i] + `'` + `,'` + statuses[i] + `'` + `)">` + statuses[i] + '</button>';
+                console.log();
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('classes').innerHTML = html;
+            $compile(document.getElementById('classes'))($scope);
+        });
+    };
+    $scope.showDates = function (className, status) {
+        //dates and info will be pulled from PNCCs
+        var dates = ['04/16/2016', '04/17/2016', '04/18/2016', '04/19/2016']
+        var info = {};
+        info['04/16/2016'] = ['Venue1', '04/16/2016', '12:00', 'Instructor1'];
+        info['04/17/2016'] = ['Venue1', '04/17/2016', '12:00', 'Instructor2'];
+        info['04/18/2016'] = ['Venue1', '04/18/2016', '12:00', 'Instructor3'];
+        info['04/19/2016'] = ['Venue1', '04/19/2016', '12:00', 'Instructor4'];
+
+        if (status == 'Register') {
+            //get dates based on class
+            html = `<div class="list">`;
+            for (var i in dates) {
+                html += `<div class="item item-button-right">` + dates[i] + `<button class="button button-small button-positive" ng-click="showInfo(` + `'` + className + `'` + `,'` + dates[i] + `'` + `)">View</button></div>`;
+            }
+            html += `</div>`;
+            //show dates
+            $scope.choice = $ionicPopup.show({
+                template: html,
+                title: 'Classes',
+                buttons: [{ text: 'Cancel', onTap: function (e) { return 'Cancel'; } }],
+                scope: $scope
+            });
+
+            //show info for date
+            $scope.showInfo = function (className, date) {
+                //get info for date
+                display = info[date];
+                html2 = `<div class="list">`;
+                html2 += `<div class="item">Venue: ` + display[0] + `</div>`;
+                html2 += `<div class="item">Date: ` + display[1] + `</div>`;
+                html2 += `<div class="item">Time: ` + display[2] + `</div>`;
+                html2 += `<div class="item">Instructor: ` + display[3] + `</div>`;
+                html2 += `</div>`;
+                infoPopup = $ionicPopup.show({
+                    template: html2,
+                    title: 'Information',
+                    buttons: [
+                      {
+                          text: 'Register', onTap: function (e) {
+                              //database stuff
+                              //get index of class
+                              var db = PouchDB('http://localhost:5984/momlink');
+                              db.get('classes').then(function (doc) {
+                                  var index;
+                                  classes = doc['class'];
+                                  for (i in classes) {
+                                      if (className == classes[i]) {
+                                          index = i;
+                                      }
+                                  }
+                                  doc['status'][index] = 'Registered';
+                                  doc['venue'][index] = display[0];
+                                  doc['date'][index] = display[1];
+                                  doc['time'][index] = display[2];
+                                  doc['instructor'][index] = display[3];
+                                  return db.put(doc);
+                              });
+                              return 'Saved';
+                          }
+                      },
+                      { text: 'Cancel', onTap: function (e) { return 'Cancel'; } }
+                    ]
+                });
+                infoPopup.then(function (res) {
+                    $scope.choice.close();
+                });
+            };
+        }
+        else {
+            var html2;
+            var db = PouchDB('http://localhost:5984/momlink');
+            db.get('classes').then(function (doc) {
+                var index;
+                classes = doc['class'];
+                for (i in classes) {
+                    if (className == classes[i]) {
+                        index = i;
+                    }
+                }
+                html2 = `<div class="list">`;
+                html2 += `<div class="item">Venue: ` + doc['venue'][index] + `</div>`;
+                html2 += `<div class="item">Date: ` + doc['date'][index] + `</div>`;
+                html2 += `<div class="item">Time: ` + doc['time'][index] + `</div>`;
+                html2 += `<div class="item">Instructor: ` + doc['instructor'][index] + `</div>`;
+                html2 += `</div>`;               
+            }).then(function (doc) {
+                showInfo = $ionicPopup.show({
+                    template: html2,
+                    title: 'Information',
+                    buttons: [
+                      { text: 'Close', onTap: function (e) { return 'Close'; } }
+                    ]
+                });
+            });
+        };
+    };
+    $scope.showInventory = function () {
+        $ionicPopup.show({
+            template: '<style>.popup { height:400px; width:95%; }</style>' +
+                      `<div ng-controller="DataController">
+                       <div class="row">
+                                <div class="col text-left">
+                                    <u style="font-size:large;">Item</u>
+                                </div>
+                                <div class="col text-right">
+                                    <u style="font-size:large;">Price</u>
+                                </div>
+                            </div>
+                            <ul>
+                                <li ng-repeat="item in inventoryList">
+                                    <div class="row">
+                                        <div class="col-75">
+                                            <p style="font-size:large">{{item.item}}</p>
+                                        </div>
+                                        <div class="col-25 text-right">
+                                            <p class="inline" style="font-size:large; vertical-align:middle;">{{item.price}} </p>
+                                            <img class="inline" src="../img/mainIcons/momlink_icon-20.png" style="width:20px; height:20px;" />
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>`,
+            title: 'Inventory',
+            buttons: [
+              { text: 'Close', onTap: function (e) { return 'Close'; } }
+            ]
+        });
+    };
+})
+
 .controller('DBController', function ($scope) {
     var today = new Date();
     getDate = function () {
@@ -141,20 +305,14 @@ angular.module('starter.controllers', [])
         return time;
     }
     $scope.submit_bhr = function () {
-        var db = PouchDB('http://localhost:5984/track_bhr');
-        log = document.getElementById('count').innerHTML;
-        //if table exists then add info to table
-        db.get(getDate()).then(function (doc) {
-            doc[getTime()] = log;
+        var db = PouchDB('http://localhost:5984/momlink');
+        value = document.getElementById('count').innerHTML;
+        db.get('trackBHR').then(function (doc) {
+            doc['uniqueId'].push(new Date().toJSON());
+            doc['date'].push(getDate());
+            doc['time'].push(getTime());
+            doc['value'].push(value);
             return db.put(doc);
-            //else create new table and add info
-        }).catch(function (err) {
-            var doc = {
-                "_id": getDate()
-            }
-            doc[getTime()] = log;
-            return db.put(doc);
-            //then move back to history page
         }).then(function (doc) {
             window.location = 'history.html';
         });
@@ -198,39 +356,23 @@ angular.module('starter.controllers', [])
 
     $scope.loadHistory = function () {
         if (window.localStorage.getItem('trackType') == 'addBabyHeartRate') {
-            var db = PouchDB('http://localhost:5984/track_bhr');
-            db.allDocs({ include_docs: true }).then(function (response) {
-                //get correct date
+            var db = PouchDB('http://localhost:5984/momlink');
+            db.get('trackBHR').then(function (doc) {
                 var date = new Date(window.localStorage.getItem('date'));
                 date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
-                var index;
-                for (var i in response['rows']) {
-                    if (date == response['rows'][i]['key']) {
-                        index = i;
-                        break;
+                var hist = '';
+                for (var i in doc['date']) {
+                    if (date == doc['date'][i]) {
+                        hist += '<center><div class="item">Time: ' + doc['time'][i] + '&nbsp; &nbsp; &nbsp; BHR: ' + doc['value'][i] + '</div></center>';
                     }
                 }
-                //build history table
-                var hist = '';
-                dict = response['rows'][index]['doc'];
-                for (var i in dict) {
-                    //ignore the meta data
-                    if (i != '_id' && i != '_rev') {
-                        hist += `<div class="row">`;
-                        hist += `<div class="col text-center">`;
-                        hist += '<p> Time: ' + i + '&nbsp; &nbsp; &nbsp; BHR: ';
-                        hist += dict[i] + '</p>';
-                        hist += `</div></div>`;
-                    }
+                //if date has no values, then display default image
+                if (hist == '') {
+                    hist += `<div class="row">`;
+                    hist += `<div class="col text-center">`;
+                    hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
+                    hist += `</div></div>`;
                 }
-                document.getElementById('history').innerHTML = hist;
-            }).catch(function (err) {
-                //insert image to click plus sign
-                var hist = '';
-                hist += `<div class="row">`;
-                hist += `<div class="col text-center">`;
-                hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
-                hist += `</div></div>`;
                 document.getElementById('history').innerHTML = hist;
             })
         }
@@ -591,6 +733,9 @@ angular.module('starter.controllers', [])
 })
 
 .controller('DataController', function ($scope, $ionicSideMenuDelegate) {
+    $scope.updateAmount = function () {
+        document.getElementById('amount').innerHTML = Object.keys($scope.couponList).length + 'x';
+    }
     $scope.actList = [
       { type: "Bike", image: "../img/activities/bike.png" },
       { type: "Clean", image: "../img/activities/clean.png" },
@@ -608,10 +753,10 @@ angular.module('starter.controllers', [])
       { image: "../img/temp/article.jpg", description: "Article 4 Description...", link: "" },
     ]
     $scope.couponList = [
-      { description: "Coupon 1 Description..." },
-      { description: "Coupon 2 Description..." },
-      { description: "Coupon 3 Description..." },
-      { description: "Coupon 4 Description..." },
+      { date: "4/15/2016", plan: "Platinum", recieved: "BABE Class" },
+      { date: "4/15/2016", plan: "Platinum", recieved: "BABE Class" },
+      { date: "4/15/2016", plan: "Platinum", recieved: "BABE Class" },
+      { date: "4/15/2016", plan: "Platinum", recieved: "BABE Class" }
     ]
     $scope.notesList = [
       { subject: "Note Subject", description: "This is a description" }
@@ -628,8 +773,9 @@ angular.module('starter.controllers', [])
       { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" }
     ]
     $scope.pnccList = [
-      { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc.png" },
-      { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc.png" }
+      { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc1.jpg" },
+      { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc2.jpg" },
+      { name: "PNCC3", email: "pncc3@gmail.com", image: "../img/temp/pncc3.jpg" }
     ]
     $scope.inventoryList = [
       { item: "Baby Carrier", price: "7" },
