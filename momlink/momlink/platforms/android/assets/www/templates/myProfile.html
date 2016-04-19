@@ -1,0 +1,66 @@
+﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+<body ng-app="starter" ng-controller="HeaderBarController">
+    <script type="text/javascript" src="../js/header.js"></script>
+    <script>header('My Profile')</script>
+    <ion-pane>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="CameraController">
+                <div class="col text-center padding-top">
+                    <img id="image" src="" style="width:90%; height:150px;" />
+                </div>
+                <div class="col padding-bottom text-right">
+                    <img src="../img/temp/camera.png" ng-onclick="takePicture()" style="width:30px; height:25px;"/>
+                </div>
+                <div class="list">
+                    <div class="item item-divider">
+                        Personal Information
+                    </div>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Name</span>
+                        <input type="text" placeholder="Name">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Email</span>
+                        <input type="email" placeholder="Email">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Age</span>
+                        <input type="number" placeholder="Age">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Pregnancy Start Date</span>
+                        <input type="date">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Expected Delivery Date</span>
+                        <input type="date">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">About Me</span>
+                        <textarea placeholder="About Me" rows="3"></textarea>
+                    </label>
+                    <div class="item item-divider">
+                        Doctor's Information
+                    </div>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Name</span>
+                        <input type="text" placeholder="Name">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Address</span>
+                        <input type="number" placeholder="Address">
+                    </label>
+                    <label class="item item-input item-stacked-label">
+                        <span class="input-label">Phone Number</span>
+                        <input type="tel" placeholder="(###) ###-####">
+                    </label>
+                </div>
+                <div class="padding-left padding-right">
+                    <input type="button" class="button button-block button-positive" value="UPDATE" onclick="">
+                    <input type="button" class="button button-block button-assertive" value="CANCEL" onclick="window.location = 'main.html'">
+                </div>
+            </ion-content>
+        </ion-view>
+    </ion-pane>
+</body>
+<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>
