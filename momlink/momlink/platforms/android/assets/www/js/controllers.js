@@ -198,7 +198,9 @@ angular.module('starter.controllers', [])
                                   doc['date'][index] = display[1];
                                   doc['time'][index] = display[2];
                                   doc['instructor'][index] = display[3];
-                                  return db.put(doc);
+                                  return db.put(doc).then(function (doc){
+                                      $scope.showClasses();
+                                  })
                               });
                               return 'Saved';
                           }
@@ -307,11 +309,14 @@ angular.module('starter.controllers', [])
     $scope.submit_bhr = function () {
         var db = PouchDB('http://localhost:5984/momlink');
         value = document.getElementById('count').innerHTML;
-        db.get('trackBHR').then(function (doc) {
-            doc['uniqueId'].push(new Date().toJSON());
-            doc['date'].push(getDate());
-            doc['time'].push(getTime());
-            doc['value'].push(value);
+        db.get('track').then(function (doc) {
+            var element = {
+                "uniqueId": new Date().toJSON(),
+                "date": getDate(),
+                "time": getTime(),
+                "value": value
+            };
+            doc['BHR'].push(element);
             return db.put(doc);
         }).then(function (doc) {
             window.location = 'history.html';
@@ -357,13 +362,14 @@ angular.module('starter.controllers', [])
     $scope.loadHistory = function () {
         if (window.localStorage.getItem('trackType') == 'addBabyHeartRate') {
             var db = PouchDB('http://localhost:5984/momlink');
-            db.get('trackBHR').then(function (doc) {
+            db.get('track').then(function (doc) {
                 var date = new Date(window.localStorage.getItem('date'));
                 date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
                 var hist = '';
-                for (var i in doc['date']) {
-                    if (date == doc['date'][i]) {
-                        hist += '<center><div class="item">Time: ' + doc['time'][i] + '&nbsp; &nbsp; &nbsp; BHR: ' + doc['value'][i] + '</div></center>';
+                elements = doc['BHR']
+                for (var i in elements) {
+                    if (date == elements[i]["date"]) {
+                        hist += '<center><div class="item">Time: ' + elements[i]["time"] + '&nbsp; &nbsp; &nbsp; BHR: ' + elements[i]["value"] + '</div></center>';
                     }
                 }
                 //if date has no values, then display default image
