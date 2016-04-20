@@ -7,7 +7,7 @@
             <ion-nav-view></ion-nav-view>
             <ion-tabs class="has-header tabs-positive tabs-icon-top">
                 <ion-tab title="Coupons" icon-on="ion-ios-pricetags" icon-off="ion-ios-pricetags-outline">
-                    <ion-subheader-bar class="bar bar-subheader" ng-controller="DataController">
+                    <ion-subheader-bar class="bar bar-subheader" ng-controller="CouponController">
                         <div class="row no-padding" style="display: table;">
                             <div class="col text-right no-padding" style="display:table-cell; width:50%; vertical-align:bottom;">
                                 <p id="amount" ng-init="updateAmount()" style="font-size:20pt;"></p>
@@ -18,15 +18,11 @@
                         </div>
                     </ion-subheader-bar>
                     <ion-view>
-                        <ion-content class="has-header has-subheader" ng-controller="DataController">
-                            <ul>
-                                <li ng-repeat="item in couponList">
-                                    <div class="item item-divider">Coupon</div>
-                                    <div class="item">Date: {{item.date}}</div>
-                                    <div class="item">Plan: {{item.plan}}</div>
-                                    <div class="item">Recieved: {{item.recieved}}</div>
-                                </li>
-                            </ul>
+                        <ion-content class="has-header has-subheader" ng-controller="CouponController">
+                            <div class="item item-button-right" style="background-color: #528ef4; color:white;">Recieved Coupons<button id="bRecieved" class="button button-small" ng-init="recievedCoupons()" ng-click="recievedCoupons()">View</button></div>
+                            <div id="Recieved"></div>
+                            <div class="item item-button-right" style="background-color: #528ef4; color:white;">Used Coupons<button id="bUsed" class="button button-small" ng-click="usedCoupons()">View</button></div>
+                            <div id="Used"></div>
                         </ion-content>
                     </ion-view>
                 </ion-tab>
@@ -72,8 +68,9 @@
                 </ion-tab>
                 <ion-tab title="Plan" icon-on="ion-ios-paper" icon-off="ion-ios-paper-outline">
                     <ion-view>
-                        <ion-content overflow-scroll="false" class="has-header" ng-init="showClasses()" ng-controller="CouponController">
-                            <div id="classes"></div>
+                        <ion-content overflow-scroll="false" class="has-header" ng-init="showPlans()" ng-controller="CouponController">
+                            <div id="classes">
+                            </div>
                         </ion-content>
                     </ion-view>
                 </ion-tab>

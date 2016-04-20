@@ -110,31 +110,42 @@ angular.module('starter.controllers', [])
 })
 
 .controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
-    $scope.showClasses = function () {
+    $scope.showPlans = function () {
+        html = `<div class="item item-divider">Plans</div>
+                <div class="item item-thumbnail-left" ng-click="showClasses('crib')">
+                <img src="../img/temp/crib.PNG">
+                <h2>Prenatal Platinum Plan</h2>
+                <p>Crib</p>
+                </div>
+                <div class="item item-thumbnail-left" ng-click="showClasses('infantCarrier')">
+                <img src="../img/temp/infantCarrier.PNG">
+                <h2>Prenatal Platinum Plan</h2>
+                <p>Infant Carrier</p>
+                </div>`
+        document.getElementById('classes').innerHTML = html;
+        $compile(document.getElementById('classes'))($scope);
+    };
+    $scope.showClasses = function (planType) {
         var db = PouchDB('http://localhost:5984/momlink');
         var html = '';
+        var type = 'Infant Carrier';
+        if (planType == 'crib') {
+            type = 'Crib';
+        }
         db.get('classes').then(function (doc) {
-            classes = doc['class'];
-            statuses = doc['status'];
+            classes = doc[planType];
             html += '<div class="list">';
+            html += '<div class="item item-button-right" style="background-color: #f5f5f5;">Prenatal Platinum Plan - ' + type + '<button class="button icon ion-ios-undo" ng-click="showPlans()"></button></div>';
             for (i in classes) {
-                if (i == 0) {
-                    //if all statuses != register? set innerHTML = Complete
-                    html += '<div class="item item-divider">Prenatal Platinum Plan - Crib</div>'
-                }
-                if (i == 12) {
-                    html += '<div class="item item-divider">Prenatal Platinum Plan - Infant Carrier</div>'
-                }
                 html += '<div class="item item-button-right">';
-                html += classes[i];
-                if (statuses[i] == 'Register') {
+                html += classes[i]['class'] + ' ' + '(' + classes[i]['number'] + ')';
+                if (classes[i]['status'] == 'Register') {
                     color = 'button-positive';
                 }
                 else {
                     color = 'button-stable';
                 }
-                html += `<button class="button button-small ` + color + `" ng-click="showDates(` + `'` + classes[i] + `'` + `,'` + statuses[i] + `'` + `)">` + statuses[i] + '</button>';
-                console.log();
+                html += `<button class="button button-small ` + color + `" ng-click="showDates(` + `'` + classes[i]['class'] + classes[i]['number'] + `'` + `,'` + classes[i]['status'] + `',` + `'` + planType + `'` + `)">` + classes[i]['status'] + '</button>';
                 html += '</div>';
             }
             html += '</div>';
@@ -142,15 +153,14 @@ angular.module('starter.controllers', [])
             $compile(document.getElementById('classes'))($scope);
         });
     };
-    $scope.showDates = function (className, status) {
+    $scope.showDates = function (className, status, planType) {
         //dates and info will be pulled from PNCCs
         var dates = ['04/16/2016', '04/17/2016', '04/18/2016', '04/19/2016']
         var info = {};
         info['04/16/2016'] = ['Venue1', '04/16/2016', '12:00', 'Instructor1'];
-        info['04/17/2016'] = ['Venue1', '04/17/2016', '12:00', 'Instructor2'];
-        info['04/18/2016'] = ['Venue1', '04/18/2016', '12:00', 'Instructor3'];
-        info['04/19/2016'] = ['Venue1', '04/19/2016', '12:00', 'Instructor4'];
-
+        info['04/17/2016'] = ['Venue2', '04/17/2016', '12:00', 'Instructor2'];
+        info['04/18/2016'] = ['Venue3', '04/18/2016', '12:00', 'Instructor3'];
+        info['04/19/2016'] = ['Venue4', '04/19/2016', '12:00', 'Instructor4'];
         if (status == 'Register') {
             //get dates based on class
             html = `<div class="list">`;
@@ -187,21 +197,21 @@ angular.module('starter.controllers', [])
                               var db = PouchDB('http://localhost:5984/momlink');
                               db.get('classes').then(function (doc) {
                                   var index;
-                                  classes = doc['class'];
+                                  classes = doc[planType];
                                   for (i in classes) {
-                                      if (className == classes[i]) {
-                                          index = i;
+                                      if (className == (classes[i]['class'] + classes[i]['number'])) {
+                                          classes[i]['status'] = 'Registered';
+                                          classes[i]['venue'] = display[0];
+                                          classes[i]['date'] = display[1];
+                                          classes[i]['time'] = display[2];
+                                          classes[i]['instructor'] = display[3];
                                       }
                                   }
-                                  doc['status'][index] = 'Registered';
-                                  doc['venue'][index] = display[0];
-                                  doc['date'][index] = display[1];
-                                  doc['time'][index] = display[2];
-                                  doc['instructor'][index] = display[3];
                                   return db.put(doc).then(function (doc) {
-                                      $scope.showClasses();
+                                      $scope.showClasses(planType);
                                   })
                               });
+                              $scope.choice.close();
                               return 'Saved';
                           }
                       },
@@ -209,7 +219,7 @@ angular.module('starter.controllers', [])
                     ]
                 });
                 infoPopup.then(function (res) {
-                    $scope.choice.close();
+                    
                 });
             };
         }
@@ -218,18 +228,17 @@ angular.module('starter.controllers', [])
             var db = PouchDB('http://localhost:5984/momlink');
             db.get('classes').then(function (doc) {
                 var index;
-                classes = doc['class'];
+                classes = doc[planType];
                 for (i in classes) {
-                    if (className == classes[i]) {
-                        index = i;
+                    if (className == (classes[i]['class'] + classes[i]['number'])) {
+                        html2 = `<div class="list">`;
+                        html2 += `<div class="item">Venue: ` + classes[i]['venue'] + `</div>`;
+                        html2 += `<div class="item">Date: ` + classes[i]['date'] + `</div>`;
+                        html2 += `<div class="item">Time: ` + classes[i]['time'] + `</div>`;
+                        html2 += `<div class="item">Instructor: ` + classes[i]['instructor'] + `</div>`;
+                        html2 += `</div>`;
                     }
                 }
-                html2 = `<div class="list">`;
-                html2 += `<div class="item">Venue: ` + doc['venue'][index] + `</div>`;
-                html2 += `<div class="item">Date: ` + doc['date'][index] + `</div>`;
-                html2 += `<div class="item">Time: ` + doc['time'][index] + `</div>`;
-                html2 += `<div class="item">Instructor: ` + doc['instructor'][index] + `</div>`;
-                html2 += `</div>`;
             }).then(function (doc) {
                 showInfo = $ionicPopup.show({
                     template: html2,
@@ -273,6 +282,66 @@ angular.module('starter.controllers', [])
             ]
         });
     };
+    $scope.recievedCoupons = function () {
+        divStatus = document.getElementById('Recieved').innerHTML;
+        if (divStatus == '') {
+            //pull active coupons from database
+            //html = database stuff
+            var html = '';
+            var db = PouchDB('http://localhost:5984/momlink');
+            db.get('coupons').then(function (doc) {             
+                coupons = doc['recieved'];
+                for (i in coupons) {
+                    html += `<div class="item item-divider">Coupon</div>`;
+                    html += `<div class="item">Date: ` + coupons[i]['date'] + `</div>`;
+                    html += `<div class="item">Plan: ` + coupons[i]['plan'] + `</div>`;
+                    html += `<div class="item">Recieved: ` + coupons[i]['for'] + `</div>`;
+                    html += `</div>`;
+                }
+            }).then(function (doc) {
+                document.getElementById('Recieved').innerHTML = html;
+                document.getElementById('bRecieved').innerHTML = 'Close';
+            });            
+        }
+        else {
+            document.getElementById('Recieved').innerHTML = '';
+            document.getElementById('bRecieved').innerHTML = 'View';         
+        }
+    };
+    $scope.usedCoupons = function () {
+        divStatus = document.getElementById('Used').innerHTML;
+        if (divStatus == '') {
+            //pull active coupons from database
+            //html = database stuff
+            var html = '';
+            var db = PouchDB('http://localhost:5984/momlink');
+            db.get('coupons').then(function (doc) {
+                coupons = doc['used'];
+                for (i in coupons) {
+                    html += `<div class="item item-divider">Coupon</div>`;
+                    html += `<div class="item">Date: ` + coupons[i]['date'] + `</div>`;
+                    html += `<div class="item">Plan: ` + coupons[i]['plan'] + `</div>`;
+                    html += `<div class="item">Recieved: ` + coupons[i]['for'] + `</div>`;
+                    html += `</div>`;
+                }
+            }).then(function (doc) {
+                document.getElementById('Used').innerHTML = html;
+                document.getElementById('bUsed').innerHTML = 'Close';
+            });
+        }
+        else {
+            document.getElementById('Used').innerHTML = '';
+            document.getElementById('bUsed').innerHTML = 'View';
+        }
+    };
+    $scope.updateAmount = function () {
+        var db = PouchDB('http://localhost:5984/momlink');
+        db.get('coupons').then(function (doc) {
+            coupons = doc['recieved'];          
+        }).then(function (doc) {
+            document.getElementById('amount').innerHTML = coupons.length + 'x';
+        });
+    }
 })
 
 .controller('DBController', function ($scope) {
@@ -758,9 +827,6 @@ angular.module('starter.controllers', [])
 })
 
 .controller('DataController', function ($scope, $ionicSideMenuDelegate) {
-    $scope.updateAmount = function () {
-        document.getElementById('amount').innerHTML = Object.keys($scope.couponList).length + 'x';
-    }
     $scope.actList = [
       { type: "Bike", image: "../img/activities/bike.png" },
       { type: "Clean", image: "../img/activities/clean.png" },
@@ -776,12 +842,6 @@ angular.module('starter.controllers', [])
       { image: "../img/temp/article.jpg", description: "Article 2 Description...", link: "" },
       { image: "../img/temp/article.jpg", description: "Article 3 Description...", link: "" },
       { image: "../img/temp/article.jpg", description: "Article 4 Description...", link: "" },
-    ]
-    $scope.couponList = [
-      { date: "4/15/2016", plan: "Platinum", recieved: "BABE Class" },
-      { date: "4/15/2016", plan: "Platinum", recieved: "BABE Class" },
-      { date: "4/15/2016", plan: "Platinum", recieved: "BABE Class" },
-      { date: "4/15/2016", plan: "Platinum", recieved: "BABE Class" }
     ]
     $scope.notesList = [
       { subject: "Note Subject", description: "This is a description" }
