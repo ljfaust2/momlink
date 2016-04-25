@@ -1,0 +1,19 @@
+﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+<body ng-app="starter" ng-controller="HeaderBarController">
+    <script type="text/javascript" src="../js/header.js"></script>
+    <script>header('Inbox')</script>
+    <ion-pane>
+        <ion-view>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
+
+            </ion-content>
+        </ion-view>
+    </ion-pane>
+    <ion-footer-bar class="bar-positive" style="padding:0px">
+            <div class="col text-left"><button class="button button-icon icon ion-ios-chatbubble-outline" ng-click="inboxAsk()">Ask</button></div>
+            <div class="col text-center"><button class="button button-icon icon ion-ios-paperplane-outline" ng-click="">Request</button></div>
+            <div class="col text-right"><button class="button button-icon icon ion-ios-paper-outline" ng-click="">Notes</button></div>
+     </ion-footer-bar>
+</body>
+<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>
+

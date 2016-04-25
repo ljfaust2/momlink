@@ -1,0 +1,81 @@
+﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+<body ng-app="starter" ng-controller="HeaderBarController">
+    <script type="text/javascript" src="../js/header.js"></script>
+    <script>header('Coupons')</script>
+    <ion-pane>
+        <ion-view overflow-scroll="false">
+            <ion-nav-view></ion-nav-view>
+            <ion-tabs class="has-header tabs-positive tabs-icon-top">
+                <ion-tab title="Coupons" icon-on="ion-ios-pricetags" icon-off="ion-ios-pricetags-outline">
+                    <ion-subheader-bar class="bar bar-subheader" ng-controller="CouponController">
+                        <div class="row no-padding" style="display: table;">
+                            <div class="col text-right no-padding" style="display:table-cell; width:50%; vertical-align:bottom;">
+                                <p id="amount" ng-init="updateAmount()" style="font-size:20pt;"></p>
+                            </div>
+                            <div class="col text-left no-padding" style="display:table-cell; width:50%; vertical-align:top">
+                                <img src="../img/mainIcons/momlink_icon-20.png" style="width:40px;height:40px;" />
+                            </div>
+                        </div>
+                    </ion-subheader-bar>
+                    <ion-view>
+                        <ion-content class="has-header has-subheader" ng-controller="CouponController">
+                            <div class="item item-button-right" style="background-color: #528ef4; color:white;">Recieved Coupons<button id="bRecieved" class="button button-small" ng-init="recievedCoupons()" ng-click="recievedCoupons()">View</button></div>
+                            <div id="Recieved"></div>
+                            <div class="item item-button-right" style="background-color: #528ef4; color:white;">Used Coupons<button id="bUsed" class="button button-small" ng-click="usedCoupons()">View</button></div>
+                            <div id="Used"></div>
+                        </ion-content>
+                    </ion-view>
+                </ion-tab>
+                <ion-tab title="Locations" icon-on="ion-ios-location" icon-off="ion-ios-location-outline">
+                    <ion-view>
+                        <ion-content class="has-header" ng-controller="CouponController">
+                            <div class="list">
+                                <div class="item item-button-right" style="background-color: #528ef4; color:white;">
+                                    B.A.B.E & More
+                                    <button class="button button-small" ng-click="showInventory()">Check Inventory</button>
+                                </div>
+                                <div class="item item-divider">Location</div>
+                                <div class="item">
+                                    325 N. Lafayette Blvd. <br />
+                                    South Bend, IN <br />
+                                    46601 <br />
+                                    574-647-2201
+                                </div>
+                                <div class="item item-divider">Hours</div>
+                                <div class="item">
+                                    Mon: 9:00 am - 3:00 pm <br />
+                                    Tue: 12:00 pm - 6:00 pm
+                                </div>
+                                <div class="item item-button-right" style="background-color: #528ef4; color:white;">
+                                    B.A.B.E Express
+                                    <button class="button button-small" ng-click="showInventory()">Check Inventory</button>
+                                </div>
+                                <div class="item item-divider">Location</div>
+                                <div class="item">
+                                    201 Lincoln Way West <br />
+                                    Mishawaka, IN <br />
+                                    46544 <br />
+                                    574-647-2175
+                                </div>
+                                <div class="item item-divider">Hours</div>
+                                <div class="item">
+                                    Tue: 8:00 am - 4:00 pm <br />
+                                    Thur: 8:00 am - 4:00 pm
+                                </div>
+                            </div>
+                        </ion-content>
+                    </ion-view>
+                </ion-tab>
+                <ion-tab title="Plan" icon-on="ion-ios-paper" icon-off="ion-ios-paper-outline">
+                    <ion-view>
+                        <ion-content overflow-scroll="false" class="has-header" ng-init="showPlans()" ng-controller="CouponController">
+                            <div id="classes">
+                            </div>
+                        </ion-content>
+                    </ion-view>
+                </ion-tab>
+            </ion-tabs>
+        </ion-view>
+    </ion-pane>
+</body>
+<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>
