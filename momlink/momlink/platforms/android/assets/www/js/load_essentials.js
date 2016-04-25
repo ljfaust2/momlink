@@ -5,10 +5,10 @@ document.write(
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
 
-    <link href="http://code.ionicframework.com/1.2.4/css/ionic.css" rel="stylesheet">
+    <link href="../lib/ionic-v1.2.4/css/ionic.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
 
-    <script src="http://code.ionicframework.com/1.2.4/js/ionic.bundle.min.js"></script>
+    <script src="../lib/ionic-v1.2.4/js/ionic.bundle.min.js"></script>
 
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 
