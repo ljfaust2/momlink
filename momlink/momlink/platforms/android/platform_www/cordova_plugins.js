@@ -27,12 +27,20 @@ module.exports = [
         "clobbers": [
             "CameraPopoverHandle"
         ]
+    },
+    {
+        "file": "plugins/cordova-plugin-statusbar/www/statusbar.js",
+        "id": "cordova-plugin-statusbar.statusbar",
+        "clobbers": [
+            "window.StatusBar"
+        ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "cordova-plugin-camera": "2.1.1"
+    "cordova-plugin-camera": "2.1.1",
+    "cordova-plugin-statusbar": "2.1.3"
 };
 // BOTTOM OF METADATA
 });

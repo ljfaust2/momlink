@@ -14,7 +14,7 @@ angular.module('starter.controllers', [])
     };
     //Menu Links
     $scope.login = function (user, pass) {
-        var db = PouchDB('http://localhost:5984/momlink');
+        var db = PouchDB('momlink');
         db.get('loginInfo').then(function (doc) {
             if (user == doc['username'] && pass == doc['password']) {
                 window.location = "templates/main.html";
@@ -126,7 +126,7 @@ angular.module('starter.controllers', [])
         $compile(document.getElementById('classes'))($scope);
     };
     $scope.showClasses = function (planType) {
-        var db = PouchDB('http://localhost:5984/momlink');
+        var db = PouchDB('momlink');
         var html = '';
         var type = 'Infant Carrier';
         if (planType == 'crib') {
@@ -194,7 +194,7 @@ angular.module('starter.controllers', [])
                           text: 'Register', onTap: function (e) {
                               //database stuff
                               //get index of class
-                              var db = PouchDB('http://localhost:5984/momlink');
+                              var db = PouchDB('momlink');
                               db.get('classes').then(function (doc) {
                                   var index;
                                   classes = doc[planType];
@@ -225,7 +225,7 @@ angular.module('starter.controllers', [])
         }
         else {
             var html2;
-            var db = PouchDB('http://localhost:5984/momlink');
+            var db = PouchDB('momlink');
             db.get('classes').then(function (doc) {
                 var index;
                 classes = doc[planType];
@@ -288,7 +288,7 @@ angular.module('starter.controllers', [])
             //pull active coupons from database
             //html = database stuff
             var html = '';
-            var db = PouchDB('http://localhost:5984/momlink');
+            var db = PouchDB('momlink');
             db.get('coupons').then(function (doc) {             
                 coupons = doc['recieved'];
                 for (i in coupons) {
@@ -314,7 +314,7 @@ angular.module('starter.controllers', [])
             //pull active coupons from database
             //html = database stuff
             var html = '';
-            var db = PouchDB('http://localhost:5984/momlink');
+            var db = PouchDB('momlink');
             db.get('coupons').then(function (doc) {
                 coupons = doc['used'];
                 for (i in coupons) {
@@ -335,7 +335,7 @@ angular.module('starter.controllers', [])
         }
     };
     $scope.updateAmount = function () {
-        var db = PouchDB('http://localhost:5984/momlink');
+        var db = PouchDB('momlink');
         db.get('coupons').then(function (doc) {
             coupons = doc['recieved'];          
         }).then(function (doc) {
@@ -376,7 +376,7 @@ angular.module('starter.controllers', [])
         return time;
     }
     $scope.submit = function (type) {
-        var db = PouchDB('http://localhost:5984/momlink');
+        var db = PouchDB('momlink');
         value = document.getElementById('count').innerHTML;
         db.get('track').then(function (doc) {
             var element = {
@@ -450,7 +450,7 @@ angular.module('starter.controllers', [])
                 type = 'W';
                 break;
         }
-        var db = PouchDB('http://localhost:5984/momlink');
+        var db = PouchDB('momlink');
         db.get('track').then(function (doc) {
             var date = new Date(window.localStorage.getItem('date'));
             date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
