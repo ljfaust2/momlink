@@ -3,30 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-
     <link href="lib/ionic-v1.2.4/css/ionic.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-
+    <script src="lib/jquery-2.2.3.min.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,400italic,100,100italic,300,300italic,500,500italic,700,700italic,900italic,900' rel='stylesheet' type='text/css'>
-
     <script src="lib/ionic-v1.2.4/js/ionic.bundle.min.js"></script>
-
     <!-- cordova script (this will be a 404 during development) -->
-    <script src="cordova.js"></script>
-
-    <!-- pouchDB script -->
+    <!--<script src="cordova.js"></script>-->
     <script src="lib/pouchdb-5.3.0.min.js"></script>
-
-    <!-- ionic datepicker -->
     <script src="lib/ionic-datepicker/dist/ionic-datepicker.bundle.min.js"></script>
-
-    <!-- your app's js -->
     <script src="js/app.js"></script>
     <script src="js/controllers.js"></script>
-    <!--<script src="js/services.js"></script> not in use-->
 </head>
 <body ng-app="starter" ng-controller="HeaderBarController">
-    <ion-view>
+    <div id="content">
         <ion-content overflow-scroll="false" style="background-color:#0866c6">
             <center>
                 <script>
@@ -282,11 +272,11 @@
                 </div>
                 <div style="width:90%; border-bottom:2px solid white;"></div>
                 <div class="padding">
-                    <input type="button" class="button button-block button-positive" value="FORGOT PASSWORD" onclick="window.location='templates/forgotPassword.html'">
-                    <input type="button" class="button button-block button-positive" value="NEW USER?" onclick="window.location='templates/register.html'">
+                    <input type="button" class="button button-block button-positive" value="FORGOT PASSWORD" ng-click="goToLink('templates/forgotPassword.html')">
+                    <input type="button" class="button button-block button-positive" value="NEW USER?" ng-click="goToLink('templates/register.html')">
                 </div>
             </center>
         </ion-content>
-    </ion-view>
+    </div>
 </body>
 </html>

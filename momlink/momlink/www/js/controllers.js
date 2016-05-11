@@ -1,17 +1,56 @@
 angular.module('starter.controllers', [])
 
-.controller('HeaderBarController', function ($scope, $ionicPopup, $location, $document) {
-    $scope.goBack = function (value) {
-        window.history.back();
+.controller('HeaderBarController', function ($scope, $ionicPopup, $location, $document, $compile) {
+    $scope.showDate = function () {
+        var d = new Date()
+        date = d.getDate(),
+        month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
+        window.localStorage.setItem('date', d);
+        function nth(d) {
+            if (d > 3 && d < 21) return 'th';
+            switch (d % 10) {
+                case 1: return "st";
+                case 2: return "nd";
+                case 3: return "rd";
+                default: return "th";
+            }
+        }
+        document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
     };
-    $scope.home = function () {
-        window.location = "main.html";
+
+    $scope.showCalendar = function () {
+        $('#calendar').fullCalendar({
+            height: "auto",
+            header: {
+                left: 'prev,next, today',
+                center: 'title',
+                right: 'agendaDay, agendaWeek, month'
+            },
+            defaultView: 'agendaDay'
+        })
     };
+
+    $scope.goToLink = function (page, title) {       
+        var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+        xhr.open('get', page, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                document.getElementById("content").innerHTML = xhr.responseText;
+                if (title != null) {
+                    document.getElementById('title').innerHTML = title;
+                }                       
+                $compile(document.getElementById('content'))($scope);
+            }
+        }
+        xhr.send();       
+    };
+
     $scope.toggleTopMenu = function () {
         var menu = document.getElementsByTagName('ion-top-menu')[0];
         var pane = document.getElementsByTagName('ion-pane')[0];
         menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
     };
+
     //Menu Links
     $scope.login = function (user, pass) {
         var db = PouchDB('momlink');
@@ -34,26 +73,23 @@ angular.module('starter.controllers', [])
         window.localStorage.removeItem('date');
         window.location = "../index.html";
     };
-    //Inbox Footer Links
-    $scope.inboxAsk = function () {
-        window.location = "inboxAsk.html";
-    };
     //Track Link
     $scope.goToHistory = function (type) {
         window.localStorage.setItem('trackType', type)
-        window.location = 'history.html';
+        $scope.goToLink('history.html', 'History')
     };
     $scope.goToAct = function (act) {
         window.localStorage.setItem('selectAct', act)
-        window.location = 'addActivityTime.html';
+        $scope.goToLink('addActivityTime.html', 'Add Activity Time');
     };
-    $scope.goToAddEvent = function (type) {
-        window.location = type + ".html";
+    $scope.goToAddEvent = function () {
+        var type = window.localStorage.getItem('trackType');
+        $scope.goToLink(type + ".html", 'History');
     };
     //Inbox Link
     $scope.goToMessage = function (type) {
-        window.localStorage.setItem('recipient', type)
-        window.location = "message.html";
+        window.localStorage.setItem('recipient', type);
+        $scope.goToLink('message.html', 'New Message');
     };
 })
 
@@ -219,7 +255,7 @@ angular.module('starter.controllers', [])
                     ]
                 });
                 infoPopup.then(function (res) {
-                    
+
                 });
             };
         }
@@ -289,7 +325,7 @@ angular.module('starter.controllers', [])
             //html = database stuff
             var html = '';
             var db = PouchDB('momlink');
-            db.get('coupons').then(function (doc) {             
+            db.get('coupons').then(function (doc) {
                 coupons = doc['recieved'];
                 for (i in coupons) {
                     html += `<div class="item item-divider">Coupon</div>`;
@@ -301,11 +337,11 @@ angular.module('starter.controllers', [])
             }).then(function (doc) {
                 document.getElementById('Recieved').innerHTML = html;
                 document.getElementById('bRecieved').innerHTML = 'Close';
-            });            
+            });
         }
         else {
             document.getElementById('Recieved').innerHTML = '';
-            document.getElementById('bRecieved').innerHTML = 'View';         
+            document.getElementById('bRecieved').innerHTML = 'View';
         }
     };
     $scope.usedCoupons = function () {
@@ -337,7 +373,7 @@ angular.module('starter.controllers', [])
     $scope.updateAmount = function () {
         var db = PouchDB('momlink');
         db.get('coupons').then(function (doc) {
-            coupons = doc['recieved'];          
+            coupons = doc['recieved'];
         }).then(function (doc) {
             document.getElementById('amount').innerHTML = coupons.length + 'x';
         });
@@ -388,7 +424,7 @@ angular.module('starter.controllers', [])
             doc[type].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            window.location = 'history.html';
+            $scope.goToLink('history.html', 'History');
         });
     }
 })
@@ -510,16 +546,16 @@ angular.module('starter.controllers', [])
                                    '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                    '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
                                    '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
                                    '</div>' +
                                '</div>' +
                                '<div class="col text-center">' +
                                    '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                    '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
                                    '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
                                    '</div>' +
                                '</div>' +
                            '</div>',
@@ -541,16 +577,16 @@ angular.module('starter.controllers', [])
                                    '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                    '<div class="col text-center"><img src="../img/handportions/' + f1 + '" style="width:75px; height:100px;"/></div>' +
                                    '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
                                    '</div>' +
                                '</div>' +
                                '<div class="col text-center">' +
                                    '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                    '<div class="col text-center"><img src="../img/handportions/' + f2 + '" style="width:75px; height:100px;" /></div>' +
                                    '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
                                    '</div>' +
                                '</div>' +
                            '</div>',
@@ -573,16 +609,16 @@ angular.module('starter.controllers', [])
                                '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
                                '<div class="row">' +
-                                   '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                   '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
                                '</div>' +
                            '</div>' +
                            '<div class="col text-center">' +
                                '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
                                '<div class="row">' +
-                                   '<div class="col text-center"><img type="button" src="../img/temp/tanminus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                   '<div class="col text-center"><img type="button" src="../img/temp/tanplus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
                                '</div>' +
                            '</div>' +
                        '</div>',

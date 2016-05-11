@@ -1,2 +1,0 @@
-﻿document.write(
-'</ion-pane>');

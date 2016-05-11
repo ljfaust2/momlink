@@ -1,40 +1,91 @@
-﻿<script type="text/javascript" src="../js/load_essentials.js"></script>
+﻿﻿<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <link href="../lib/ionic-v1.2.4/css/ionic.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <script src="../lib/jquery-2.2.3.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,400italic,100,100italic,300,300italic,500,500italic,700,700italic,900italic,900' rel='stylesheet' type='text/css'>
+    <script src="../lib/ionic-v1.2.4/js/ionic.bundle.min.js"></script>
+    <!-- cordova script (this will be a 404 during development) -->
+    <!--<script src="cordova.js"></script>-->
+    <script src="../lib/pouchdb-5.3.0.min.js"></script>
+    <script src="../lib/ionic-datepicker/dist/ionic-datepicker.bundle.min.js"></script>
+    <script src="../lib/raphael-min.js"></script>
+    <!--Calendar-->
+    <script src="../lib/moment/min/moment.min.js"></script>
+    <script src="../lib/fullcalendar/dist/fullcalendar.min.js"></script>
+    <link rel='stylesheet' href='../lib/fullcalendar/dist/fullcalendar.min.css' />
+    <!--My Scripts-->
+    <script src="../js/app.js"></script>
+    <script src="../js/controllers.js"></script>
+</head>
 <body ng-app="starter" ng-controller="HeaderBarController">
-    <script type="text/javascript" src="../js/header.js"></script>
-    <script>header('Momlink')</script>
-    <script type="text/javascript" src="../js/subheader.js"></script>
-        <ion-view>
-            <ion-content overflow-scroll="false" class="has-header has-subheader">
-                <ion-slides options="options" slider="data.slider" style="height: 80px; background-color:deeppink;">
-                    <ion-slide-page>
-                        <div class="centerWhite">Appointments</div>
-                    </ion-slide-page>
-                    <ion-slide-page>
-                        <div class="centerWhite"></div>
-                    </ion-slide-page>
-                    <ion-slide-page>
-                        <div class="centerWhite"></div>
-                    </ion-slide-page>
-                </ion-slides>
-                <center>
-                    <div class="row">
-                        <div class="col"><a href="inbox.html"><img src="../img/mainIcons/momlink_icon-16.png" style="width:75px;height:75px;vertical-align:middle" alt="Mail"></a><p>Mail</p></div>
-                        <div class="col"><a href="calendar.html"><img src="../img/mainIcons/momlink_icon-17.png" style="width:75px;height:75px;vertical-align:middle" alt="Calendar"></a><p>Calendar</p></div>
-                        <div class="col"><a href="referrals.html"><img src="../img/mainIcons/momlink_icon-18.png" style="width:75px;height:75px;vertical-align:middle" alt="Referrals"></a><p>Referrals</p></div>
-                    </div>
-                    <div class="row">
-                        <div class="col"><a href="track.html"><img src="../img/mainIcons/momlink_icon-19.png" style="width:75px;height:75px;vertical-align:middle" alt="Track"></a><p>Track</p></div>
-                        <div class="col"><a href="coupons.html"><img src="../img/mainIcons/momlink_icon-20.png" style="width:75px;height:75px;vertical-align:middle" alt="Coupons"></a><p>Coupons</p></div>
-                        <div class="col"><a href="education.html"><img src="../img/mainIcons/momlink_icon-21.png" style="width:75px;height:75px;vertical-align:middle" alt="Education"></a><p>Education</p></div>
-                    </div>
-                    <div class="row">
-                        <div class="col"><a href="journal.html"><img src="../img/mainIcons/momlink_icon-22.png" style="width:75px;height:75px;vertical-align:middle" alt="Notes"></a><p>Journal</p></div>
-                        <div class="col"><a href="myProfile.html"><img src="../img/mainIcons/momlink_icon-23.png" style="width:75px;height:75px;vertical-align:middle" alt="My Profile"></a><p>My Profile</p></div>
-                        <div class="col"></div>
-                    </div>
-                </center>
-            </ion-content>
-        </ion-view>
-    <script type="text/javascript" src="../js/subheaderEnd.js"></script>
+    <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
+        <div class="buttons">
+            <button class="button button-icon icon ion-ios-home" ng-click="goToLink('home.html', 'Momlink')"></button>
+        </div>
+        <h1 class="title" id="title">Momlink</h1>
+        <div class="buttons">
+            <button class="button button-icon icon ion-navicon-round" ng-click="toggleTopMenu()"></button>
+        </div>
+    </ion-header-bar>
+    <ion-top-menu class="text-center has-header">
+        <ion-content overflow-scroll="false" style="background-color:#ffffff">
+            <div class="row">
+                <div class="col"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="goToLink('inbox.html', 'Inbox'); toggleTopMenu()" style="width:75px;height:75px;vertical-align:middle"><p>Mail</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="goToLink('calendar.html', 'Calendar'); toggleTopMenu()" style="width:75px;height:75px;vertical-align:middle"><p>Calendar</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="goToLink('referrals.html', 'Referrals'); toggleTopMenu()" style="width:75px;height:75px;vertical-align:middle"><p>Referrals</p></div>
+            </div>
+            <div class="row">
+                <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="goToLink('track.html', 'Track'); toggleTopMenu()" style="width:75px;height:75px;vertical-align:middle"><p>Track</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="goToLink('coupons.html', 'Coupons'); toggleTopMenu()" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="goToLink('education.html', 'Education'); toggleTopMenu()" style="width:75px;height:75px;vertical-align:middle"><p>Education</p></div>
+            </div>
+            <div class="row">
+                <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="goToLink('journal.html', 'My Journal'); toggleTopMenu()" style="width:75px;height:75px;vertical-align:middle"><p>Journal</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="goToLink('myProfile.html', 'My Profile'); toggleTopMenu()" style="width:75px;height:75px;vertical-align:middle"><p>My Profile</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-24.png" ng-click="logout()" style="width:75px;height:75px;vertical-align:middle" alt="Logout"><p>Logout</p></div>
+            </div>
+        </ion-content>
+    </ion-top-menu>
+    <div id="content">
+        <ion-pane>
+            <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="showDate()">
+                <h2 class="title" id="todaysDate"></h2>
+            </ion-subheader-bar>
+            <ion-view>
+                <ion-content overflow-scroll="false" class="has-header has-subheader">
+                    <ion-slides options="options" slider="data.slider" style="height: 80px; background-color:deeppink;">
+                        <ion-slide-page>
+                            <div class="centerWhite">Appointments</div>
+                        </ion-slide-page>
+                        <ion-slide-page>
+                            <div class="centerWhite"></div>
+                        </ion-slide-page>
+                        <ion-slide-page>
+                            <div class="centerWhite"></div>
+                        </ion-slide-page>
+                    </ion-slides>
+                    <center>
+                        <div class="row">
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="goToLink('inbox.html', 'Inbox')" style="width:75px;height:75px;vertical-align:middle"><p>Mail</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="goToLink('calendar.html', 'Calendar')" style="width:75px;height:75px;vertical-align:middle"><p>Calendar</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="goToLink('referrals.html', 'Referrals')" style="width:75px;height:75px;vertical-align:middle"><p>Referrals</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="goToLink('track.html', 'Track')" style="width:75px;height:75px;vertical-align:middle"><p>Track</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="goToLink('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="goToLink('education.html', 'Education')" style="width:75px;height:75px;vertical-align:middle"><p>Education</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="goToLink('journal.html', 'My Journal')" style="width:75px;height:75px;vertical-align:middle"><p>Journal</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="goToLink('myProfile.html', 'My Profile')" style="width:75px;height:75px;vertical-align:middle"><p>My Profile</p></div>
+                            <div class="col"></div>
+                        </div>
+                    </center>
+                </ion-content>
+            </ion-view>
+        </ion-pane>
+    </div>
 </body>
-<script type="text/javascript" src="../js/load_essentialsEnd.js"></script>
