@@ -20,16 +20,11 @@
                     <input type="time" placeholder="Time">
                 </label>
             </div>
-            <center>
-                <div class="row">
-                    <div class="col">
-                        <img src="../img/temp/save.png" style="width:25px; height:25px;" />
-                    </div>
-                    <div class="col">
-                        <img src="../img/temp/delete.png" style="width:25px; height:25px;" />
-                    </div>
+            <div class="row">
+                <div class="col text-center " ng-controller="DBController">
+                    <input type="button" class="button button-block button-positive" value="ADD" ng-click="submit('BP')">
                 </div>
-            </center>
+            </div>
         </ion-content>
     </ion-view>
 </ion-pane>

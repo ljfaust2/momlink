@@ -418,6 +418,9 @@ angular.module('starter.controllers', [])
     $scope.loadHistory = function () {
         var type;
         switch (window.localStorage.getItem('trackType')) {
+            case 'addActivity':
+                type = 'A';
+                break;
             case 'addBabyHeartRate':
                 type = 'BHR';
                 break;
@@ -430,8 +433,29 @@ angular.module('starter.controllers', [])
             case 'addBloodPressure':
                 type = 'BP';
                 break;
+            case 'addCaffeine':
+                type = 'CA';
+                break;
+            case 'addCigarette':
+                type = 'CI';
+                break;
+            case 'addFood':
+                type = 'D';
+                break;
             case 'addKicks':
                 type = 'K';
+                break;
+            case 'addMood':
+                type = 'M';
+                break;
+            case 'addPain':
+                type = 'PA';
+                break;
+            case 'addPill':
+                type = 'PI';
+                break;
+            case 'addStress':
+                type = 'S';
                 break;
             case 'addWeight':
                 type = 'W';
@@ -445,7 +469,12 @@ angular.module('starter.controllers', [])
             elements = doc[type]
             for (var i in elements) {
                 if (date == elements[i]["date"]) {
-                    hist += '<center><div class="item">Time: ' + elements[i]["time"] + '&nbsp; &nbsp; &nbsp; ' + type + ': ' + elements[i]["value"] + '</div></center>';
+                    if (type == 'A') {
+                        hist += '<center><div class="item">' + elements[i]["time"] + ' &nbsp; Act: ' + elements[i]["act"] + ' &nbsp; Length: ' + elements[i]["value"] + '</div></center>';
+                    }
+                    else {
+                        hist += '<center><div class="item">Time: ' + elements[i]["time"] + '&nbsp; &nbsp; &nbsp; ' + elements[i]["value"] + '</div></center>';
+                    }
                 }
             }
             //if date has no values, then display default image
@@ -606,6 +635,30 @@ angular.module('starter.controllers', [])
 })
 
 .controller('AddSubController', function ($scope) {
+    $scope.setActive = function (type) {
+        document.getElementById('count').classList.remove('activeBorder')
+        document.getElementById('count2').classList.remove('activeBorder')
+        document.getElementById(type).classList.add('activeBorder')
+    }
+
+    $scope.plusMinusBP = function (pm) {
+        if (document.getElementById('count').classList.contains('activeBorder')) {
+            active = 'count'
+        }
+        else {
+            active = 'count2'
+        }
+        var countEl = document.getElementById(active).innerHTML;
+
+        if (pm == 'plus') {
+            countEl++;
+            document.getElementById(active).innerHTML = countEl;
+        }
+        if (pm == 'minus' && countEl > 0) {
+            countEl--;
+            document.getElementById(active).innerHTML = countEl;
+        }
+    }
     $scope.plusMinus = function (pm, id) {
         var countEl = document.getElementById(id).innerHTML;
         if (pm == 'plus') {
@@ -878,9 +931,110 @@ angular.module('starter.controllers', [])
         var time = hour + ':' + minute + ':' + second;
         return time;
     }
+
+    $scope.submitAct = function (type) {
+        var db = PouchDB('momlink');
+        hour = document.getElementById('hour').innerHTML;
+        min = document.getElementById('minute').innerHTML;
+        value = String(hour + ":" + min);
+        db.get('track').then(function (doc) {
+            var element = {
+                "uniqueId": new Date().toJSON(),
+                "date": getDate(),
+                "time": getTime(),
+                "act": window.localStorage.getItem('selectAct'),
+                "value": value
+            };
+            doc['A'].push(element);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('history.html', 'History');
+        });
+    }
     $scope.submit = function (type) {
         var db = PouchDB('momlink');
         value = document.getElementById('count').innerHTML;
+        db.get('track').then(function (doc) {
+            var element = {
+                "uniqueId": new Date().toJSON(),
+                "date": getDate(),
+                "time": getTime(),
+                "value": value
+            };
+            doc[type].push(element);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('history.html', 'History');
+        });
+    }
+    $scope.submitPain = function (type) {
+        var db = PouchDB('momlink');
+        var type;
+        switch (document.getElementById('pain').value) {
+            case '1':
+                value = 'No hurt';
+                break;
+            case '2':
+                value = 'Hurts little bit';
+                break;
+            case '3':
+                value = 'Hurts little more';
+                break;
+            case '4':
+                value = 'Hurts even more';
+                break;
+            case '5':
+                value = 'Hurts whole lot';
+                break;
+            case '6':
+                value = 'Hurts worst';
+                break;
+        }
+        db.get('track').then(function (doc) {
+            var element = {
+                "uniqueId": new Date().toJSON(),
+                "date": getDate(),
+                "time": getTime(),
+                "value": value
+            };
+            doc[type].push(element);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('history.html', 'History');
+        });
+    }
+    $scope.submitBP = function () {
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            var element = {
+                "uniqueId": new Date().toJSON(),
+                "date": getDate(),
+                "time": getTime(),
+                "value": document.getElementById('count').innerHTML + "/" + document.getElementById('count2').innerHTML
+            };
+            doc['BP'].push(element);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('history.html', 'History');
+        });
+    }
+    $scope.submitAdd = function (type) {
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            var element = {
+                "uniqueId": new Date().toJSON(),
+                "date": getDate(),
+                "time": getTime(),
+                "value": parseInt(document.getElementById('count12').innerHTML) * (.5) + parseInt(document.getElementById('count1').innerHTML)
+            };
+            doc[type].push(element);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('history.html', 'History');
+        });
+    }
+    $scope.submitSet = function (value, type) {
+        var db = PouchDB('momlink');
         db.get('track').then(function (doc) {
             var element = {
                 "uniqueId": new Date().toJSON(),
@@ -961,12 +1115,20 @@ angular.module('starter.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "track",
+                    'A': [],
                     "BHR": [],
                     "BG": [],
                     "BI": [],
+                    "BP": [],
+                    "CA": [],
+                    "CI": [],
+                    "D": [],
                     "K": [],
+                    'M': [],
+                    'PA': [],
+                    'PI': [],
+                    'S': [],
                     "W": [],
-                    "BP": []
                 });
             }
         });
@@ -1183,13 +1345,6 @@ angular.module('starter.controllers', [])
     ]
     $scope.notesList = [
       { subject: "Note Subject", description: "This is a description" }
-    ]
-    $scope.stressList = [
-      { type: "Family/Relationships", image: "" },
-      { type: "Housing", image: "" },
-      { type: "Finances", image: "" },
-      { type: "Domestic Violence", image: "" },
-      { type: "Material Needs", image: "" }
     ]
     $scope.referList = [
       { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" },

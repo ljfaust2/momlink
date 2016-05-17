@@ -15,19 +15,15 @@
                         <div class="item range range-positive">
                             <i class="icon ion-happy-outline"></i>
                             <script>value = 1</script>
-                            <input type="range" ng-init="value=1" ng-change="updateFace(value)" ng-model="value" min="1" max="6">
+                            <input id="pain" type="range" ng-init="value=1" ng-change="updateFace(value)" ng-model="value" min="1" max="6">
                             <i class="icon ion-sad-outline"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row padding">
-                <div class="col">
-                    <center>
-                        <button class="button button-stable">
-                            SUBMIT
-                        </button>
-                    </center>
+            <div class="row padding" ng-controller="DBController">
+                <div class="col text-center">
+                    <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submitPain('PA')">
                 </div>
             </div>
         </ion-content>

@@ -1,25 +1,35 @@
 ﻿<ion-pane>
     <ion-view>
         <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
-            <div>
-                <ul>
-                    <li ng-repeat="item in stressList">
-                        <div ng-show="$index % 2 == 0">
-                            <div class="row">
-                                <div class="col text-center">
-                                    <input type="image" src={{item.image}} value={{item.type}} name="type" style="width:100px;height:100px; border:1px solid black;" alt={{item.type}}>
-                                    <p>{{item.type}}</p>
-                                </div>
-                                <div ng-show="stressList[$index+1] != null" class="col text-center">
-                                    <input type="image" src={{stressList[$index+1].image}} value={{stressList[$index+1].type}} name="type" style="width:100px;height:100px; border:1px solid black;" alt={{stressList[$index+1].type}}>
-                                    <p>{{stressList[$index+1].type}}</p>
-                                </div>
-                                <div ng-show="stressList[$index+1] == null" class="col text-center">
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+            <div ng-controller="DBController">
+                <div class="row">
+                    <div class="col text-center">
+                        <input type="image" src="" ng-click="submitSet('Family/Relationships','S')" style="width:100px;height:100px; border:1px solid black;">
+                        <p>Family/Relationships</p>
+                    </div>
+                    <div class="col text-center">
+                        <input type="image" src="" ng-click="submitSet('Housing','S')" style="width:100px;height:100px; border:1px solid black;">
+                        <p>Housing</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col text-center">
+                        <input type="image" src="" ng-click="submitSet('Finances','S')" style="width:100px;height:100px; border:1px solid black;">
+                        <p>Finances</p>
+                    </div>
+                    <div class="col text-center">
+                        <input type="image" src="" ng-click="submitSet('Domestic Violence','S')" style="width:100px;height:100px; border:1px solid black;">
+                        <p>Domestic Violence</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col text-center">
+                        <input type="image" src="" ng-click="submitSet('Material Needs','S')" style="width:100px;height:100px; border:1px solid black;">
+                        <p>Material Needs</p>
+                    </div>
+                    <div class="col text-center">
+                    </div>
+                </div>
             </div>
         </ion-content>
     </ion-view>

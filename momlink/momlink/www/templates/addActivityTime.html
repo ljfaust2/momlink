@@ -3,7 +3,7 @@
         <ion-content overflow-scroll="false" class="has-header" ng-controller="ActivityController">
             <div class="row padding">
                 <div class="col" ng-controller="ClockController">
-                    <div id="EXAMPLE_4" class="example" style="background: url('../img/temp/clock.PNG'); background-size: 150px 150px; background-repeat: no-repeat;">
+                    <div id="EXAMPLE_4" class="example" style="background: url(../img/temp/clock.png); background-size: 150px 150px; background-repeat: no-repeat;">
                         <div id="CLOCK_HOLDER" class="CLOCK_HOLDER"></div>
                     </div>
                 </div>
@@ -26,11 +26,11 @@
                 window.localStorage.removeItem('selectAct')
                 console.log(el);
             </script>-->
-            <div class="row padding">
+            <div class="row padding" ng-controller="DBController">
                 <div class="col">
                     <center>
                         <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear()">
-                        <input type="button" class="button button-block button-positive" value="SUBMIT">
+                        <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submitAct()">
                     </center>
                 </div>
             </div>
