@@ -30,7 +30,7 @@ angular.module('starter.controllers', [])
         })
     };
 
-    $scope.goToLink = function (page, title) {       
+    $scope.goToLink = function (page, title) {
         var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         xhr.open('get', page, true);
         xhr.onreadystatechange = function () {
@@ -38,11 +38,11 @@ angular.module('starter.controllers', [])
                 document.getElementById("content").innerHTML = xhr.responseText;
                 if (title != null) {
                     document.getElementById('title').innerHTML = title;
-                }                       
+                }
                 $compile(document.getElementById('content'))($scope);
             }
         }
-        xhr.send();       
+        xhr.send();
     };
 
     $scope.toggleTopMenu = function () {
@@ -380,55 +380,6 @@ angular.module('starter.controllers', [])
     }
 })
 
-.controller('DBController', function ($scope) {
-    var today = new Date();
-    getDate = function () {
-        var dd = today.getDate();
-        var mm = today.getMonth() + 1;
-        var yyyy = today.getFullYear();
-        if (dd < 10) {
-            dd = '0' + dd
-        }
-        if (mm < 10) {
-            mm = '0' + mm
-        }
-        date = mm + '/' + dd + '/' + yyyy;
-        return date;
-    }
-    getTime = function () {
-        var hour = today.getHours();
-        var minute = today.getMinutes();
-        var second = today.getSeconds();
-        if (hour.toString().length == 1) {
-            var hour = '0' + hour;
-        }
-        if (minute.toString().length == 1) {
-            var minute = '0' + minute;
-        }
-        if (second.toString().length == 1) {
-            var second = '0' + second;
-        }
-        var time = hour + ':' + minute + ':' + second;
-        return time;
-    }
-    $scope.submit = function (type) {
-        var db = PouchDB('momlink');
-        value = document.getElementById('count').innerHTML;
-        db.get('track').then(function (doc) {
-            var element = {
-                "uniqueId": new Date().toJSON(),
-                "date": getDate(),
-                "time": getTime(),
-                "value": value
-            };
-            doc[type].push(element);
-            return db.put(doc);
-        }).then(function (doc) {
-            $scope.goToLink('history.html', 'History');
-        });
-    }
-})
-
 .controller('HistoryController', function ($scope) {
     formatDate = function (d) {
         var t
@@ -671,6 +622,40 @@ angular.module('starter.controllers', [])
     }
 })
 
+.controller('ProfileController', function ($scope) {
+    $scope.updateProfile = function () {
+        var db = PouchDB('momlink');
+        db.get('profile').then(function (doc) {
+            doc['name'] = $('#name').val(),
+            doc['email'] = $('#email').val(),
+            doc['age'] = $('#age').val(),
+            doc['startDate'] = $('#start').val(),
+            doc['deliveryDate'] = $('#delivery').val(),
+            doc['aboutMe'] = $('#about').val(),
+            doc['doctorsName'] = $('#dName').val(),
+            doc['doctorsEmail'] = $('#dEmail').val(),
+            doc['doctorsPhone'] = $('#dNumber').val()
+            return db.put(doc).then(function (doc) {
+                $scope.goToLink('home.html', 'Momlink');
+            });
+        });
+    }
+    $scope.getProfile = function () {
+        var db = PouchDB('momlink');
+        db.get('profile').then(function (doc) {
+            $('#name').val(doc['name']);
+            $('#email').val(doc['email']);
+            $('#age').val(doc['age']);
+            $('#start').val(doc['startDate']);
+            $('#delivery').val(doc['deliveryDate']);
+            $('#about').val(doc['aboutMe']);
+            $('#dName').val(doc['doctorsName']);
+            $('#dEmail').val(doc['doctorsEmail']);
+            $('#dNumber').val(doc['doctorsPhone']);
+        });
+    }
+})
+
 .controller('ActivityController', function ($scope) {
     var hour = 0;
     var totalMinutes = document.getElementById("minute");
@@ -862,6 +847,323 @@ angular.module('starter.controllers', [])
     }
 })
 
+.controller('DBController', function ($scope) {
+    var today = new Date();
+    getDate = function () {
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1;
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd
+        }
+        if (mm < 10) {
+            mm = '0' + mm
+        }
+        date = mm + '/' + dd + '/' + yyyy;
+        return date;
+    }
+    getTime = function () {
+        var hour = today.getHours();
+        var minute = today.getMinutes();
+        var second = today.getSeconds();
+        if (hour.toString().length == 1) {
+            var hour = '0' + hour;
+        }
+        if (minute.toString().length == 1) {
+            var minute = '0' + minute;
+        }
+        if (second.toString().length == 1) {
+            var second = '0' + second;
+        }
+        var time = hour + ':' + minute + ':' + second;
+        return time;
+    }
+    $scope.submit = function (type) {
+        var db = PouchDB('momlink');
+        value = document.getElementById('count').innerHTML;
+        db.get('track').then(function (doc) {
+            var element = {
+                "uniqueId": new Date().toJSON(),
+                "date": getDate(),
+                "time": getTime(),
+                "value": value
+            };
+            doc[type].push(element);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('history.html', 'History');
+        });
+    }
+
+    $scope.initializeDB = function () {
+        var db = new PouchDB('momlink');
+        db.get('loginInfo').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "loginInfo",
+                    "username": "first",
+                    "password": "password",
+                    "clientID": "08798a24b703fb7b9d5d231ab30008d3",
+                    "answer": "Yes",
+                    "securityQuestion": "?",
+                    "resetCode": "595"
+                });
+            }
+        });
+        db.get('profile').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "profile",
+                    "name": "",
+                    "email": "",
+                    "age": "",
+                    "startDate": "",
+                    "deliveryDate": "",
+                    "aboutMe": "",
+                    "doctorsName": "",
+                    "doctorsEmail": "",
+                    "doctorsPhone": ""
+                });
+            }
+        });
+        db.get('coupons').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "coupons",
+                    "recieved": [
+                        {
+                            "date": "4/15/2016",
+                            "plan": "Platinum",
+                            "for": "BABE Class"
+                        },
+                        {
+                            "date": "4/16/2016",
+                            "plan": "Platinum",
+                            "for": "BABE Class"
+                        }
+                    ],
+                    "used": [
+                        {
+                            "date": "4/12/2016",
+                            "plan": "Platinum",
+                            "for": "BABE Class"
+                        },
+                        {
+                            "date": "4/14/2016",
+                            "plan": "Platinum",
+                            "for": "BABE Class"
+                        }
+                    ]
+                });
+            }
+        });
+        db.get('track').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "track",
+                    "BHR": [],
+                    "BG": [],
+                    "BI": [],
+                    "K": [],
+                    "W": [],
+                    "BP": []
+                });
+            }
+        });
+        db.get('classes').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "classes",
+                    "crib": [
+                        {
+                            "plan": "Crib",
+                            "class": "Safe Sleep Class",
+                            "number": "1",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "Safety Class",
+                            "number": "1",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "BABE Class",
+                            "number": "1",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "BABE Class",
+                            "number": "2",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "1",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "2",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "3",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "4",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "5",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "6",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "HUGS",
+                            "number": "1",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Crib",
+                            "class": "HUGS",
+                            "number": "2",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        }
+                    ],
+                    "infantCarrier": [
+                        {
+                            "plan": "Infant Carrier",
+                            "class": "Safety Class",
+                            "number": "1",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Infant Carrier",
+                            "class": "BABE Class",
+                            "number": "1",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Infant Carrier",
+                            "class": "BABE Class",
+                            "number": "2",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Infant Carrier",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "1",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Infant Carrier",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "2",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        },
+                        {
+                            "plan": "Infant Carrier",
+                            "class": "PNCC (HUGS/face to face)",
+                            "number": "3",
+                            "status": "Register",
+                            "venue": "",
+                            "date": "",
+                            "time": "",
+                            "instructor": ""
+                        }
+                    ]
+                });
+            }
+        });
+    }
+})
+
 .controller('DataController', function ($scope, $ionicSideMenuDelegate) {
     $scope.actList = [
       { type: "Bike", image: "../img/activities/bike.png" },
@@ -953,4 +1255,4 @@ angular.module('starter.controllers', [])
       { type: "Stressors", link: "addStress", image: "../img/temp/stress.png" },
       { type: "Weight", link: "addWeight", image: "../img/temp/scale.jpg" }
     ]
-});
+})

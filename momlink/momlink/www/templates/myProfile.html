@@ -1,58 +1,58 @@
 ﻿<ion-pane>
     <ion-view>
-        <ion-content overflow-scroll="false" class="has-header">
+        <ion-content overflow-scroll="false" class="has-header" ng-controller="ProfileController">
             <div class="col text-center padding-top">
                 <img id="image" src="" style="width:90%; height:150px;" />
             </div>
             <div class="col padding-bottom text-right">
                 <img src="../img/temp/camera.PNG" ng-onclick="takePicture()" style="width:30px; height:25px;" />
             </div>
-            <div class="list">
+            <div class="list" ng-init="getProfile()">
                 <div class="item item-divider">
                     Personal Information
                 </div>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Name</span>
-                    <input type="text" placeholder="Name">
+                    <input id="name" type="text" placeholder="Name">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Email</span>
-                    <input type="email" placeholder="Email">
+                    <input id="email" type="email" placeholder="Email">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Age</span>
-                    <input type="number" placeholder="Age">
+                    <input id="age" type="number" placeholder="Age">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Pregnancy Start Date</span>
-                    <input type="date">
+                    <input id="start" type="date">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Expected Delivery Date</span>
-                    <input type="date">
+                    <input id="delivery" type="date">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">About Me</span>
-                    <textarea placeholder="About Me" rows="3"></textarea>
+                    <textarea id="about" placeholder="About Me" rows="3"></textarea>
                 </label>
                 <div class="item item-divider">
                     Doctor's Information
                 </div>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Name</span>
-                    <input type="text" placeholder="Name">
+                    <input id="dName" type="text" placeholder="Name">
                 </label>
                 <label class="item item-input item-stacked-label">
-                    <span class="input-label">Address</span>
-                    <input type="number" placeholder="Address">
+                    <span class="input-label">Email</span>
+                    <input id="dEmail" type="email" placeholder="Address">
                 </label>
                 <label class="item item-input item-stacked-label">
                     <span class="input-label">Phone Number</span>
-                    <input type="tel" placeholder="(###) ###-####">
+                    <input id="dNumber" type="tel" placeholder="(###) ###-####">
                 </label>
             </div>
             <div class="padding-left padding-right">
-                <input type="button" class="button button-block button-positive" value="UPDATE" onclick="">
+                <input type="button" class="button button-block button-positive" value="UPDATE" ng-click="updateProfile()">
                 <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="goToLink('home.html', 'Momlink')">
             </div>
         </ion-content>
