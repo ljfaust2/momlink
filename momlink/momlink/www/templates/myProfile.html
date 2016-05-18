@@ -2,10 +2,12 @@
     <ion-view>
         <ion-content overflow-scroll="false" class="has-header" ng-controller="ProfileController">
             <div class="col text-center padding-top">
-                <img id="image" src="" style="width:90%; height:150px;" />
+                <center>
+                    <img id="profilePic" src="" style="max-width:90%; max-height:150px;" />
+                </center>
             </div>
-            <div class="col padding-bottom text-right">
-                <img src="../img/temp/camera.PNG" ng-onclick="takePicture()" style="width:30px; height:25px;" />
+            <div class="col padding-bottom text-right" ng-controller="CameraController" ng-init="initializeDevice()">
+                <img src="../img/temp/camera.PNG" ng-click="capturePhoto()" style="width:30px; height:25px;" />
             </div>
             <div class="list" ng-init="getProfile()">
                 <div class="item item-divider">

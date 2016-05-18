@@ -887,16 +887,65 @@ angular.module('starter.controllers', [])
 })
 
 .controller('CameraController', function ($scope) {
-    $scope.takePicture = function () {
-        console.log('e');
-        navigator.camera.getPicture(function (imageURI) {
-            // imageURI is the URL of the image that we can use for
-            // an <img> element or backgroundImage.
-            var image = document.getElementById("image");
-            image.src = imageURI;
-        }, function (err) {
-            console.log('error');
-        }, cameraOptions);
+
+    var pictureSource;
+    var destinationType; // sets the format of returned value
+
+    // Wait for device API libraries to load
+    $scope.initializeDevice = function () {
+        document.addEventListener("deviceready", $scope.onDeviceReady, false);
+    }
+
+    // device APIs are available
+    $scope.onDeviceReady = function () {
+        pictureSource = navigator.camera.PictureSourceType;
+        destinationType = navigator.camera.DestinationType;
+    }
+    $scope.onPhotoDataSuccess = function (imageData) {
+        // Uncomment to view the base64-encoded image data
+        // console.log(imageData);
+        var smallImage = document.getElementById('profilePic');
+        // Unhide image elements
+        //
+        smallImage.style.display = 'block';
+        // Show the captured photo
+        // The in-line CSS rules are used to resize the image
+        //
+        smallImage.src = "data:image/jpeg;base64," + imageData;
+    }
+    $scope.onPhotoURISuccess = function (imageURI) {
+        // Uncomment to view the image file URI
+        // console.log(imageURI);
+        var largeImage = document.getElementById('largeImage');
+        // Unhide image elements
+        //
+        largeImage.style.display = 'block';
+        // Show the captured photo
+        // The in-line CSS rules are used to resize the image
+        //
+        largeImage.src = imageURI;
+    }
+    $scope.capturePhoto = function () {
+        navigator.camera.getPicture($scope.onPhotoDataSuccess, $scope.onFail, {
+            quality: 50,
+            destinationType: destinationType.DATA_URL
+        });
+    }
+    $scope.capturePhotoEdit = function () {
+        navigator.camera.getPicture($scope.onPhotoDataSuccess, $scope.onFail, {
+            quality: 20, allowEdit: true,
+            destinationType: destinationType.DATA_URL
+        });
+    }
+    $scope.getPhoto = function (source) {
+        navigator.camera.getPicture($scope.onPhotoURISuccess, $scope.onFail, {
+            quality: 50,
+            destinationType: destinationType.FILE_URI,
+            sourceType: source
+        });
+    }
+    $scope.onFail = function (message) {
+        alert('Failed because: ' + message);
     }
 })
 
