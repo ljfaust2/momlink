@@ -1,5 +1,6 @@
 ## Ignore platforms directory 
 momlink/momlink/platforms/
+momlink/momlink/plugins/
 momlink/momlink/resources/
 
 ## Ignore Visual Studio temporary files, build results, and
