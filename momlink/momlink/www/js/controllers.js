@@ -18,18 +18,6 @@ angular.module('starter.controllers', [])
         document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
     };
 
-    $scope.showCalendar = function () {
-        $('#calendar').fullCalendar({
-            height: "auto",
-            header: {
-                left: 'prev,next, today',
-                center: 'title',
-                right: 'agendaDay, agendaWeek, month'
-            },
-            defaultView: 'agendaDay'
-        })
-    };
-
     $scope.goToLink = function (page, title) {
         var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         xhr.open('get', page, true);
@@ -510,8 +498,7 @@ angular.module('starter.controllers', [])
 
     $scope.showFoodFluid = function (food, fluid, hp1, hp2, f1, f2) {
         $scope.choice = $ionicPopup.show({
-            template: '<style>.popup { height:400px; }</style>' +
-                        '<div class="text-center">' +
+            template: '<div class="text-center">' +
                         '<img src="../img/food/' + food + '" ng-click="showFoodAmount()" style="width:100px; height:100px" />' +
                         '<img src="../img/food/' + fluid + '" ng-click="showFluidAmount()" style="width:100px; height:100px" />' +
                       '</div>',
@@ -520,8 +507,7 @@ angular.module('starter.controllers', [])
         });
         $scope.showFoodAmount = function () {
             ffAmountPopup = $ionicPopup.show({
-                template: '<style>.popup { height:400px; }</style>' +
-                          '<div class="row" ng-controller="AddSubController">' +
+                template: '<div class="row" ng-controller="AddSubController">' +
                                '<div class="col text-center">' +
                                    '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                    '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
@@ -541,8 +527,14 @@ angular.module('starter.controllers', [])
                            '</div>',
                 title: 'How much?',
                 buttons: [
-                  { text: 'Save', onTap: function (e) { return 'Saved'; } },
-                  { text: 'Cancel', onTap: function (e) { return 'Cancel'; } }
+                  {
+                      text: 'Save', onTap: function (e) { return 'Saved'; },
+                      type: 'button-positive'
+                  },
+                  {
+                      text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                      type: 'button-positive'
+                  }
                 ]
             });
             ffAmountPopup.then(function (res) {
@@ -551,8 +543,7 @@ angular.module('starter.controllers', [])
         };
         $scope.showFluidAmount = function () {
             ffAmountPopup = $ionicPopup.show({
-                template: '<style>.popup { height:400px; }</style>' +
-                          '<div class="row" ng-controller="AddSubController">' +
+                template: '<div class="row" ng-controller="AddSubController">' +
                                '<div class="col text-center">' +
                                    '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                    '<div class="col text-center"><img src="../img/handportions/' + f1 + '" style="width:75px; height:100px;"/></div>' +
@@ -572,8 +563,14 @@ angular.module('starter.controllers', [])
                            '</div>',
                 title: 'How much?',
                 buttons: [
-                  { text: 'Save', onTap: function (e) { return 'Saved'; } },
-                  { text: 'Cancel', onTap: function (e) { return 'Cancel'; } }
+                  {
+                      text: 'Save', onTap: function (e) { return 'Saved'; },
+                      type: 'button-positive'
+                  },
+                  {
+                      text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                      type: 'button-positive'
+                  }
                 ]
             });
             ffAmountPopup.then(function (res) {
@@ -583,8 +580,7 @@ angular.module('starter.controllers', [])
     };
     $scope.showAmount = function (type, hp1, hp2) {
         $ionicPopup.show({
-            template: '<style>.popup { height:400px; }</style>' +
-                      '<div class="row" ng-controller="AddSubController">' +
+            template: '<div class="row" ng-controller="AddSubController">' +
                            '<div class="col text-center">' +
                                '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
                                '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
@@ -604,8 +600,14 @@ angular.module('starter.controllers', [])
                        '</div>',
             title: 'How much did you ' + type + '?',
             buttons: [
-              { text: 'Save', onTap: function (e) { return 'Saved'; } },
-              { text: 'Cancel', onTap: function (e) { return 'Cancel'; } }
+              {
+                  text: 'Save', onTap: function (e) { return 'Saved'; },
+                  type: 'button-positive'
+              },
+              {
+                  text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                  type: 'button-positive'
+              }
             ]
         });
     };
@@ -874,10 +876,89 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('EventController', function ($scope, $ionicPopover) {
-    $scope.select = function (eventType) {
-        document.getElementById(eventType).style.border = "1px solid black";
+.controller('CalendarController', function ($scope, $ionicPopup) {
+    $scope.showCalendar = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            $('#calendar').fullCalendar({
+                height: "auto",
+                header: {
+                    left: 'prev,next, today',
+                    center: 'title',
+                    right: 'basicDay, basicWeek, month'
+                },
+                defaultView: 'basicDay',
+                events: doc['E'],
+                eventRender: function (event, element) {
+                    element.click(function () {
+                        //format date and time
+                        var date = String(event.start._d).split(' ').slice(0,4);
+                        date = String(date).split(',').join(' ');
+                        var startTime = String(event.start._i).substr(String(event.start._i).indexOf("T") + 1);
+                        var endTime = String(event.end._i).substr(String(event.end._i).indexOf("T") + 1);
+                        //view event
+                        var alertPopup = $ionicPopup.show({
+                            title: event.title,
+                            template:
+                                '<p><b>' + event.type + '</b></p>' +
+                                '<p><b>Date</b>: ' + date + '</p>' +
+                                '<p><b>Start</b>: ' + startTime + '</p>' +
+                                '<p><b>End</b>: ' + endTime + '</p>' +
+                                '<p><b>Venue</b>: ' + event.venue + '</p>' +
+                                '<p><b>Description</b>: ' + event.description + '</p>',
+                            buttons: [
+                              {
+                                  text: 'Close', onTap: function (e) { return 'Cancel'; },
+                                  type: 'button-positive'
+                              }
+                            ],
+                        });
+                    })
+                }
+            })
+        });
     };
+
+    $scope.addEvent = function () {
+        var db = PouchDB('momlink');
+        switch ($("#type").val()) {
+            case 'OB Appt':
+                color = 'blue';
+                break;
+            case 'Test':
+                color = 'red';
+                break;
+            case 'Visit':
+                color = 'green';
+                break;
+            case 'Ultra':
+                color = 'orange';
+                break;
+            case 'Class':
+                color = 'purple';
+                break;
+            case 'Other':
+                color = 'black';
+                break;
+        }
+        start = $('#date').val() + "T" + $('#start').val();
+        end = $('#date').val() + "T" + $('#end').val();
+        db.get('events').then(function (doc) {
+            var event = {
+                "title": $('#name').val(),
+                "type": $("#type").val(),
+                "start": start,
+                "end": end,
+                "venue": $('#venue').val(),
+                "description": $('#description').val(),
+                "color": color
+            };
+            doc['E'].push(event);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('calendar.html', 'Calendar');
+        });
+    }
 })
 
 .controller('SliderController', function ($scope, $ionicSlideBoxDelegate) {
@@ -1157,6 +1238,14 @@ angular.module('starter.controllers', [])
                             "for": "BABE Class"
                         }
                     ]
+                });
+            }
+        });
+        db.get('events').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "events",
+                    'E': []
                 });
             }
         });
