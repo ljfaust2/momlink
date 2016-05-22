@@ -1,26 +1,24 @@
 ﻿<ion-pane>
     <ion-view>
         <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
-            <div>
-                <ul>
-                    <li ng-repeat="track in trackList">
-                        <div ng-show="$index % 2 == 0">
-                            <div class="row">
-                                <div class="col text-center">
-                                    <input type="image" src={{track.image}} ng-click="goToHistory(track.link)" name="type" style="width:100px;height:100px; border:1px solid black;" alt={{track.type}}>
-                                    <p>{{track.type}}</p>
-                                </div>
-                                <div ng-show="trackList[$index+1] != null" class="col text-center">
-                                    <input type="image" src={{trackList[$index+1].image}} ng-click="goToHistory(trackList[$index+1].link)" name="type" style="width:100px;height:100px; border:1px solid black;" alt={{trackList[$index+1].type}}>
-                                    <p>{{trackList[$index+1].type}}</p>
-                                </div>
-                                <div ng-show="trackList[$index+1] == null" class="col text-center">
-                                </div>
+            <ul>
+                <li ng-repeat="track in trackList">
+                    <div ng-show="$index % 2 == 0">
+                        <div class="row">
+                            <div class="col text-center">
+                                <input type="image" src={{track.image}} ng-click="goToHistory(track.link)" name="type" style="width:100px;height:100px; border:1px solid black;" alt={{track.type}}>
+                                <p>{{track.type}}</p>
+                            </div>
+                            <div ng-show="trackList[$index+1] != null" class="col text-center">
+                                <input type="image" src={{trackList[$index+1].image}} ng-click="goToHistory(trackList[$index+1].link)" name="type" style="width:100px;height:100px; border:1px solid black;" alt={{trackList[$index+1].type}}>
+                                <p>{{trackList[$index+1].type}}</p>
+                            </div>
+                            <div ng-show="trackList[$index+1] == null" class="col text-center">
                             </div>
                         </div>
-                    </li>
-                </ul>
-            </div>
+                    </div>
+                </li>
+            </ul>
         </ion-content>
     </ion-view>
 </ion-pane>

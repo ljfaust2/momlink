@@ -1,4 +1,4 @@
-angular.module('starter.controllers', [])
+angular.module('momlink.controllers', [])
 
 .controller('HeaderBarController', function ($scope, $ionicPopup, $location, $document, $compile) {
     $scope.showDate = function () {
@@ -36,7 +36,22 @@ angular.module('starter.controllers', [])
     $scope.toggleTopMenu = function () {
         var menu = document.getElementsByTagName('ion-top-menu')[0];
         var pane = document.getElementsByTagName('ion-pane')[0];
+        //change icon color
+        if (document.getElementById('menuIcon').classList.contains('menu-icon')) {
+            document.getElementById('menuIcon').classList.remove('menu-icon')
+        }
+        else {
+            document.getElementById('menuIcon').classList.add('menu-icon')
+        }
+        //raise/lower menu
         menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
+    };
+
+    $scope.closeTopMenu = function () {
+        var menu = document.getElementsByTagName('ion-top-menu')[0];
+        if (menu.offsetHeight == 340) {
+            $scope.toggleTopMenu();
+        }
     };
 
     //Menu Links
@@ -53,35 +68,92 @@ angular.module('starter.controllers', [])
             }
         });
     };
-    $scope.register = function (value) {
-        window.location = "templates/main.html";
-    };
     $scope.logout = function () {
         window.localStorage.removeItem('trackType');
         window.localStorage.removeItem('date');
         window.location = "../index.html";
     };
-    //Track Link
+    //Track Links
     $scope.goToHistory = function (type) {
         window.localStorage.setItem('trackType', type)
         $scope.goToLink('history.html', 'History')
     };
+    $scope.goToAddEvent = function () {
+        var type = window.localStorage.getItem('trackType');
+        title = type.split(/(?=[A-Z])/).splice(1, 100)
+        title = title.join(' ')
+        $scope.goToLink(type + ".html", 'Add ' + title);
+    };
     $scope.goToAct = function (act) {
         window.localStorage.setItem('selectAct', act)
         $scope.goToLink('addActivityTime.html', 'Add Activity Time');
-    };
-    $scope.goToAddEvent = function () {
-        var type = window.localStorage.getItem('trackType');
-        $scope.goToLink(type + ".html", 'History');
     };
     //Inbox Link
     $scope.goToMessage = function (type) {
         window.localStorage.setItem('recipient', type);
         $scope.goToLink('message.html', 'New Message');
     };
+
+    //Create Event
+    $scope.createEvent = function (link, title) {
+        $ionicPopup.show({
+            title: 'Create Event',
+            templateUrl: 'eventPopup.html',
+            buttons: [
+              {
+                  text: 'Create Event', onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      switch ($("#type").val()) {
+                          case 'OB Appt':
+                              color = 'blue';
+                              break;
+                          case 'Test':
+                              color = 'red';
+                              break;
+                          case 'Visit':
+                              color = 'green';
+                              break;
+                          case 'Ultra':
+                              color = 'orange';
+                              break;
+                          case 'Class':
+                              color = 'purple';
+                              break;
+                          case 'Other':
+                              color = 'black';
+                              break;
+                      }
+                      start = $('#date').val() + "T" + $('#start').val();
+                      end = $('#date').val() + "T" + $('#end').val();
+                      db.get('events').then(function (doc) {
+                          var event = {
+                              "title": $('#name').val(),
+                              "type": $("#type").val(),
+                              "start": start,
+                              "end": end,
+                              "venue": $('#venue').val(),
+                              "description": $('#description').val(),
+                              "color": color
+                          };
+                          doc['E'].push(event);
+                          return db.put(doc);
+                      }).then(function (doc) {
+                          $scope.goToLink(link, title);
+                      });
+                      return 'Create';
+                  },
+                  type: 'button-positive'
+              },
+            {
+                text: 'Cancel', onTap: function (e) { return 'Close'; },
+                type: 'button-stable'
+            }
+            ],
+        });
+    };
 })
 
-.controller('DietController', function ($scope) {
+.controller('DietController', function ($scope, $ionicPopup) {
     $scope.dietCircle = function (id, size, min) {
         var bg = document.getElementById(id);
         var ctx = ctx = bg.getContext('2d');
@@ -123,7 +195,165 @@ angular.module('starter.controllers', [])
         }
         else { ctx.strokeStyle = '#2486ae'; }
         draw(size / 100);
+    };
+    $scope.showFoodFluid = function (food, fluid, hp1, hp2, f1, f2) {
+        $scope.choice = $ionicPopup.show({
+            template: '<div class="text-center">' +
+                        '<img src="../img/food/' + food + '" ng-click="showFoodAmount()" style="width:100px; height:100px" />' +
+                        '<img src="../img/food/' + fluid + '" ng-click="showFluidAmount()" style="width:100px; height:100px" />' +
+                      '</div>',
+            title: 'What did you eat?',
+            scope: $scope
+        });
+        $scope.showFoodAmount = function () {
+            ffAmountPopup = $ionicPopup.show({
+                template: '<div class="row" ng-controller="AddSubController">' +
+                               '<div class="col text-center">' +
+                                   '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
+                                   '<div class="row">' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                   '</div>' +
+                               '</div>' +
+                               '<div class="col text-center">' +
+                                   '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
+                                   '<div class="row">' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                   '</div>' +
+                               '</div>' +
+                           '</div>',
+                title: 'How much?',
+                buttons: [
+                  {
+                      text: 'Save', onTap: function (e) { return 'Saved'; },
+                      type: 'button-positive'
+                  },
+                  {
+                      text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                      type: 'button-positive'
+                  }
+                ]
+            });
+            ffAmountPopup.then(function (res) {
+                $scope.choice.close();
+            });
+        };
+        $scope.showFluidAmount = function () {
+            ffAmountPopup = $ionicPopup.show({
+                template: '<div class="row" ng-controller="AddSubController">' +
+                               '<div class="col text-center">' +
+                                   '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + f1 + '" style="width:75px; height:100px;"/></div>' +
+                                   '<div class="row">' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                   '</div>' +
+                               '</div>' +
+                               '<div class="col text-center">' +
+                                   '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + f2 + '" style="width:75px; height:100px;" /></div>' +
+                                   '<div class="row">' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                   '</div>' +
+                               '</div>' +
+                           '</div>',
+                title: 'How much?',
+                buttons: [
+                  {
+                      text: 'Save', onTap: function (e) { return 'Saved'; },
+                      type: 'button-positive'
+                  },
+                  {
+                      text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                      type: 'button-positive'
+                  }
+                ]
+            });
+            ffAmountPopup.then(function (res) {
+                $scope.choice.close();
+            });
+        };
+    };
+    $scope.showAmount = function (type, hp1, hp2) {
+        $ionicPopup.show({
+            template: '<div class="row" ng-controller="AddSubController">' +
+                           '<div class="col text-center">' +
+                               '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                               '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
+                               '<div class="row">' +
+                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
+                               '</div>' +
+                           '</div>' +
+                           '<div class="col text-center">' +
+                               '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
+                               '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
+                               '<div class="row">' +
+                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
+                               '</div>' +
+                           '</div>' +
+                       '</div>',
+            title: 'How much did you ' + type + '?',
+            buttons: [
+              {
+                  text: 'Save', onTap: function (e) { return 'Saved'; },
+                  type: 'button-positive'
+              },
+              {
+                  text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                  type: 'button-positive'
+              }
+            ]
+        });
+    };
+})
 
+.controller('CalendarController', function ($scope, $ionicPopup) {
+    $scope.showCalendar = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            $('#calendar').fullCalendar({
+                height: "auto",
+                header: {
+                    left: 'prev,next, today',
+                    center: 'title',
+                    right: 'basicDay, basicWeek, month'
+                },
+                defaultView: 'basicDay',
+                events: doc['E'],
+                eventRender: function (event, element) {
+                    element.click(function () {
+                        //format date and time
+                        var date = String(event.start._d).split(' ').slice(0, 4);
+                        date = String(date).split(',').join(' ');
+                        var startTime = String(event.start._i).substr(String(event.start._i).indexOf("T") + 1);
+                        var endTime = String(event.end._i).substr(String(event.end._i).indexOf("T") + 1);
+                        //view event
+                        var alertPopup = $ionicPopup.show({
+                            title: event.title,
+                            template:
+                                '<p><b>' + event.type + '</b></p>' +
+                                '<p><b>Date</b>: ' + date + '</p>' +
+                                '<p><b>Start</b>: ' + startTime + '</p>' +
+                                '<p><b>End</b>: ' + endTime + '</p>' +
+                                '<p><b>Venue</b>: ' + event.venue + '</p>' +
+                                '<p><b>Description</b>: ' + event.description + '</p>',
+                            buttons: [
+                              {
+                                  text: 'Close', onTap: function (e) { return 'Cancel'; },
+                                  type: 'button-positive'
+                              }
+                            ],
+                        });
+                    })
+                }
+            })
+        });
     };
 })
 
@@ -216,7 +446,6 @@ angular.module('starter.controllers', [])
                     buttons: [
                       {
                           text: 'Register', onTap: function (e) {
-                              //database stuff
                               //get index of class
                               var db = PouchDB('momlink');
                               db.get('classes').then(function (doc) {
@@ -368,6 +597,251 @@ angular.module('starter.controllers', [])
     }
 })
 
+.controller('EducationController', function ($scope, $ionicPopup, $timeout, $compile) {
+    $scope.showShared = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('articles').then(function (doc) {
+            shared = doc['shared'];
+            html += '<div class="list">';
+            for (i in shared) {
+                html += '<div class="item item-thumbnail-left">';
+                html += `<img onclick="window.open('` + shared[i]['link'] + `', '_system')" src="../img/temp/article.jpg">`;
+                html += '<h2>' + shared[i]['title'] + '</h2>';
+                html += '<p>' + shared[i]['description'] + '</p>';
+                html += `<button class="button button-small button-positive" ng-click="read('` + shared[i]['link'] + `')">Read</button>&nbsp;&nbsp;<button class="button button-small button-calm" ng-click="didntRead('` + shared[i]['link'] + `')">Didn\'t Read</button>`;
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('shared').innerHTML = html;
+            $compile(document.getElementById('shared'))($scope);
+        });
+    };
+    $scope.showHistory = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('articles').then(function (doc) {
+            history1 = doc['history'];
+            html += '<div class="list">';
+            for (i in history1) {
+                html += '<div class="item item-thumbnail-left">';
+                html += `<img onclick="window.open('` + history1[i]['link'] + `', '_system')" src="../img/temp/article.jpg">`;
+                html += '<h2>' + history1[i]['title'] + '</h2>';
+                html += '<p>' + history1[i]['description'] + '</p>';
+                if (history1[i]['read'] == 'Yes') {
+                    html += '<p>Read for: ' + history1[i]['length'] + ' minutes</p>';
+                    html += '<p>' + history1[i]['date'] + '</p>';
+                }
+                else {
+                    html += '<p>Didn\'t Read</p>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('history').innerHTML = html;
+            $compile(document.getElementById('history'))($scope);
+        });
+    };
+    $scope.read = function (link) {
+        var db = PouchDB('momlink');
+        var index = 0;
+        //ask how long they read
+        $ionicPopup.prompt({
+            title: 'Time Spent Reading Article (Minutes)',
+            inputType: 'number',
+        }).then(function (res) {
+            //if they hit 'cancel' then do nothing
+            if (String(res) != 'undefined') {
+                db.get('articles').then(function (doc) {
+                    //get article         
+                    shared = doc['shared'];
+                    for (i in shared) {
+                        if (shared[i]['link'] == link) {
+                            index = i;
+                        }
+                    }
+                    //get date
+                    var today = new Date();
+                    var dd = today.getDate();
+                    var mm = today.getMonth() + 1; //January is 0
+                    var yyyy = today.getFullYear();
+                    if (dd < 10) {
+                        dd = '0' + dd
+                    }
+                    if (mm < 10) {
+                        mm = '0' + mm
+                    }
+                    today = mm + '/' + dd + '/' + yyyy;
+                    //add info
+                    var article = {
+                        "title": doc['shared'][index]['title'],
+                        "description": doc['shared'][index]['description'],
+                        "link": doc['shared'][index]['link'],
+                        "read": 'Yes',
+                        "length": res,
+                        "date": today,
+                    };
+                    //move to history
+                    doc['history'].push(article);
+                    //delete from shared
+                    doc['shared'].splice(index, 1);
+                    return db.put(doc);
+                }).then(function (doc) {
+                    $scope.goToLink('education.html', 'Education');
+                });
+            }
+        });
+    };
+    $scope.didntRead = function (link) {
+        var db = PouchDB('momlink');
+        var index = 0;
+        db.get('articles').then(function (doc) {
+            //get article         
+            shared = doc['shared'];
+            for (i in shared) {
+                if (shared[i]['link'] == link) {
+                    index = i;
+                }
+            }
+            //add info
+            var article = {
+                "title": doc['shared'][index]['title'],
+                "description": doc['shared'][index]['description'],
+                "link": doc['shared'][index]['link'],
+                "read": 'No',
+                "length": '',
+                "date": '',
+            };
+            //move to history
+            doc['history'].push(article);
+            //delete from shared
+            doc['shared'].splice(index, 1);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('education.html', 'Education');
+        });
+    };
+})
+
+.controller('ReferralController', function ($scope, $ionicPopup, $timeout, $compile) {
+    $scope.showReferrals = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('referrals').then(function (doc) {
+            referrals = doc['R'];
+            html += '<div class="list">';
+            for (i in referrals) {
+                html += '<div class="item item-thumbnail-left">';
+                html += `<img src="">`;
+                html += '<h2>' + referrals[i]['name'] + '</h2>';
+                html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
+                html += '<p>Address: ' + referrals[i]['address'] + '</p>';
+                html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
+                html += '<p>Email: ' + referrals[i]['email'] + '</p>';
+                if (referrals[i]['meeting'] == 'no') {
+                    html += `<button class="button button-small button-positive" ng-click="schedule('` + referrals[i]['name'] + `')">Schedule Meeting</button>`;
+                }
+                else {
+                    html += `<button class="button button-small button-stable" ng-click="schedule()">Not Visited</button>`;
+                }
+
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('referrals').innerHTML = html;
+            $compile(document.getElementById('referrals'))($scope);
+        });
+    };
+
+    $scope.schedule = function (name) {
+        $ionicPopup.show({
+            title: 'Schedule By',
+            cssClass: 'popup-vertical-buttons',
+            buttons: [
+            {
+                text: 'Call', onTap: function (e) {
+                    $scope.createEvent('referrals.html', 'Referrals').then(updateDatabase())
+
+                    return 'Call';
+                },
+                type: 'button-positive'
+            },
+            {
+                text: 'Email', onTap: function (e) {
+                    $scope.createEvent('referrals.html', 'Referrals').then(function (res) {
+                        updateDatabase();
+                    })
+                    return 'Email';
+                },
+                type: 'button-positive'
+            },
+            {
+                text: 'Already Scheduled', onTap: function (e) {
+                    $scope.createEvent('referrals.html', 'Referrals').then(function (res) {
+                        updateDatabase();
+                    })
+                    return 'Already Scheduled';
+                },
+                type: 'button-positive'
+            },
+            {
+                text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                type: 'button-stable'
+            }
+            ],
+        });
+
+        function updateDatabase() {
+            var db = PouchDB('momlink');
+            var index = 0;
+            db.get('referrals').then(function (doc) {
+                //get referral         
+                referral = doc['R'];
+                for (i in referral) {
+                    if (referral[i]['name'] == name) {
+                        index = i;
+                    }
+                }
+                //updated meeting status
+                referral[index]['meeting'] = 'yes'
+                console.log('what')
+                //update database
+                return db.put(doc);
+            }).then(function (doc) {
+                $scope.goToLink('referrals.html', 'Referrals');
+            });
+        }
+    }
+})
+
+.controller('JournalController', function ($scope) {
+    $scope.renderPhotoJournal = function () {
+        var start;
+        var end;
+        var db = PouchDB('momlink');
+        //get start/end date
+        db.get('profile').then(function (doc) {
+            start = doc['startDate'];
+            end = doc['deliveryDate'];
+            //if these values are null, say they must set start and end dates
+        }).then(function (doc) {
+            var html;
+            //convert start/end date to moment
+            start = moment(start)
+            end = moment(end)
+            //generate weeks until end
+            do{             
+                html += '<div class="row">' + String(moment(start).format('ddd MMM Do')) + '-' + String(moment(start.add(6, 'days')).format('ddd MMM Do')) + '</div>';
+                start.add(1, 'days')
+                console.log(String(start))
+                console.log(String(end))
+            }while(start < end)
+
+            document.getElementById('photoJournal').innerHTML = html;
+        });       
+    }
+})
+
 .controller('HistoryController', function ($scope) {
     formatDate = function (d) {
         var t
@@ -404,213 +878,84 @@ angular.module('starter.controllers', [])
     };
 
     $scope.loadHistory = function () {
-        var type;
-        switch (window.localStorage.getItem('trackType')) {
-            case 'addActivity':
-                type = 'A';
-                break;
-            case 'addBabyHeartRate':
-                type = 'BHR';
-                break;
-            case 'addBloodGlucose':
-                type = 'BG';
-                break;
-            case 'addBloodIron':
-                type = 'BI';
-                break;
-            case 'addBloodPressure':
-                type = 'BP';
-                break;
-            case 'addCaffeine':
-                type = 'CA';
-                break;
-            case 'addCigarette':
-                type = 'CI';
-                break;
-            case 'addFood':
-                type = 'D';
-                break;
-            case 'addKicks':
-                type = 'K';
-                break;
-            case 'addMood':
-                type = 'M';
-                break;
-            case 'addPain':
-                type = 'PA';
-                break;
-            case 'addPill':
-                type = 'PI';
-                break;
-            case 'addStress':
-                type = 'S';
-                break;
-            case 'addWeight':
-                type = 'W';
-                break;
+        //diet is handled differently
+        var el = window.localStorage.getItem('trackType');
+        if (el == 'addFood') {
+            $scope.goToLink('addFood.html', 'Diet')
         }
-        var db = PouchDB('momlink');
-        db.get('track').then(function (doc) {
-            var date = new Date(window.localStorage.getItem('date'));
-            date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
-            var hist = '';
-            elements = doc[type]
-            for (var i in elements) {
-                if (date == elements[i]["date"]) {
-                    if (type == 'A') {
-                        hist += '<center><div class="item">' + elements[i]["time"] + ' &nbsp; Act: ' + elements[i]["act"] + ' &nbsp; Length: ' + elements[i]["value"] + '</div></center>';
-                    }
-                    else {
-                        hist += '<center><div class="item">Time: ' + elements[i]["time"] + '&nbsp; &nbsp; &nbsp; ' + elements[i]["value"] + '</div></center>';
+        else {
+            var type;
+            switch (window.localStorage.getItem('trackType')) {
+                case 'addActivity':
+                    type = 'A';
+                    break;
+                case 'addBabyHeartRate':
+                    type = 'BHR';
+                    break;
+                case 'addBloodGlucose':
+                    type = 'BG';
+                    break;
+                case 'addBloodIron':
+                    type = 'BI';
+                    break;
+                case 'addBloodPressure':
+                    type = 'BP';
+                    break;
+                case 'addCaffeine':
+                    type = 'CA';
+                    break;
+                case 'addCigarette':
+                    type = 'CI';
+                    break;
+                case 'addFood':
+                    type = 'D';
+                    break;
+                case 'addKicks':
+                    type = 'K';
+                    break;
+                case 'addMood':
+                    type = 'M';
+                    break;
+                case 'addPain':
+                    type = 'PA';
+                    break;
+                case 'addPill':
+                    type = 'PI';
+                    break;
+                case 'addStress':
+                    type = 'S';
+                    break;
+                case 'addWeight':
+                    type = 'W';
+                    break;
+            }
+            var db = PouchDB('momlink');
+            db.get('track').then(function (doc) {
+                var date = new Date(window.localStorage.getItem('date'));
+                date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
+                var hist = '';
+                elements = doc[type]
+                for (var i in elements) {
+                    if (date == elements[i]["date"]) {
+                        if (type == 'A') {
+                            hist += '<center><div class="item">' + elements[i]["time"] + ' &nbsp; Act: ' + elements[i]["act"] + ' &nbsp; Length: ' + elements[i]["value"] + '</div></center>';
+                        }
+                        else {
+                            hist += '<center><div class="item">Time: ' + elements[i]["time"] + '&nbsp; &nbsp; &nbsp; ' + elements[i]["value"] + '</div></center>';
+                        }
                     }
                 }
-            }
-            //if date has no values, then display default image
-            if (hist == '') {
-                hist += `<div class="row">`;
-                hist += `<div class="col text-center">`;
-                hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
-                hist += `</div></div>`;
-            }
-            document.getElementById('history').innerHTML = hist;
-        })
-    };
-})
-
-.controller('PopupCtrl', function ($scope, $ionicPopup, $timeout) {
-    $scope.uploadTrack = function () {
-        var alertPopup = $ionicPopup.alert({
-            title: 'Your info has been sent'
-        });
-        alertPopup.then(function (res) {
-            //dbSend tracking info
-        });
-    };
-    $scope.addEvent = function () {
-        var alertPopup = $ionicPopup.alert({
-            title: 'Event added'
-        });
-        alertPopup.then(function (res) {
-            //addEvent
-            window.location = "calendar.html"
-        });
-    };
-
-    $scope.showFoodFluid = function (food, fluid, hp1, hp2, f1, f2) {
-        $scope.choice = $ionicPopup.show({
-            template: '<div class="text-center">' +
-                        '<img src="../img/food/' + food + '" ng-click="showFoodAmount()" style="width:100px; height:100px" />' +
-                        '<img src="../img/food/' + fluid + '" ng-click="showFluidAmount()" style="width:100px; height:100px" />' +
-                      '</div>',
-            title: 'What did you eat?',
-            scope: $scope
-        });
-        $scope.showFoodAmount = function () {
-            ffAmountPopup = $ionicPopup.show({
-                template: '<div class="row" ng-controller="AddSubController">' +
-                               '<div class="col text-center">' +
-                                   '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
-                                   '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                   '</div>' +
-                               '</div>' +
-                               '<div class="col text-center">' +
-                                   '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
-                                   '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                   '</div>' +
-                               '</div>' +
-                           '</div>',
-                title: 'How much?',
-                buttons: [
-                  {
-                      text: 'Save', onTap: function (e) { return 'Saved'; },
-                      type: 'button-positive'
-                  },
-                  {
-                      text: 'Cancel', onTap: function (e) { return 'Cancel'; },
-                      type: 'button-positive'
-                  }
-                ]
-            });
-            ffAmountPopup.then(function (res) {
-                $scope.choice.close();
-            });
+                //if date has no values, then display default image
+                if (hist == '') {
+                    hist += `<div class="row">`;
+                    hist += `<div class="col text-center">`;
+                    hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
+                    hist += `</div></div>`;
+                }
+                document.getElementById('history').innerHTML = hist;
+            })
         };
-        $scope.showFluidAmount = function () {
-            ffAmountPopup = $ionicPopup.show({
-                template: '<div class="row" ng-controller="AddSubController">' +
-                               '<div class="col text-center">' +
-                                   '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + f1 + '" style="width:75px; height:100px;"/></div>' +
-                                   '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                   '</div>' +
-                               '</div>' +
-                               '<div class="col text-center">' +
-                                   '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + f2 + '" style="width:75px; height:100px;" /></div>' +
-                                   '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                   '</div>' +
-                               '</div>' +
-                           '</div>',
-                title: 'How much?',
-                buttons: [
-                  {
-                      text: 'Save', onTap: function (e) { return 'Saved'; },
-                      type: 'button-positive'
-                  },
-                  {
-                      text: 'Cancel', onTap: function (e) { return 'Cancel'; },
-                      type: 'button-positive'
-                  }
-                ]
-            });
-            ffAmountPopup.then(function (res) {
-                $scope.choice.close();
-            });
-        };
-    };
-    $scope.showAmount = function (type, hp1, hp2) {
-        $ionicPopup.show({
-            template: '<div class="row" ng-controller="AddSubController">' +
-                           '<div class="col text-center">' +
-                               '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                               '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
-                               '<div class="row">' +
-                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                               '</div>' +
-                           '</div>' +
-                           '<div class="col text-center">' +
-                               '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                               '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
-                               '<div class="row">' +
-                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                   '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                               '</div>' +
-                           '</div>' +
-                       '</div>',
-            title: 'How much did you ' + type + '?',
-            buttons: [
-              {
-                  text: 'Save', onTap: function (e) { return 'Saved'; },
-                  type: 'button-positive'
-              },
-              {
-                  text: 'Cancel', onTap: function (e) { return 'Cancel'; },
-                  type: 'button-positive'
-              }
-            ]
-        });
-    };
+    }
 })
 
 .controller('PopOverController', function ($scope, $ionicPopover) {
@@ -876,91 +1221,6 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('CalendarController', function ($scope, $ionicPopup) {
-    $scope.showCalendar = function () {
-        var db = PouchDB('momlink');
-        db.get('events').then(function (doc) {
-            $('#calendar').fullCalendar({
-                height: "auto",
-                header: {
-                    left: 'prev,next, today',
-                    center: 'title',
-                    right: 'basicDay, basicWeek, month'
-                },
-                defaultView: 'basicDay',
-                events: doc['E'],
-                eventRender: function (event, element) {
-                    element.click(function () {
-                        //format date and time
-                        var date = String(event.start._d).split(' ').slice(0,4);
-                        date = String(date).split(',').join(' ');
-                        var startTime = String(event.start._i).substr(String(event.start._i).indexOf("T") + 1);
-                        var endTime = String(event.end._i).substr(String(event.end._i).indexOf("T") + 1);
-                        //view event
-                        var alertPopup = $ionicPopup.show({
-                            title: event.title,
-                            template:
-                                '<p><b>' + event.type + '</b></p>' +
-                                '<p><b>Date</b>: ' + date + '</p>' +
-                                '<p><b>Start</b>: ' + startTime + '</p>' +
-                                '<p><b>End</b>: ' + endTime + '</p>' +
-                                '<p><b>Venue</b>: ' + event.venue + '</p>' +
-                                '<p><b>Description</b>: ' + event.description + '</p>',
-                            buttons: [
-                              {
-                                  text: 'Close', onTap: function (e) { return 'Cancel'; },
-                                  type: 'button-positive'
-                              }
-                            ],
-                        });
-                    })
-                }
-            })
-        });
-    };
-
-    $scope.addEvent = function () {
-        var db = PouchDB('momlink');
-        switch ($("#type").val()) {
-            case 'OB Appt':
-                color = 'blue';
-                break;
-            case 'Test':
-                color = 'red';
-                break;
-            case 'Visit':
-                color = 'green';
-                break;
-            case 'Ultra':
-                color = 'orange';
-                break;
-            case 'Class':
-                color = 'purple';
-                break;
-            case 'Other':
-                color = 'black';
-                break;
-        }
-        start = $('#date').val() + "T" + $('#start').val();
-        end = $('#date').val() + "T" + $('#end').val();
-        db.get('events').then(function (doc) {
-            var event = {
-                "title": $('#name').val(),
-                "type": $("#type").val(),
-                "start": start,
-                "end": end,
-                "venue": $('#venue').val(),
-                "description": $('#description').val(),
-                "color": color
-            };
-            doc['E'].push(event);
-            return db.put(doc);
-        }).then(function (doc) {
-            $scope.goToLink('calendar.html', 'Calendar');
-        });
-    }
-})
-
 .controller('SliderController', function ($scope, $ionicSlideBoxDelegate) {
     $scope.nextSlide = function () {
         $ionicSlideBoxDelegate.next();
@@ -968,7 +1228,6 @@ angular.module('starter.controllers', [])
 })
 
 .controller('CameraController', function ($scope) {
-
     var pictureSource;
     var destinationType; // sets the format of returned value
 
@@ -1181,6 +1440,7 @@ angular.module('starter.controllers', [])
 
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink');
+        //db.destroy()
         db.get('loginInfo').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -1267,6 +1527,106 @@ angular.module('starter.controllers', [])
                     'PI': [],
                     'S': [],
                     "W": [],
+                });
+            }
+        });
+        db.get('articles').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "articles",
+                    "shared": [
+                        {
+                            "title": "Pregnancy Center",
+                            "description": "Pregnancy center description",
+                            "link": "http://www.webmd.com/baby/",
+                            "read": "",
+                            "length": "",
+                            "date": ""
+                        },
+                        {
+                            "title": "Pregnancy Center2",
+                            "description": "Pregnancy center description2",
+                            "link": "something",
+                            "read": "",
+                            "length": "",
+                            "date": ""
+                        },
+                        {
+                            "title": "Pregnancy Center3",
+                            "description": "Pregnancy center description3",
+                            "link": "somethingElse",
+                            "read": "",
+                            "length": "",
+                            "date": ""
+                        },
+                        {
+                            "title": "Pregnancy Center4",
+                            "description": "Pregnancy center description4",
+                            "link": "something4",
+                            "read": "",
+                            "length": "",
+                            "date": ""
+                        },
+                        {
+                            "title": "Pregnancy Center5",
+                            "description": "Pregnancy center description5",
+                            "link": "something5",
+                            "read": "",
+                            "length": "",
+                            "date": ""
+                        }
+                    ],
+                    "history": [
+                    ]
+                });
+            }
+        });
+        db.get('referrals').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "referrals",
+                    "R": [
+                        {
+                            "name": "First Last",
+                            "address": "555 Chicago",
+                            "phone": "555-555-5555",
+                            "email": "first@email.com",
+                            "date": "3/22/2016",
+                            "meeting": "no"
+                        },
+                        {
+                            "name": "First Last1",
+                            "address": "555 Chicago1",
+                            "phone": "555-555-5555",
+                            "email": "first@email.com1",
+                            "date": "3/23/2016",
+                            "meeting": "no"
+                        },
+                        {
+                            "name": "First Last2",
+                            "address": "555 Chicago2",
+                            "phone": "555-555-5555",
+                            "email": "first@email.com2",
+                            "date": "3/24/2016",
+                            "meeting": "no"
+                        },
+                        {
+                            "name": "First Last3",
+                            "address": "555 Chicago3",
+                            "phone": "555-555-5555",
+                            "email": "first@email.com3",
+                            "date": "3/24/2016",
+                            "meeting": "no"
+                        },
+                        {
+                            "name": "First Last4",
+                            "address": "555 Chicago4",
+                            "phone": "555-555-5555",
+                            "email": "first@email.com4",
+                            "date": "3/25/2016",
+                            "meeting": "no"
+                        }
+                    ],
                 });
             }
         });
@@ -1464,7 +1824,7 @@ angular.module('starter.controllers', [])
     }
 })
 
-.controller('DataController', function ($scope, $ionicSideMenuDelegate) {
+.controller('DataController', function ($scope, $ionicSideMenuDelegate, $compile) {
     $scope.actList = [
       { type: "Bike", image: "../img/activities/bike.png" },
       { type: "Clean", image: "../img/activities/clean.png" },
@@ -1484,15 +1844,29 @@ angular.module('starter.controllers', [])
     $scope.notesList = [
       { subject: "Note Subject", description: "This is a description" }
     ]
-    $scope.referList = [
-      { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" },
-      { name: "First Last", referDate: "3/22/2016", address: "123 Street, Chicago IL, 60290", phone: "555-555-5555", email: "firstLast@email.com" }
-    ]
     $scope.pnccList = [
       { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc1.jpg" },
       { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc2.jpg" },
       { name: "PNCC3", email: "pncc3@gmail.com", image: "../img/temp/pncc3.jpg" }
     ]
+    $scope.showReferralContacts = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('referrals').then(function (doc) {
+            referrals = doc['R'];
+            html += '<div class="list">';
+            for (i in referrals) {
+                html += `<div class="item item-thumbnail-left" ng-click="goToMessage('` + referrals[i]['email'] + `')">`;
+                html += `<img src="">`;
+                html += '<h2>' + referrals[i]['name'] + '</h2>';
+                html += '<p>' + referrals[i]['email'] + '</p>';
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('referrals').innerHTML = html;
+            $compile(document.getElementById('referrals'))($scope);
+        });
+    };
     $scope.inventoryList = [
       { item: "Baby Carrier", price: "7" },
       { item: "Baby Wipes", price: "1" },

@@ -1,4 +1,4 @@
-angular.module('starter', ['ionic', 'starter.controllers'])
+angular.module('momlink', ['ionic', 'momlink.controllers'])
 angular.module('plugins', ['ionic', 'ionic-datepicker'])
 
 .run(function ($ionicPlatform) {

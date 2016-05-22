@@ -7,11 +7,8 @@
             <div id='calendar' ng-init="showCalendar()"></div>
         </ion-content>
     </ion-view>
-    <ion-footer-bar class="bar-positive" ng-controller="PopupCtrl">
-        <!--<div id="uploadHistory" class="buttons" ng-click="uploadTrack()">
-            <button class="button button-icon icon ion-ios-cloud-upload-outline"></button>
-        </div>-->
-        <h1 class="title"></h1>
-        <div class="buttons" ng-click="goToLink('event.html', 'Add Event')"><button class="button button-icon icon ion-ios-plus-outline"></button></div>
-    </ion-footer-bar>
 </ion-pane>
+<ion-footer-bar class="bar-positive" style="padding:0px" ng-controller="CalendarController">
+    <div class="col text-left"><button class="button button-icon icon ion-ios-cloud-upload-outline"></button></div>
+    <div class="col text-right"><button class="button button-icon icon ion-ios-plus-outline" ng-click="createEvent('calendar.html', 'Calendar')"></button></div>
+</ion-footer-bar>

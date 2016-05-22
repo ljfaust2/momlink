@@ -2,6 +2,20 @@
     font-family: 'Roboto', sans-serif;
 }
 
+.menu-icon{
+  color:darkblue;
+}
+
+.popup-vertical-buttons button
+{
+    min-width: 100%;
+    margin-bottom: 5px;
+}
+.popup-vertical-buttons .popup-buttons
+{
+    display: block;
+}
+
 .center-vertical {
     display: -webkit-box;
     display: -moz-box;

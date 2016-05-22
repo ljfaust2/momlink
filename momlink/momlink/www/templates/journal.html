@@ -1,7 +1,7 @@
 ﻿﻿    <ion-pane>
     <ion-view overflow-scroll="false">
         <ion-nav-view></ion-nav-view>
-        <ion-tabs class="has-header tabs-positive tabs-icon-top">
+        <ion-tabs class="has-header tabs-positive tabs-icon-top" ng-controller="JournalController">
             <ion-tab title="PNCC Visits" icon-on="ion-ios-calendar" icon-off="ion-ios-calendar-outline">
                 <ion-view>
                     <ion-subheader-bar class="bar bar-subheader" style="border:0;">
@@ -43,7 +43,8 @@
             </ion-tab>
             <ion-tab title="Photo Journal" icon-on="ion-ios-grid-view" icon-off="ion-ios-grid-view">
                 <ion-view>
-                    <ion-content overflow-scroll="false" class="has-header padding">
+                    <ion-content overflow-scroll="false" class="has-header padding" ng-init="renderPhotoJournal()">
+                        <div id="photoJournal"></div>
                     </ion-content>
                 </ion-view>
             </ion-tab>

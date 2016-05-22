@@ -52082,7 +52082,7 @@ IonicModule
     },
     tabs: {
       style: PLATFORM,
-      position: PLATFORM
+      position: 'bottom'
     },
     templates: {
       maxPrefetch: PLATFORM
@@ -52182,7 +52182,7 @@ IonicModule
 
     tabs: {
       style: 'striped',
-      position: 'top'
+      position: 'bottom'
     },
 
     scrolling: {

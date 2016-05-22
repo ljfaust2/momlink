@@ -20,14 +20,14 @@
     <script src="../js/app.js"></script>
     <script src="../js/controllers.js"></script>
 </head>
-<body ng-app="starter" ng-controller="HeaderBarController">
+<body ng-app="momlink" ng-controller="HeaderBarController">
     <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
         <div class="buttons">
-            <button class="button button-icon icon ion-ios-home" ng-click="goToLink('home.html', 'Momlink')"></button>
+            <button class="button button-icon icon ion-ios-home" ng-click="goToLink('home.html', 'Momlink');closeTopMenu()"></button>
         </div>
         <h1 class="title" id="title">Momlink</h1>
         <div class="buttons">
-            <button class="button button-icon icon ion-navicon-round" ng-click="toggleTopMenu()"></button>
+            <button class="button button-icon" ng-click="toggleTopMenu()"><i id="menuIcon" class="icon ion-navicon-round"></i></button>
         </div>
     </ion-header-bar>
     <ion-top-menu class="text-center has-header">
@@ -49,7 +49,7 @@
             </div>
         </ion-content>
     </ion-top-menu>
-    <div id="content">
+    <div id="content" ng-click="closeTopMenu()">
         <ion-pane>
             <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="showDate()">
                 <h2 class="title" id="todaysDate"></h2>

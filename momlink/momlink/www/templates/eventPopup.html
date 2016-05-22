@@ -1,0 +1,46 @@
+﻿<div class="list list-inset" ng-app="plugins" ng-controller="CalendarController">
+    <div class="item item-divider">
+        Event Title/Type:
+    </div>
+    <label class="item item-input">
+        <input id="name" type="text" placeholder="Title">
+    </label>
+    <label class="item item-input item-select">
+        Type
+        <select id="type">
+            <option value="OB Appt" selected>OB Appt</option>
+            <option value="Test">Test</option>
+            <option value="Visit">Visit</option>
+            <option value="Ultra">Ultra</option>
+            <option value="Class">Class</option>
+            <option value="Other">Other</option>
+        </select>
+    </label>
+    <div class="item item-divider">
+        Date/Time:
+    </div>
+    <label class="item item-input item-stacked-label">
+        <span class="input-label">Date</span>
+        <input id="date" type="date">
+    </label>
+    <label class="item item-input item-stacked-label">
+        <span class="input-label">Start</span>
+        <input id="start" type="time" placeholder="Time">
+    </label>
+    <label class="item item-input item-stacked-label">
+        <span class="input-label">End</span>
+        <input id="end" type="time" placeholder="Time">
+    </label>
+    <div class="item item-divider">
+        Venue:
+    </div>
+    <label class="item item-input">
+        <input id="venue" type="text" placeholder="Venue">
+    </label>
+    <div class="item item-divider">
+        Description:
+    </div>
+    <label class="item item-input">
+        <textarea id="description" placeholder="Description"></textarea>
+    </label>
+</div>

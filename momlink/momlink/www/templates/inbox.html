@@ -1,11 +1,10 @@
 ﻿<ion-pane>
     <ion-view>
         <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
-
         </ion-content>
     </ion-view>
 </ion-pane>
-<ion-footer-bar class="bar-positive" style="padding:0px">
+<ion-footer-bar class="bar-positive" style="padding:0px" ng-controller="CalendarController">
     <div class="col text-left"><button class="button button-icon icon ion-ios-chatbubble-outline" ng-click="goToLink('inboxAskPNCC.html','Inbox')">Ask PNCC</button></div>
     <div class="col text-right"><button class="button button-icon icon ion-ios-paperplane-outline" ng-click="goToLink('inboxAskReferral.html','Inbox')">Ask Referral</button></div>
 </ion-footer-bar>
