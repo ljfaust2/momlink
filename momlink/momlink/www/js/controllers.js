@@ -1282,15 +1282,17 @@ angular.module('momlink.controllers', [])
 
         /*var db = PouchDB('momlink');
         db.get('profile').then(function (doc) {
-            _attachments: {
-                'profilePic': {
-                    content_type: 'image/png',
-                    data: imageData
-                }
-            }
+
+            console.log(doc)
+
+            //get content type and image data
+            var contents = {
+                "content_type": 'image/png',
+                "data": imageData,
+            };
+            //add picture to attachments
+            doc['profilePic'].push(contents)
             return db.put(doc);
-        }).then(function (doc) {
-            $scope.goToLink('referrals.html', 'Referrals');
         });*/
 
     }
@@ -1499,7 +1501,7 @@ angular.module('momlink.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "profile",
-                    "_attachments": {},
+                    "profilePic": [],
                     "name": "",
                     "email": "",
                     "age": "",
