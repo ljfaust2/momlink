@@ -1080,6 +1080,15 @@ angular.module('momlink.controllers', [])
             $('#dEmail').val(doc['doctorsEmail']);
             $('#dNumber').val(doc['doctorsPhone']);
         });
+
+        db.getAttachment('profile', 'profilePic.png').then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var img = document.getElementById('profilePic');
+            img.src = url;
+            console.log(url);
+        }).catch(function (err) {
+            console.log(err);
+        });
     }
 })
 
@@ -1278,9 +1287,9 @@ angular.module('momlink.controllers', [])
         // Show the captured photo
         // The in-line CSS rules are used to resize the image
         //
-        smallImage.src = "data:image/jpeg;base64," + imageData;
+        smallImage.src = "data:image/png;base64," + imageData;
 
-        /*var db = PouchDB('momlink');
+        var db = PouchDB('momlink');
         db.get('profile').then(function (doc) {
 
             console.log(doc)
@@ -1290,10 +1299,11 @@ angular.module('momlink.controllers', [])
                 "content_type": 'image/png',
                 "data": imageData,
             };
+
             //add picture to attachments
-            doc['profilePic'].push(contents)
+            doc['_attachments']['profilePic.png'] = contents
             return db.put(doc);
-        });*/
+        });
 
     }
     $scope.onPhotoURISuccess = function (imageURI) {
@@ -1501,6 +1511,7 @@ angular.module('momlink.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "profile",
+                    "_attachments": {},
                     "profilePic": [],
                     "name": "",
                     "email": "",
