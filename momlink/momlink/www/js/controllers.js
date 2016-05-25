@@ -389,7 +389,7 @@ angular.module('momlink.controllers', [])
         db.get('classes').then(function (doc) {
             classes = doc[planType];
             html += '<div class="list">';
-            html += '<div class="item item-button-right" style="background-color: #f5f5f5;">Prenatal Platinum Plan - ' + type + '<button class="button icon ion-ios-undo" ng-click="showPlans()"></button></div>';
+            html += '<div class="item item-button-left" style="background-color: #f5f5f5;">Prenatal Platinum Plan - ' + type + '<button class="button icon button-icon ion-ios-undo" ng-click="showPlans()"></button></div>';
             for (i in classes) {
                 html += '<div class="item item-button-right">';
                 html += classes[i]['class'] + ' ' + '(' + classes[i]['number'] + ')';
@@ -804,7 +804,6 @@ angular.module('momlink.controllers', [])
                 }
                 //updated meeting status
                 referral[index]['meeting'] = 'yes'
-                console.log('what')
                 //update database
                 return db.put(doc);
             }).then(function (doc) {
@@ -814,7 +813,7 @@ angular.module('momlink.controllers', [])
     }
 })
 
-.controller('JournalController', function ($scope) {
+.controller('JournalController', function ($scope, $compile) {
     $scope.renderPhotoJournal = function () {
         var start;
         var end;
@@ -825,20 +824,48 @@ angular.module('momlink.controllers', [])
             end = doc['deliveryDate'];
             //if these values are null, say they must set start and end dates
         }).then(function (doc) {
-            var html;
+            var html = '';
+            var colSpacer = 1;
             //convert start/end date to moment
+            today = moment()
             start = moment(start)
+            send = moment(start)
             end = moment(end)
             //generate weeks until end
-            do{             
-                html += '<div class="row">' + String(moment(start).format('ddd MMM Do')) + '-' + String(moment(start.add(6, 'days')).format('ddd MMM Do')) + '</div>';
+            html += '<div class="row">'
+            do {
+                //highlight the current week
+                if (start <= today && start.add(6, 'days') >= today) {
+                    start.subtract(6, 'days');
+                    displayDate = String(moment(start).format('ddd MMM Do') + ` - ` + moment(start.add(6, 'days')).format('ddd MMM Do'))
+                    html += `<div class="col-33 activeWeek padding" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
+                }
+                else {
+                    start.subtract(6, 'days');
+                    displayDate = String(moment(start).format('ddd MMM Do') + ` - ` + moment(start.add(6, 'days')).format('ddd MMM Do'))
+                    html += `<div class="col-33 padding" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
+                }
+                //3 per column
+                if (colSpacer % 3 == 0) {
+                    html += '</div><div class="row">'
+                }
                 start.add(1, 'days')
-                console.log(String(start))
-                console.log(String(end))
-            }while(start < end)
-
+                colSpacer++;
+            } while (start <= today && start <= end)
+            //could only extend to current day by using todays date instead of end
+            html += '</div>'
             document.getElementById('photoJournal').innerHTML = html;
-        });       
+            $compile(document.getElementById('photoJournal'))($scope);
+        });
+    }
+    $scope.renderGallery = function (sDate) {
+        //for each photo fill spot in grid
+        html = '<div class="list">';
+        html += '<div class="item item-button-left" style="background-color: #f5f5f5;"><b>' + sDate + '</b><button class="button icon button-icon ion-ios-undo" ng-click="renderPhotoJournal()"></button></div>';
+        html += '</div>';
+
+        document.getElementById('photoJournal').innerHTML = html;
+        $compile(document.getElementById('photoJournal'))($scope);
     }
 })
 
@@ -1252,6 +1279,20 @@ angular.module('momlink.controllers', [])
         // The in-line CSS rules are used to resize the image
         //
         smallImage.src = "data:image/jpeg;base64," + imageData;
+
+        /*var db = PouchDB('momlink');
+        db.get('profile').then(function (doc) {
+            _attachments: {
+                'profilePic': {
+                    content_type: 'image/png',
+                    data: imageData
+                }
+            }
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.goToLink('referrals.html', 'Referrals');
+        });*/
+
     }
     $scope.onPhotoURISuccess = function (imageURI) {
         // Uncomment to view the image file URI
@@ -1458,6 +1499,7 @@ angular.module('momlink.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "profile",
+                    "_attachments": {},
                     "name": "",
                     "email": "",
                     "age": "",

@@ -1,4 +1,4 @@
-* {
+*{
     font-family: 'Roboto', sans-serif;
 }
 
@@ -62,6 +62,10 @@
         -ms-flex-item-align: auto;
         align-self: auto;
     }
+
+.activeWeek {
+    border:3px solid #0866c6;
+}
 
 .activeBorder {
     border:3px solid gray;
