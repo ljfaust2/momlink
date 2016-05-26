@@ -22,7 +22,7 @@
 <body ng-app="momlink" ng-controller="HeaderBarController">
     <div id="content">
         <div id="database" ng-controller="DBController" ng-init="initializeDB()"></div>
-        <ion-content overflow-scroll="false" style="background-color:#0866c6">
+        <ion-content overflow-scroll="false" style="background-color:#0866c6" ng-init="autoLogin()">
             <center>
                 <div class="padding-top"><img src="img/temp/logo.PNG" height="175" width="175" alt="Momlink"></div>
                 <div class="list list-inset">

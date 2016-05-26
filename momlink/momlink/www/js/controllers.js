@@ -55,10 +55,22 @@ angular.module('momlink.controllers', [])
     };
 
     //Menu Links
+    $scope.autoLogin = function () {
+        //if they've logged in recently, skip the login screen
+        if (window.localStorage.getItem('username') != null && window.localStorage.getItem('password') != null) {
+            window.location = "templates/main.html";
+        }
+    };
+
     $scope.login = function (user, pass) {
         var db = PouchDB('momlink');
         db.get('loginInfo').then(function (doc) {
             if (user == doc['username'] && pass == doc['password']) {
+
+                window.localStorage.setItem('username', doc['username'])
+                window.localStorage.setItem('password', doc['password'])
+
+                //set username and password variables
                 window.location = "templates/main.html";
             }
             else {
@@ -69,6 +81,8 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.logout = function () {
+        window.localStorage.removeItem('username');
+        window.localStorage.removeItem('password');
         window.localStorage.removeItem('trackType');
         window.localStorage.removeItem('date');
         window.location = "../index.html";
@@ -1498,8 +1512,8 @@ angular.module('momlink.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "loginInfo",
-                    "username": "first",
-                    "password": "password",
+                    "username": "u",
+                    "password": "p",
                     "clientID": "08798a24b703fb7b9d5d231ab30008d3",
                     "answer": "Yes",
                     "securityQuestion": "?",
