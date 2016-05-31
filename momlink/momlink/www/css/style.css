@@ -1,18 +1,85 @@
-*{
+* {
     font-family: 'Roboto', sans-serif;
 }
 
-.menu-icon{
-  color:darkblue;
+.button-rounded {
+  display: block !important;
+  width: 25px !important;
+  height: 25px !important;
+  line-height: 25px !important;
+
+  border-radius: 50% !important;
+  color: white !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
 }
 
-.popup-vertical-buttons button
-{
+.float-button-tabs {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    width: 25px;
+    padding: 25px;
+    font-size: 40px;
+    background: $warning;
+    position: fixed;
+    bottom: 60px; /* Adjust to where you want it */
+    right: 10px; /* Adjust to where you want it */
+    z-index: 9999;
+}
+.float-button-tabs .height_fix {
+    margin-top: 100%;
+}
+.float-button-tabs .content {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    margin-top: -20px; /* Note, this must be half the font size */
+    color: $light;
+}
+
+.float-button {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    width: 25px;
+    padding: 25px;
+    font-size: 40px;
+    background: $warning;
+    position: fixed;
+    bottom: 10px; /* Adjust to where you want it */
+    right: 10px; /* Adjust to where you want it */
+    z-index: 9999;
+}
+.float-button .height_fix {
+    margin-top: 100%;
+}
+.float-button .content {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    margin-top: -20px; /* Note, this must be half the font size */
+    color: $light;
+}
+
+.menu-icon {
+    color: darkblue;
+}
+
+.popup-vertical-buttons button {
     min-width: 100%;
     margin-bottom: 5px;
 }
-.popup-vertical-buttons .popup-buttons
-{
+
+.popup-vertical-buttons .popup-buttons {
     display: block;
 }
 
@@ -64,13 +131,13 @@
     }
 
 .activeWeek {
-    border:3px solid #0866c6;
+    border: 3px solid #0866c6;
 }
 
 .activeBorder {
-    border:3px solid gray;
-    height:10px;
-    width:10px;
+    border: 3px solid gray;
+    height: 10px;
+    width: 10px;
 }
 
 .trackingText {

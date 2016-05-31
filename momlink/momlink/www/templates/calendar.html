@@ -3,12 +3,20 @@
 <link rel='stylesheet' href='../lib/fullcalendar/dist/fullcalendar.min.css' />
 <ion-pane>
     <ion-view overflow-scroll="false">
-        <ion-content  class="has-header has-footer padding" ng-controller="CalendarController">
+        <ion-content class="has-header padding" ng-controller="CalendarController">
             <div id='calendar' ng-init="showCalendar()"></div>
+            Filter by: <select id="filter">
+                <optgroup label="Filter By">
+                    <option value="all" selected>All</option>
+                    <option value="0">Personal</option>
+                    <option value="1">PNCC</option>
+                </optgroup>
+            </select>
         </ion-content>
+        <div class="float-button" >
+            <span class="height-fix">
+                <button class="button button-positive button-rounded content" ng-click="createEvent('calendar.html', 'Calendar')"><i class="icon ion-plus-round"></i></button>
+            </span>
+        </div>
     </ion-view>
 </ion-pane>
-<ion-footer-bar class="bar-positive" style="padding:0px" ng-controller="CalendarController">
-    <div class="col text-left"><button class="button button-icon icon ion-ios-cloud-upload-outline"></button></div>
-    <div class="col text-right"><button class="button button-icon icon ion-ios-plus-outline" ng-click="createEvent('calendar.html', 'Calendar')"></button></div>
-</ion-footer-bar>

@@ -1,6 +1,25 @@
 angular.module('momlink.controllers', [])
 
 .controller('HeaderBarController', function ($scope, $ionicPopup, $location, $document, $compile) {
+    backHistory = [];
+    $scope.initializeBack = function () {
+        document.addEventListener("backbutton", $scope.handleBack, false);
+    }
+    $scope.handleBack = function () {
+        //create queue of previous pages to navigate back through
+        //if backHistory is empty exit app
+        if (backHistory.length == 0) {
+            //exit app
+            console.log('empty')
+        }
+        else {
+            lastPage = backHistory.pop();
+            title = lastPage[0];
+            page = lastPage[1];
+            $scope.goToLink(page, title, false)
+        }
+    };
+
     $scope.showDate = function () {
         var d = new Date()
         date = d.getDate(),
@@ -18,7 +37,37 @@ angular.module('momlink.controllers', [])
         document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
     };
 
-    $scope.goToLink = function (page, title) {
+    $scope.showDate = function () {
+        var d = new Date()
+        date = d.getDate(),
+        month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
+        window.localStorage.setItem('date', d);
+        function nth(d) {
+            if (d > 3 && d < 21) return 'th';
+            switch (d % 10) {
+                case 1: return "st";
+                case 2: return "nd";
+                case 3: return "rd";
+                default: return "th";
+            }
+        }
+        document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
+    };
+
+    currentPage = 'home.html';
+    $scope.goToLink = function (page, title, history) {
+        //will not include history when tabbing back
+        if (history != false) {
+            //get current page and title before moving to new page
+            if (document.getElementById('title') != null) {
+                var histPage = currentPage;
+                var histTitle = document.getElementById('title').innerHTML
+                //add page to history
+                backHistory.push([histTitle, histPage])
+                currentPage = page;
+            }
+        }
+        //move to new page       
         var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         xhr.open('get', page, true);
         xhr.onreadystatechange = function () {
@@ -46,7 +95,6 @@ angular.module('momlink.controllers', [])
         //raise/lower menu
         menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
     };
-
     $scope.closeTopMenu = function () {
         var menu = document.getElementsByTagName('ion-top-menu')[0];
         if (menu.offsetHeight == 340) {
@@ -61,7 +109,6 @@ angular.module('momlink.controllers', [])
             window.location = "templates/main.html";
         }
     };
-
     $scope.login = function (user, pass) {
         var db = PouchDB('momlink');
         db.get('loginInfo').then(function (doc) {
@@ -103,11 +150,26 @@ angular.module('momlink.controllers', [])
         $scope.goToLink('addActivityTime.html', 'Add Activity Time');
     };
     //Inbox Link
-    $scope.goToMessage = function (type) {
-        window.localStorage.setItem('recipient', type);
-        $scope.goToLink('message.html', 'New Message');
+    $scope.goToMessage = function (email, link, title) {
+        window.localStorage.setItem('recipient', email);
+        $ionicPopup.show({
+            title: email,
+            templateUrl: 'messagePopup.html',
+            buttons: [
+              {
+                  text: 'Send', onTap: function (e) {
+                      $scope.goToLink(link, title);
+                      return 'Create';
+                  },
+                  type: 'button-positive'
+              },
+            {
+                text: 'Cancel', onTap: function (e) { return 'Close'; },
+                type: 'button-stable'
+            }
+            ],
+        });
     };
-
     //Create Event
     $scope.createEvent = function (link, title) {
         $ionicPopup.show({
@@ -147,7 +209,8 @@ angular.module('momlink.controllers', [])
                               "end": end,
                               "venue": $('#venue').val(),
                               "description": $('#description').val(),
-                              "color": color
+                              "color": color,
+                              "scheduledBy": '0'
                           };
                           doc['E'].push(event);
                           return db.put(doc);
@@ -365,17 +428,43 @@ angular.module('momlink.controllers', [])
                             ],
                         });
                     })
+                    return ['all', event.scheduledBy].indexOf($('#filter').val()) >= 0
                 }
             })
+        });
+
+        $('#filter').on('change', function () {
+            $('#calendar').fullCalendar('rerenderEvents');
+        })
+    };
+})
+
+.controller('InboxController', function ($scope, $compile, $ionicPopup) {
+    $scope.showReferralContacts = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('referrals').then(function (doc) {
+            referrals = doc['R'];
+            html += '<div class="list">';
+            for (i in referrals) {
+                html += `<div class="item item-thumbnail-left" ng-click="goToMessage('` + referrals[i]['email'] + `', 'inbox.html', 'Inbox')">`;
+                html += `<img src="">`;
+                html += '<h2>' + referrals[i]['name'] + '</h2>';
+                html += '<p>' + referrals[i]['email'] + '</p>';
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('referrals').innerHTML = html;
+            $compile(document.getElementById('referrals'))($scope);
         });
     };
 })
 
-.controller('ContentController', function ($scope, $ionicSideMenuDelegate) {
+/*.controller('ContentController', function ($scope, $ionicSideMenuDelegate) {
     $scope.toggleLeft = function () {
         $ionicSideMenuDelegate.toggleLeft();
     };
-})
+})*/
 
 .controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showPlans = function () {
@@ -747,7 +836,9 @@ angular.module('momlink.controllers', [])
             for (i in referrals) {
                 html += '<div class="item item-thumbnail-left">';
                 html += `<img src="">`;
-                html += '<h2>' + referrals[i]['name'] + '</h2>';
+                html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
+                html += '<a class="button button-small button-positive icon ion-ios-telephone-outline" ng-href="tel: ' + ('1-' + referrals[i]['phone']) + '" style="display:inline"></a>&nbsp;'
+                html += `<a class="button button-small button-positive icon ion-ios-email-outline" ng-click="goToMessage('` + referrals[i]['email'] + `', 'referrals.html', 'Referrals')" style="display:inline"></a>`
                 html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
                 html += '<p>Address: ' + referrals[i]['address'] + '</p>';
                 html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
@@ -766,7 +857,6 @@ angular.module('momlink.controllers', [])
             $compile(document.getElementById('referrals'))($scope);
         });
     };
-
     $scope.schedule = function (name) {
         $ionicPopup.show({
             title: 'Schedule By',
@@ -827,7 +917,7 @@ angular.module('momlink.controllers', [])
     }
 })
 
-.controller('JournalController', function ($scope, $compile) {
+.controller('JournalController', function ($scope, $ionicPopup, $compile) {
     $scope.renderPhotoJournal = function () {
         var start;
         var end;
@@ -881,6 +971,54 @@ angular.module('momlink.controllers', [])
         document.getElementById('photoJournal').innerHTML = html;
         $compile(document.getElementById('photoJournal'))($scope);
     }
+    $scope.createNote = function (link, title) {
+        $ionicPopup.show({
+            title: 'Add Note',
+            templateUrl: 'notePopup.html',
+            buttons: [
+              {
+                  text: 'Add Note', onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      db.get('journal').then(function (doc) {
+                          var note = {
+                              "date": moment().format('MMMM Do YYYY'),
+                              "subject": $('#subject').val(),
+                              "description": $("#description").val()
+                          };
+                          doc['notes'].push(note);
+                          return db.put(doc);
+                      }).then(function (doc) {
+                          $scope.goToLink(link, title);
+                      });
+                      return 'Add';
+                  },
+                  type: 'button-positive'
+              },
+            {
+                text: 'Discard', onTap: function (e) { return 'Discard'; },
+                type: 'button-stable'
+            }
+            ],
+        });
+    };
+    $scope.showNotes = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('journal').then(function (doc) {
+            notes = doc['notes'];
+            html += '<div class="list">';
+            for (i in notes) {
+                html += '<div class="item">';
+                html += '<h2 style="display:inline">' + notes[i]['subject'] + '</h2> &nbsp;';
+                html += '<p style="display:inline">' + notes[i]['date'] + '</p>';
+                html += '<p>' + notes[i]['description'] + '</p>';
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('notes').innerHTML = html;
+            $compile(document.getElementById('notes'))($scope);
+        });
+    };
 })
 
 .controller('HistoryController', function ($scope) {
@@ -1574,7 +1712,18 @@ angular.module('momlink.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "events",
-                    'E': []
+                    'E': [
+                        /*{
+                        "title": 'PNCC',
+                        "type": 'OB Appt',
+                        "start": new Date(),
+                        "end": new Date(),
+                        "venue": 'asdfadsf',
+                        "description": 'asfadsfd',
+                        "color": 'blue',
+                        "scheduledBy": '1'
+                        }*/
+                    ]
                 });
             }
         });
@@ -1647,6 +1796,15 @@ angular.module('momlink.controllers', [])
                     ],
                     "history": [
                     ]
+                });
+            }
+        });
+        db.get('journal').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "journal",
+                    "notes": [],
+                    "visits": []
                 });
             }
         });
@@ -1904,38 +2062,11 @@ angular.module('momlink.controllers', [])
       { type: "Walk", image: "../img/activities/walk_dog.png" },
       { type: "Walk Dog", image: "../img/activities/walk.png" }
     ]
-    $scope.articleList = [
-      { image: "../img/temp/article.jpg", description: "Article 1 Description...", link: "" },
-      { image: "../img/temp/article.jpg", description: "Article 2 Description...", link: "" },
-      { image: "../img/temp/article.jpg", description: "Article 3 Description...", link: "" },
-      { image: "../img/temp/article.jpg", description: "Article 4 Description...", link: "" },
-    ]
-    $scope.notesList = [
-      { subject: "Note Subject", description: "This is a description" }
-    ]
     $scope.pnccList = [
       { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc1.jpg" },
       { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc2.jpg" },
       { name: "PNCC3", email: "pncc3@gmail.com", image: "../img/temp/pncc3.jpg" }
     ]
-    $scope.showReferralContacts = function () {
-        var db = PouchDB('momlink');
-        var html = '';
-        db.get('referrals').then(function (doc) {
-            referrals = doc['R'];
-            html += '<div class="list">';
-            for (i in referrals) {
-                html += `<div class="item item-thumbnail-left" ng-click="goToMessage('` + referrals[i]['email'] + `')">`;
-                html += `<img src="">`;
-                html += '<h2>' + referrals[i]['name'] + '</h2>';
-                html += '<p>' + referrals[i]['email'] + '</p>';
-                html += '</div>';
-            }
-            html += '</div>';
-            document.getElementById('referrals').innerHTML = html;
-            $compile(document.getElementById('referrals'))($scope);
-        });
-    };
     $scope.inventoryList = [
       { item: "Baby Carrier", price: "7" },
       { item: "Baby Wipes", price: "1" },

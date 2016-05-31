@@ -12,6 +12,5 @@ angular.module('plugins', ['ionic', 'ionic-datepicker'])
             // org.apache.cordova.statusbar required
             StatusBar.styleLightContent();
         }
-        console.log('wlskdjf')
     });
 });
