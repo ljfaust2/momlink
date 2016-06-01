@@ -28,7 +28,8 @@
             </ion-tab>
             <ion-tab title="PNCC Visits" icon-on="ion-ios-calendar" icon-off="ion-ios-calendar-outline">
                 <ion-view>
-                    <ion-content overflow-scroll="false" class="has-header padding">
+                    <ion-content overflow-scroll="false" class="has-header" ng-init="showVisits()">
+                        <div id="pnccVisits"></div>
                     </ion-content>
                     <div class="float-button-tabs">
                         <span class="height-fix">

@@ -112,7 +112,7 @@ angular.module('momlink.controllers', [])
             else {
                 //add this in to remove white flash
                 //$(window).bind("load", function () {
-                    navigator.splashscreen.hide()
+                navigator.splashscreen.hide()
                 //});
             }
         });
@@ -120,7 +120,7 @@ angular.module('momlink.controllers', [])
     $scope.removeSplash = function () {
         //wait until the page has loaded to remove the splash screen{
         document.addEventListener("deviceready", function () {
-                navigator.splashscreen.hide()
+            navigator.splashscreen.hide()
         });
     };
     $scope.login = function (user, pass) {
@@ -473,12 +473,6 @@ angular.module('momlink.controllers', [])
         });
     };
 })
-
-/*.controller('ContentController', function ($scope, $ionicSideMenuDelegate) {
-    $scope.toggleLeft = function () {
-        $ionicSideMenuDelegate.toggleLeft();
-    };
-})*/
 
 .controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showPlans = function () {
@@ -1023,6 +1017,24 @@ angular.module('momlink.controllers', [])
             html += '</div>';
             document.getElementById('notes').innerHTML = html;
             $compile(document.getElementById('notes'))($scope);
+        });
+    };
+    $scope.showVisits = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('journal').then(function (doc) {
+            visits = doc['visits'];
+            html += '<div class="list">';
+            for (i in visits) {
+                html += '<div class="item">';
+                html += '<h2 style="display:inline">' + visits[i]['subject'] + '</h2> &nbsp;';
+                html += '<p style="display:inline">' + visits[i]['date'] + '</p>';
+                html += '<p>' + visits[i]['description'] + '</p>';
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('pnccVisits').innerHTML = html;
+            $compile(document.getElementById('pnccVisits'))($scope);
         });
     };
 })
@@ -1809,7 +1821,18 @@ angular.module('momlink.controllers', [])
                 db.put({
                     "_id": "journal",
                     "notes": [],
-                    "visits": []
+                    "visits": [
+                        {
+                            "subject": "Subject 1",
+                            "description": "Description 1...",
+                            "date": "6/1/2016"
+                        },
+                        {
+                            "subject": "Subject 3",
+                            "description": "Description 2...",
+                            "date": "5/25/2016"
+                        },
+                    ]
                 });
             }
         });
