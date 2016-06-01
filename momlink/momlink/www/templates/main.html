@@ -21,7 +21,7 @@
     <script src="../js/controllers.js"></script>
     <link href="../css/style.css" rel="stylesheet">
 </head>
-<body ng-app="momlink" ng-controller="HeaderBarController" ng-init="initializeBack()">
+<body ng-app="momlink" ng-controller="HeaderBarController" ng-init="initializeBack(); removeSplash()">
     <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
         <div class="buttons">
             <button class="button button-icon icon ion-ios-home" ng-click="goToLink('home.html', 'Momlink');closeTopMenu()"></button>

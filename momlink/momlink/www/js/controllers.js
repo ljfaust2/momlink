@@ -104,10 +104,24 @@ angular.module('momlink.controllers', [])
 
     //Menu Links
     $scope.autoLogin = function () {
-        //if they've logged in recently, skip the login screen
-        if (window.localStorage.getItem('username') != null && window.localStorage.getItem('password') != null) {
-            window.location = "templates/main.html";
-        }
+        //if they've logged in previously, skip the login screen
+        document.addEventListener("deviceready", function () {
+            if (window.localStorage.getItem('username') != null && window.localStorage.getItem('password') != null) {
+                window.location = "templates/main.html";
+            }
+            else {
+                //add this in to remove white flash
+                //$(window).bind("load", function () {
+                    navigator.splashscreen.hide()
+                //});
+            }
+        });
+    };
+    $scope.removeSplash = function () {
+        //wait until the page has loaded to remove the splash screen{
+        document.addEventListener("deviceready", function () {
+                navigator.splashscreen.hide()
+        });
     };
     $scope.login = function (user, pass) {
         var db = PouchDB('momlink');
@@ -847,7 +861,7 @@ angular.module('momlink.controllers', [])
                     html += `<button class="button button-small button-positive" ng-click="schedule('` + referrals[i]['name'] + `')">Schedule Meeting</button>`;
                 }
                 else {
-                    html += `<button class="button button-small button-stable" ng-click="schedule()">Not Visited</button>`;
+                    html += `<button class="button button-small button-stable" ng-click="">View Meeting</button>`;
                 }
 
                 html += '</div>';
@@ -863,30 +877,22 @@ angular.module('momlink.controllers', [])
             cssClass: 'popup-vertical-buttons',
             buttons: [
             {
-                text: 'Call', onTap: function (e) {
-                    $scope.createEvent('referrals.html', 'Referrals').then(updateDatabase())
-
+                text: '  Call', onTap: function (e) {
+                    //$scope.createEvent('referrals.html', 'Referrals').then(function (res) {
+                    updateDatabase();
+                    //})
                     return 'Call';
                 },
-                type: 'button-positive'
+                type: 'ion-ios-telephone-outline button-positive'
             },
             {
-                text: 'Email', onTap: function (e) {
-                    $scope.createEvent('referrals.html', 'Referrals').then(function (res) {
-                        updateDatabase();
-                    })
+                text: '  Email', onTap: function (e) {
+                    //$scope.createEvent('referrals.html', 'Referrals').then(function (res) {
+                    updateDatabase();
+                    //})
                     return 'Email';
                 },
-                type: 'button-positive'
-            },
-            {
-                text: 'Already Scheduled', onTap: function (e) {
-                    $scope.createEvent('referrals.html', 'Referrals').then(function (res) {
-                        updateDatabase();
-                    })
-                    return 'Already Scheduled';
-                },
-                type: 'button-positive'
+                type: 'ion-ios-email-outline button-positive'
             },
             {
                 text: 'Cancel', onTap: function (e) { return 'Cancel'; },
@@ -1237,7 +1243,6 @@ angular.module('momlink.controllers', [])
             var url = URL.createObjectURL(blob);
             var img = document.getElementById('profilePic');
             img.src = url;
-            console.log(url);
         }).catch(function (err) {
             console.log(err);
         });
