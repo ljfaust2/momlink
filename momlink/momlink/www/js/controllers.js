@@ -472,6 +472,24 @@ angular.module('momlink.controllers', [])
             $compile(document.getElementById('referrals'))($scope);
         });
     };
+    $scope.showPNCCContacts = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('inbox').then(function (doc) {
+            pncc = doc['pncc'];
+            html += '<div class="list">';
+            for (i in pncc) {
+                html += `<div class="item item-thumbnail-left" ng-click="goToMessage('` + pncc[i]['email'] + `', 'inbox.html', 'Inbox')">`;
+                html += `<img src="` + pncc[i]['image'] + `">`;
+                html += '<h2>' + pncc[i]['name'] + '</h2>';
+                html += '<p>' + pncc[i]['email'] + '</p>';
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('pncc').innerHTML = html;
+            $compile(document.getElementById('pncc'))($scope);
+        });
+    };
 })
 
 .controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
@@ -935,7 +953,7 @@ angular.module('momlink.controllers', [])
             start = moment(start)
             send = moment(start)
             end = moment(end)
-            //generate weeks until end
+            //generate weeks until end/current date
             html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
             do {
                 //highlight the current week
@@ -944,6 +962,7 @@ angular.module('momlink.controllers', [])
                     displayDate = String(moment(start).format('ddd MMM Do') + ` - ` + moment(start.add(6, 'days')).format('ddd MMM Do'))
                     html += `<div class="col-33 text-center padding activeWeek" stlye="padding-bottom:0" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
                 }
+                    //normal week
                 else {
                     start.subtract(6, 'days');
                     displayDate = String(moment(start).format('ddd MMM Do') + ` - ` + moment(start.add(6, 'days')).format('ddd MMM Do'))
@@ -956,7 +975,6 @@ angular.module('momlink.controllers', [])
                 start.add(1, 'days')
                 colSpacer++;
             } while (start <= today && start <= end)
-            //could only extend to current day by using todays date instead of end
             html += '</div>'
             document.getElementById('photoJournal').innerHTML = html;
             $compile(document.getElementById('photoJournal'))($scope);
@@ -1435,45 +1453,37 @@ angular.module('momlink.controllers', [])
 .controller('CameraController', function ($scope) {
     var pictureSource;
     var destinationType; // sets the format of returned value
-
     // Wait for device API libraries to load
     $scope.initializeDevice = function () {
         document.addEventListener("deviceready", $scope.onDeviceReady, false);
     }
-
     // device APIs are available
     $scope.onDeviceReady = function () {
         pictureSource = navigator.camera.PictureSourceType;
         destinationType = navigator.camera.DestinationType;
     }
-    $scope.onPhotoDataSuccess = function (imageData) {
-        // Uncomment to view the base64-encoded image data
-        // console.log(imageData);
-        var smallImage = document.getElementById('profilePic');
-        // Unhide image elements
-        //
-        smallImage.style.display = 'block';
-        // Show the captured photo
-        // The in-line CSS rules are used to resize the image
-        //
-        smallImage.src = "data:image/png;base64," + imageData;
-
+    //takes in the table the image will be added to, name of the image, and element to be overwritten (if applicable)
+    $scope.onPhotoDataSuccess = function (imageData, table, name, eId) {
+        if (eId != null) {
+            var smallImage = document.getElementById(eId);
+            // Unhide image elements
+            smallImage.style.display = 'block';
+            // Show the captured photo
+            smallImage.src = "data:image/png;base64," + imageData;
+        }
         var db = PouchDB('momlink');
-        db.get('profile').then(function (doc) {
-
+        db.get(table).then(function (doc) {
             console.log(doc)
-
             //get content type and image data
             var contents = {
                 "content_type": 'image/png',
                 "data": imageData,
             };
-
             //add picture to attachments
-            doc['_attachments']['profilePic.png'] = contents
+            name = name + '.png';
+            doc['_attachments'][name] = contents
             return db.put(doc);
         });
-
     }
     $scope.onPhotoURISuccess = function (imageURI) {
         // Uncomment to view the image file URI
@@ -1487,8 +1497,13 @@ angular.module('momlink.controllers', [])
         //
         largeImage.src = imageURI;
     }
-    $scope.capturePhoto = function () {
-        navigator.camera.getPicture($scope.onPhotoDataSuccess, $scope.onFail, {
+    $scope.capturePhoto = function (table, name, eId) {
+        if (name = 'date') {
+            name = String(new Date())
+        }
+        navigator.camera.getPicture(function (imageData) {
+            $scope.onPhotoDataSuccess(imageData, table, name, eId)
+        }, $scope.onFail, {
             quality: 50,
             destinationType: destinationType.DATA_URL
         });
@@ -1694,6 +1709,18 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
+        db.get('inbox').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "inbox",
+                    "pncc": [
+                        { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc1.jpg" },
+                        { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc2.jpg" },
+                        { name: "PNCC3", email: "pncc3@gmail.com", image: "../img/temp/pncc3.jpg" }
+                    ]
+                });
+            }
+        });
         db.get('coupons').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -1820,6 +1847,7 @@ angular.module('momlink.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "journal",
+                    "_attachments": {},
                     "notes": [],
                     "visits": [
                         {
@@ -2089,11 +2117,6 @@ angular.module('momlink.controllers', [])
       { type: "Shop", image: "../img/activities/shop.png" },
       { type: "Walk", image: "../img/activities/walk_dog.png" },
       { type: "Walk Dog", image: "../img/activities/walk.png" }
-    ]
-    $scope.pnccList = [
-      { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc1.jpg" },
-      { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc2.jpg" },
-      { name: "PNCC3", email: "pncc3@gmail.com", image: "../img/temp/pncc3.jpg" }
     ]
     $scope.inventoryList = [
       { item: "Baby Carrier", price: "7" },
