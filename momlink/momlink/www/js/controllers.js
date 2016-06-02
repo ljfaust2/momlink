@@ -936,22 +936,22 @@ angular.module('momlink.controllers', [])
             send = moment(start)
             end = moment(end)
             //generate weeks until end
-            html += '<div class="row">'
+            html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
             do {
                 //highlight the current week
                 if (start <= today && start.add(6, 'days') >= today) {
                     start.subtract(6, 'days');
                     displayDate = String(moment(start).format('ddd MMM Do') + ` - ` + moment(start.add(6, 'days')).format('ddd MMM Do'))
-                    html += `<div class="col-33 activeWeek padding" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
+                    html += `<div class="col-33 text-center padding activeWeek" stlye="padding-bottom:0" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
                 }
                 else {
                     start.subtract(6, 'days');
                     displayDate = String(moment(start).format('ddd MMM Do') + ` - ` + moment(start.add(6, 'days')).format('ddd MMM Do'))
-                    html += `<div class="col-33 padding" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
+                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
                 }
                 //3 per column
                 if (colSpacer % 3 == 0) {
-                    html += '</div><div class="row">'
+                    html += '</div><div class="row" style="padding-right:0; padding-left:0">'
                 }
                 start.add(1, 'days')
                 colSpacer++;
