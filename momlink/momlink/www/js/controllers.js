@@ -10,7 +10,6 @@ angular.module('momlink.controllers', [])
         //if backHistory is empty exit app
         if (backHistory.length == 0) {
             //exit app
-            console.log('empty')
         }
         else {
             lastPage = backHistory.pop();
@@ -947,47 +946,88 @@ angular.module('momlink.controllers', [])
             //if these values are null, say they must set start and end dates
         }).then(function (doc) {
             var html = '';
-            var colSpacer = 1;
+            var weekCounter = 1;
             //convert start/end date to moment
             today = moment()
-            start = moment(start)
-            send = moment(start)
-            end = moment(end)
+            displayStart = moment(start)
+            displayEnd = moment(end)
             //generate weeks until end/current date
             html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
             do {
+                //display Date formats starting and ending dates for the week
+                displayDate = String(moment(displayStart).format('ddd MMM Do') + ` - ` + moment(displayStart.add(6, 'days')).format('ddd MMM Do'))
+                displayStart.subtract(6, 'days');
                 //highlight the current week
-                if (start <= today && start.add(6, 'days') >= today) {
-                    start.subtract(6, 'days');
-                    displayDate = String(moment(start).format('ddd MMM Do') + ` - ` + moment(start.add(6, 'days')).format('ddd MMM Do'))
-                    html += `<div class="col-33 text-center padding activeWeek" stlye="padding-bottom:0" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
+                if (displayStart <= today && displayStart.add(6, 'days') >= today) {
+                    html += `<div class="col-33 text-center padding activeWeek" stlye="padding-bottom:0" ng-click="renderGallery('` + displayDate + `','` + moment(start).format('YYYY-MM-DD') + `','` + moment(start).add(6, 'days').format('YYYY-MM-DD') + `')"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
                 }
                     //normal week
                 else {
-                    start.subtract(6, 'days');
-                    displayDate = String(moment(start).format('ddd MMM Do') + ` - ` + moment(start.add(6, 'days')).format('ddd MMM Do'))
-                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery('` + displayDate + `')"><b>Week:</b> ` + colSpacer + `<br>` + displayDate + `</div>`;
+                    html += `<div class="col-33 text-center padding nonActiveWeek" stlye="padding-bottom:0" ng-click="renderGallery('` + displayDate + `','` + moment(start).format('YYYY-MM-DD') + `','` + moment(start).add(6, 'days').format('YYYY-MM-DD') + `')"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
                 }
-                //3 per column
-                if (colSpacer % 3 == 0) {
+                //3 dates per column
+                if (weekCounter % 3 == 0) {
                     html += '</div><div class="row" style="padding-right:0; padding-left:0">'
                 }
-                start.add(1, 'days')
-                colSpacer++;
-            } while (start <= today && start <= end)
+                displayStart.add(1, 'days')
+                weekCounter++;
+            } while (displayStart <= today && displayStart <= displayEnd)
             html += '</div>'
+            //keep current week for saving photos, decrement 1 to keep consistent
+            window.localStorage.setItem('currentWeek', weekCounter--);
             document.getElementById('photoJournal').innerHTML = html;
             $compile(document.getElementById('photoJournal'))($scope);
         });
     }
-    $scope.renderGallery = function (sDate) {
-        //for each photo fill spot in grid
+    $scope.renderGallery = function (displayDate, firstDay, lastDay) {
+        var counter = 1;
+        var colSpacer = 1;
+        var db = PouchDB('momlink');
+        //generate header
         html = '<div class="list">';
-        html += '<div class="item item-button-left" style="background-color: #f5f5f5;"><b>' + sDate + '</b><button class="button icon button-icon ion-ios-undo" ng-click="renderPhotoJournal()"></button></div>';
-        html += '</div>';
-
-        document.getElementById('photoJournal').innerHTML = html;
-        $compile(document.getElementById('photoJournal'))($scope);
+        html += '<div class="item item-button-left" style="background-color: #f5f5f5;"><b>' + displayDate + '</b><button class="button icon button-icon ion-ios-undo" ng-click="renderPhotoJournal()"></button></div>';
+        //populate space with photos from selected week
+        html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
+        db.get('journal').then(function (doc) {
+            photos = doc['_attachments'];
+            //if any photos exists for the week
+            if (Object.keys(photos).length > 0) {
+                var length = Object.keys(photos).length;
+                //for each photo in the journal
+                for (let key in photos) {
+                    if (!photos.hasOwnProperty(key)) { continue; }
+                    //get photo if it fits the current week 
+                    console.log(photos[key])
+                    console.log(photos[key]['date'])
+                    //if (key['date'] -> current date > firstDay && current date < lastDay) {
+                    db.getAttachment('journal', String(key)).then(function (blob) {
+                        var url = URL.createObjectURL(blob);
+                        html += '<div class="col-33 no-padding" stlye="padding-bottom:0"><img style="width:100%; height:100px" src="' + url + '"></div>'
+                        //3 photos per row
+                        if (colSpacer % 3 == 0) {
+                            html += '</div><div class="row" style="padding-right:0; padding-left:0">'
+                        }
+                        colSpacer++;
+                    }).catch(function (err) {
+                        console.log('error ' + err);
+                    }).then(function () {
+                        //run iff for-loop is complete, render photos
+                        if (counter == length) {
+                            html += '</div>';
+                            document.getElementById('photoJournal').innerHTML = html;
+                            $compile(document.getElementById('photoJournal'))($scope);
+                        }
+                        counter++;
+                    })
+                    //}
+                }
+            }
+            else {
+                html += '</div>';
+                document.getElementById('photoJournal').innerHTML = html;
+                $compile(document.getElementById('photoJournal'))($scope);
+            }
+        });
     }
     $scope.createNote = function (link, title) {
         $ionicPopup.show({
@@ -1269,13 +1309,23 @@ angular.module('momlink.controllers', [])
             $('#dNumber').val(doc['doctorsPhone']);
         });
 
-        db.getAttachment('profile', 'profilePic.png').then(function (blob) {
-            var url = URL.createObjectURL(blob);
+        //get filesystem
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, getFS);
+        function getFS(fileSystem) {
+            fileSystem.root.getDirectory("photos", { create: false, exclusive: false }, getDir)
+        }
+        //get directory
+        function getDir(dir) { 
+            console.log(dir)
+            dir.getFile("profilePic.jpg", { create: false, exclusive: false }, getPic)
+        }
+        //get file
+        function getPic(pic) {
+            //do things with file
+            console.log(pic.toURL())
             var img = document.getElementById('profilePic');
-            img.src = url;
-        }).catch(function (err) {
-            console.log(err);
-        });
+            img.src = pic.toURL();
+        }
     }
 })
 
@@ -1462,64 +1512,58 @@ angular.module('momlink.controllers', [])
         pictureSource = navigator.camera.PictureSourceType;
         destinationType = navigator.camera.DestinationType;
     }
-    //takes in the table the image will be added to, name of the image, and element to be overwritten (if applicable)
-    $scope.onPhotoDataSuccess = function (imageData, table, name, eId) {
-        if (eId != null) {
-            var smallImage = document.getElementById(eId);
-            // Unhide image elements
-            smallImage.style.display = 'block';
-            // Show the captured photo
-            smallImage.src = "data:image/png;base64," + imageData;
-        }
-        var db = PouchDB('momlink');
-        db.get(table).then(function (doc) {
-            console.log(doc)
-            //get content type and image data
-            var contents = {
-                "content_type": 'image/png',
-                "data": imageData,
-            };
-            //add picture to attachments
-            name = name + '.png';
-            doc['_attachments'][name] = contents
-            return db.put(doc);
-        });
+
+    $scope.takeProfilePhoto = function () {
+        $scope.capturePhoto('profilePic', 'photos');
     }
-    $scope.onPhotoURISuccess = function (imageURI) {
-        // Uncomment to view the image file URI
-        // console.log(imageURI);
-        var largeImage = document.getElementById('largeImage');
-        // Unhide image elements
-        //
-        largeImage.style.display = 'block';
-        // Show the captured photo
-        // The in-line CSS rules are used to resize the image
-        //
-        largeImage.src = imageURI;
+    $scope.takeJournalPhoto = function () {
+        var name = moment().format('YYYY-MM-DDhhmmssa');
+        week = 'Week' + window.localStorage.getItem('currentWeek')
+        var folderPath = 'photoJournal'
+        //'photos/photoJournal/' + week;
+
+        console.log(String(name), String(folderPath))
+
+        $scope.capturePhoto(String(name), String(folderPath));
     }
-    $scope.capturePhoto = function (table, name, eId) {
-        if (name = 'date') {
-            name = String(new Date())
-        }
+
+    $scope.capturePhoto = function (fileName, folderPath) {
         navigator.camera.getPicture(function (imageData) {
-            $scope.onPhotoDataSuccess(imageData, table, name, eId)
+            $scope.onPhotoDataSuccess(imageData, fileName, folderPath)
         }, $scope.onFail, {
-            quality: 50,
-            destinationType: destinationType.DATA_URL
+            quality: 75,
+            destinationType: Camera.DestinationType.FILE_URI,
+            sourceType: Camera.PictureSourceType.CAMERA,
+            allowEdit: false,
+            encodingType: Camera.EncodingType.JPEG,
+            popoverOptions: CameraPopoverOptions,
+            correctOrientation: true
         });
     }
-    $scope.capturePhotoEdit = function () {
-        navigator.camera.getPicture($scope.onPhotoDataSuccess, $scope.onFail, {
-            quality: 20, allowEdit: true,
-            destinationType: destinationType.DATA_URL
-        });
-    }
-    $scope.getPhoto = function (source) {
-        navigator.camera.getPicture($scope.onPhotoURISuccess, $scope.onFail, {
-            quality: 50,
-            destinationType: destinationType.FILE_URI,
-            sourceType: source
-        });
+    $scope.onPhotoDataSuccess = function (imageData, fileName, folderPath) {
+        window.resolveLocalFileSystemURL(imageData, resolveOnSuccess, resOnError);
+        //Callback function when the file system url has been resolved
+        function resolveOnSuccess(entry) {
+            fileName = fileName + ".jpg";
+            window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fileSys) {
+                //The folder is created if doesn't exist
+                fileSys.root.getDirectory(folderPath,
+                                { create: true, exclusive: false },
+                                function (directory) {
+                                    entry.moveTo(directory, fileName, successMove, resOnError);
+                                },
+                                resOnError);
+            },
+            resOnError);
+        }
+        //Callback function when the file has been moved successfully - inserting the complete path
+        function successMove(entry) {
+            //probably reload page
+            console.log(entry.toURL())
+        }
+        function resOnError(error) {
+            alert(error.code);
+        }
     }
     $scope.onFail = function (message) {
         alert('Failed because: ' + message);
@@ -1677,6 +1721,7 @@ angular.module('momlink.controllers', [])
 
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink');
+        window.PouchDB = PouchDB;
         //db.destroy()
         db.get('loginInfo').catch(function (err) {
             if (err.status === 404) {
@@ -1696,7 +1741,6 @@ angular.module('momlink.controllers', [])
                 db.put({
                     "_id": "profile",
                     "_attachments": {},
-                    "profilePic": [],
                     "name": "",
                     "email": "",
                     "age": "",
@@ -1711,6 +1755,7 @@ angular.module('momlink.controllers', [])
         });
         db.get('inbox').catch(function (err) {
             if (err.status === 404) {
+                //php request
                 db.put({
                     "_id": "inbox",
                     "pncc": [

@@ -18,9 +18,9 @@
     "cordova-plugin-file": {
         "source": {
             "type": "registry",
-            "id": "cordova-plugin-file"
+            "id": "cordova-plugin-file@~4.1.0"
         },
-        "is_top_level": false,
+        "is_top_level": true,
         "variables": {}
     },
     "cordova-plugin-compat": {
@@ -29,14 +29,6 @@
             "id": "cordova-plugin-compat"
         },
         "is_top_level": false,
-        "variables": {}
-    },
-    "cordova-plugin-crosswalk-webview": {
-        "source": {
-            "type": "registry",
-            "id": "cordova-plugin-crosswalk-webview"
-        },
-        "is_top_level": true,
         "variables": {}
     },
     "cordova-plugin-inappbrowser": {
