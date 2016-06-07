@@ -491,7 +491,7 @@ angular.module('momlink.controllers', [])
     };
 })
 
-.controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
+/*.controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showPlans = function () {
         html = `<div class="item item-divider">Plans</div>
                 <div class="item item-thumbnail-left" ng-click="showClasses('crib')">
@@ -723,7 +723,7 @@ angular.module('momlink.controllers', [])
             document.getElementById('amount').innerHTML = coupons.length + 'x';
         });
     }
-})
+})*/
 
 .controller('EducationController', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showShared = function () {
