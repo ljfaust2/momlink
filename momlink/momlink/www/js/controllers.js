@@ -36,7 +36,7 @@ angular.module('momlink.controllers', [])
         document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
     };
 
-    $scope.showDate = function () {
+    /*$scope.showDate = function () {
         var d = new Date()
         date = d.getDate(),
         month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
@@ -51,16 +51,25 @@ angular.module('momlink.controllers', [])
             }
         }
         document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
+    };*/
+
+    //function for registration
+    /*
+    $scope.register = function () {
+        call initialize db
+        add info to loginInfo table
+        use current day as starting date for profile
     };
+    */
 
     currentPage = 'home.html';
     $scope.goToLink = function (page, title, history) {
         //will not include history when tabbing back
         if (history != false) {
             //get current page and title before moving to new page
-            if (document.getElementById('title') != null) {
+            if (document.getElementById('headline') != null) {
                 var histPage = currentPage;
-                var histTitle = document.getElementById('title').innerHTML
+                var histTitle = document.getElementById('headline').innerHTML
                 //add page to history
                 backHistory.push([histTitle, histPage])
                 currentPage = page;
@@ -73,7 +82,7 @@ angular.module('momlink.controllers', [])
             if (xhr.readyState == 4 && xhr.status == 200) {
                 document.getElementById("content").innerHTML = xhr.responseText;
                 if (title != null) {
-                    document.getElementById('title').innerHTML = title;
+                    document.getElementById('headline').innerHTML = title;
                 }
                 $compile(document.getElementById('content'))($scope);
             }
@@ -147,7 +156,7 @@ angular.module('momlink.controllers', [])
         window.localStorage.removeItem('date');
         window.location = "../index.html";
     };
-    //Track Links
+    //Tracking Links
     $scope.goToHistory = function (type) {
         window.localStorage.setItem('trackType', type)
         $scope.goToLink('history.html', 'History')
@@ -183,63 +192,83 @@ angular.module('momlink.controllers', [])
             ],
         });
     };
-    //Create Event
     $scope.createEvent = function (link, title) {
         $ionicPopup.show({
             title: 'Create Event',
             templateUrl: 'eventPopup.html',
             buttons: [
               {
-                  text: 'Create Event', onTap: function (e) {
-                      var db = PouchDB('momlink');
-                      switch ($("#type").val()) {
-                          case 'OB Appt':
-                              color = 'blue';
-                              break;
-                          case 'Test':
-                              color = 'red';
-                              break;
-                          case 'Visit':
-                              color = 'green';
-                              break;
-                          case 'Ultra':
-                              color = 'orange';
-                              break;
-                          case 'Class':
-                              color = 'purple';
-                              break;
-                          case 'Other':
-                              color = 'black';
-                              break;
+                  text: 'Save', onTap: function (e) {
+                      //checks if all necessary fields have been filled
+                      var fields = { '#title': 'title', '#type': 'type', '#date': 'date', '#start': 'start time', '#end': 'end time' };
+                      for (var key in fields) {
+                          if ($(key).val() == null || $(key).val() == '') {
+                              //prevents popup from closing
+                              e.preventDefault();
+                              showAlert(fields[key]);
+                              pass = false;
+                              return;
+                          }
                       }
-                      start = $('#date').val() + "T" + $('#start').val();
-                      end = $('#date').val() + "T" + $('#end').val();
-                      db.get('events').then(function (doc) {
-                          var event = {
-                              "title": $('#name').val(),
-                              "type": $("#type").val(),
-                              "start": start,
-                              "end": end,
-                              "venue": $('#venue').val(),
-                              "description": $('#description').val(),
-                              "color": color,
-                              "scheduledBy": '0'
-                          };
-                          doc['E'].push(event);
-                          return db.put(doc);
-                      }).then(function (doc) {
-                          $scope.goToLink(link, title);
-                      });
-                      return 'Create';
+                      var pass = true;
+
+                      if (pass == true) {
+                          var db = PouchDB('momlink');
+                          switch ($("#type").val()) {
+                              case 'OB Appt':
+                                  color = 'blue';
+                                  break;
+                              case 'Test':
+                                  color = 'red';
+                                  break;
+                              case 'Visit':
+                                  color = 'green';
+                                  break;
+                              case 'Ultra':
+                                  color = 'orange';
+                                  break;
+                              case 'Class':
+                                  color = 'purple';
+                                  break;
+                              case 'Other':
+                                  color = 'black';
+                                  break;
+                          }
+                          start = $('#date').val() + "T" + $('#starttime').val();
+                          end = $('#date').val() + "T" + $('#endtime').val();
+                          db.get('events').then(function (doc) {
+                              var event = {
+                                  "title": $('#title').val(),
+                                  "type": $("#type").val(),
+                                  "start": start,
+                                  "end": end,
+                                  "venue": $('#venue').val(),
+                                  "description": $('#description').val(),
+                                  "color": color,
+                                  "scheduledBy": '0'
+                              };
+                              doc['E'].push(event);
+                              return db.put(doc);
+                          }).then(function (doc) {
+                              $scope.goToLink(link, title);
+                          });
+                          return 'Create';
+                      }
                   },
                   type: 'button-positive'
               },
             {
-                text: 'Cancel', onTap: function (e) { return 'Close'; },
+                text: 'Discard', onTap: function (e) { return 'Close'; },
                 type: 'button-stable'
             }
             ],
         });
+        showAlert = function (category) {
+            var alertPopup = $ionicPopup.alert({
+                title: 'Please select a ' + category,
+            });
+            alertPopup;
+        };
     };
 })
 
@@ -491,6 +520,7 @@ angular.module('momlink.controllers', [])
     };
 })
 
+//Coupon controller
 /*.controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showPlans = function () {
         html = `<div class="item item-divider">Plans</div>
@@ -1299,7 +1329,6 @@ angular.module('momlink.controllers', [])
             doc['name'] = $('#name').val(),
             doc['email'] = $('#email').val(),
             doc['age'] = $('#age').val(),
-            doc['startDate'] = $('#start').val(),
             doc['deliveryDate'] = $('#delivery').val(),
             doc['aboutMe'] = $('#about').val(),
             doc['doctorsName'] = $('#dName').val(),
@@ -1312,6 +1341,17 @@ angular.module('momlink.controllers', [])
     }
     $scope.getProfile = function () {
         var db = PouchDB('momlink');
+        db.get('profile').then(function (doc) {
+            $('#name').val(doc['name']);
+            $('#email').val(doc['email']);
+            $('#age').val(doc['age']);
+            $('#delivery').val(doc['deliveryDate']);
+            $('#about').val(doc['aboutMe']);
+            $('#dName').val(doc['doctorsName']);
+            $('#dEmail').val(doc['doctorsEmail']);
+            $('#dNumber').val(doc['doctorsPhone']);
+        });
+
         //local storage
         //get filesystem
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, getFS);
@@ -1773,7 +1813,7 @@ angular.module('momlink.controllers', [])
                     "name": "",
                     "email": "",
                     "age": "",
-                    "startDate": "",
+                    "startDate": "5/20/2016",
                     "deliveryDate": "",
                     "aboutMe": "",
                     "doctorsName": "",

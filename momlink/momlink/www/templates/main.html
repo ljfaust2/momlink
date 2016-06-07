@@ -26,29 +26,29 @@
         <div class="buttons">
             <button class="button button-icon icon ion-ios-home" ng-click="goToLink('home.html', 'Momlink');closeTopMenu()"></button>
         </div>
-        <h1 class="title" id="title">Momlink</h1>
+        <h1 class="title" id="headline">Momlink</h1>
         <div class="buttons">
             <button class="button button-icon" ng-click="toggleTopMenu()"><i id="menuIcon" class="icon ion-navicon-round"></i></button>
         </div>
     </ion-header-bar>
     <ion-top-menu class="text-center has-header">
         <ion-content overflow-scroll="false" style="background-color:#ffffff">
-                <div class="row">
-                    <div class="col"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="goToLink('inbox.html', 'Inbox')" style="width:75px;height:75px;vertical-align:middle"><p>Mail</p></div>
-                    <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="goToLink('calendar.html', 'Calendar')" style="width:75px;height:75px;vertical-align:middle"><p>Calendar</p></div>
-                    <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="goToLink('referrals.html', 'Referrals')" style="width:75px;height:75px;vertical-align:middle"><p>Referrals</p></div>
-                </div>
-                <div class="row">
-                    <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="goToLink('education.html', 'Education')" style="width:75px;height:75px;vertical-align:middle"><p>Education</p></div>
-                    <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="goToLink('journal.html', 'My Journal')" style="width:75px;height:75px;vertical-align:middle"><p>Journal</p></div>
-                    <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="goToLink('myProfile.html', 'My Profile')" style="width:75px;height:75px;vertical-align:middle"><p>My Profile</p></div>
-                    <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="goToLink('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
-                </div>
-                <div class="row">
-                    <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="goToLink('track.html', 'Track')" style="width:75px;height:75px;vertical-align:middle"><p>Track</p></div>
-                    <div class="col"><img src="../img/temp/refresh.png" ng-click="" style="width:75px;height:75px;vertical-align:middle"><p>Update</p></div>
-                    <div class="col"></div>
-                </div>
+            <div class="row">
+                <div class="col"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="goToLink('inbox.html', 'Inbox')" style="width:75px;height:75px;vertical-align:middle"><p>Mail</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="goToLink('calendar.html', 'Calendar')" style="width:75px;height:75px;vertical-align:middle"><p>Calendar</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="goToLink('referrals.html', 'Referrals')" style="width:75px;height:75px;vertical-align:middle"><p>Referrals</p></div>
+            </div>
+            <div class="row">
+                <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="goToLink('education.html', 'Education')" style="width:75px;height:75px;vertical-align:middle"><p>Education</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="goToLink('journal.html', 'My Journal')" style="width:75px;height:75px;vertical-align:middle"><p>Journal</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="goToLink('myProfile.html', 'My Profile')" style="width:75px;height:75px;vertical-align:middle"><p>My Profile</p></div>
+                <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="goToLink('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
+            </div>
+            <div class="row">
+                <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="goToLink('track.html', 'Track')" style="width:75px;height:75px;vertical-align:middle"><p>Track</p></div>
+                <div class="col"><img src="../img/temp/refresh.png" ng-click="" style="width:75px;height:75px;vertical-align:middle"><p>Update</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-24.png" ng-click="logout()" style="width:75px;height:75px;vertical-align:middle" alt="Logout"><p>Logout</p></div>
+            </div>
         </ion-content>
     </ion-top-menu>
     <div id="content" ng-click="closeTopMenu()">
