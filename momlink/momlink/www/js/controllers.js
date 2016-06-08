@@ -1,8 +1,6 @@
 angular.module('momlink.controllers', [])
 /**
  *The header controller handles login, navigation, splash screen, back button
- *
- *
  */
 .controller('HeaderCtrl', function ($scope, $ionicPopup, $location, $document, $compile) {
 
@@ -39,10 +37,11 @@ angular.module('momlink.controllers', [])
     }
 
     $scope.renderSubheaderDate = function () {
-        var date = new Date()
-        window.localStorage.setItem('date', date);
         today = moment().format('MMMM Do YYYY')
         document.getElementById("todaysDate").innerHTML = "Today, " + today;
+        //used by History subheader
+        var date = new Date()
+        window.localStorage.setItem('date', date);
     };
 
     pageHistory = [];
@@ -55,7 +54,7 @@ angular.module('momlink.controllers', [])
         }
         else {
             lastPage = pageHistory.pop();
-            console.log(pageHistory)
+            //console.log(pageHistory)
             headline = lastPage[0];
             page = lastPage[1];
             $scope.toNewPage(page, headline, true)
@@ -81,7 +80,7 @@ angular.module('momlink.controllers', [])
                 var currentHeadline = document.getElementById('headline').innerHTML
             }
             pageHistory.push([currentHeadline, currentPage])
-            console.log(pageHistory)
+            //console.log(pageHistory)
             currentPage = nextPage;
         }
         //load in the requested page      
@@ -209,18 +208,28 @@ angular.module('momlink.controllers', [])
               {
                   text: 'Save', onTap: function (e) {
                       //checks if all necessary fields have been filled
+                      var pass = true;
                       var fields = { '#title': 'title', '#type': 'type', '#date': 'date', '#start': 'start time', '#end': 'end time' };
                       for (var key in fields) {
                           if ($(key).val() == null || $(key).val() == '') {
                               //prevents popup from closing
                               e.preventDefault();
-                              showAlert(fields[key]);
+                              var alertPopup = $ionicPopup.alert({
+                                  title: 'Please select a ' + fields[key],
+                              });
+                              alertPopup;
                               pass = false;
                               return;
                           }
                       }
-                      var pass = true;
-
+                      if ($('#start').val() > $('#end').val()) {
+                          e.preventDefault();
+                          var alertPopup = $ionicPopup.alert({
+                              title: 'Starting time must occur before ending time',
+                          });
+                          alertPopup;
+                          pass = false;
+                      }
                       if (pass == true) {
                           var db = PouchDB('momlink');
                           switch ($("#type").val()) {
@@ -243,8 +252,8 @@ angular.module('momlink.controllers', [])
                                   color = 'black';
                                   break;
                           }
-                          start = $('#date').val() + "T" + $('#starttime').val();
-                          end = $('#date').val() + "T" + $('#endtime').val();
+                          start = $('#date').val() + "T" + $('#start').val();
+                          end = $('#date').val() + "T" + $('#end').val();
                           db.get('events').then(function (doc) {
                               var event = {
                                   "title": $('#title').val(),
@@ -272,12 +281,6 @@ angular.module('momlink.controllers', [])
             }
             ],
         });
-        showAlert = function (category) {
-            var alertPopup = $ionicPopup.alert({
-                title: 'Please select a ' + category,
-            });
-            alertPopup;
-        };
     };
 })
 
@@ -462,15 +465,22 @@ angular.module('momlink.controllers', [])
                         var startTime = String(event.start._i).substr(String(event.start._i).indexOf("T") + 1);
                         var endTime = String(event.end._i).substr(String(event.end._i).indexOf("T") + 1);
                         //view event
+
+                        //render template
+                        templateHTML = '<p><b>' + event.type + '</b></p>';
+                        templateHTML += '<p><b>Date</b>: ' + date + '</p>';
+                        templateHTML += '<p><b>Start</b>: ' + startTime + '</p>';
+                        templateHTML += '<p><b>End</b>: ' + endTime + '</p>';
+                        if(event.venue != ''){
+                            templateHTML += '<p><b>Venue</b>: ' + event.venue + '</p>'
+                        }
+                        if(event.description != ''){
+                            templateHTML += '<p><b>Description</b>: ' + event.description + '</p>'
+                        }
+
                         var alertPopup = $ionicPopup.show({
                             title: event.title,
-                            template:
-                                '<p><b>' + event.type + '</b></p>' +
-                                '<p><b>Date</b>: ' + date + '</p>' +
-                                '<p><b>Start</b>: ' + startTime + '</p>' +
-                                '<p><b>End</b>: ' + endTime + '</p>' +
-                                '<p><b>Venue</b>: ' + event.venue + '</p>' +
-                                '<p><b>Description</b>: ' + event.description + '</p>',
+                            template: templateHTML,
                             buttons: [
                               {
                                   text: 'Close', onTap: function (e) { return 'Cancel'; },
