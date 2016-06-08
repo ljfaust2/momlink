@@ -130,6 +130,9 @@
     align-self: auto;
 }
 
+.photoJournalBorder {
+    border: 1px solid #FFFFFF;
+}
 .activeWeek {
     border: 1px solid #0866c6;
 }

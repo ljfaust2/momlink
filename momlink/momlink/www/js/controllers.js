@@ -986,11 +986,11 @@ angular.module('momlink.controllers', [])
                 displayStart.subtract(6, 'days');
                 //highlight the current week
                 if (displayStart <= today && displayStart.add(6, 'days') >= today) {
-                    html += `<div class="col-33 text-center padding activeWeek" stlye="padding-bottom:0" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
+                    html += `<div class="col-33 text-center padding activeWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
                 }
                     //normal week
                 else {
-                    html += `<div class="col-33 text-center padding nonActiveWeek" stlye="padding-bottom:0" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
+                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
                 }
                 //3 dates per column
                 if (weekCounter % 3 == 0) {
@@ -1047,12 +1047,12 @@ angular.module('momlink.controllers', [])
                 //get file
                 function getPic(pic) {
                     //add html img and append pic to it
-                    html += `<div class="col-33" stlye="padding-bottom:0"><image src="` + pic.toURL() + `" style="height:100px; width:100%"></div>`;
+                    html += `<div class="col-33 photoJournalBorder"><image src="` + pic.toURL() + `" style="height:100px; width:100%"></div>`;
                     if (counter >= dirSize) {
                         callback();
                     }
                     if (colSpacer % 3 == 0) {
-                        html += `</div><div class="row" style="padding-right:0; padding-left:0">`;
+                        html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
                     }
                     colSpacer++;
                     counter++;
@@ -1574,7 +1574,7 @@ angular.module('momlink.controllers', [])
         navigator.camera.getPicture(function (imageData) {
             onPhotoDataSuccess(imageData)
         }, $scope.onFail, {
-            quality: 75,
+            quality: 50,
             destinationType: Camera.DestinationType.FILE_URI,
             sourceType: Camera.PictureSourceType.CAMERA,
             allowEdit: false,
