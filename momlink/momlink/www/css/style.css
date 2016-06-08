@@ -16,7 +16,7 @@
   font-weight: bold !important;
 }
 
-.float-button-tabs {
+.float-button-hasFooter {
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
     border-radius: 50%;
@@ -29,10 +29,10 @@
     right: 10px; /* Adjust to where you want it */
     z-index: 9999;
 }
-.float-button-tabs .height_fix {
+.float-button-hasFooter .height_fix {
     margin-top: 100%;
 }
-.float-button-tabs .content {
+.float-button-hasFooter .content {
     position: absolute;
     left: 0;
     top: 50%;

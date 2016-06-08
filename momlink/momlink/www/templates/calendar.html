@@ -5,18 +5,17 @@
     <ion-view overflow-scroll="false">
         <ion-content class="has-header padding" ng-controller="CalendarController">
             <div id='calendar' ng-init="showCalendar()"></div>
-            Filter by: <select id="filter">
-                <optgroup label="Filter By">
-                    <option value="all" selected>All</option>
-                    <option value="0">Personal</option>
-                    <option value="1">PNCC</option>
-                </optgroup>
-            </select>
+            <div id="filter"style="visibility:hidden">all</div>
         </ion-content>
-        <div class="float-button" >
+        <div class="float-button-hasFooter" >
             <span class="height-fix">
                 <button class="button button-positive button-rounded content" ng-click="createEvent('calendar.html', 'Calendar')"><i class="icon ion-plus-round"></i></button>
             </span>
         </div>
     </ion-view>
 </ion-pane>
+<ion-footer-bar class="bar-positive" style="padding:0px" ng-controller="CalendarController">
+    <div class="col text-left"><button class="button button-icon" ng-click="filterEvents('0')">Personal</button></div>
+    <div class="col text-center"><button class="button button-icon" ng-click="filterEvents('all')">All</button></div>
+    <div class="col text-right"><button class="button button-icon" ng-click="filterEvents('1')">PNCC</button></div>
+</ion-footer-bar>
