@@ -13,7 +13,7 @@
   <preference name="SplashScreenDelay" value="10000" />
   <preference name="FadeSplashScreen" value="false" />
   <preference name="SplashMaintainAspectRatio" value="true|false" />
-  <platform name="android">    
+  <platform name="android">
     <preference name="StatusBarBackgroundColor" value="#387ef5" />
     <icon density="ldpi" src="res/icons/android/icon-36-ldpi.png" />
     <icon density="mdpi" src="res/icons/android/icon-48-mdpi.png" />
@@ -66,4 +66,6 @@
   <plugin name="cordova-plugin-inappbrowser" version="1.2.1" />
   <plugin name="cordova-plugin-splashscreen" version="3.1.0" />
   <plugin name="cordova-plugin-file" version="4.1.1" />
+  <plugin name="cordova-plugin-whitelist" version="1.2.2" />
+  <plugin name="cordova-plugin-network-information" version="1.2.1" />
 </widget>

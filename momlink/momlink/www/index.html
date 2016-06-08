@@ -19,7 +19,7 @@
     <script src="js/app.js"></script>
     <script src="js/controllers.js"></script>
 </head>
-<body ng-app="momlink" ng-controller="HeaderBarController">
+<body ng-app="momlink" ng-controller="HeaderCtrl">
     <div id="content">
         <div id="database" ng-controller="DBController" ng-init="initializeDB()"></div>
         <ion-content overflow-scroll="false" style="background-color:#0866c6" ng-init="autoLogin()">
@@ -38,8 +38,8 @@
                 </div>
                 <div style="width:90%; border-bottom:2px solid white;"></div>
                 <div class="padding">
-                    <input type="button" class="button button-block button-positive" value="FORGOT PASSWORD" ng-click="goToLink('templates/forgotPassword.html')">
-                    <input type="button" class="button button-block button-positive" value="NEW USER?" ng-click="goToLink('templates/register.html')">
+                    <input type="button" class="button button-block button-positive" value="FORGOT PASSWORD" ng-click="toNewPage('templates/forgotPassword.html')">
+                    <input type="button" class="button button-block button-positive" value="NEW USER?" ng-click="toNewPage('templates/register.html')">
                 </div>
             </center>
         </ion-content>

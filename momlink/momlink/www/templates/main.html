@@ -21,10 +21,10 @@
     <script src="../js/controllers.js"></script>
     <link href="../css/style.css" rel="stylesheet">
 </head>
-<body ng-app="momlink" ng-controller="HeaderBarController" ng-init="initializeBack(); removeSplash()">
-    <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderBarController">
+<body ng-app="momlink" ng-controller="HeaderCtrl" ng-init="addBackButtonListener(); removeSplash();">
+    <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderCtrl">
         <div class="buttons">
-            <button class="button button-icon icon ion-ios-home" ng-click="goToLink('home.html', 'Momlink');closeTopMenu()"></button>
+            <button class="button button-icon icon ion-ios-home" ng-click="toNewPage('home.html', 'Momlink');closeTopMenu()"></button>
         </div>
         <h1 class="title" id="headline">Momlink</h1>
         <div class="buttons">
@@ -34,18 +34,18 @@
     <ion-top-menu class="text-center has-header">
         <ion-content overflow-scroll="false" style="background-color:#ffffff">
             <div class="row">
-                <div class="col"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="goToLink('inbox.html', 'Inbox')" style="width:75px;height:75px;vertical-align:middle"><p>Mail</p></div>
-                <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="goToLink('calendar.html', 'Calendar')" style="width:75px;height:75px;vertical-align:middle"><p>Calendar</p></div>
-                <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="goToLink('referrals.html', 'Referrals')" style="width:75px;height:75px;vertical-align:middle"><p>Referrals</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="width:75px;height:75px;vertical-align:middle"><p>Mail</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="width:75px;height:75px;vertical-align:middle"><p>Calendar</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="width:75px;height:75px;vertical-align:middle"><p>Referrals</p></div>
             </div>
             <div class="row">
-                <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="goToLink('education.html', 'Education')" style="width:75px;height:75px;vertical-align:middle"><p>Education</p></div>
-                <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="goToLink('journal.html', 'My Journal')" style="width:75px;height:75px;vertical-align:middle"><p>Journal</p></div>
-                <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="goToLink('myProfile.html', 'My Profile')" style="width:75px;height:75px;vertical-align:middle"><p>My Profile</p></div>
-                <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="goToLink('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
+                <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="width:75px;height:75px;vertical-align:middle"><p>Education</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="toNewPage('journal.html', 'My Journal')" style="width:75px;height:75px;vertical-align:middle"><p>Journal</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="toNewPage('myProfile.html', 'My Profile')" style="width:75px;height:75px;vertical-align:middle"><p>My Profile</p></div>
+                <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="toNewPage('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
             </div>
             <div class="row">
-                <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="goToLink('track.html', 'Track')" style="width:75px;height:75px;vertical-align:middle"><p>Track</p></div>
+                <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('track.html', 'Track')" style="width:75px;height:75px;vertical-align:middle"><p>Track</p></div>
                 <div class="col"><img src="../img/temp/refresh.png" ng-click="" style="width:75px;height:75px;vertical-align:middle"><p>Update</p></div>
                 <div class="col"><img src="../img/mainIcons/momlink_icon-24.png" ng-click="logout()" style="width:75px;height:75px;vertical-align:middle" alt="Logout"><p>Logout</p></div>
             </div>
@@ -53,7 +53,7 @@
     </ion-top-menu>
     <div id="content" ng-click="closeTopMenu()">
         <ion-pane>
-            <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="showDate()">
+            <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="renderSubheaderDate()">
                 <h2 class="title" id="todaysDate"></h2>
             </ion-subheader-bar>
             <ion-view>
@@ -71,18 +71,18 @@
                     </ion-slides>
                     <center>
                         <div class="row">
-                            <div class="col"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="goToLink('inbox.html', 'Inbox')" style="width:75px;height:75px;vertical-align:middle"><p>Mail</p></div>
-                            <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="goToLink('calendar.html', 'Calendar')" style="width:75px;height:75px;vertical-align:middle"><p>Calendar</p></div>
-                            <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="goToLink('referrals.html', 'Referrals')" style="width:75px;height:75px;vertical-align:middle"><p>Referrals</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="width:75px;height:75px;vertical-align:middle"><p>Mail</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="width:75px;height:75px;vertical-align:middle"><p>Calendar</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="width:75px;height:75px;vertical-align:middle"><p>Referrals</p></div>
                         </div>
                         <div class="row">
-                            <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="goToLink('education.html', 'Education')" style="width:75px;height:75px;vertical-align:middle"><p>Education</p></div>
-                            <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="goToLink('journal.html', 'My Journal')" style="width:75px;height:75px;vertical-align:middle"><p>Journal</p></div>
-                            <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="goToLink('myProfile.html', 'My Profile')" style="width:75px;height:75px;vertical-align:middle"><p>My Profile</p></div>
-                            <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="goToLink('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="width:75px;height:75px;vertical-align:middle"><p>Education</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="toNewPage('journal.html', 'My Journal')" style="width:75px;height:75px;vertical-align:middle"><p>Journal</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="toNewPage('myProfile.html', 'My Profile')" style="width:75px;height:75px;vertical-align:middle"><p>My Profile</p></div>
+                            <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="toNewPage('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
                         </div>
                         <div class="row">
-                            <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="goToLink('track.html', 'Track')" style="width:75px;height:75px;vertical-align:middle"><p>Track</p></div>
+                            <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('track.html', 'Track')" style="width:75px;height:75px;vertical-align:middle"><p>Track</p></div>
                             <div class="col"><img src="../img/temp/refresh.png" ng-click="" style="width:75px;height:75px;vertical-align:middle"><p>Update</p></div>
                             <div class="col"></div>
                         </div>

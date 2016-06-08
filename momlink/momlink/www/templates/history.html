@@ -1,9 +1,9 @@
-﻿<ion-pane>
-    <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="showDate()">
+﻿<ion-pane ng-controller="HistoryController">
+    <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="renderSubheaderDate()">
         <h2 class="title" id="todaysDate"></h2>
     </ion-subheader-bar>
     <ion-view>
-        <ion-content overflow-scroll="false" class="has-header has-subheader" ng-controller="HistoryController" ng-init="loadHistory()" on-swipe-left="increaseDate(); loadHistory()" on-swipe-right="decreaseDate(); loadHistory()">
+        <ion-content overflow-scroll="false" class="has-header has-subheader" ng-init="loadHistory()" on-swipe-left="increaseDate(); loadHistory()" on-swipe-right="decreaseDate(); loadHistory()">
             <div id="history"></div>
         </ion-content>
     </ion-view>

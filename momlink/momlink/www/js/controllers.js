@@ -1,57 +1,66 @@
 angular.module('momlink.controllers', [])
+/**
+ *The header controller handles login, navigation, splash screen, back button
+ *
+ *
+ */
+.controller('HeaderCtrl', function ($scope, $ionicPopup, $location, $document, $compile) {
 
-.controller('HeaderBarController', function ($scope, $ionicPopup, $location, $document, $compile) {
-    backHistory = [];
-    $scope.initializeBack = function () {
-        document.addEventListener("backbutton", $scope.handleBack, false);
+    $scope.getInformation = function () {
+        // Which fetches are repeatable.
+        // All sends are repeatable.
+        document.addEventListener("deviceready", function () {
+            client_referral_education_fetched = false;
+            pncc_fetched = false;
+            if (navigator.network.connection.type == Connection.NONE) {
+                alert('No network connection.');
+            } else {
+                // fetch pncc information
+                if (!pncc_fetched) {
+                    // PNCC INFORMATION. FETCH ONCE.
+                    pncc_fetched = true;
+
+                    // Hard-Coded pncc_id - depends on username
+                    var pncc_data = { 'pncc_id': 9888 };
+
+                    $.ajax({
+                        url: 'https://momlink.crc.nd.edu/~jonathan/send_pncc.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: pncc_data,
+                        success: function (data) {
+                            alert("Successfully Retrieved Data.");
+                            console.log(data)
+                        }
+                    });
+                }
+            }
+        });
     }
-    $scope.handleBack = function () {
-        //create queue of previous pages to navigate back through
-        //if backHistory is empty exit app
-        if (backHistory.length == 0) {
+
+    $scope.renderSubheaderDate = function () {
+        var date = new Date()
+        window.localStorage.setItem('date', date);
+        today = moment().format('MMMM Do YYYY')
+        document.getElementById("todaysDate").innerHTML = "Today, " + today;
+    };
+
+    pageHistory = [];
+    $scope.addBackButtonListener = function () {
+        document.addEventListener("backbutton", $scope.toPreviousPage, false);
+    }
+    $scope.toPreviousPage = function () {
+        if (pageHistory.length == 0) {
             //exit app
         }
         else {
-            lastPage = backHistory.pop();
-            title = lastPage[0];
+            lastPage = pageHistory.pop();
+            console.log(pageHistory)
+            headline = lastPage[0];
             page = lastPage[1];
-            $scope.goToLink(page, title, false)
+            $scope.toNewPage(page, headline, true)
         }
     };
-
-    $scope.showDate = function () {
-        var d = new Date()
-        date = d.getDate(),
-        month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
-        window.localStorage.setItem('date', d);
-        function nth(d) {
-            if (d > 3 && d < 21) return 'th';
-            switch (d % 10) {
-                case 1: return "st";
-                case 2: return "nd";
-                case 3: return "rd";
-                default: return "th";
-            }
-        }
-        document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
-    };
-
-    /*$scope.showDate = function () {
-        var d = new Date()
-        date = d.getDate(),
-        month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
-        window.localStorage.setItem('date', d);
-        function nth(d) {
-            if (d > 3 && d < 21) return 'th';
-            switch (d % 10) {
-                case 1: return "st";
-                case 2: return "nd";
-                case 3: return "rd";
-                default: return "th";
-            }
-        }
-        document.getElementById("todaysDate").innerHTML = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
-    };*/
 
     //function for registration
     /*
@@ -62,27 +71,27 @@ angular.module('momlink.controllers', [])
     };
     */
 
+    //the first page in history should always be home.html
     currentPage = 'home.html';
-    $scope.goToLink = function (page, title, history) {
-        //will not include history when tabbing back
-        if (history != false) {
-            //get current page and title before moving to new page
+    $scope.toNewPage = function (nextPage, nextHeadline, history) {
+        //prevents adding pages to history when using the back button
+        if (history != true) {
+            //save current page and headline to history before moving to requested page
             if (document.getElementById('headline') != null) {
-                var histPage = currentPage;
-                var histTitle = document.getElementById('headline').innerHTML
-                //add page to history
-                backHistory.push([histTitle, histPage])
-                currentPage = page;
+                var currentHeadline = document.getElementById('headline').innerHTML
             }
+            pageHistory.push([currentHeadline, currentPage])
+            console.log(pageHistory)
+            currentPage = nextPage;
         }
-        //move to new page       
+        //load in the requested page      
         var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-        xhr.open('get', page, true);
+        xhr.open('get', nextPage, true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 document.getElementById("content").innerHTML = xhr.responseText;
-                if (title != null) {
-                    document.getElementById('headline').innerHTML = title;
+                if (nextHeadline != null) {
+                    document.getElementById('headline').innerHTML = nextHeadline;
                 }
                 $compile(document.getElementById('content'))($scope);
             }
@@ -159,17 +168,17 @@ angular.module('momlink.controllers', [])
     //Tracking Links
     $scope.goToHistory = function (type) {
         window.localStorage.setItem('trackType', type)
-        $scope.goToLink('history.html', 'History')
+        $scope.toNewPage('history.html', 'History')
     };
     $scope.goToAddEvent = function () {
         var type = window.localStorage.getItem('trackType');
         title = type.split(/(?=[A-Z])/).splice(1, 100)
         title = title.join(' ')
-        $scope.goToLink(type + ".html", 'Add ' + title);
+        $scope.toNewPage(type + ".html", 'Add ' + title);
     };
     $scope.goToAct = function (act) {
         window.localStorage.setItem('selectAct', act)
-        $scope.goToLink('addActivityTime.html', 'Add Activity Time');
+        $scope.toNewPage('addActivityTime.html', 'Add Activity Time');
     };
     //Inbox Link
     $scope.goToMessage = function (email, link, title) {
@@ -180,7 +189,7 @@ angular.module('momlink.controllers', [])
             buttons: [
               {
                   text: 'Send', onTap: function (e) {
-                      $scope.goToLink(link, title);
+                      $scope.toNewPage(link, title);
                       return 'Create';
                   },
                   type: 'button-positive'
@@ -250,7 +259,7 @@ angular.module('momlink.controllers', [])
                               doc['E'].push(event);
                               return db.put(doc);
                           }).then(function (doc) {
-                              $scope.goToLink(link, title);
+                              $scope.toNewPage(link, title);
                           });
                           return 'Create';
                       }
@@ -474,7 +483,6 @@ angular.module('momlink.controllers', [])
                 }
             })
         });
-
         $('#filter').on('change', function () {
             $('#calendar').fullCalendar('rerenderEvents');
         })
@@ -496,8 +504,8 @@ angular.module('momlink.controllers', [])
                 html += '</div>';
             }
             html += '</div>';
-            document.getElementById('referrals').innerHTML = html;
-            $compile(document.getElementById('referrals'))($scope);
+            $("#referrals").html(html);
+            $compile($("#referrals"))($scope);
         });
     };
     $scope.showPNCCContacts = function () {
@@ -514,8 +522,8 @@ angular.module('momlink.controllers', [])
                 html += '</div>';
             }
             html += '</div>';
-            document.getElementById('pncc').innerHTML = html;
-            $compile(document.getElementById('pncc'))($scope);
+            $("#pncc").html(html);
+            $compile($("#pncc"))($scope);
         });
     };
 })
@@ -771,8 +779,8 @@ angular.module('momlink.controllers', [])
                 html += '</div>';
             }
             html += '</div>';
-            document.getElementById('shared').innerHTML = html;
-            $compile(document.getElementById('shared'))($scope);
+            $('#shared').html(html);
+            $compile($('#shared'))($scope);
         });
     };
     $scope.showHistory = function () {
@@ -796,8 +804,8 @@ angular.module('momlink.controllers', [])
                 html += '</div>';
             }
             html += '</div>';
-            document.getElementById('history').innerHTML = html;
-            $compile(document.getElementById('history'))($scope);
+            $('#history').html(html);
+            $compile($('#history'))($scope);
         });
     };
     $scope.read = function (link) {
@@ -845,7 +853,7 @@ angular.module('momlink.controllers', [])
                     doc['shared'].splice(index, 1);
                     return db.put(doc);
                 }).then(function (doc) {
-                    $scope.goToLink('education.html', 'Education');
+                    $scope.toNewPage('education.html', 'Education');
                 });
             }
         });
@@ -876,7 +884,7 @@ angular.module('momlink.controllers', [])
             doc['shared'].splice(index, 1);
             return db.put(doc);
         }).then(function (doc) {
-            $scope.goToLink('education.html', 'Education');
+            $scope.toNewPage('education.html', 'Education');
         });
     };
 })
@@ -908,8 +916,8 @@ angular.module('momlink.controllers', [])
                 html += '</div>';
             }
             html += '</div>';
-            document.getElementById('referrals').innerHTML = html;
-            $compile(document.getElementById('referrals'))($scope);
+            $('#referrals').html(html);
+            $compile($('#referrals'))($scope);
         });
     };
     $scope.schedule = function (name) {
@@ -958,7 +966,7 @@ angular.module('momlink.controllers', [])
                 //update database
                 return db.put(doc);
             }).then(function (doc) {
-                $scope.goToLink('referrals.html', 'Referrals');
+                $scope.toNewPage('referrals.html', 'Referrals');
             });
         }
     }
@@ -1006,8 +1014,8 @@ angular.module('momlink.controllers', [])
             //keep current week for saving photos, decrement 1 to keep consistent
             weekCounter--;
             window.localStorage.setItem('currentWeek', weekCounter);
-            document.getElementById('photoJournal').innerHTML = html;
-            $compile(document.getElementById('photoJournal'))($scope);
+            $('#photoJournal').html(html);
+            $compile($('#photoJournal'))($scope);
         });
     }
     $scope.renderGallery = function (displayDate, week) {
@@ -1065,9 +1073,8 @@ angular.module('momlink.controllers', [])
         //end html string and recompile page
         var B = function () {
             html += '</div>';
-            console.log(html)
-            document.getElementById('photoJournal').innerHTML = html;
-            $compile(document.getElementById('photoJournal'))($scope);
+            $('#photoJournal').html(html);
+            $compile($('#photoJournal'))($scope);
         };
         //need to wait until function A has finished before calling B
         A(function () {
@@ -1091,7 +1098,7 @@ angular.module('momlink.controllers', [])
                           doc['notes'].push(note);
                           return db.put(doc);
                       }).then(function (doc) {
-                          $scope.goToLink(link, title);
+                          $scope.toNewPage(link, title);
                       });
                       return 'Add';
                   },
@@ -1118,8 +1125,8 @@ angular.module('momlink.controllers', [])
                 html += '</div>';
             }
             html += '</div>';
-            document.getElementById('notes').innerHTML = html;
-            $compile(document.getElementById('notes'))($scope);
+            $('#notes').html(html);
+            $compile($('#notes'))($scope);
         });
     };
     $scope.showVisits = function () {
@@ -1136,52 +1143,37 @@ angular.module('momlink.controllers', [])
                 html += '</div>';
             }
             html += '</div>';
-            document.getElementById('pnccVisits').innerHTML = html;
-            $compile(document.getElementById('pnccVisits'))($scope);
+            $('#pnccVisits').html(html);
+            $compile($('#pnccVisits'))($scope);
         });
     };
 })
 
 .controller('HistoryController', function ($scope) {
     formatDate = function (d) {
-        var t
-        var date = d.getDate(),
-        month = "Jan,Feb,Mar,Apr,May,June,July,Aug,Sept,Oct,Nov,Dec".split(",")[d.getMonth()];
+        var selectedDate = moment(d).format('MMMM Do YYYY')
+        today = moment().format('MMMM Do YYYY')
         window.localStorage.setItem('date', d);
-        function nth(d) {
-            if (d > 3 && d < 21) return 'th';
-            switch (d % 10) {
-                case 1: return "st";
-                case 2: return "nd";
-                case 3: return "rd";
-                default: return "th";
-            }
+        if (selectedDate == today) {
+            selectedDate = "Today, ".concat(selectedDate);
         }
-        today = new Date();
-        if (String(d).substring(0, 15) == String(today).substring(0, 15)) {
-            t = "Today, " + month + " " + date + nth(date) + " " + d.getFullYear();
-        }
-        else {
-            t = month + " " + date + nth(date) + ", " + d.getFullYear();
-        }
-        return t;
+        return selectedDate;
     };
     $scope.increaseDate = function () {
         var d = new Date(window.localStorage.getItem('date'));
         d.setDate(d.getDate() + 1)
-        document.getElementById("todaysDate").innerHTML = formatDate(d);
+        $('#todaysDate').html(formatDate(d));
     };
     $scope.decreaseDate = function () {
         var d = new Date(window.localStorage.getItem('date'));
         d.setDate(d.getDate() - 1)
-        document.getElementById("todaysDate").innerHTML = formatDate(d);
+        $('#todaysDate').html(formatDate(d));
     };
-
     $scope.loadHistory = function () {
         //diet is handled differently
         var el = window.localStorage.getItem('trackType');
         if (el == 'addFood') {
-            $scope.goToLink('addFood.html', 'Diet')
+            $scope.toNewPage('addFood.html', 'Diet')
         }
         else {
             var type;
@@ -1252,7 +1244,7 @@ angular.module('momlink.controllers', [])
                     hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
                     hist += `</div></div>`;
                 }
-                document.getElementById('history').innerHTML = hist;
+                $('#history').html(hist);
             })
         };
     }
@@ -1295,30 +1287,30 @@ angular.module('momlink.controllers', [])
         else {
             active = 'count2'
         }
-        var countEl = document.getElementById(active).innerHTML;
+        var countEl =  $("#" + active).html();
 
         if (pm == 'plus') {
             countEl++;
-            document.getElementById(active).innerHTML = countEl;
+            $("#" + active).html(countEl);
         }
         if (pm == 'minus' && countEl > 0) {
             countEl--;
-            document.getElementById(active).innerHTML = countEl;
+            $("#" + active).html(countEl);
         }
     }
     $scope.plusMinus = function (pm, id) {
-        var countEl = document.getElementById(id).innerHTML;
+        var countEl = $("#" + id).html();
         if (pm == 'plus') {
             countEl++;
-            document.getElementById(id).innerHTML = countEl;
+            $("#" + id).html(countEl);
         }
         if (pm == 'minus' && countEl > 0) {
             countEl--;
-            document.getElementById(id).innerHTML = countEl;
+            $("#" + id).html(countEl);
         }
     }
     $scope.clear = function (id, num) {
-        document.getElementById(id).innerHTML = num;
+        $("#" + id).html(num);
     }
 })
 
@@ -1335,7 +1327,7 @@ angular.module('momlink.controllers', [])
             doc['doctorsEmail'] = $('#dEmail').val(),
             doc['doctorsPhone'] = $('#dNumber').val()
             return db.put(doc).then(function (doc) {
-                $scope.goToLink('home.html', 'Momlink');
+                $scope.toNewPage('home.html', 'Momlink');
             });
         });
     }
@@ -1373,27 +1365,27 @@ angular.module('momlink.controllers', [])
 
 .controller('ActivityController', function ($scope) {
     var hour = 0;
-    var totalMinutes = document.getElementById("minute");
-    var totalHours = document.getElementById("hour");
+    var totalMinutes = $('#minute');
+    var totalHours = $('#hour');
     $scope.addHour = function () {
         hour++;
         totalHours.value = hour;
-        document.getElementById("hour").innerHTML = ("0" + totalHours.value).slice(-2);
+        $('#hour').html(("0" + totalHours.value).slice(-2));
     }
     $scope.subtractHour = function () {
         if (totalHours.value > 0) {
             hour--;
             totalHours.value = hour;
-            document.getElementById("hour").innerHTML = ("0" + totalHours.value).slice(-2);
+            $('#hour').html(("0" + totalHours.value).slice(-2));
         }
     }
     $scope.clear = function () {
         minute = 0;
         totalMinutes.value = minute;
-        document.getElementById("minute").innerHTML = ("0" + totalMinutes.value).slice(-2);
+        $('#minute').html(("0" + totalMinutes.value).slice(-2));
         hour = 0;
         totalHours.value = hour;
-        document.getElementById("hour").innerHTML = ("0" + totalHours.value).slice(-2);
+        $('#hour').html(("0" + totalMinutes.value).slice(-2));
     }
 })
 
@@ -1490,7 +1482,7 @@ angular.module('momlink.controllers', [])
                     THIS.minute.angle = iAngle;
                     THIS.minute.value = (THIS.minute.angle / 360 * 60).toFixed();
                     this.transform(['r', iAngle, x1, y1]);
-                    document.getElementById("minute").innerHTML = ("0" + THIS.minute.value).slice(-2);
+                    $('#minute').html(("0" + THIS.minute.value).slice(-2));
                     if (THIS.onMinuteDragMove) {
                         THIS.onMinuteDragMove.apply(THIS, arguments);
                     }
@@ -1532,7 +1524,7 @@ angular.module('momlink.controllers', [])
             description = "Hurts worst";
         }
         document.getElementById("face").src = "../img/painScale/" + face + ".png";
-        document.getElementById("description").innerHTML = description;
+        $('#description').html(description);
     };
 })
 
@@ -1672,9 +1664,9 @@ angular.module('momlink.controllers', [])
     }
 
     $scope.submitAct = function (type) {
-        var db = PouchDB('momlink');
-        hour = document.getElementById('hour').innerHTML;
-        min = document.getElementById('minute').innerHTML;
+        var db = PouchDB('momlink');       
+        hour = $('#hour').html();
+        min = $('#minute').html();
         value = String(hour + ":" + min);
         db.get('track').then(function (doc) {
             var element = {
@@ -1687,12 +1679,12 @@ angular.module('momlink.controllers', [])
             doc['A'].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            $scope.goToLink('history.html', 'History');
+            $scope.toNewPage('history.html', 'History');
         });
     }
     $scope.submit = function (type) {
         var db = PouchDB('momlink');
-        value = document.getElementById('count').innerHTML;
+        value = $('#count').html();
         db.get('track').then(function (doc) {
             var element = {
                 "uniqueId": new Date().toJSON(),
@@ -1703,7 +1695,7 @@ angular.module('momlink.controllers', [])
             doc[type].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            $scope.goToLink('history.html', 'History');
+            $scope.toNewPage('history.html', 'History');
         });
     }
     $scope.submitPain = function (type) {
@@ -1739,7 +1731,7 @@ angular.module('momlink.controllers', [])
             doc[type].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            $scope.goToLink('history.html', 'History');
+            $scope.toNewPage('history.html', 'History');
         });
     }
     $scope.submitBP = function () {
@@ -1749,12 +1741,12 @@ angular.module('momlink.controllers', [])
                 "uniqueId": new Date().toJSON(),
                 "date": getDate(),
                 "time": getTime(),
-                "value": document.getElementById('count').innerHTML + "/" + document.getElementById('count2').innerHTML
+                "value": $('#count').html() + "/" + $('#count2').html()
             };
             doc['BP'].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            $scope.goToLink('history.html', 'History');
+            $scope.toNewPage('history.html', 'History');
         });
     }
     $scope.submitAdd = function (type) {
@@ -1764,12 +1756,12 @@ angular.module('momlink.controllers', [])
                 "uniqueId": new Date().toJSON(),
                 "date": getDate(),
                 "time": getTime(),
-                "value": parseInt(document.getElementById('count12').innerHTML) * (.5) + parseInt(document.getElementById('count1').innerHTML)
+                "value": parseInt($('#count12').html()) * (.5) + parseInt($('#count1').html())
             };
             doc[type].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            $scope.goToLink('history.html', 'History');
+            $scope.toNewPage('history.html', 'History');
         });
     }
     $scope.submitSet = function (value, type) {
@@ -1784,7 +1776,7 @@ angular.module('momlink.controllers', [])
             doc[type].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            $scope.goToLink('history.html', 'History');
+            $scope.toNewPage('history.html', 'History');
         });
     }
 
