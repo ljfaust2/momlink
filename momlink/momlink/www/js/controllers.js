@@ -46,20 +46,21 @@ angular.module('momlink.controllers', [])
 
     pageHistory = [];
     $scope.addBackButtonListener = function () {
-        document.addEventListener("backbutton", $scope.toPreviousPage, false);
+        document.addEventListener("backbutton", function (event) {
+            //if on homepage then exit app
+            if ($('#headline').html() == 'Momlink') {
+                navigator.app.exitApp();
+            }
+            else {
+                lastPage = pageHistory.pop();
+                //console.log(pageHistory)
+                headline = lastPage[0];
+                page = lastPage[1];
+                $scope.toNewPage(page, headline, true)
+                navigator.app.preventDefault();
+            }
+        }, false);
     }
-    $scope.toPreviousPage = function () {
-        if (pageHistory.length == 0) {
-            //exit app
-        }
-        else {
-            lastPage = pageHistory.pop();
-            //console.log(pageHistory)
-            headline = lastPage[0];
-            page = lastPage[1];
-            $scope.toNewPage(page, headline, true)
-        }
-    };
 
     //function for registration
     /*
@@ -74,10 +75,10 @@ angular.module('momlink.controllers', [])
     currentPage = 'home.html';
     $scope.toNewPage = function (nextPage, nextHeadline, history) {
         //prevents adding pages to history when using the back button
-        if (history != true) {
+        if (history != true || nextPage == 'home.html') {
             //save current page and headline to history before moving to requested page
             if (document.getElementById('headline') != null) {
-                var currentHeadline = document.getElementById('headline').innerHTML
+                var currentHeadline = $('#headline').html();
             }
             pageHistory.push([currentHeadline, currentPage])
             //console.log(pageHistory)
@@ -471,10 +472,10 @@ angular.module('momlink.controllers', [])
                         templateHTML += '<p><b>Date</b>: ' + date + '</p>';
                         templateHTML += '<p><b>Start</b>: ' + startTime + '</p>';
                         templateHTML += '<p><b>End</b>: ' + endTime + '</p>';
-                        if(event.venue != ''){
+                        if (event.venue != '') {
                             templateHTML += '<p><b>Venue</b>: ' + event.venue + '</p>'
                         }
-                        if(event.description != ''){
+                        if (event.description != '') {
                             templateHTML += '<p><b>Description</b>: ' + event.description + '</p>'
                         }
 
@@ -1297,7 +1298,7 @@ angular.module('momlink.controllers', [])
         else {
             active = 'count2'
         }
-        var countEl =  $("#" + active).html();
+        var countEl = $("#" + active).html();
 
         if (pm == 'plus') {
             countEl++;
@@ -1538,12 +1539,6 @@ angular.module('momlink.controllers', [])
     };
 })
 
-.controller('SliderController', function ($scope, $ionicSlideBoxDelegate) {
-    $scope.nextSlide = function () {
-        $ionicSlideBoxDelegate.next();
-    }
-})
-
 .controller('CameraController', function ($scope) {
     var pictureSource;
     var destinationType; // sets the format of returned value
@@ -1674,7 +1669,7 @@ angular.module('momlink.controllers', [])
     }
 
     $scope.submitAct = function (type) {
-        var db = PouchDB('momlink');       
+        var db = PouchDB('momlink');
         hour = $('#hour').html();
         min = $('#minute').html();
         value = String(hour + ":" + min);
