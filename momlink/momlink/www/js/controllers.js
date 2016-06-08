@@ -115,7 +115,14 @@ angular.module('momlink.controllers', [])
     $scope.closeTopMenu = function () {
         var menu = document.getElementsByTagName('ion-top-menu')[0];
         if (menu.offsetHeight == 340) {
-            $scope.toggleTopMenu();
+            var menu = document.getElementsByTagName('ion-top-menu')[0];
+            var pane = document.getElementsByTagName('ion-pane')[0];
+            //set icon color to white
+            if (document.getElementById('menuIcon').classList.contains('menu-icon')) {
+                document.getElementById('menuIcon').classList.remove('menu-icon')
+            }
+            //raise menu
+            menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
         }
     };
 
@@ -922,7 +929,6 @@ angular.module('momlink.controllers', [])
                 else {
                     html += `<button class="button button-small button-stable" ng-click="">View Meeting</button>`;
                 }
-
                 html += '</div>';
             }
             html += '</div>';
@@ -931,35 +937,8 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.schedule = function (name) {
-        $ionicPopup.show({
-            title: 'Schedule By',
-            cssClass: 'popup-vertical-buttons',
-            buttons: [
-            {
-                text: '  Call', onTap: function (e) {
-                    //$scope.createEvent('referrals.html', 'Referrals').then(function (res) {
-                    updateDatabase();
-                    //})
-                    return 'Call';
-                },
-                type: 'ion-ios-telephone-outline button-positive'
-            },
-            {
-                text: '  Email', onTap: function (e) {
-                    //$scope.createEvent('referrals.html', 'Referrals').then(function (res) {
-                    updateDatabase();
-                    //})
-                    return 'Email';
-                },
-                type: 'ion-ios-email-outline button-positive'
-            },
-            {
-                text: 'Cancel', onTap: function (e) { return 'Cancel'; },
-                type: 'button-stable'
-            }
-            ],
-        });
-
+        $scope.createEvent('referrals.html', 'Referrals');
+        updateDatabase();
         function updateDatabase() {
             var db = PouchDB('momlink');
             var index = 0;
