@@ -44,6 +44,65 @@ angular.module('momlink.controllers', [])
         window.localStorage.setItem('date', date);
     };
 
+    $scope.renderAppointments = function () {
+        var db = PouchDB('momlink');
+        var k = 0;
+        db.get('events').then(function (doc) {
+            events = doc['E'];
+            //get todays events
+            todaysEvents = [];
+            for (i in events) {
+                if (events[i]['day'] == moment().format('YYYY-MM-DD')) {
+                    todaysEvents.push(events[i]['id'])
+                }
+            }
+            if (todaysEvents.length == 0) {
+                $('#appointmentsHeader').html('No Events Today');
+                $compile($('#appointmentsHeader'))($scope);
+            }
+            else {
+                function renderEvent(index) {
+                    for (j in events) {
+                        if (events[j]['id'] == todaysEvents[index]) {
+                            //ng-click open event or calendar
+                            title = events[j]['title'];
+                            startingTime = String(events[j]['start']).substr(String(events[j]['start']).indexOf("T") + 1);
+                            //render todays events
+                            html = title + ' ' + $scope.convert24to12(startingTime);
+                            $('#appointmentsHeader').fadeOut("slow", function () {
+                                $('#appointmentsHeader').html(html);
+                                $('#appointmentsHeader').fadeIn("slow");
+                            });
+                            $compile($('#appointmentsHeader'))($scope);
+                        }
+                    }
+                    k++;
+                }
+                renderEvent(k);
+                //cycle through todays events    
+                (function cycleTodaysEvents(i) {
+                    setTimeout(function () {
+                        renderEvent(k);
+                        if (k == todaysEvents.length) { k = 0 }
+                        if (--i) cycleTodaysEvents(i);
+                    }, 5000)
+                })(Number.POSITIVE_INFINITY);
+            }
+        })
+    };
+    $scope.convert24to12 = function (time) {
+        if (parseInt(time.substring(0, 2)) >= 12) {
+            if (parseInt(time.substring(0, 2)) > 12) {
+                hour = time.slice(0, 2) % 12;
+                time = String(hour).concat(time.slice(2, 5))
+            }
+            time += ' PM'
+        }
+        else {
+            time += ' AM'
+        }
+        return time;
+    }
     pageHistory = [];
     $scope.addBackButtonListener = function () {
         document.addEventListener("backbutton", function (event) {
@@ -267,6 +326,7 @@ angular.module('momlink.controllers', [])
                                   "id": new Date(),
                                   "title": $('#title').val(),
                                   "type": $("#type").val(),
+                                  "day": $('#date').val(),
                                   "start": start,
                                   "end": end,
                                   "venue": $('#venue').val(),
@@ -556,7 +616,9 @@ angular.module('momlink.controllers', [])
     };
 })
 
-//Coupon controller
+/**
+ *Coupon Controller
+ */
 /*.controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showPlans = function () {
         html = `<div class="item item-divider">Plans</div>
@@ -1665,37 +1727,14 @@ angular.module('momlink.controllers', [])
 })
 
 .controller('DBController', function ($scope) {
-    var today = new Date();
     getDate = function () {
-        var dd = today.getDate();
-        var mm = today.getMonth() + 1;
-        var yyyy = today.getFullYear();
-        if (dd < 10) {
-            dd = '0' + dd
-        }
-        if (mm < 10) {
-            mm = '0' + mm
-        }
-        date = mm + '/' + dd + '/' + yyyy;
+        date = moment().format('MM/DD/YYYY')
         return date;
     }
     getTime = function () {
-        var hour = today.getHours();
-        var minute = today.getMinutes();
-        var second = today.getSeconds();
-        if (hour.toString().length == 1) {
-            var hour = '0' + hour;
-        }
-        if (minute.toString().length == 1) {
-            var minute = '0' + minute;
-        }
-        if (second.toString().length == 1) {
-            var second = '0' + second;
-        }
-        var time = hour + ':' + minute + ':' + second;
+        time = moment().format('hh:mm:ss')
         return time;
     }
-
     $scope.submitAct = function (type) {
         var db = PouchDB('momlink');
         hour = $('#hour').html();
@@ -1812,7 +1851,6 @@ angular.module('momlink.controllers', [])
             $scope.toNewPage('history.html', 'History');
         });
     }
-
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink')
         //db.destroy()
@@ -1930,6 +1968,7 @@ angular.module('momlink.controllers', [])
                             "title": "Title 1",
                             "description": "Description 1",
                             "link": "http://www.webmd.com/baby/",
+                            "dateShared": "",
                             "lastRead": "",
                             "category": "Category 1"
                         },
@@ -1938,32 +1977,36 @@ angular.module('momlink.controllers', [])
                             "title": "Title 2",
                             "description": "Description 2",
                             "link": "http://www.webmd.com/baby/",
+                            "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 2"
+                            "category": "Category 1"
                         },
                         {
                             "id": "3",
                             "title": "Title 3",
                             "description": "Description 3",
                             "link": "http://www.webmd.com/baby/",
+                            "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 3"
+                            "category": "Category 2"
                         },
                         {
                             "id": "4",
                             "title": "Title 4",
                             "description": "Description 4",
                             "link": "http://www.webmd.com/baby/",
+                            "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 4"
+                            "category": "Category 2"
                         },
                         {
                             "id": "5",
                             "title": "Title 5",
                             "description": "Description 5",
                             "link": "http://www.webmd.com/baby/",
+                            "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 4"
+                            "category": "Category 2"
                         }
                     ],
                     "history": [

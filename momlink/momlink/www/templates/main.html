@@ -57,10 +57,10 @@
                 <h2 class="title" id="todaysDate"></h2>
             </ion-subheader-bar>
             <ion-view>
-                <ion-content overflow-scroll="false" class="has-header has-subheader">
+                <ion-content overflow-scroll="false" class="has-header has-subheader" ng-init="renderAppointments()">
                     <ion-slides options="options" slider="data.slider" style="height: 80px; background-color:deeppink;">
                         <ion-slide-page>
-                            <div class="centerWhite">Appointments</div>
+                            <div id="appointmentsHeader" class="centerWhite"></div>
                         </ion-slide-page>
                         <ion-slide-page>
                             <div class="centerWhite">Articles</div>
