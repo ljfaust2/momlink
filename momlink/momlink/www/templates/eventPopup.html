@@ -1,9 +1,7 @@
-﻿<div class="list list-inset" ng-app="plugins" ng-controller="CalendarController">
-    <div class="item item-divider">
-        Event Title/Type:
-    </div>
+﻿<div class="list" ng-controller="CalendarController">
     <label class="item item-input">
-        <input id="title" type="text" placeholder="Title">
+        <span class="input-label">Title</span>
+        <input id="title" type="text">
     </label>
     <label class="item item-input item-select">
         Type
@@ -17,28 +15,23 @@
             <option value="Other">Other</option>
         </select>
     </label>
-    <label class="item item-input item-stacked-label">
+    <label class="item item-input">
         <span class="input-label">Date</span>
         <input id="date" type="date">
     </label>
-    <label class="item item-input item-stacked-label">
+    <label class="item item-input">
         <span class="input-label">Start Time</span>
-        <input id="start" type="time" placeholder="Time">
+        <input id="start" type="time">
     </label>
-    <label class="item item-input item-stacked-label">
+    <label class="item item-input">
         <span class="input-label">End Time</span>
-        <input id="end" type="time" placeholder="Time">
+        <input id="end" type="time">
     </label>
-    <div class="item item-divider">
-        Venue:
-    </div>
     <label class="item item-input">
-        <input id="venue" type="text" placeholder="Venue">
+        <span class="input-label">Location</span>
+        <input id="venue" type="text">
     </label>
-    <div class="item item-divider">
-        Notes:
-    </div>
     <label class="item item-input">
-        <textarea id="description" placeholder="Description"></textarea>
+        <textarea id="description" rows="4" placeholder="Notes"></textarea>
     </label>
 </div>
