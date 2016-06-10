@@ -846,7 +846,7 @@ angular.module('momlink.controllers', [])
 })*/
 
 .controller('EducationController', function ($scope, $ionicPopup, $timeout, $compile) {
-    $scope.showSharedCategories = function () {
+    $scope.renderCategories = function () {
         var db = PouchDB('momlink');
         var html = '';
         var categories = {};
@@ -877,10 +877,10 @@ angular.module('momlink.controllers', [])
             }
             //render categories
             html += '<div class="list">';
-            html += `<a class="item" ng-click="showSharedArticles('All')">All
+            html += `<a class="item" ng-click="renderArticles('All')">All
                 <span class="badge badge-assertive">` + totalUnreadArticles + `</span></a>`
             for (i in categories) {
-                html += `<a class="item" ng-click="showSharedArticles('` + i + `')">`;
+                html += `<a class="item" ng-click="renderArticles('` + i + `')">`;
                 html += i;
                 if (categories[i] > 0) {
                     html += '<span class="badge badge-assertive">' + categories[i] + '</span>';
@@ -892,17 +892,17 @@ angular.module('momlink.controllers', [])
             $compile($('#shared'))($scope);
         })
     };
-    $scope.showSharedArticles = function (category) {
+    $scope.renderArticles = function (category) {
         var db = PouchDB('momlink');
         var html = '';
         db.get('articles').then(function (doc) {
             sharedArticles = doc['shared'];
-            html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="showSharedCategories()"></button><div class ="title">` + category + `</div></div>`
+            html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderCategories()"></button><div class ="title">` + category + `</div></div>`
             html += '<div class="list has-header">';
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['category'] == category || category == 'All') {
-                    html += `<a class="item item-thumbnail-left" ng-click="showArticle('` + article['id'] + `')">`;
+                    html += `<a class="item item-thumbnail-left" ng-click="renderArticle('` + article['id'] + `')">`;
                     html += `<img src="../img/temp/article.jpg">`;
                     html += '<h2>' + article['title'] + '</h2>';
                     html += '<p>' + article['description'] + '</p>';
@@ -915,7 +915,7 @@ angular.module('momlink.controllers', [])
             $compile($('#shared'))($scope);
         });
     };
-    $scope.showArticle = function (id) {
+    $scope.renderArticle = function (id) {
         var db = PouchDB('momlink');
         var html = '';
         db.get('articles').then(function (doc) {
@@ -924,14 +924,56 @@ angular.module('momlink.controllers', [])
                 article = sharedArticles[i]
                 if (article['id'] == id) {
                     html += `<div class="bar bar-footer">`
-                    html += `<button class ="button button-icon icon ion-reply" ng-click="showSharedArticles('`+ article['category'] +`')"></button>`
-                    html += `<button class ="button button-icon icon icon-right ion-help">Take Quiz &nbsp;</button>`
+                    html += `<button class ="button button-icon icon ion-reply" ng-click="renderArticles('` + article['category'] + `')"></button>`
+                    html += `<button class ="button button-icon icon icon-right ion-help" ng-click="renderQuiz('` + article['id'] + `')">Take Quiz &nbsp;</button>`
                     html += `</div>`
                     html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
                     $('#shared').html(html);
                     $compile($('#shared'))($scope);
                 }
             }
+        });
+    };
+    $scope.renderQuiz = function (articleID) {
+        //generate quiz
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('articles').then(function (doc) {
+            sharedArticles = doc['shared'];
+            for (i in sharedArticles) {
+                article = sharedArticles[i]
+                if (article['id'] == articleID) {
+                    //get article's related quiz
+                    quiz = article['quiz'];
+                    for (j in quiz) {
+                        question = quiz[j][0];
+                        answers = quiz[j][1];
+                        //render question
+                        html += `  <div class="item item-divider">` + question + `</div>`;
+                        //render answers
+                        html += `<ion-list>`
+                        for (k = 0; k < answers.length; k++) {
+                            answer = quiz[j][1][k];
+                            html += `<ion-radio name="'` + j + `'" value="'` + answer + `'">` + answer + `</ion-radio>`;
+                        }
+                        html += `</ion-list>`
+                    }
+                }
+            }
+            $ionicPopup.show({
+                title: 'Quiz',
+                template: html,
+                buttons: [
+                  {
+                      text: 'Finish', onTap: function (e) {
+                          //score the quiz
+                          $scope.renderCategories()
+                          return 'Create';
+                      },
+                      type: 'button-positive'
+                  }
+                ],
+            });
         });
     };
     $scope.showHistory = function () {
@@ -1866,7 +1908,6 @@ angular.module('momlink.controllers', [])
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink')
         //db.destroy()
-
         /*
             "_id": "loginInfo",
             "clientID": "", should be a unique id
@@ -2032,10 +2073,16 @@ angular.module('momlink.controllers', [])
                             "id": "1",
                             "title": "Title 1",
                             "description": "Description 1",
-                            "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
+                            //"link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 1"
+                            "category": "Category 1",
+                            "quiz":
+                                [
+                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
+                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
+                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
+                                ]
                         },
                         {
                             "id": "2",
@@ -2044,7 +2091,13 @@ angular.module('momlink.controllers', [])
                             "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 1"
+                            "category": "Category 1",
+                            "quiz":
+                                [
+                                ('This is question 1', ['First answer', 'Second Answer', 'Third Answer'], '0'),
+                                ('This is question 2', ['First answer', 'Second Answer', 'Third Answer'], '1'),
+                                ('This is question 3', ['First answer', 'Second Answer', 'Third Answer'], '2')
+                                ]
                         },
                         {
                             "id": "3",
@@ -2053,7 +2106,13 @@ angular.module('momlink.controllers', [])
                             "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 2"
+                            "category": "Category 2",
+                            "quiz":
+                                [
+                                ('This is question 1', ['First answer', 'Second Answer', 'Third Answer'], '0'),
+                                ('This is question 2', ['First answer', 'Second Answer', 'Third Answer'], '1'),
+                                ('This is question 3', ['First answer', 'Second Answer', 'Third Answer'], '2')
+                                ]
                         },
                         {
                             "id": "4",
@@ -2062,7 +2121,13 @@ angular.module('momlink.controllers', [])
                             "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 2"
+                            "category": "Category 2",
+                            "quiz":
+                                [
+                                ('This is question 1', ['First answer', 'Second Answer', 'Third Answer'], '0'),
+                                ('This is question 2', ['First answer', 'Second Answer', 'Third Answer'], '1'),
+                                ('This is question 3', ['First answer', 'Second Answer', 'Third Answer'], '2')
+                                ]
                         },
                         {
                             "id": "5",
@@ -2071,7 +2136,13 @@ angular.module('momlink.controllers', [])
                             "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 2"
+                            "category": "Category 2",
+                            "quiz":
+                                [
+                                ('This is question 1', ['First answer', 'Second Answer', 'Third Answer'], '0'),
+                                ('This is question 2', ['First answer', 'Second Answer', 'Third Answer'], '1'),
+                                ('This is question 3', ['First answer', 'Second Answer', 'Third Answer'], '2')
+                                ]
                         }
                     ],
                     "history": [
@@ -2391,21 +2462,5 @@ angular.module('momlink.controllers', [])
       { item: "Thermometers", price: "1" },
       { item: "Underwear", price: "1" },
       { item: "Washcloths", price: "2" }
-    ]
-    $scope.trackList = [
-      { type: "Activity", link: "addActivity", image: "../img/activities/run.png" },
-      { type: "Baby Heart Rate", link: "addBabyHeartRate", image: "../img/buttons/btn-12.png" },
-      { type: "Blood Glucose", link: "addBloodGlucose", image: "../img/temp/bloodGlucose.png" },
-      { type: "Blood Iron", link: "addBloodIron", image: "../img/temp/bloodDrop.png" },
-      { type: "Blood Pressure", link: "addBloodPressure", image: "../img/temp/blood-pressure.jpg" },
-      { type: "Caffeine", link: "addCaffeine", image: "../img/temp/coffee.jpg" },
-      { type: "Cigarettes", link: "addCigarette", image: "../img/temp/cigarette.png" },
-      { type: "Diet", link: "addFood", image: "../img/buttons/btn_t-03.png" },
-      { type: "Kicks", link: "addKicks", image: "../img/temp/kicks.png" },
-      { type: "Mood", link: "addMood", image: "../img/moods/cheerful.png" },
-      { type: "Pain", link: "addPain", image: "../img/buttons/btn_t-05.png" },
-      { type: "Pills", link: "addPill", image: "../img/buttons/btn_t-04.png" },
-      { type: "Stressors", link: "addStress", image: "../img/temp/stress.png" },
-      { type: "Weight", link: "addWeight", image: "../img/temp/scale.jpg" }
     ]
 })
