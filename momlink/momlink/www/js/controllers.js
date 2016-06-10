@@ -353,8 +353,8 @@ angular.module('momlink.controllers', [])
     };
 })
 
-.controller('DietController', function ($scope, $ionicPopup) {
-    $scope.dietCircle = function (id, size, min) {
+.controller('NutritionController', function ($scope, $ionicPopup) {
+    $scope.nutritionCircle = function (id, size, min) {
         var bg = document.getElementById(id);
         var ctx = ctx = bg.getContext('2d');
         var image = new Image();
@@ -1325,10 +1325,10 @@ angular.module('momlink.controllers', [])
         $('#todaysDate').html(formatDate(d));
     };
     $scope.loadHistory = function () {
-        //diet is handled differently
+        //nutrition is handled differently
         var el = window.localStorage.getItem('trackType');
-        if (el == 'addFood') {
-            $scope.toNewPage('addFood.html', 'Diet')
+        if (el == 'addNutrition') {
+            $scope.toNewPage('addNutrition.html', 'Nutrition')
         }
         else {
             var type;
@@ -1354,8 +1354,8 @@ angular.module('momlink.controllers', [])
                 case 'addCigarette':
                     type = 'cigarette';
                     break;
-                case 'addFood':
-                    type = 'diet';
+                case 'addNutrition':
+                    type = 'nutrition';
                     break;
                 case 'addKicks':
                     type = 'kicks';
@@ -2054,7 +2054,7 @@ angular.module('momlink.controllers', [])
                     "bloodPressure": [],
                     "caffeine": [],
                     "cigarette": [],
-                    "diet": [],
+                    "nutrition": [],
                     "kicks": [],
                     'mood': [],
                     'pain': [],

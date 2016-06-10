@@ -275,7 +275,7 @@ Con v 1.0.0, l'attributo `fullPath` è il percorso del file, *rispetto alla radi
 
 Se l'applicazione funziona con dispositivo-assoluto-percorsi, e precedentemente recuperato quei percorsi attraverso la proprietà `fullPath` della `voce` oggetti, è necessario aggiornare il codice per utilizzare `entry.toURL()` invece.
 
-Per indietro la compatibilità, il metodo `resolveLocalFileSystemURL()` verrà accettare un dispositivo-assoluto-percorso e restituirà un oggetto di `entrata` corrispondente ad essa, fintanto che il file esiste all'interno del filesystem la `temporanea` o `permanente`.
+Per innutritionro la compatibilità, il metodo `resolveLocalFileSystemURL()` verrà accettare un dispositivo-assoluto-percorso e restituirà un oggetto di `entrata` corrispondente ad essa, fintanto che il file esiste all'interno del filesystem la `temporanea` o `permanente`.
 
 Questo particolare è stato un problema con il plugin di trasferimento File, che in precedenza utilizzati percorsi-dispositivo-assoluto (e ancora può accoglierli). Esso è stato aggiornato per funzionare correttamente con gli URL di FileSystem, così sostituendo `entry.fullPath` con `entry.toURL()` dovrebbe risolvere eventuali problemi ottenendo quel plugin per lavorare con i file nel dispositivo.
 
