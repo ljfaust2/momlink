@@ -46,42 +46,51 @@ angular.module('momlink.controllers', [])
     };
 
     //ion-slides
-    $scope.renderAppointments = function () {
+    $scope.renderAppointmentsHeader = function () {
         var db = PouchDB('momlink');
-        var eventsToday;
+        var todaysEvents = []
         html = '<div class="row">'
         db.get('events').then(function (doc) {
             events = doc['events'];
             for (i in events) {
                 if (events[i]['day'] == moment().format('YYYY-MM-DD')) {
-                    title = events[i]['title'];
                     startingTime = String(events[i]['start']).substr(String(events[i]['start']).indexOf("T") + 1);
-                    //image will take the place of icon
-                    html += `<div class="col" ng-click="viewEvent('` + events[i]['id'] + `')">`;
-                    html += `<img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"><br>`;
-                    html += $scope.convert24to12(startingTime) + `</div>`;
-                    eventsToday = true;
+                    todaysEvents.push([startingTime, [events[i]['id']]]);
                 }
             }
-            html += '</div>';
-            if (!(eventsToday)) {
-                html = 'No Events Today';
+            todaysEvents = sortTimes(todaysEvents)
+            for (j in todaysEvents) {
+                html += `<div class="col" ng-click="viewEvent('` + todaysEvents[j][1] + `')">`;
+                html += `<img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"><br>`;
+                html += $scope.convert24to12(todaysEvents[j][0]) + `</div>`;
+                eventsToday = true;
             }
+            html += '</div>';
+            if (todaysEvents == 0) { html = 'No Events Today'; }
             $('#appointmentsHeader').html(html);
             $compile($('#appointmentsHeader'))($scope);
         })
+        function sortTimes(array) {
+            return array.sort(function (a, b) {
+                if (parseInt(a[0].split(":")[0]) - parseInt(b[0].split(":")[0]) === 0) {
+                    return parseInt(a[0].split(":")[1]) - parseInt(b[0].split(":")[1]);
+                } else {
+                    return parseInt(a[0].split(":")[0]) - parseInt(b[0].split(":")[0]);
+                }
+            })
+        }
     };
-    $scope.renderArticles = function () {
+    $scope.renderArticlesHeader = function () {
         var db = PouchDB('momlink');
         var html = '';
-        var newArticles;
+        var newArticles = false;
         db.get('articles').then(function (doc) {
             sharedArticles = doc['shared'];
             //generates a dictionary where keys are categories 
             //and values are the number of articles per category not read
             html += '<div class=row ng-controller="EducationController">';
             for (i in sharedArticles) {
-                if(sharedArticles[i]['lastRead'] == ''){
+                if (sharedArticles[i]['lastRead'] == '') {
                     html += `<div class="col" ng-click="renderArticle('shared','` + sharedArticles[i]['id'] + `','` + sharedArticles[i]['category'] + `');">`;
                     html += `<img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"><br>`;
                     html += sharedArticles[i]['title'] + `</div>`;
@@ -90,7 +99,7 @@ angular.module('momlink.controllers', [])
             }
             html += '</div>';
             if (newArticles == false) {
-                html = 'No New Articles'
+                html = '<div class="row; centerVH;"><br>No New Articles</div>'
             }
             $('#articlesHeader').html(html);
             $compile($('#articlesHeader'))($scope);
