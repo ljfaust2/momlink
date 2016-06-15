@@ -3,7 +3,7 @@ angular.module('momlink.controllers', [])
  *The header controller handles login, navigation, splash screen, back button
  */
 .controller('HeaderCtrl', function ($scope, $ionicPopup, $location, $document, $compile) {
-
+    var sliderCount = Number.POSITIVE_INFINITY;
     $scope.getInformation = function () {
         // Which fetches are repeatable.
         // All sends are repeatable.
@@ -36,6 +36,7 @@ angular.module('momlink.controllers', [])
         });
     }
 
+    //ion-subheader
     $scope.renderSubheaderDate = function () {
         today = moment().format('MMMM Do YYYY')
         document.getElementById("todaysDate").innerHTML = "Today, " + today;
@@ -44,65 +45,58 @@ angular.module('momlink.controllers', [])
         window.localStorage.setItem('date', date);
     };
 
+    //ion-slides
     $scope.renderAppointments = function () {
         var db = PouchDB('momlink');
-        var k = 0;
+        var eventsToday;
+        html = '<div class="row">'
         db.get('events').then(function (doc) {
             events = doc['events'];
-            //get todays events
-            todaysEvents = [];
             for (i in events) {
                 if (events[i]['day'] == moment().format('YYYY-MM-DD')) {
-                    todaysEvents.push(events[i]['id'])
+                    title = events[i]['title'];
+                    startingTime = String(events[i]['start']).substr(String(events[i]['start']).indexOf("T") + 1);
+                    //image will take the place of icon
+                    html += `<div class="col" ng-click="viewEvent('` + events[i]['id'] + `')">`;
+                    html += `<img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"><br>`;
+                    html += $scope.convert24to12(startingTime) + `</div>`;
+                    eventsToday = true;
                 }
             }
-            if (todaysEvents.length == 0) {
-                $('#appointmentsHeader').html('No Events Today');
-                $compile($('#appointmentsHeader'))($scope);
+            html += '</div>';
+            if (!(eventsToday)) {
+                html = 'No Events Today';
             }
-            else {
-                function renderEvent(index) {
-                    for (j in events) {
-                        if (events[j]['id'] == todaysEvents[index]) {
-                            //ng-click open event or calendar
-                            title = events[j]['title'];
-                            startingTime = String(events[j]['start']).substr(String(events[j]['start']).indexOf("T") + 1);
-                            //render todays events
-                            html = title + ' ' + $scope.convert24to12(startingTime);
-                            $('#appointmentsHeader').fadeOut("slow", function () {
-                                $('#appointmentsHeader').html(html);
-                                $('#appointmentsHeader').fadeIn("slow");
-                            });
-                            $compile($('#appointmentsHeader'))($scope);
-                        }
-                    }
-                    k++;
-                }
-                renderEvent(k);
-                //cycle through todays events    
-                (function cycleTodaysEvents(i) {
-                    setTimeout(function () {
-                        renderEvent(k);
-                        if (k == todaysEvents.length) { k = 0 }
-                        if (--i) cycleTodaysEvents(i);
-                    }, 5000)
-                })(Number.POSITIVE_INFINITY);
-            }
+            $('#appointmentsHeader').html(html);
+            $compile($('#appointmentsHeader'))($scope);
         })
     };
-    $scope.convert24to12 = function (time) {
-        if (parseInt(time.substring(0, 2)) >= 12) {
-            if (parseInt(time.substring(0, 2)) > 12) {
-                hour = time.slice(0, 2) % 12;
-                time = String(hour).concat(time.slice(2, 5))
+    $scope.renderArticles = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        var newArticles;
+        db.get('articles').then(function (doc) {
+            sharedArticles = doc['shared'];
+            //generates a dictionary where keys are categories 
+            //and values are the number of articles per category not read
+            html += '<div class=row ng-controller="EducationController">';
+            for (i in sharedArticles) {
+                if(sharedArticles[i]['lastRead'] == ''){
+                    html += `<div class="col" ng-click="renderArticle('shared','` + sharedArticles[i]['id'] + `','` + sharedArticles[i]['category'] + `');">`;
+                    html += `<img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"><br>`;
+                    html += sharedArticles[i]['title'] + `</div>`;
+                    newArticles = true;
+                }
             }
-            time += ' PM'
-        }
-        else {
-            time += ' AM'
-        }
-        return time;
-    }
+            html += '</div>';
+            if (newArticles == false) {
+                html = 'No New Articles'
+            }
+            $('#articlesHeader').html(html);
+            $compile($('#articlesHeader'))($scope);
+        })
+    };
+
     pageHistory = [];
     $scope.addBackButtonListener = function () {
         document.addEventListener("backbutton", function (event) {
@@ -135,6 +129,11 @@ angular.module('momlink.controllers', [])
     $scope.toNewPage = function (nextPage, nextHeadline, history) {
         //prevents adding pages to history when using the back button
         if (history != true || nextPage == 'home.html') {
+            //empty pageHistory
+            if (nextPage == 'home.html') {
+                pageHistory = [];
+                currentPage = 'home.html';
+            }
             //save current page and headline to history before moving to requested page
             if (document.getElementById('headline') != null) {
                 var currentHeadline = $('#headline').html();
@@ -185,7 +184,6 @@ angular.module('momlink.controllers', [])
         }
     };
 
-    //Menu Links
     $scope.autoLogin = function () {
         //if they've logged in previously, skip the login screen
         document.addEventListener("deviceready", function () {
@@ -231,7 +229,7 @@ angular.module('momlink.controllers', [])
         window.localStorage.removeItem('date');
         window.location = "../index.html";
     };
-    //Tracking Links
+    //Tracking
     $scope.goToHistory = function (type) {
         window.localStorage.setItem('trackType', type)
         $scope.toNewPage('history.html', 'History')
@@ -246,7 +244,7 @@ angular.module('momlink.controllers', [])
         window.localStorage.setItem('selectAct', act)
         $scope.toNewPage('addActivityTime.html', 'Add Activity Time');
     };
-    //Inbox Link
+
     $scope.newMessage = function (email, link, title) {
         window.localStorage.setItem('recipient', email);
         $ionicPopup.show({
@@ -267,7 +265,7 @@ angular.module('momlink.controllers', [])
             ],
         });
     };
-    $scope.createEvent = function (link, title) {
+    $scope.createEvent = function (link, title, callback) {
         $ionicPopup.show({
             title: 'Create Event',
             templateUrl: 'eventPopup.html',
@@ -303,10 +301,13 @@ angular.module('momlink.controllers', [])
                               case 'OB Appt':
                                   color = 'blue';
                                   break;
-                              case 'Test':
+                              case 'Referral':
+                                  color = 'yellow';
+                                  break;
+                              case 'Lab':
                                   color = 'red';
                                   break;
-                              case 'Visit':
+                              case 'PNCC':
                                   color = 'green';
                                   break;
                               case 'Ultra':
@@ -322,8 +323,10 @@ angular.module('momlink.controllers', [])
                           start = $('#date').val() + "T" + $('#start').val();
                           end = $('#date').val() + "T" + $('#end').val();
                           db.get('events').then(function (doc) {
+                              var id = moment().format('MM-DD-YYYYThh:mm:ssa')
+                              window.localStorage.setItem('eventID', id);
                               var event = {
-                                  "id": new Date(),
+                                  "id": id,
                                   "title": $('#title').val(),
                                   "type": $("#type").val(),
                                   "day": $('#date').val(),
@@ -338,6 +341,10 @@ angular.module('momlink.controllers', [])
                               return db.put(doc);
                           }).then(function (doc) {
                               $scope.toNewPage(link, title);
+                              if (callback != null) {
+                                  callback();
+                              }
+
                           });
                           return 'Create';
                       }
@@ -351,6 +358,59 @@ angular.module('momlink.controllers', [])
             ],
         });
     };
+    $scope.viewEvent = function (eventID) {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            events = doc['events'];
+            for (i in events) {
+                event = events[i]
+                if (event['id'] == eventID) {
+                    var year = String(event['day']).substring(0, 4);
+                    var month = String(event['day']).substring(5, 7);
+                    var day = String(event['day']).substring(8, 10);
+                    var date = month + '/' + day + '/' + year;
+                    var startTime = String(event['start']).substr(String(event['start']).indexOf("T") + 1);
+                    var endTime = String(event['end']).substr(String(event['end']).indexOf("T") + 1);
+                    //render template
+                    templateHTML = '<p><b>' + event['type'] + '</b></p>';
+                    templateHTML += '<p><b>Date</b>: ' + date + '</p>';
+                    templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
+                    templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
+                    if (event.venue != '') {
+                        templateHTML += '<p><b>Venue</b>: ' + event['venue'] + '</p>'
+                    }
+                    if (event.description != '') {
+                        templateHTML += '<p><b>Description</b>: ' + event['description'] + '</p>'
+                    }
+                    //view event
+                    var alertPopup = $ionicPopup.show({
+                        title: event['title'],
+                        template: templateHTML,
+                        buttons: [
+                          {
+                              text: 'Close', onTap: function (e) { return 'Cancel'; },
+                              type: 'button-positive'
+                          }
+                        ],
+                    });
+                }
+            }
+        });
+    }
+    //helper functions
+    $scope.convert24to12 = function (time) {
+        if (parseInt(time.substring(0, 2)) >= 12) {
+            if (parseInt(time.substring(0, 2)) > 12) {
+                hour = time.slice(0, 2) % 12;
+                time = String(hour).concat(time.slice(2, 5))
+            }
+            time += ' PM'
+        }
+        else {
+            time += ' AM'
+        }
+        return time;
+    }
 })
 
 .controller('NutritionController', function ($scope, $ionicPopup) {
@@ -536,8 +596,8 @@ angular.module('momlink.controllers', [])
                         //render template
                         templateHTML = '<p><b>' + event.type + '</b></p>';
                         templateHTML += '<p><b>Date</b>: ' + date + '</p>';
-                        templateHTML += '<p><b>Start</b>: ' + startTime + '</p>';
-                        templateHTML += '<p><b>End</b>: ' + endTime + '</p>';
+                        templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
+                        templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
                         if (event.venue != '') {
                             templateHTML += '<p><b>Venue</b>: ' + event.venue + '</p>'
                         }
@@ -572,7 +632,7 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         var html = '';
         db.get('referrals').then(function (doc) {
-            referrals = doc['R'];
+            referrals = doc['referrals'];
             html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="toNewPage('inbox.html','Inbox')"></button><div class ="title">Referrals</div></div>`
             html += '<div class="list has-header">';
             for (i in referrals) {
@@ -845,16 +905,19 @@ angular.module('momlink.controllers', [])
     }
 })*/
 
-.controller('EducationController', function ($scope, $ionicPopup, $timeout, $compile) {
-    $scope.renderCategories = function () {
+.controller('EducationController', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
+    var timer;
+    var sessionTime = 0;
+    $scope.renderCategories = function (type) {
         var db = PouchDB('momlink');
         var html = '';
+        var colSpacer = 1;
         var categories = {};
         db.get('articles').then(function (doc) {
             //get all unique categories
-            sharedArticles = doc['shared'];
+            sharedArticles = doc[type];
             //generates a dictionary where keys are categories 
-            //values are the number of articles per category not read
+            //and values are the number of articles per category not read
             for (i in sharedArticles) {
                 articleCategory = sharedArticles[i]['category'];
                 articleRead = sharedArticles[i]['lastRead'];
@@ -876,70 +939,108 @@ angular.module('momlink.controllers', [])
                 totalUnreadArticles += categories[i];
             }
             //render categories
-            html += '<div class="list">';
-            html += `<a class="item" ng-click="renderArticles('All')">All
-                <span class="badge badge-assertive">` + totalUnreadArticles + `</span></a>`
+            html += '<div class="row has-header" style="padding-right:0;padding-left:0;padding-top:0">'
+            if (type == 'shared') {
+                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All')" style="position:relative">
+                     <img class="autoSize" src="../img/mainIcons/momlink_icon-16.png">
+                     <span class ="badge badge-positive topRightBadge">` + totalUnreadArticles + `</span>All</div>`;
+            }
+            else {
+                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All')" style="position:relative">
+                     <img class="autoSize" src="../img/mainIcons/momlink_icon-16.png">All</div>`;
+            }
             for (i in categories) {
-                html += `<a class="item" ng-click="renderArticles('` + i + `')">`;
-                html += i;
+                //add column
+                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','` + i + `')" style="position:relative">`;
+                html += '<image class="autoSize" src="../img/mainIcons/momlink_icon-16.png">'
                 if (categories[i] > 0) {
-                    html += '<span class="badge badge-assertive">' + categories[i] + '</span>';
+                    html += '<span class="badge badge-positive topRightBadge">' + categories[i] + '</span>';
                 }
-                html += '</a>';
+                html += i;
+                html += '</div>';
+                //add row if 3 elements have been placed
+                if (colSpacer % 3 == 0) {
+                    html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
+                }
+                colSpacer++;
             }
             html += '</div>';
-            $('#shared').html(html);
-            $compile($('#shared'))($scope);
+            console.log(doc)
+            $('#' + type).html(html);
+            $compile($('#' + type))($scope);
         })
     };
-    $scope.renderArticles = function (category) {
+    $scope.renderArticles = function (type, category) {
         var db = PouchDB('momlink');
         var html = '';
         db.get('articles').then(function (doc) {
-            sharedArticles = doc['shared'];
-            html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderCategories()"></button><div class ="title">` + category + `</div></div>`
+            sharedArticles = doc[type];
+            html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderCategories('` + type + `')"></button><div class ="title">` + category + `</div></div>`
             html += '<div class="list has-header">';
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['category'] == category || category == 'All') {
-                    html += `<a class="item item-thumbnail-left" ng-click="renderArticle('` + article['id'] + `')">`;
-                    html += `<img src="../img/temp/article.jpg">`;
-                    html += '<h2>' + article['title'] + '</h2>';
+                    html += `<div class="item item-thumbnail-left">`;
+                    html += `<img ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')" src="../img/temp/article.jpg">`;
+                    //bold if the article has not been read
+                    if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
+                    else { html += '<h2>' + article['title'] + '</h2>'; }
                     html += '<p>' + article['description'] + '</p>';
-                    html += '</a>';
+                    html += '<p>Shared: ' + article['dateShared'] + '</p>';
+                    if (type == 'history') {
+                        var bestScore = 0;
+                        html += '<p>Quiz Attempts: ' + Object.keys(article['quizHistory']).length + '</p>';
+                        for (j in article['quizHistory']) {
+                            if (article['quizHistory'][j].substring(0, 1) > String(bestScore).substring(0, 1)) {
+                                bestScore = article['quizHistory'][j]
+                            }
+                            //console.log(article['quizHistory'][j])
+                        }
+                        html += '<p>Best Score: ' + bestScore + '</p>';
+                    }
+                    html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz</button>`;
+                    html += '</div>';
                 }
             }
-
             html += '</div>';
-            $('#shared').html(html);
-            $compile($('#shared'))($scope);
+            $('#' + type).html(html);
+            $compile($('#' + type))($scope);
         });
     };
-    $scope.renderArticle = function (id) {
+    $scope.renderArticle = function (type, id, category) {
         var db = PouchDB('momlink');
         var html = '';
         db.get('articles').then(function (doc) {
-            sharedArticles = doc['shared'];
+            sharedArticles = doc[type];
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['id'] == id) {
-                    html += `<div class="bar bar-footer">`
-                    html += `<button class ="button button-icon icon ion-reply" ng-click="renderArticles('` + article['category'] + `')"></button>`
-                    html += `<button class ="button button-icon icon icon-right ion-help" ng-click="renderQuiz('` + article['id'] + `')">Take Quiz &nbsp;</button>`
-                    html += `</div>`
+                    html += `<ion-modal-view>`;
+                    html += `<div class="bar bar-footer" ng-init="startSessionTimer()">`;
+                    html += `<button class ="button button-icon icon ion-close-round" ng-click="recordTime('` + article['id'] + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
+                    html += `<button class ="button button-icon icon icon-right ion-help" ng-click="recordTime('` + article['id'] + `'); closeModal(); renderQuiz('` + type + `','` + article['id'] + `','` + category + `');">Take Quiz &nbsp;</button>`;
+                    html += `</div>`;
                     html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
-                    $('#shared').html(html);
-                    $compile($('#shared'))($scope);
+                    html += `</ion-modal-view>`
+                    //updated last time article was read
+                    article['lastRead'] = String(moment().format('MM-DD-YYYY'));
+                    return db.put(doc)
                 }
             }
-        });
+
+        }).then(function () {
+            $scope.modal = $ionicModal.fromTemplate(html, {
+                scope: $scope,
+                animation: 'slide-in-up'
+            });
+            $scope.openModal();
+        })
     };
-    $scope.renderQuiz = function (articleID) {
-        //generate quiz
+    $scope.renderQuiz = function (type, articleID, category) {
         var db = PouchDB('momlink');
         var html = '';
         db.get('articles').then(function (doc) {
-            sharedArticles = doc['shared'];
+            sharedArticles = doc[type];
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['id'] == articleID) {
@@ -951,12 +1052,14 @@ angular.module('momlink.controllers', [])
                         //render question
                         html += `  <div class="item item-divider">` + question + `</div>`;
                         //render answers
+                        html += `<form id="` + String(j) + `">`
                         html += `<ion-list>`
                         for (k = 0; k < answers.length; k++) {
                             answer = quiz[j][1][k];
-                            html += `<ion-radio name="'` + j + `'" value="'` + answer + `'">` + answer + `</ion-radio>`;
+                            html += `<ion-radio name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio>`;
                         }
                         html += `</ion-list>`
+                        html += `</form>`
                     }
                 }
             }
@@ -967,7 +1070,7 @@ angular.module('momlink.controllers', [])
                   {
                       text: 'Finish', onTap: function (e) {
                           //score the quiz
-                          $scope.renderCategories()
+                          $scope.gradeQuiz(type, articleID, category);
                           return 'Create';
                       },
                       type: 'button-positive'
@@ -976,154 +1079,170 @@ angular.module('momlink.controllers', [])
             });
         });
     };
-    $scope.showHistory = function () {
+    $scope.gradeQuiz = function (type, articleID, category) {
         var db = PouchDB('momlink');
-        var html = '';
+        var score = 0;
+        var finalScore;
         db.get('articles').then(function (doc) {
-            history1 = doc['history'];
-            html += '<div class="list">';
-            for (i in history1) {
-                html += '<div class="item item-thumbnail-left">';
-                html += `<img onclick="window.open('` + history1[i]['link'] + `', '_system')" src="../img/temp/article.jpg">`;
-                html += '<h2>' + history1[i]['title'] + '</h2>';
-                html += '<p>' + history1[i]['description'] + '</p>';
-                if (history1[i]['read'] == 'Yes') {
-                    html += '<p>Read for: ' + history1[i]['length'] + ' minutes</p>';
-                    html += '<p>' + history1[i]['date'] + '</p>';
-                }
-                else {
-                    html += '<p>Didn\'t Read</p>';
-                }
-                html += '</div>';
-            }
-            html += '</div>';
-            $('#history').html(html);
-            $compile($('#history'))($scope);
-        });
-    };
-    $scope.read = function (link) {
-        var db = PouchDB('momlink');
-        var index = 0;
-        //ask how long they read
-        $ionicPopup.prompt({
-            title: 'Time Spent Reading Article (Minutes)',
-            inputType: 'number',
-        }).then(function (res) {
-            //if they hit 'cancel' then do nothing
-            if (String(res) != 'undefined') {
-                db.get('articles').then(function (doc) {
-                    //get article         
-                    shared = doc['shared'];
-                    for (i in shared) {
-                        if (shared[i]['link'] == link) {
-                            index = i;
+            sharedArticles = doc[type];
+            for (i in sharedArticles) {
+                article = sharedArticles[i]
+                if (article['id'] == articleID) {
+                    quiz = article['quiz'];
+                    for (j in quiz) {
+                        selectedAnswer = $(`input[name="` + String(j) + `"]:checked`, `#`.concat(j)).val();
+                        correctAnswer = quiz[j][1][quiz[j][2]];
+                        if (selectedAnswer == correctAnswer) {
+                            score++;
                         }
                     }
-                    //get date
-                    var today = moment().format('MM/DD/YYYY')
-                    //add info
-                    var article = {
-                        "title": doc['shared'][index]['title'],
-                        "description": doc['shared'][index]['description'],
-                        "link": doc['shared'][index]['link'],
-                        "read": 'Yes',
-                        "length": res,
-                        "date": today,
-                    };
-                    //move to history
-                    doc['history'].push(article);
-                    //delete from shared
-                    doc['shared'].splice(index, 1);
-                    return db.put(doc);
-                }).then(function (doc) {
-                    $scope.toNewPage('education.html', 'Education');
-                });
+                    finalScore = score + '/' + quiz.length;
+                    article['quizHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = finalScore;
+                    return db.put(doc)
+                }
+            }
+        }).then(function () {
+            $ionicPopup.show({
+                title: 'Results',
+                template: '<div style="text-align:center">Your Score: ' + finalScore + '</div>',
+                buttons: [
+                  {
+                      text: 'Finish', onTap: function (e) {
+                          return 'Create';
+                      },
+                      type: 'button-positive'
+                  }
+                ],
+            })
+        }).then(function () {
+            if (type == 'shared') {
+                $scope.moveToHistory(type, articleID, category);
+            }
+            else {
+                $scope.renderArticles(type, category)
+            }
+        })
+    };
+    $scope.recordTime = function (articleID) {
+        //end timer
+        clearInterval(timer);
+        var db = PouchDB('momlink');
+        db.get('articles').then(function (doc) {
+            sharedArticles = doc['shared'];
+            for (i in sharedArticles) {
+                article = sharedArticles[i]
+                if (article['id'] == articleID) {
+                    //convert time to minutes and seconds
+                    var minutes = Math.floor(sessionTime / 60);
+                    var seconds = sessionTime - minutes * 60;
+                    if (seconds < 10) {
+                        seconds = '0'.concat(seconds);
+                    }
+                    var finalSessionTime = minutes + ':' + seconds;
+                    article['readHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = finalSessionTime;
+                    return db.put(doc)
+                }
             }
         });
     };
-    $scope.didntRead = function (link) {
+    $scope.startSessionTimer = function () {
+        timer = setInterval(function () { sessionTime++; }, 1000);
+    };
+    $scope.moveToHistory = function (type, articleID, category) {
         var db = PouchDB('momlink');
-        var index = 0;
         db.get('articles').then(function (doc) {
-            //get article         
-            shared = doc['shared'];
-            for (i in shared) {
-                if (shared[i]['link'] == link) {
-                    index = i;
+            sharedArticles = doc['shared'];
+            for (i in sharedArticles) {
+                if (sharedArticles[i]['id'] == articleID) {
+                    article = sharedArticles[i];
+                    sharedArticles.splice(i, 1);
                 }
             }
-            //add info
-            var article = {
-                "title": doc['shared'][index]['title'],
-                "description": doc['shared'][index]['description'],
-                "link": doc['shared'][index]['link'],
-                "read": 'No',
-                "length": '',
-                "date": '',
-            };
-            //move to history
-            doc['history'].push(article);
-            //delete from shared
-            doc['shared'].splice(index, 1);
             return db.put(doc);
-        }).then(function (doc) {
-            $scope.toNewPage('education.html', 'Education');
+        }).then(function () {
+            db.get('articles').then(function (doc) {
+                doc['history'].push(article);
+                return db.put(doc)
+            })
+        }).then(function () {
+            $scope.renderArticles(type, category)
+        })
+    };
+
+    $scope.openModal = function () {
+        $scope.modal.show();
+    };
+    $scope.closeModal = function () {
+        $scope.modal.hide().then(function () {
+            $scope.modal.remove();
         });
     };
 })
 
 .controller('ReferralController', function ($scope, $ionicPopup, $timeout, $compile) {
-    $scope.showReferrals = function () {
+    $scope.showReferrals = function (type) {
         var db = PouchDB('momlink');
-        var html = '';
+        var html = '<div class="list">';
+        var meetingTime = '';
         db.get('referrals').then(function (doc) {
-            referrals = doc['R'];
-            html += '<div class="list">';
-            for (i in referrals) {
-                html += '<div class="item item-thumbnail-left">';
-                html += `<img src="">`;
-                html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
-                html += `<a class="button button-small button-positive icon ion-ios-telephone-outline" ng-href="tel: ` + ('1-' + referrals[i]['phone']) + `" style="display:inline"></a>&nbsp;`
-                html += `<a class="button button-small button-positive icon ion-ios-email-outline" ng-click="newMessage('` + referrals[i]['email'] + `', 'referrals.html', 'Referrals')" style="display:inline"></a>`
-                html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
-                html += '<p>Address: ' + referrals[i]['address'] + '</p>';
-                html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
-                html += '<p>Email: ' + referrals[i]['email'] + '</p>';
-                if (referrals[i]['meeting'] == '') {
-                    html += `<button class="button button-small button-positive" ng-click="schedule('` + referrals[i]['name'] + `')">Schedule Meeting</button>`;
+            referrals = doc['referrals'];
+            db.get('events').then(function (doc) {
+                for (i in referrals) {
+                    for (j in doc['events']) {
+                        if (doc['events'][j]['id'] == referrals[i]['meeting']) {
+                            meetingTime = doc['events'][j]['day'];
+                        }
+                    }
+                    var today = moment().format('YYYY-MM-DD')
+                    if ((type == 'recent' && (meetingTime == '' || moment(meetingTime) >= moment(today))) || (type == 'previous' && (moment(meetingTime) < moment(today)))) {
+                        html += '<div class="item item-thumbnail-left">';
+                        html += `<img src="">`;
+                        html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
+                        html += `<a class="button button-small button-positive icon ion-ios-telephone-outline" ng-href="tel: ` + '1-' + referrals[i]['phone'] + `" style="display:inline"></a>&nbsp;`
+                        html += `<a class="button button-small button-positive icon ion-ios-email-outline" ng-click="newMessage('` + referrals[i]['email'] + `', 'referrals.html', 'Referrals')" style="display:inline"></a>`
+                        html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
+                        html += '<p>Address: ' + referrals[i]['address'] + '</p>';
+                        html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
+                        html += '<p>Email: ' + referrals[i]['email'] + '</p>';
+                        if (referrals[i]['meeting'] == '') {
+                            html += `<button class="button button-small button-positive" ng-click="schedule('` + referrals[i]['name'] + `')">Schedule Meeting</button>`;
+                        }
+                        else {
+                            html += `<button class="button button-small button-stable" ng-click="viewEvent('` + referrals[i]['meeting'] + `')">View Meeting</button>`;
+                        }
+                        html += '</div>';
+                    }
+                    meetingTime = '';
                 }
-                else {
-                    //create view event function that pulls the event based on ID
-                    html += `<button class="button button-small button-stable" ng-click="">View Meeting</button>`;
-                }
+            }).then(function () {
                 html += '</div>';
-            }
-            html += '</div>';
-            $('#referrals').html(html);
-            $compile($('#referrals'))($scope);
+                $('#' + type).html(html);
+                $compile($('#' + type))($scope);
+            })
         });
     };
     $scope.schedule = function (name) {
-        $scope.createEvent('referrals.html', 'Referrals');
-        updateDatabase();
-        function updateDatabase() {
+        $scope.createEvent('referrals.html', 'Referrals', updateReferral);
+        //needs to run after createEvent
+        function updateReferral() {
             var db = PouchDB('momlink');
             var index = 0;
             db.get('referrals').then(function (doc) {
                 //get referral         
-                referral = doc['R'];
+                referral = doc['referrals'];
                 for (i in referral) {
                     if (referral[i]['name'] == name) {
                         index = i;
                     }
                 }
-                //updated meeting status
-
                 //set meeting status to id of the event
-                referral[index]['meeting'] = 'yes'
+                if (window.localStorage.getItem('eventID') != null) {
+                    referral[index]['meeting'] = window.localStorage.getItem('eventID');
+                }
                 //update database
                 return db.put(doc);
             }).then(function (doc) {
+                window.localStorage.removeItem('eventID');
                 $scope.toNewPage('referrals.html', 'Referrals');
             });
         }
@@ -1907,16 +2026,7 @@ angular.module('momlink.controllers', [])
     }
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink')
-        //db.destroy()
-        /*
-            "_id": "loginInfo",
-            "clientID": "", should be a unique id
-            "username": "User",
-            "password": "Password",
-            "securityQuestion": "What is your mother's maiden name?",
-            "answer": "Last",
-            "resetCode": "XXXXX"
-        */
+        //window.PouchDB = PouchDB;
         db.get('loginInfo').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -1931,19 +2041,6 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
-        /*
-            "_id": "profile",
-            "name": "First Last",
-            "email": "first@server.com",
-            "age": "XX",
-            This date will be set to the day the user creates their account
-            "startDate": "MM/DD/YYYY", 
-            "deliveryDate": "MM/DD/YYYY",
-            "aboutMe": "brief description of the client",
-            "doctorsName": "DFirst DLast",
-            "doctorsEmail": "doctor@server.com",
-            "doctorsPhone": "555-555-5555"
-        */
         db.get('profile').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -1960,15 +2057,6 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
-        /*
-            "_id": "inbox",
-            List of pnccs, each element contains name, email, path to picture of the pncc
-            "pncc": [ 
-                { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc1.jpg" },
-                { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc2.jpg" },
-                { name: "PNCC3", email: "pncc3@gmail.com", image: "../img/temp/pncc3.jpg" }
-            ]
-        */
         db.get('inbox').catch(function (err) {
             if (err.status === 404) {
                 //php request
@@ -1982,37 +2070,6 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
-        /*db.get('coupons').catch(function (err) {
-            if (err.status === 404) {
-                db.put({
-                    "_id": "coupons",
-                    "recieved": [
-                        {
-                            "date": "4/15/2016",
-                            "plan": "Platinum",
-                            "for": "BABE Class"
-                        },
-                        {
-                            "date": "4/16/2016",
-                            "plan": "Platinum",
-                            "for": "BABE Class"
-                        }
-                    ],
-                    "used": [
-                        {
-                            "date": "4/12/2016",
-                            "plan": "Platinum",
-                            "for": "BABE Class"
-                        },
-                        {
-                            "date": "4/14/2016",
-                            "plan": "Platinum",
-                            "for": "BABE Class"
-                        }
-                    ]
-                });
-            }
-        });*/
         db.get('events').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -2073,10 +2130,12 @@ angular.module('momlink.controllers', [])
                             "id": "1",
                             "title": "Title 1",
                             "description": "Description 1",
-                            //"link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
+                            "category": "Category 1",
+                            "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 1",
+                            "readHistory": {},
+                            "quizHistory": {},
                             "quiz":
                                 [
                                 ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
@@ -2088,60 +2147,68 @@ angular.module('momlink.controllers', [])
                             "id": "2",
                             "title": "Title 2",
                             "description": "Description 2",
+                            "category": "Category 1",
                             "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 1",
+                            "readHistory": {},
+                            "quizHistory": {},
                             "quiz":
                                 [
-                                ('This is question 1', ['First answer', 'Second Answer', 'Third Answer'], '0'),
-                                ('This is question 2', ['First answer', 'Second Answer', 'Third Answer'], '1'),
-                                ('This is question 3', ['First answer', 'Second Answer', 'Third Answer'], '2')
+                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
+                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
+                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
                                 ]
                         },
                         {
                             "id": "3",
                             "title": "Title 3",
                             "description": "Description 3",
+                            "category": "Category 2",
                             "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 2",
+                            "readHistory": {},
+                            "quizHistory": {},
                             "quiz":
                                 [
-                                ('This is question 1', ['First answer', 'Second Answer', 'Third Answer'], '0'),
-                                ('This is question 2', ['First answer', 'Second Answer', 'Third Answer'], '1'),
-                                ('This is question 3', ['First answer', 'Second Answer', 'Third Answer'], '2')
+                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
+                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
+                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
                                 ]
                         },
                         {
                             "id": "4",
                             "title": "Title 4",
                             "description": "Description 4",
+                            "category": "Category 2",
                             "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 2",
+                            "readHistory": {},
+                            "quizHistory": {},
                             "quiz":
                                 [
-                                ('This is question 1', ['First answer', 'Second Answer', 'Third Answer'], '0'),
-                                ('This is question 2', ['First answer', 'Second Answer', 'Third Answer'], '1'),
-                                ('This is question 3', ['First answer', 'Second Answer', 'Third Answer'], '2')
+                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
+                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
+                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
                                 ]
                         },
                         {
                             "id": "5",
                             "title": "Title 5",
                             "description": "Description 5",
+                            "category": "Category 2",
                             "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
                             "dateShared": "",
                             "lastRead": "",
-                            "category": "Category 2",
+                            "readHistory": {},
+                            "quizHistory": {},
                             "quiz":
                                 [
-                                ('This is question 1', ['First answer', 'Second Answer', 'Third Answer'], '0'),
-                                ('This is question 2', ['First answer', 'Second Answer', 'Third Answer'], '1'),
-                                ('This is question 3', ['First answer', 'Second Answer', 'Third Answer'], '2')
+                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
+                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
+                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
                                 ]
                         }
                     ],
@@ -2174,7 +2241,7 @@ angular.module('momlink.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "referrals",
-                    "R": [
+                    "referrals": [
                         {
                             "name": "First Last",
                             "address": "555 Chicago",
@@ -2410,6 +2477,7 @@ angular.module('momlink.controllers', [])
                 });
             }
         });*/
+        //db.destroy()
     }
 })
 
