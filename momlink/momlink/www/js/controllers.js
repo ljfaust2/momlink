@@ -131,7 +131,7 @@ angular.module('momlink.controllers', [])
     /*
     $scope.register = function () {
         call initialize db
-        add info to loginInfo table
+        add info to login table
         use current day as starting date for profile
     };
     */
@@ -218,7 +218,7 @@ angular.module('momlink.controllers', [])
     };
     $scope.login = function (user, pass) {
         var db = PouchDB('momlink');
-        db.get('loginInfo').then(function (doc) {
+        db.get('login').then(function (doc) {
             if (user == doc['username'] && pass == doc['password']) {
                 window.localStorage.setItem('username', doc['username'])
                 window.localStorage.setItem('password', doc['password'])
@@ -2110,10 +2110,10 @@ angular.module('momlink.controllers', [])
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink')
         //window.PouchDB = PouchDB;
-        db.get('loginInfo').catch(function (err) {
+        db.get('login').catch(function (err) {
             if (err.status === 404) {
                 db.put({
-                    "_id": "loginInfo",
+                    "_id": "login",
                     "login_code": "6",
                     "username": "u",
                     "password": "p",
