@@ -2,12 +2,13 @@ angular.module('momlink.controllers', [])
 /**
  *The header controller handles login, navigation, splash screen, back button
  */
-.controller('HeaderCtrl', function ($scope, $ionicPopup, $location, $document, $compile) {
+.controller('HeaderCtrl', function ($scope, $ionicPopup, $ionicModal, $location, $document, $compile) {
     var sliderCount = Number.POSITIVE_INFINITY;
     $scope.getInformation = function () {
         // Which fetches are repeatable.
         // All sends are repeatable.
         document.addEventListener("deviceready", function () {
+
             client_referral_education_fetched = false;
             pncc_fetched = false;
             if (navigator.network.connection.type == Connection.NONE) {
@@ -179,11 +180,11 @@ angular.module('momlink.controllers', [])
             document.getElementById('menuIcon').classList.add('menu-icon')
         }
         //raise/lower menu
-        menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
+        menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '50%' : '0px';
     };
     $scope.closeTopMenu = function () {
         var menu = document.getElementsByTagName('ion-top-menu')[0];
-        if (menu.offsetHeight == 340) {
+        if (menu.offsetHeight > 0) {
             var menu = document.getElementsByTagName('ion-top-menu')[0];
             var pane = document.getElementsByTagName('ion-pane')[0];
             //set icon color to white
@@ -191,7 +192,7 @@ angular.module('momlink.controllers', [])
                 document.getElementById('menuIcon').classList.remove('menu-icon')
             }
             //raise menu
-            menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '340px' : '0px';
+            menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '50%' : '0px';
         }
     };
 
@@ -313,99 +314,101 @@ angular.module('momlink.controllers', [])
             }, console.log('Email Sent'), $scope)
         }
     };
-    $scope.createEvent = function (link, title, callback) {
-        $ionicPopup.show({
-            title: 'Create Event',
-            templateUrl: 'eventPopup.html',
-            buttons: [
-              {
-                  text: 'Save', onTap: function (e) {
-                      //checks if all necessary fields have been filled
-                      var pass = true;
-                      var fields = { '#title': 'title', '#type': 'type', '#date': 'date', '#start': 'start time', '#end': 'end time' };
-                      for (var key in fields) {
-                          if ($(key).val() == null || $(key).val() == '') {
-                              //prevents popup from closing
-                              e.preventDefault();
-                              var alertPopup = $ionicPopup.alert({
-                                  title: 'Please select a ' + fields[key],
-                              });
-                              alertPopup;
-                              pass = false;
-                              return;
-                          }
-                      }
-                      if ($('#start').val() > $('#end').val()) {
-                          e.preventDefault();
-                          var alertPopup = $ionicPopup.alert({
-                              title: 'Starting time must occur before ending time',
-                          });
-                          alertPopup;
-                          pass = false;
-                      }
-                      if (pass == true) {
-                          var db = PouchDB('momlink');
-                          switch ($("#type").val()) {
-                              case 'OB Appt':
-                                  color = 'blue';
-                                  break;
-                              case 'Referral':
-                                  color = 'yellow';
-                                  break;
-                              case 'Lab':
-                                  color = 'red';
-                                  break;
-                              case 'PNCC':
-                                  color = 'green';
-                                  break;
-                              case 'Ultra':
-                                  color = 'orange';
-                                  break;
-                              case 'Class':
-                                  color = 'purple';
-                                  break;
-                              case 'Other':
-                                  color = 'black';
-                                  break;
-                          }
-                          start = $('#date').val() + "T" + $('#start').val();
-                          end = $('#date').val() + "T" + $('#end').val();
-                          db.get('events').then(function (doc) {
-                              var id = moment().format('MM-DD-YYYYThh:mm:ssa')
-                              window.localStorage.setItem('eventID', id);
-                              var event = {
-                                  "id": id,
-                                  "title": $('#title').val(),
-                                  "type": $("#type").val(),
-                                  "day": $('#date').val(),
-                                  "start": start,
-                                  "end": end,
-                                  "venue": $('#venue').val(),
-                                  "description": $('#description').val(),
-                                  "color": color,
-                                  "scheduledBy": '0'
-                              };
-                              doc['events'].push(event);
-                              return db.put(doc);
-                          }).then(function (doc) {
-                              $scope.toNewPage(link, title);
-                              if (callback != null) {
-                                  callback();
-                              }
 
-                          });
-                          return 'Create';
-                      }
-                  },
-                  type: 'button-positive'
-              },
-            {
-                text: 'Discard', onTap: function (e) { return 'Close'; },
-                type: 'button-stable'
+    $scope.createEvent = function (link, title, callback) {
+        $scope.sLink = link;
+        $scope.sTitle = title;
+        $scope.sCallback = callback;
+        $scope.modal = $ionicModal.fromTemplateUrl('eventPopup.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function (modal) {
+            $scope.modal = modal;
+            $scope.modal.show();
+        })
+    }
+    $scope.saveEvent = function () {
+        //checks if all necessary fields have been filled
+        var pass = true;
+        var fields = { '#title': 'title', '#type': 'type', '#date': 'date', '#start': 'start time', '#end': 'end time' };
+        for (var key in fields) {
+            if ($(key).val() == null || $(key).val() == '') {
+                var alertPopup = $ionicPopup.alert({
+                    title: 'Please select a ' + fields[key],
+                });
+                alertPopup;
+                pass = false;
+                return;
             }
-            ],
+        }
+        if ($('#start').val() > $('#end').val()) {
+            var alertPopup = $ionicPopup.alert({
+                title: 'Starting time must occur before ending time',
+            });
+            alertPopup;
+            pass = false;
+        }
+        if (pass == true) {
+            var db = PouchDB('momlink');
+            switch ($("#type").val()) {
+                case 'OB Appt':
+                    color = 'blue';
+                    break;
+                case 'Referral':
+                    color = 'yellow';
+                    break;
+                case 'Lab':
+                    color = 'red';
+                    break;
+                case 'PNCC':
+                    color = 'green';
+                    break;
+                case 'Ultra':
+                    color = 'orange';
+                    break;
+                case 'Class':
+                    color = 'purple';
+                    break;
+                case 'Other':
+                    color = 'black';
+                    break;
+            }
+            start = $('#date').val() + "T" + $('#start').val();
+            end = $('#date').val() + "T" + $('#end').val();
+            db.get('events').then(function (doc) {
+                var id = moment().format('MM-DD-YYYYThh:mm:ssa')
+                window.localStorage.setItem('eventID', id);
+                var event = {
+                    "id": id,
+                    "title": $('#title').val(),
+                    "type": $("#type").val(),
+                    "day": $('#date').val(),
+                    "start": start,
+                    "end": end,
+                    "venue": $('#venue').val(),
+                    "description": $('#description').val(),
+                    "color": color,
+                    "scheduledBy": '0'
+                };
+                doc['events'].push(event);
+                return db.put(doc);
+            }).then(function (doc) {
+                $scope.toNewPage($scope.sLink, $scope.sTitle);
+                $scope.closeModal();
+                delete $scope.sLink;
+                delete $scope.sTitle;
+                if ($scope.sCallback != null) {
+                    $scope.sCallback();
+                }
+            });
+        }
+    }
+    $scope.closeModal = function () {
+        $scope.modal.hide().then(function () {
+            $scope.modal.remove();
         });
     };
+
     $scope.viewEvent = function (eventID) {
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
@@ -458,6 +461,39 @@ angular.module('momlink.controllers', [])
             time += ' AM'
         }
         return time;
+    }
+
+    $scope.fileDownload = function () {
+        /*document.addEventListener("deviceready", function () {
+            //The directory to store data
+            var store = cordova.file.dataDirectory;
+            //URL of our asset
+            var assetURL = "https://www.sitepoint.com/storing-local-data-in-a-cordova-app/";
+            //File name of our important data file we didn't ship with the app
+            var fileName = "lol2.html";
+            //Check for the file. 
+            window.resolveLocalFileSystemURL(store + fileName, appStart, downloadAsset);
+
+            function downloadAsset() {
+                var fileTransfer = new FileTransfer();
+                console.log("About to start transfer");
+                fileTransfer.download(assetURL, store + fileName,
+                    function (entry) {
+                        console.log("Success!");
+                        appStart();
+                    },
+                    function (err) {
+                        console.log("Error");
+                        console.dir(err);
+                    });
+            }
+            function appStart(entry) {
+                html = `<iframe onclick="alert('lol')" src="` + entry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
+                $("#content").html(html);
+                //$compile($("#content"))($scope);
+                console.log("App ready!");
+            }
+        })*/
     }
 })
 
@@ -1075,7 +1111,6 @@ angular.module('momlink.controllers', [])
                     return db.put(doc)
                 }
             }
-
         }).then(function () {
             $scope.modal = $ionicModal.fromTemplate(html, {
                 scope: $scope,
@@ -1216,7 +1251,6 @@ angular.module('momlink.controllers', [])
             $scope.renderArticles(type, category)
         })
     };
-
     $scope.openModal = function () {
         $scope.modal.show();
     };
@@ -1273,6 +1307,7 @@ angular.module('momlink.controllers', [])
         $scope.createEvent('referrals.html', 'Referrals', updateReferral);
         //needs to run after createEvent
         function updateReferral() {
+            delete $scope.sCallback;
             var db = PouchDB('momlink');
             var index = 0;
             db.get('referrals').then(function (doc) {
@@ -2074,6 +2109,7 @@ angular.module('momlink.controllers', [])
     }
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink')
+        //db.destroy();
         //window.PouchDB = PouchDB;
         db.get('loginInfo').catch(function (err) {
             if (err.status === 404) {
@@ -2122,27 +2158,6 @@ angular.module('momlink.controllers', [])
         db.get('events').catch(function (err) {
             if (err.status === 404) {
                 db.put({
-                    /*
-                    "_id": "events",
-                    Each event will hold id, title, type, date, start time, end time, location, and notes.
-                    'events': [
-                    {
-                        new date is used as a unique id for the event
-                        "id": new Date(),
-                        "title": Title,
-                        "type": OB Appt,
-                        "day": DD-MM-YYYY,
-                        "start": HH:MM:SS,
-                        "end": HH:MM:SS,
-                        "venue": 'South Bend',
-                        "description": 'This is my description for this event',
-                        indicates the color to use for showing the event in full calendar
-                        "color": blue,
-                        indicates whether the event was scheduled by the pncc or client, used for filtering purposes by the mobile calendar
-                        "scheduledBy": '0'
-                    }
-                    ]
-                    */
                     "_id": "events",
                     "events": [
                     ]
@@ -2526,7 +2541,7 @@ angular.module('momlink.controllers', [])
                 });
             }
         });*/
-        //db.destroy()
+        //db.destroy();
     }
 })
 
