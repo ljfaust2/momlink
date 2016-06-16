@@ -256,26 +256,62 @@ angular.module('momlink.controllers', [])
         $scope.toNewPage('addActivityTime.html', 'Add Activity Time');
     };
 
-    $scope.newMessage = function (email) {
-        window.cordova.plugins.email.open({
-            to: [email],
-        }, console.log('Email Sent'), $scope)
-        /*$ionicPopup.show({
-            title: email,
-            templateUrl: 'messagePopup.html',
-            buttons: [
-              {
-                  text: 'Send', onTap: function (e) {
-                      //$scope.toNewPage(link, title);
-                  },
-                  type: 'button-positive'
-              },
-            {
-                text: 'Discard', onTap: function (e) { return 'Close'; },
-                type: 'button-stable'
-            }
-            ],
-        });*/
+    $scope.newMessage = function (email, phone) {
+        if (email != '' && phone != '') {
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Text', onTap: function (e) {
+                            text();
+                            return 'text';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Email', onTap: function (e) {
+                            mail();
+                            return 'email';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            return 'cancel';
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
+        }
+        else if (email == '' && phone != '') {
+            text();
+        }
+        else if (phone == '' && email != '') {
+            mail();
+        }
+        else {
+            $ionicPopup.alert({
+                title: 'Error',
+                template: 'Contact has not provided any information'
+            });
+        }
+        function text() {
+            var message = '';
+            var options = {
+                android: {
+                    intent: 'INTENT'  // send SMS with the native android SMS messaging
+                    //intent: '' // send SMS without open any other app
+                }
+            };
+            sms.send(phone, message, options);
+        }
+        function mail() {
+            window.cordova.plugins.email.open({
+                to: [email],
+            }, console.log('Email Sent'), $scope)
+        }
     };
     $scope.createEvent = function (link, title, callback) {
         $ionicPopup.show({
@@ -645,12 +681,12 @@ angular.module('momlink.controllers', [])
         var html = '';
         db.get('referrals').then(function (doc) {
             referrals = doc['referrals'];
-            html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="toNewPage('inbox.html','Inbox')"></button><div class ="title">Referrals</div></div>`
-            html += '<div class="list has-header">';
+            html += '<div class="list">';
             for (i in referrals) {
-                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + referrals[i]['email'] + `')">`;
+                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + referrals[i]['email'] + `','` + referrals[i]['phone'] + `')">`;
                 html += `<img src="">`;
                 html += '<h2>' + referrals[i]['name'] + '</h2>';
+                html += '<p>' + referrals[i]['phone'] + '</p>';
                 html += '<p>' + referrals[i]['email'] + '</p>';
                 html += '</div>';
             }
@@ -664,13 +700,13 @@ angular.module('momlink.controllers', [])
         var html = '';
         db.get('inbox').then(function (doc) {
             pncc = doc['pncc'];
-            html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="toNewPage('inbox.html','Inbox')"></button><div class ="title">PNCCs</div></div>`
-            html += '<div class="list has-header">';
+            html += '<div class="list">';
             for (i in pncc) {
-                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + pncc[i]['email'] + `')">`;
+                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + pncc[i]['email'] + `','` + pncc[i]['phone'] + `')">`;
                 html += `<img src="` + pncc[i]['image'] + `">`;
                 html += '<h2>' + pncc[i]['name'] + '</h2>';
                 html += '<p>' + pncc[i]['email'] + '</p>';
+                html += '<p>' + pncc[i]['phone'] + '</p>';
                 html += '</div>';
             }
             html += '</div>';
@@ -1211,7 +1247,7 @@ angular.module('momlink.controllers', [])
                         html += `<img src="">`;
                         html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
                         html += `<a class="button button-small button-positive icon ion-ios-telephone-outline" ng-href="tel: ` + '1-' + referrals[i]['phone'] + `" style="display:inline"></a>&nbsp;`
-                        html += `<a class="button button-small button-positive icon ion-ios-email-outline" ng-click="newMessage('` + referrals[i]['email'] + `', 'referrals.html', 'Referrals')" style="display:inline"></a>`
+                        html += `<a class="button button-small button-positive icon ion-ios-email-outline" ng-click="newMessage('` + referrals[i]['email'] + `','` + referrals[i]['phone'] + `')" style="display:inline"></a>`
                         html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
                         html += '<p>Address: ' + referrals[i]['address'] + '</p>';
                         html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
@@ -2075,9 +2111,10 @@ angular.module('momlink.controllers', [])
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        { name: "PNCC1", email: "pncc1@gmail.com", image: "../img/temp/pncc1.jpg" },
-                        { name: "PNCC2", email: "pncc2@gmail.com", image: "../img/temp/pncc2.jpg" },
-                        { name: "PNCC3", email: "pncc3@gmail.com", image: "../img/temp/pncc3.jpg" }
+                        { "name": "PNCC1", "email": "pncc1@gmail.com", "phone": "555-555-5555", "image": "../img/temp/pncc1.jpg" },
+                        { "name": "PNCC2", "email": "pncc2@gmail.com", "phone": "", "image": "../img/temp/pncc2.jpg" },
+                        { "name": "PNCC3", "email": "", "phone": "555-555-5555", "image": "../img/temp/pncc3.jpg" },
+                        { "name": "PNCC4", "email": "", "phone": "", "image": "../img/temp/pncc3.jpg" }
                     ]
                 });
             }
@@ -2265,7 +2302,7 @@ angular.module('momlink.controllers', [])
                         {
                             "name": "First Last1",
                             "address": "555 Chicago1",
-                            "phone": "555-555-5555",
+                            "phone": "",
                             "email": "first@email.com1",
                             "date": "3/23/2016",
                             "meeting": ""

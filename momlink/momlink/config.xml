@@ -68,5 +68,7 @@
   <plugin name="cordova-plugin-network-information" version="1.2.1" />
   <plugin name="cordova-plugin-splashscreen" version="3.1.0" />
   <plugin name="cordova-plugin-whitelist" version="1.2.2" />
-
+  <access origin="tel:*" launch-external="yes" />
+  <plugin name="com.cordova.plugins.sms" version="0.1.10" />
+  <plugin name="de.appplant.cordova.plugin.email-composer" version="0.8.2" />
 </widget>
