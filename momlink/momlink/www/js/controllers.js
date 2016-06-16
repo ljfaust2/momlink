@@ -319,7 +319,7 @@ angular.module('momlink.controllers', [])
         $scope.sLink = link;
         $scope.sTitle = title;
         $scope.sCallback = callback;
-        $scope.modal = $ionicModal.fromTemplateUrl('eventPopup.html', {
+        $scope.modal = $ionicModal.fromTemplateUrl('eventModal.html', {
             scope: $scope,
             animation: 'slide-in-up'
         }).then(function (modal) {
@@ -2115,13 +2115,13 @@ angular.module('momlink.controllers', [])
             if (err.status === 404) {
                 db.put({
                     "_id": "loginInfo",
-                    "userID": "",
+                    "login_code": "6",
                     "username": "u",
                     "password": "p",
-                    "clientID": "08798a24b703fb7b9d5d231ab30008d3",
+                    "reset_code": "595",
                     "answer": "Yes",
-                    "securityQuestion": "?",
-                    "resetCode": "595"
+                    "sec_question": "?",
+                    "client_id": "08798a24b703fb7b9d5d231ab30008d3"
                 });
             }
         });
