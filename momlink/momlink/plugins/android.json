@@ -10,9 +10,6 @@
         "cordova-plugin-camera": {
             "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
         },
-        "cordova-plugin-statusbar": {
-            "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
-        },
         "cordova-plugin-file": {
             "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
         },
@@ -25,7 +22,13 @@
         "cordova-plugin-splashscreen": {
             "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
         },
+        "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
+        },
         "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
+        },
+        "de.appplant.cordova.plugin.email-composer": {
             "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
         }
     },

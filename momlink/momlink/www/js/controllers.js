@@ -66,7 +66,9 @@ angular.module('momlink.controllers', [])
                 eventsToday = true;
             }
             html += '</div>';
-            if (todaysEvents == 0) { html = 'No Events Today'; }
+            if (todaysEvents == 0) {
+                html = '<div class="row; centerVH;"><br>No Events Today</div>'
+            }
             $('#appointmentsHeader').html(html);
             $compile($('#appointmentsHeader'))($scope);
         })
@@ -254,16 +256,17 @@ angular.module('momlink.controllers', [])
         $scope.toNewPage('addActivityTime.html', 'Add Activity Time');
     };
 
-    $scope.newMessage = function (email, link, title) {
-        window.localStorage.setItem('recipient', email);
-        $ionicPopup.show({
+    $scope.newMessage = function (email) {
+        window.cordova.plugins.email.open({
+            to: [email],
+        }, console.log('Email Sent'), $scope)
+        /*$ionicPopup.show({
             title: email,
             templateUrl: 'messagePopup.html',
             buttons: [
               {
                   text: 'Send', onTap: function (e) {
-                      $scope.toNewPage(link, title);
-                      return 'Create';
+                      //$scope.toNewPage(link, title);
                   },
                   type: 'button-positive'
               },
@@ -272,7 +275,7 @@ angular.module('momlink.controllers', [])
                 type: 'button-stable'
             }
             ],
-        });
+        });*/
     };
     $scope.createEvent = function (link, title, callback) {
         $ionicPopup.show({
@@ -645,7 +648,7 @@ angular.module('momlink.controllers', [])
             html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="toNewPage('inbox.html','Inbox')"></button><div class ="title">Referrals</div></div>`
             html += '<div class="list has-header">';
             for (i in referrals) {
-                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + referrals[i]['email'] + `', 'inbox.html', 'Inbox')">`;
+                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + referrals[i]['email'] + `')">`;
                 html += `<img src="">`;
                 html += '<h2>' + referrals[i]['name'] + '</h2>';
                 html += '<p>' + referrals[i]['email'] + '</p>';
@@ -664,7 +667,7 @@ angular.module('momlink.controllers', [])
             html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="toNewPage('inbox.html','Inbox')"></button><div class ="title">PNCCs</div></div>`
             html += '<div class="list has-header">';
             for (i in pncc) {
-                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + pncc[i]['email'] + `', 'inbox.html', 'Inbox')">`;
+                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + pncc[i]['email'] + `')">`;
                 html += `<img src="` + pncc[i]['image'] + `">`;
                 html += '<h2>' + pncc[i]['name'] + '</h2>';
                 html += '<p>' + pncc[i]['email'] + '</p>';

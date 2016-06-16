@@ -68,4 +68,5 @@
   <plugin name="cordova-plugin-network-information" version="1.2.1" />
   <plugin name="cordova-plugin-splashscreen" version="3.1.0" />
   <plugin name="cordova-plugin-whitelist" version="1.2.2" />
+
 </widget>
