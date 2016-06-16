@@ -43,7 +43,7 @@ angular.module('momlink.controllers', [])
         document.getElementById("todaysDate").innerHTML = "Today, " + today;
         //used by History subheader
         var date = new Date()
-        window.localStorage.setItem('date', date);
+        $scope.currentDate = date;
     };
 
     //ion-slides
@@ -220,10 +220,8 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('loginInfo').then(function (doc) {
             if (user == doc['username'] && pass == doc['password']) {
-
                 window.localStorage.setItem('username', doc['username'])
                 window.localStorage.setItem('password', doc['password'])
-
                 //set username and password variables
                 window.location = "templates/main.html";
             }
@@ -237,23 +235,25 @@ angular.module('momlink.controllers', [])
     $scope.logout = function () {
         window.localStorage.removeItem('username');
         window.localStorage.removeItem('password');
-        window.localStorage.removeItem('trackType');
-        window.localStorage.removeItem('date');
+        delete $scope.trackType;
+        delete $scope.selectAct;
+        delete $scope.eventID;
+        delete $scope.currentWeek;
+        delete $scope.currentDate;
         window.location = "../index.html";
     };
     //Tracking
     $scope.goToHistory = function (type) {
-        window.localStorage.setItem('trackType', type)
+        $scope.trackType = type;
         $scope.toNewPage('history.html', 'History')
     };
     $scope.goToAddEvent = function () {
-        var type = window.localStorage.getItem('trackType');
-        title = type.split(/(?=[A-Z])/).splice(1, 100)
+        title = $scope.trackType.split(/(?=[A-Z])/).splice(1, 100)
         title = title.join(' ')
-        $scope.toNewPage(type + ".html", 'Add ' + title);
+        $scope.toNewPage($scope.trackType + ".html", 'Add ' + title);
     };
     $scope.goToAct = function (act) {
-        window.localStorage.setItem('selectAct', act)
+        $scope.selectAct = act;
         $scope.toNewPage('addActivityTime.html', 'Add Activity Time');
     };
 
@@ -377,7 +377,7 @@ angular.module('momlink.controllers', [])
             end = $('#date').val() + "T" + $('#end').val();
             db.get('events').then(function (doc) {
                 var id = moment().format('MM-DD-YYYYThh:mm:ssa')
-                window.localStorage.setItem('eventID', id);
+                $scope.eventID = id;
                 var event = {
                     "id": id,
                     "title": $('#title').val(),
@@ -1319,8 +1319,8 @@ angular.module('momlink.controllers', [])
                     }
                 }
                 //set meeting status to id of the event
-                if (window.localStorage.getItem('eventID') != null) {
-                    referral[index]['meeting'] = window.localStorage.getItem('eventID');
+                if ($scope.eventID != null) {
+                    referral[index]['meeting'] = $scope.eventID;
                 }
                 //update database
                 return db.put(doc);
@@ -1373,7 +1373,7 @@ angular.module('momlink.controllers', [])
             html += '</div>'
             //keep current week for saving photos, decrement 1 to keep consistent
             weekCounter--;
-            window.localStorage.setItem('currentWeek', weekCounter);
+            $scope.currentWeek = weekCounter;
             $('#photoJournal').html(html);
             $compile($('#photoJournal'))($scope);
         });
@@ -1510,31 +1510,31 @@ angular.module('momlink.controllers', [])
     formatDate = function (d) {
         var selectedDate = moment(d).format('MMMM Do YYYY')
         today = moment().format('MMMM Do YYYY')
-        window.localStorage.setItem('date', d);
+        $scope.currentDate = d;
         if (selectedDate == today) {
             selectedDate = "Today, ".concat(selectedDate);
         }
         return selectedDate;
     };
     $scope.increaseDate = function () {
-        var d = new Date(window.localStorage.getItem('date'));
+        var d = new Date($scope.currentDate);
         d.setDate(d.getDate() + 1)
         $('#todaysDate').html(formatDate(d));
     };
     $scope.decreaseDate = function () {
-        var d = new Date(window.localStorage.getItem('date'));
+        var d = new Date($scope.currentDate);
         d.setDate(d.getDate() - 1)
         $('#todaysDate').html(formatDate(d));
     };
     $scope.loadHistory = function () {
         //nutrition is handled differently
-        var el = window.localStorage.getItem('trackType');
+        var el = $scope.trackType;
         if (el == 'addNutrition') {
             $scope.toNewPage('addNutrition.html', 'Nutrition')
         }
         else {
             var type;
-            switch (window.localStorage.getItem('trackType')) {
+            switch ($scope.trackType) {
                 case 'addActivity':
                     type = 'activity';
                     break;
@@ -1580,7 +1580,7 @@ angular.module('momlink.controllers', [])
             }
             var db = PouchDB('momlink');
             db.get('track').then(function (doc) {
-                var date = new Date(window.localStorage.getItem('date'));
+                var date = new Date($scope.currentDate);
                 date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
                 var hist = '';
                 elements = doc[type]
@@ -1938,7 +1938,7 @@ angular.module('momlink.controllers', [])
     }
     $scope.takeJournalPhoto = function () {
         var name = moment().format('YYYY-MM-DDhhmmssa');
-        week = 'Week' + window.localStorage.getItem('currentWeek')
+        week = 'Week' + $scope.currentWeek;
         navigator.camera.getPicture(function (imageData) {
             onPhotoDataSuccess(imageData)
         }, $scope.onFail, {
@@ -2001,7 +2001,7 @@ angular.module('momlink.controllers', [])
                 "uniqueId": new Date().toJSON(),
                 "date": getDate(),
                 "time": getTime(),
-                "act": window.localStorage.getItem('selectAct'),
+                "act": $scope.selectAct,
                 "value": value
             };
             doc['activity'].push(element);
@@ -2109,7 +2109,6 @@ angular.module('momlink.controllers', [])
     }
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink')
-        //db.destroy();
         //window.PouchDB = PouchDB;
         db.get('loginInfo').catch(function (err) {
             if (err.status === 404) {
