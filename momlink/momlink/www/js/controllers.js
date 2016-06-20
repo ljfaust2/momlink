@@ -88,27 +88,42 @@ angular.module('momlink.controllers', [])
     };
     $scope.renderArticlesHeader = function () {
         var db = PouchDB('momlink');
-        var html = '';
-        var newArticles = false;
+        var k = 0;
         db.get('articles').then(function (doc) {
-            sharedArticles = doc['shared'];
-            //generates a dictionary where keys are categories 
-            //and values are the number of articles per category not read
-            html += '<div class=row ng-controller="EducationController">';
-            for (i in sharedArticles) {
-                if (sharedArticles[i]['lastRead'] == '') {
-                    html += `<div class="col" ng-click="renderArticle('shared','` + sharedArticles[i]['id'] + `','` + sharedArticles[i]['category'] + `');">`;
-                    html += `<img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"><br>`;
-                    html += sharedArticles[i]['title'] + `</div>`;
-                    newArticles = true;
+            articles = doc['shared'];
+            if (articles == '') {
+                $('#articlesHeader').html('No New Articles');
+                $compile($('#articlesHeader'))($scope);
+            }
+            else {
+                function renderArticle(index) {
+                    for (j in articles) {
+                        articleHtml = `<div class="row centerWhite" ng-controller="EducationController">`;
+                        articleHtml += `<div class="col-15" align="left"><img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"></div>`;
+                        articleHtml += `<div class="col no-padding" align="left">`;
+                        articleHtml += `<span style="display: inline-block; max-height:50%; line-height: 95%; overflow:hidden">` + articles[k]['description'] + `</span>`;
+                        articleHtml += `<br /><a ng-click="renderArticle('shared','` + articles[k]['id'] + `')" style="color:white"><u>Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared','` + articles[k]['id'] + `')" style="color:white"><u>Take Quiz</u></a>`;
+                        articleHtml += `</div></div>`;
+                        $('#articlesHeader').fadeOut("slow", function () {
+                            $('#articlesHeader').html(articleHtml);
+                            $compile($('#articlesHeader'))($scope);
+                            $('#articlesHeader').fadeIn("slow");
+                        });
+                    }
+                    k++;
+                    if (k == articles.length) {
+                        k = 0;
+                    }
                 }
+                renderArticle(k);
+                //cycle through new/unread articles    
+                (function cycleTodaysEvents(i) {
+                    setTimeout(function () {
+                        renderArticle(k);
+                        if (--i) cycleTodaysEvents(i);
+                    }, 7000)
+                })(Number.POSITIVE_INFINITY);
             }
-            html += '</div>';
-            if (newArticles == false) {
-                html = '<div class="row; centerVH;"><br>No New Articles</div>'
-            }
-            $('#articlesHeader').html(html);
-            $compile($('#articlesHeader'))($scope);
         })
     };
 
@@ -176,11 +191,13 @@ angular.module('momlink.controllers', [])
         //if they've logged in previously, skip the login screen
         document.addEventListener("deviceready", function () {
             if (window.localStorage.getItem('username') != null && window.localStorage.getItem('password') != null) {
+                $scope.renderArticlesHeader();
                 window.location = "templates/main.html";
             }
             else {
                 //add this in to remove white flash
                 //$(window).bind("load", function () {
+                $scope.renderArticlesHeader();
                 navigator.splashscreen.hide()
                 //});
             }
