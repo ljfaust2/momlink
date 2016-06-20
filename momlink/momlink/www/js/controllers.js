@@ -186,6 +186,23 @@ angular.module('momlink.controllers', [])
             }
         });
     };
+    $scope.renderSurveyBadge = function () {
+        var db = PouchDB('momlink');
+        var count = 0;
+        db.get('events').then(function (doc) {
+            events = doc['events'];
+            for (i in events) {
+                if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
+                    count++;
+                }
+            }
+            if (count > 0) {
+                html = `<img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + count + `</span><p>Survey</p>`;
+                $('#survey').html(html);
+                $compile($('#survey'))($scope);
+            }
+        })
+    };
     $scope.removeSplash = function () {
         //wait until the page has loaded to remove the splash screen{
         document.addEventListener("deviceready", function () {
@@ -222,7 +239,7 @@ angular.module('momlink.controllers', [])
     $scope.goToHistory = function (type) {
         $scope.trackType = type;
         if (type == 'addNutrition') {
-            $scope.toNewPage('addNutrition.html', 'Nutrition')       
+            $scope.toNewPage('addNutrition.html', 'Nutrition')
         } else {
             $scope.toNewPage('history.html', 'History')
         }
@@ -383,6 +400,7 @@ angular.module('momlink.controllers', [])
                     "color": color,
                     "scheduledBy": '0'
                 };
+                console.log(event)
                 doc['events'].push(event);
                 return db.put(doc);
             }).then(function (doc) {
@@ -1254,6 +1272,104 @@ angular.module('momlink.controllers', [])
     };
 })
 
+.controller('SurveyController', function ($scope, $ionicPopup, $ionicModal, $compile) {
+    $scope.renderSurveys = function () {
+        var db = PouchDB('momlink');
+        var html = '<div class="list">';
+        db.get('events').then(function (doc) {
+            events = doc['events'];
+            for (i in events) {
+                if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
+                    html += `<a class="item" ng-click="renderSurvey('` + events[i]['id'] + `')">` + events[i]['title'] + ` follow-up</a>`
+                }
+            }
+            html += '</div>';
+            $('#recent').html(html);
+            $compile($('#recent'))($scope);
+        })
+    };
+    $scope.renderPastSurveys = function () {
+        var db = PouchDB('momlink');
+        var html = '<div class="list">';
+        db.get('events').then(function (doc) {
+            events = doc['events'];
+            for (i in events) {
+                if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length > 2) {
+                    html += `<a class="item" ng-click="">` + events[i]['title'] + ` follow-up</a>`
+                }
+            }
+            html += '</div>';
+            $('#history').html(html);
+            $compile($('#history'))($scope);
+        })
+    };
+    $scope.renderSurvey = function (eventID) {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('events').then(function (doc) {
+            events = doc['events'];
+            for (i in events) {
+                event = events[i]
+                if (event['id'] == eventID) {
+                    //get event's related survey
+                    survey = event['survey'];
+                    for (j in survey) {
+                        question = survey[j][0];
+                        answers = survey[j][1];
+                        //render question
+                        html += `  <div class="item item-divider">` + question + `</div>`;
+                        //render answers
+                        html += `<form id="` + String(j) + `">`
+                        html += `<ion-list>`
+                        for (k = 0; k < answers.length; k++) {
+                            answer = survey[j][1][k];
+                            html += `<ion-radio name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio>`;
+                        }
+                        html += `</ion-list>`
+                        html += `</form>`
+                    }
+                }
+            }
+            $ionicPopup.show({
+                title: 'Survey',
+                template: html,
+                buttons: [
+                  {
+                      text: 'Finish', onTap: function (e) {
+                          $scope.saveSurvey(eventID);
+                          return 'Create';
+                      },
+                      type: 'button-positive'
+                  }
+                ],
+            });
+        });
+    };
+    $scope.saveSurvey = function (eventID) {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            events = doc['events'];
+            for (i in events) {
+                event = events[i]
+                if (event['id'] == eventID) {
+                    for (j in event['survey']) {
+                        selectedAnswer = $(`input[name="` + String(j) + `"]:checked`, `#`.concat(j)).val();
+                        event['survey'][j].push(selectedAnswer);
+                    }
+                    return db.put(doc)
+                }
+            }
+        }).then(function () {
+            var db = PouchDB('momlink');
+            db.get('events').then(function (doc) {
+                events = doc['events'];
+            })
+        }).then(function () {
+            $scope.toNewPage('survey.html', 'Survey')
+        })
+    };
+})
+
 .controller('ReferralController', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showReferrals = function (type) {
         var db = PouchDB('momlink');
@@ -2108,7 +2224,6 @@ angular.module('momlink.controllers', [])
     }
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink')
-        //window.PouchDB = PouchDB;
         db.get('login').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -2158,6 +2273,24 @@ angular.module('momlink.controllers', [])
                 db.put({
                     "_id": "events",
                     "events": [
+                        {
+                            "id": '06-20-2016T10:53:29am',
+                            "title": 'test',
+                            "type": 'Lab',
+                            "day": '2016-06-20',
+                            "start": '2016-06-20T10:11',
+                            "end": '2016-06-20T11:11',
+                            "venue": 'asdfasd',
+                            "description": 'sdfadsf',
+                            "color": 'red',
+                            "scheduledBy": '0',
+                            "survey":
+                                [
+                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer']],
+                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer']],
+                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer']]
+                                ]
+                        }
                     ]
                 });
             }

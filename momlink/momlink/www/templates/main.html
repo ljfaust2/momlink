@@ -38,8 +38,8 @@
                         <h2 class="title" id="todaysDate"></h2>
                     </ion-subheader-bar>
                     <ion-view>
-                        <ion-content overflow-scroll="false" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();" on-swipe-up="closeTopMenu()">
-                            <ion-slides style="height:70px; background-color:deeppink;">
+                        <ion-content overflow-scroll="false" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderSurveyBadge();" on-swipe-up="closeTopMenu()">
+                            <ion-slides style="height:15%; background-color:deeppink;">
                                 <ion-slide-page>
                                     <div id="appointmentsHeader" class="centerWhite"></div>
                                 </ion-slide-page>
@@ -60,8 +60,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('track.html', 'Track')" style="max-width:100%; height:auto;vertical-align:middle"><p>Track</p></div>
+                                    <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%; height:auto;vertical-align:middle"><p>Survey</p></div>
                                     <div class="col"><img src="../img/temp/refresh.png" ng-click="" style="max-width:100%; height:auto;vertical-align:middle"><p>Update</p></div>
-                                    <div class="col"></div>
                                 </div>
                             </center>
                         </ion-content>
@@ -78,6 +78,7 @@
                 <a class="item item-icon-left" ng-click="toNewPage('journal.html', 'My Journal');toggleRightSideMenu()"><i class="icon ion-ios-bookmarks"></i>Journal</a>
                 <a class="item item-icon-left" ng-click="toNewPage('myProfile.html', 'My Profile');toggleRightSideMenu()"><i class="icon ion-person"></i>My Profile</a>
                 <a class="item item-icon-left" ng-click="toNewPage('track.html', 'Track');toggleRightSideMenu()"><i class="icon ion-clipboard"></i>Track</a>
+                <a class="item item-icon-left" ng-click="toNewPage('survey.html', 'Track');toggleRightSideMenu()"><i class="icon ion-clipboard"></i>Survey</a>
                 <a class="item item-icon-left" ng-click=""><i class="icon ion-loop"></i>Update</a>
                 <a class="item item-icon-left" ng-click="logout()"><i class="icon ion-locked"></i>Logout</a>
             </div>

@@ -27,6 +27,33 @@
   font-weight: bold !important;
 }
 
+.float-button-left-hasFooter {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    width: 25px;
+    padding: 25px;
+    font-size: 40px;
+    background: $warning;
+    position: fixed;
+    bottom: 60px; /* Adjust to where you want it */
+    left: 10px; /* Adjust to where you want it */
+    z-index: 9999;
+}
+.float-button-left-hasFooter .height_fix {
+    margin-top: 100%;
+}
+.float-button-left-hasFooter .content {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    margin-top: -20px; /* Note, this must be half the font size */
+    color: $light;
+}
+
 .float-button-hasFooter {
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;

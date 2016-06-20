@@ -3,7 +3,7 @@
         <h2 class="title" id="todaysDate"></h2>
     </ion-subheader-bar>
     <ion-view>
-        <ion-content overflow-scroll="false" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();">
+        <ion-content overflow-scroll="false" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderSurveyBadge();">
             <ion-slides style="height:15%; background-color:deeppink;">
                 <ion-slide-page>
                     <div id="appointmentsHeader" class="centerWhite"></div>
@@ -26,8 +26,8 @@
                 </div>
                 <div class="row">
                     <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('track.html', 'Track')" style="max-width:100%; height:auto;vertical-align:middle"><p>Track</p></div>
+                    <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%; height:auto;vertical-align:middle"><p>Survey</p></div>
                     <div class="col"><img src="../img/temp/refresh.png" ng-click="" style="max-width:100%; height:auto;vertical-align:middle"><p>Update</p></div>
-                    <div class="col"></div>
                 </div>
             </center>
         </ion-content>
