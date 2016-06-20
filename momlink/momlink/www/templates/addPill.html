@@ -1,30 +1,29 @@
-﻿<ion-pane>
-    <ion-subheader-bar class="bar bar-subheader">
-        <h2 class="title">New Pill</h2>
-    </ion-subheader-bar>
-    <ion-view>
-        <ion-content overflow-scroll="false" class="has-header has-subheader">
-            <div class="col text-center padding-top">
-                <img style="width:90%; height:150px;" />
+﻿<ion-modal-view>
+    <ion-header-bar align-title="middle" class="bar-positive">
+        <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
+        <h1 class="title" id="headline">New Pill</h1>
+    </ion-header-bar>
+    <ion-content overflow-scroll="false" class="has-header has-subheader">
+        <div class="col text-center padding-top">
+            <img style="width:90%; height:150px;" />
+        </div>
+        <div class="col padding-bottom text-right">
+            <img src="../img/temp/camera.PNG" style="width:30px; height:25px;" />
+        </div>
+        <div class="list">
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">Pill name</span>
+                <input type="text" placeholder="Pill name">
+            </label>
+            <label class="item item-input item-stacked-label">
+                <span class="input-label">When should this pill be taken?</span>
+                <input type="time" placeholder="Time">
+            </label>
+        </div>
+        <div class="row">
+            <div class="col text-center " ng-controller="DBController">
+                <input type="button" class="button button-block button-positive" value="ADD" ng-click="submit('BP');closeModal();">
             </div>
-            <div class="col padding-bottom text-right">
-                <img src="../img/temp/camera.PNG" style="width:30px; height:25px;" />
-            </div>
-            <div class="list">
-                <label class="item item-input item-stacked-label">
-                    <span class="input-label">Pill name</span>
-                    <input type="text" placeholder="Pill name">
-                </label>
-                <label class="item item-input item-stacked-label">
-                    <span class="input-label">When should this pill be taken?</span>
-                    <input type="time" placeholder="Time">
-                </label>
-            </div>
-            <div class="row">
-                <div class="col text-center " ng-controller="DBController">
-                    <input type="button" class="button button-block button-positive" value="ADD" ng-click="submit('BP')">
-                </div>
-            </div>
-        </ion-content>
-    </ion-view>
-</ion-pane>
+        </div>
+    </ion-content>
+</ion-modal-view>

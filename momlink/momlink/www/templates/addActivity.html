@@ -1,27 +1,51 @@
-﻿<ion-pane>
-    <ion-view>
-        <ion-content overflow-scroll="false" class="has-header" ng-controller="DataController">
-            <div>
-                <ul>
-                    <li ng-repeat="act in actList">
-                        <div ng-show="$index % 2 == 0">
-                            <div class="row">
-                                <div class="col text-center">
-                                    <input type="image" src={{act.image}} ng-click="goToAct(act.type)" name="type" style="width:100px;height:100px;" alt={{act.type}}>
-                                    <p>{{act.type}}</p>
-                                </div>
-                                <div ng-show="actList[$index+1] != null" class="col text-center">
-                                    <input type="image" src={{actList[$index+1].image}} ng-click="goToAct(actList[$index+1].type)" name="type" style="width:100px;height:100px;" alt={{actList[$index+1].type}}>
-                                    <p>{{actList[$index+1].type}}</p>
-                                </div>
-                                <div ng-show="actList[$index+1] == null" class="col text-center">
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+﻿<ion-modal-view>
+    <ion-header-bar align-title="middle" class="bar-positive">
+        <button class="button button-icon icon ion-close-round" ng-click="closeModal()"></button>
+        <h1 class="title" id="headline">Activity</h1>
+    </ion-header-bar>
+    <ion-content overflow-scroll="false" class="has-header" ng-controller="ActivityController">
+        <div id="activity">
+            <div class="row">
+                <div class="col text-center">
+                    <input type="image" src="../img/activities/bike.png" ng-click="goToAct('Bike')" name="type" style="width:100px;height:100px;">
+                    <p>Bike</p>
+                </div>
+                <div class="col text-center">
+                    <input type="image" src="../img/activities/clean.png" ng-click="goToAct('Clean')" name="type" style="width:100px;height:100px;">
+                    <p>Clean</p>
+                </div>
             </div>
-        </ion-content>
-    </ion-view>
-</ion-pane>
+            <div class="row">
+                <div class="col text-center">
+                    <input type="image" src="../img/activities/dance.png" ng-click="goToAct('Dance')" name="type" style="width:100px;height:100px;">
+                    <p>Dance</p>
+                </div>
+                <div class="col text-center">
+                    <input type="image" src="../img/activities/exercise.png" ng-click="goToAct('Exercise')" name="type" style="width:100px;height:100px;">
+                    <p>Exercise</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                    <input type="image" src="../img/activities/run.png" ng-click="goToAct('Run')" name="type" style="width:100px;height:100px;">
+                    <p>Run</p>
+                </div>
+                <div class="col text-center">
+                    <input type="image" src="../img/activities/shop.png" ng-click="goToAct('Shop')" name="type" style="width:100px;height:100px;">
+                    <p>Shop</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                    <input type="image" src="../img/activities/walk.png" ng-click="goToAct('Walk')" name="type" style="width:100px;height:100px;">
+                    <p>Walk</p>
+                </div>
+                <div class="col text-center">
+                    <input type="image" src="../img/activities/walk_dog.png" ng-click="goToAct('Walk Dog')" name="type" style="width:100px;height:100px;">
+                    <p>Walk Dog</p>
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-modal-view>
 

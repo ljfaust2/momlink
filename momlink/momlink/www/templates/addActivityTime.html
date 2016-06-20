@@ -1,34 +1,29 @@
-﻿<ion-pane>
-    <ion-view>
-        <ion-content overflow-scroll="false" class="has-header" ng-controller="ActivityController">
+﻿<div ng-controller="ActivityController">
+    <div class="row padding has-subheader">
+        <div class="col" ng-controller="ClockController">
+            <div id="EXAMPLE_4" class="example" style="background: url(../img/temp/clock.png); background-size: 150px 150px; background-repeat: no-repeat;">
+                <div id="CLOCK_HOLDER" class="CLOCK_HOLDER"></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="row">
+                <p style="font-size: 25px; line-height: 25px;">Time Active:</p>
+            </div>
             <div class="row padding">
-                <div class="col" ng-controller="ClockController">
-                    <div id="EXAMPLE_4" class="example" style="background: url(../img/temp/clock.png); background-size: 150px 150px; background-repeat: no-repeat;">
-                        <div id="CLOCK_HOLDER" class="CLOCK_HOLDER"></div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="row">
-                        <p style="font-size: 25px; line-height: 25px;">Time Active:</p>
-                    </div>
-                    <div class="row padding">
-                        <p id="hour" style="font-size: 50px; line-height: 50px;">00</p><p id="hour" style="font-size: 50px; line-height: 50px;">:</p><p id="minute" style="font-size: 50px; line-height: 50px;">00</p>
-                    </div>
-                    <div class="row padding">
-                        <input type="button" class="button button-small button-assertive" value="-1 Hour" ng-click="subtractHour()">&nbsp
-                        <input type="button" class="button button-small button-balanced" value="+1 Hour" ng-click="addHour()">
-                    </div>
-                </div>
+                <p id="hour" style="font-size: 50px; line-height: 50px;">00</p><p id="hour" style="font-size: 50px; line-height: 50px;">:</p><p id="minute" style="font-size: 50px; line-height: 50px;">00</p>
             </div>
-            <div class="row padding" ng-controller="DBController">
-                <div class="col">
-                    <center>
-                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear()">
-                        <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submitAct()">
-                        <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="goToHistory('addActivity')">
-                    </center>
-                </div>
+            <div class="row padding">
+                <input type="button" class="button button-small button-assertive" value="-1 Hour" ng-click="subtractHour()">&nbsp
+                <input type="button" class="button button-small button-balanced" value="+1 Hour" ng-click="addHour()">
             </div>
-        </ion-content>
-    </ion-view>
-</ion-pane>
+        </div>
+    </div>
+    <div class="row padding" ng-controller="DBController">
+        <div class="col">
+            <center>
+                <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear()">
+                <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submitAct();closeModal();">
+            </center>
+        </div>
+    </div>
+</div>

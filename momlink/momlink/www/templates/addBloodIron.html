@@ -1,39 +1,40 @@
-﻿<ion-pane>
-    <ion-view>
-        <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">
-            <script id="popover.html" type="text/ng-template">
-                <ion-popover-view>
-                    <div class="padding">
-                        Description
-                    </div>
-                </ion-popover-view>
-            </script>
-            <div class="row" ng-controller="PopOverController">
-                <div class="col text-right">
-                    <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
+﻿<ion-modal-view>
+    <ion-header-bar align-title="middle" class="bar-positive">
+        <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
+        <h1 class="title" id="headline">Blood Iron</h1>
+    </ion-header-bar>
+    <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">
+        <script id="popover.html" type="text/ng-template">
+            <ion-popover-view>
+                <div class="padding">
+                    Description
                 </div>
+            </ion-popover-view>
+        </script>
+        <div class="row" ng-controller="PopOverController">
+            <div class="col text-right">
+                <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
             </div>
-            <div class="row">
-                <div class="col text-center">
-                    <p class="trackingText" id="count">15</p>
-                    <p class="trackingText">&nbsp;g/dL</p>
-                </div>
+        </div>
+        <div class="row">
+            <div class="col text-center">
+                <p class="trackingText" id="count">15</p>
+                <p class="trackingText">&nbsp;g/dL</p>
             </div>
-            <br />
-            <div class="row padding">
-                <div class="col text-center">
-                    <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plusMinus('plus','count')" style="width:115px;height:115px;">
-                    <img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus('minus','count')" style="width:65px;height:65px;">
-                </div>
+        </div>
+        <br />
+        <div class="row padding">
+            <div class="col text-center">
+                <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plusMinus('plus','count')" style="width:115px;height:115px;">
+                <img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus('minus','count')" style="width:65px;height:65px;">
             </div>
-            <br />
-            <div class="row padding">
-                <div class="col text-center" ng-controller="DBController">
-                    <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count', 15)">
-                    <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submit('bloodIron')">
-                    <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="goToHistory('addBloodIron')">
-                </div>
+        </div>
+        <br />
+        <div class="row padding">
+            <div class="col text-center" ng-controller="DBController">
+                <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count', 15)">
+                <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submit('bloodIron');closeModal();">
             </div>
-        </ion-content>
-    </ion-view>
-</ion-pane>
+        </div>
+    </ion-content>
+</ion-modal-view>

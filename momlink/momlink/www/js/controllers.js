@@ -2,8 +2,7 @@ angular.module('momlink.controllers', [])
 /**
  *The header controller handles login, navigation, splash screen, back button
  */
-.controller('HeaderCtrl', function ($scope, $ionicPopup, $ionicModal, $location, $document, $compile) {
-    var sliderCount = Number.POSITIVE_INFINITY;
+.controller('HeaderCtrl', function ($scope, $ionicSideMenuDelegate, $ionicPopup, $ionicModal, $location, $document, $compile) {
     $scope.getInformation = function () {
         // Which fetches are repeatable.
         // All sends are repeatable.
@@ -36,6 +35,10 @@ angular.module('momlink.controllers', [])
             }
         });
     }
+
+    $scope.toggleRightSideMenu = function () {
+        $ionicSideMenuDelegate.toggleRight();
+    };
 
     //ion-subheader
     $scope.renderSubheaderDate = function () {
@@ -169,33 +172,6 @@ angular.module('momlink.controllers', [])
         xhr.send();
     };
 
-    $scope.toggleTopMenu = function () {
-        var menu = document.getElementsByTagName('ion-top-menu')[0];
-        var pane = document.getElementsByTagName('ion-pane')[0];
-        //change icon color
-        if (document.getElementById('menuIcon').classList.contains('menu-icon')) {
-            document.getElementById('menuIcon').classList.remove('menu-icon')
-        }
-        else {
-            document.getElementById('menuIcon').classList.add('menu-icon')
-        }
-        //raise/lower menu
-        menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '50%' : '0px';
-    };
-    $scope.closeTopMenu = function () {
-        var menu = document.getElementsByTagName('ion-top-menu')[0];
-        if (menu.offsetHeight > 0) {
-            var menu = document.getElementsByTagName('ion-top-menu')[0];
-            var pane = document.getElementsByTagName('ion-pane')[0];
-            //set icon color to white
-            if (document.getElementById('menuIcon').classList.contains('menu-icon')) {
-                document.getElementById('menuIcon').classList.remove('menu-icon')
-            }
-            //raise menu
-            menu.style.height = pane.style.top = (menu.offsetHeight == 0) ? '50%' : '0px';
-        }
-    };
-
     $scope.autoLogin = function () {
         //if they've logged in previously, skip the login screen
         document.addEventListener("deviceready", function () {
@@ -245,16 +221,33 @@ angular.module('momlink.controllers', [])
     //Tracking
     $scope.goToHistory = function (type) {
         $scope.trackType = type;
-        $scope.toNewPage('history.html', 'History')
+        if (type == 'addNutrition') {
+            $scope.toNewPage('addNutrition.html', 'Nutrition')       
+        } else {
+            $scope.toNewPage('history.html', 'History')
+        }
+
     };
     $scope.goToAddEvent = function () {
         title = $scope.trackType.split(/(?=[A-Z])/).splice(1, 100)
         title = title.join(' ')
-        $scope.toNewPage($scope.trackType + ".html", 'Add ' + title);
+        $scope.modal = $ionicModal.fromTemplateUrl($scope.trackType + ".html", {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function (modal) {
+            $scope.modal = modal;
+            $scope.modal.show();
+        })
     };
     $scope.goToAct = function (act) {
         $scope.selectAct = act;
-        $scope.toNewPage('addActivityTime.html', 'Add Activity Time');
+        $.ajax({
+            url: 'addActivityTime.html',
+            success: function (data) {
+                $('#activity').html(data);
+                $compile($('#activity'))($scope);
+            }
+        });
     };
 
     $scope.newMessage = function (email, phone) {
@@ -464,13 +457,13 @@ angular.module('momlink.controllers', [])
     }
 
     $scope.fileDownload = function () {
-        /*document.addEventListener("deviceready", function () {
+        document.addEventListener("deviceready", function () {
             //The directory to store data
             var store = cordova.file.dataDirectory;
             //URL of our asset
-            var assetURL = "https://www.sitepoint.com/storing-local-data-in-a-cordova-app/";
+            var assetURL = "http://www.webmd.com/fibromyalgia/guide/fibromyalgia-and-pregnancy";
             //File name of our important data file we didn't ship with the app
-            var fileName = "lol2.html";
+            var fileName = "webmd.html";
             //Check for the file. 
             window.resolveLocalFileSystemURL(store + fileName, appStart, downloadAsset);
 
@@ -488,12 +481,12 @@ angular.module('momlink.controllers', [])
                     });
             }
             function appStart(entry) {
-                html = `<iframe onclick="alert('lol')" src="` + entry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
+                html = `<iframe src="` + entry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
                 $("#content").html(html);
                 //$compile($("#content"))($scope);
                 console.log("App ready!");
             }
-        })*/
+        })
     }
 })
 
@@ -1332,7 +1325,7 @@ angular.module('momlink.controllers', [])
     }
 })
 
-.controller('JournalController', function ($scope, $ionicPopup, $compile) {
+.controller('JournalController', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.renderPhotoJournal = function () {
         var start;
         var end;
@@ -1439,33 +1432,32 @@ angular.module('momlink.controllers', [])
         });
     }
     $scope.createNote = function (link, title) {
-        $ionicPopup.show({
-            title: 'Add Note',
-            templateUrl: 'notePopup.html',
-            buttons: [
-              {
-                  text: 'Add Note', onTap: function (e) {
-                      var db = PouchDB('momlink');
-                      db.get('journal').then(function (doc) {
-                          var note = {
-                              "date": moment().format('MMMM Do YYYY'),
-                              "subject": $('#subject').val(),
-                              "description": $("#description").val()
-                          };
-                          doc['notes'].push(note);
-                          return db.put(doc);
-                      }).then(function (doc) {
-                          $scope.toNewPage(link, title);
-                      });
-                      return 'Add';
-                  },
-                  type: 'button-positive'
-              },
-            {
-                text: 'Discard', onTap: function (e) { return 'Discard'; },
-                type: 'button-stable'
-            }
-            ],
+        $scope.modal = $ionicModal.fromTemplateUrl('noteModal.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function (modal) {
+            $scope.modal = modal;
+            $scope.modal.show();
+        })
+    };
+    $scope.saveNote = function () {
+        var db = PouchDB('momlink');
+        db.get('journal').then(function (doc) {
+            var note = {
+                "date": moment().format('MMMM Do YYYY'),
+                "subject": $('#subject').val(),
+                "description": $("#description").val()
+            };
+            doc['notes'].push(note);
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.toNewPage('journal.html', 'My Journal');
+            $scope.closeModal();
+        });
+    };
+    $scope.closeModal = function () {
+        $scope.modal.hide().then(function () {
+            $scope.modal.remove();
         });
     };
     $scope.showNotes = function () {
@@ -1506,7 +1498,7 @@ angular.module('momlink.controllers', [])
     };
 })
 
-.controller('HistoryController', function ($scope) {
+.controller('HistoryController', function ($scope, $ionicModal) {
     formatDate = function (d) {
         var selectedDate = moment(d).format('MMMM Do YYYY')
         today = moment().format('MMMM Do YYYY')
@@ -1530,7 +1522,13 @@ angular.module('momlink.controllers', [])
         //nutrition is handled differently
         var el = $scope.trackType;
         if (el == 'addNutrition') {
-            $scope.toNewPage('addNutrition.html', 'Nutrition')
+            $scope.modal = $ionicModal.fromTemplateUrl("addNutrition.html", {
+                scope: $scope,
+                animation: 'slide-in-up'
+            }).then(function (modal) {
+                $scope.modal = modal;
+                $scope.modal.show();
+            })
         }
         else {
             var type;
@@ -1737,11 +1735,10 @@ angular.module('momlink.controllers', [])
         }
     }
     $scope.clear = function () {
-        minute = 0;
-        totalMinutes.value = minute;
-        $('#minute').html(("0" + totalMinutes.value).slice(-2));
         hour = 0;
-        totalHours.value = hour;
+        totalMinutes.value = 0;
+        $('#minute').html(("0" + totalMinutes.value).slice(-2));
+        totalHours.value = 0;
         $('#hour').html(("0" + totalMinutes.value).slice(-2));
     }
 })
@@ -1978,7 +1975,9 @@ angular.module('momlink.controllers', [])
         }
     }
     $scope.onFail = function (message) {
-        alert('Failed because: ' + message);
+        if (message != 'Camera cancelled.') {
+            alert('Failed because: ' + message);
+        }
     }
 })
 
@@ -2544,17 +2543,7 @@ angular.module('momlink.controllers', [])
     }
 })
 
-.controller('DataController', function ($scope, $ionicSideMenuDelegate, $compile) {
-    $scope.actList = [
-      { type: "Bike", image: "../img/activities/bike.png" },
-      { type: "Clean", image: "../img/activities/clean.png" },
-      { type: "Dance", image: "../img/activities/dance.png" },
-      { type: "Exercise", image: "../img/activities/exercise.png" },
-      { type: "Run", image: "../img/activities/run.png" },
-      { type: "Shop", image: "../img/activities/shop.png" },
-      { type: "Walk", image: "../img/activities/walk_dog.png" },
-      { type: "Walk Dog", image: "../img/activities/walk.png" }
-    ]
+.controller('DataController', function ($scope, $compile) {
     $scope.inventoryList = [
       { item: "Baby Carrier", price: "7" },
       { item: "Baby Wipes", price: "1" },

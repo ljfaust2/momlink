@@ -1,0 +1,28 @@
+﻿<ion-modal-view>
+    <ion-header-bar align-title="middle" class="bar-positive">
+        <button class="button button-icon icon ion-close-round" ng-click="closeModal();">Cancel</button>
+        <h1 class="title" id="headline">Create Note</h1>
+    </ion-header-bar>
+    <div class="list has-header">
+        <label class="item item-input">
+            <span class="input-label">Subject</span>
+            <input id="subject" type="text">
+        </label>
+        <div class="row">
+            <div class="col text-right ">
+                <img src="../img/temp/mic.png" ng-onclick="" style="width:30px; height:25px;" />
+                <img src="../img/temp/clip.png" ng-onclick="" style="width:30px; height:25px;" />
+                <img src="../img/temp/camera.PNG" ng-onclick="takePicture()" style="width:30px; height:25px;" />
+            </div>
+        </div>
+        <label class="item item-input">
+            <textarea id="description" placeholder="Description" rows="5"></textarea>
+        </label>
+    </div>
+    <br />
+    <div class="row padding">
+        <div class="col text-center">
+            <input type="button" class="button button-block button-positive" value="SAVE" ng-click="saveNote()">
+        </div>
+    </div>
+</ion-modal-view>

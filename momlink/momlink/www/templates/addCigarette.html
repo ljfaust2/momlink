@@ -1,50 +1,51 @@
-﻿<ion-pane>
-    <ion-view>
-        <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">
-            <div ng-controller="DBController">
-                <div class="row">
-                    <div class="col">
-                        <div class="col text-right">
-                            <p id="count12" style="font-size: 30px; line-height: 30px;">0</p>
-                        </div>
-                        <div class="col text-center">
-                            <img src="../img/temp/haflCigarette.png" style="width:25px; height:125px;" />
-                        </div>
-                        <div class="row">
-                            <div class="col text-center">
-                                <img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus('minus','count12')" style="width:30px;height:30px;">
-                            </div>
-                            <div class="col text-center">
-                                <img type="button" src="../img/handportions/tanplus.PNG" id="plus" ng-click="plusMinus('plus','count12')" style="width:30px;height:30px;">
-                            </div>
-                        </div>
+﻿<ion-modal-view>
+    <ion-header-bar align-title="middle" class="bar-positive">
+        <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
+        <h1 class="title" id="headline">Cigarettes</h1>
+    </ion-header-bar>
+    <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">
+        <div ng-controller="DBController">
+            <div class="row">
+                <div class="col">
+                    <div class="col text-right">
+                        <p id="count12" style="font-size: 30px; line-height: 30px;">0</p>
                     </div>
-                    <div class="col">
-                        <div class="col text-right">
-                            <p id="count1" style="font-size: 30px; line-height: 30px;">0</p>
+                    <div class="col text-center">
+                        <img src="../img/temp/haflCigarette.png" style="width:25px; height:125px;" />
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">
+                            <img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus('minus','count12')" style="width:30px;height:30px;">
                         </div>
                         <div class="col text-center">
-                            <img src="../img/temp/fullCigarette.png" style="width:25px; height:125px;" />
-                        </div>
-                        <div class="row">
-                            <div class="col text-center">
-                                <img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus('minus','count1')" style="width:30px;height:30px;">
-                            </div>
-                            <div class="col text-center">
-                                <img type="button" src="../img/handportions/tanplus.PNG" id="plus" ng-click="plusMinus('plus','count1')" style="width:30px;height:30px;">
-                            </div>
+                            <img type="button" src="../img/handportions/tanplus.PNG" id="plus" ng-click="plusMinus('plus','count12')" style="width:30px;height:30px;">
                         </div>
                     </div>
                 </div>
-                <div class="row padding">
+                <div class="col">
+                    <div class="col text-right">
+                        <p id="count1" style="font-size: 30px; line-height: 30px;">0</p>
+                    </div>
                     <div class="col text-center">
-                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count12', 0);clear('count1', 0);">
-                        <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submitAdd('cigarette')">
-                        <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="goToHistory('addCigarette')">
+                        <img src="../img/temp/fullCigarette.png" style="width:25px; height:125px;" />
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">
+                            <img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus('minus','count1')" style="width:30px;height:30px;">
+                        </div>
+                        <div class="col text-center">
+                            <img type="button" src="../img/handportions/tanplus.PNG" id="plus" ng-click="plusMinus('plus','count1')" style="width:30px;height:30px;">
+                        </div>
                     </div>
                 </div>
             </div>
-        </ion-content>
-    </ion-view>
-</ion-pane>
+            <div class="row padding">
+                <div class="col text-center">
+                    <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count12', 0);clear('count1', 0);">
+                    <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submitAdd('cigarette');closeModal();">
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-modal-view>
 

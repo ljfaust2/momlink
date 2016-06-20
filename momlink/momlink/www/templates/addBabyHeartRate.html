@@ -1,43 +1,43 @@
-﻿<ion-pane>
-    <ion-view>
-        <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">
-            <script id="popover.html" type="text/ng-template">
-                <ion-popover-view>
-                    <div class="padding">
-                        To calculate your unborn baby's fetal heart rate simply count the heartbeats you hear for 15 seconds and multiply that number times 4.
-                        (Courtesy of fetaldopplerfacts.org)
+﻿<ion-modal-view>
+    <ion-header-bar align-title="middle" class="bar-positive">
+        <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
+        <h1 class="title" id="headline">Baby Heart Rate</h1>
+    </ion-header-bar>
+            <ion-content overflow-scroll="false" class="has-header" ng-controller="AddSubController">
+                <script id="popover.html" type="text/ng-template">
+                    <ion-popover-view>
+                        <div class="padding">
+                            To calculate your unborn baby's fetal heart rate simply count the heartbeats you hear for 15 seconds and multiply that number times 4.
+                            (Courtesy of fetaldopplerfacts.org)
+                        </div>
+                    </ion-popover-view>
+                </script>
+                <div class="row" ng-controller="PopOverController">
+                    <div class="col text-right">
+                        <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
                     </div>
-                </ion-popover-view>
-            </script>
-            <div class="row" ng-controller="PopOverController">
-                <div class="col text-right">
-                    <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
                 </div>
-            </div>
-            <div style="background-image: url('../img/temp/cardiogram.png'); background-size: contain; background-repeat: no-repeat;">
-                <div class="row">
-                    <div class="col text-center">
-                        <p class="trackingText" id="count">130</p>
-                        <p class="trackingText">&nbsp;bpm</p>
+                <div style="background-image: url('../img/temp/cardiogram.png'); background-size: contain; background-repeat: no-repeat;">
+                    <div class="row">
+                        <div class="col text-center">
+                            <p class="trackingText" id="count">130</p>
+                            <p class="trackingText">&nbsp;bpm</p>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row padding">
+                        <div class="col text-center">
+                            <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plusMinus('plus','count')" style="width:115px;height:115px;">
+                            <img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus('minus','count')" style="width:65px;height:65px;">
+                        </div>
                     </div>
                 </div>
                 <br />
                 <div class="row padding">
-                    <div class="col text-center">
-                        <img type="button" src="../img/temp/plus.png" id="plus" ng-click="plusMinus('plus','count')" style="width:115px;height:115px;">
-                        <img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus('minus','count')" style="width:65px;height:65px;">
+                    <div class="col text-center" ng-controller="DBController">
+                        <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count', 130)">
+                        <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submit('babyHeartRate');closeModal();">
                     </div>
                 </div>
-            </div>
-            <br />
-            <div class="row padding">
-                <div class="col text-center" ng-controller="DBController">
-                    <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count', 130)">
-                    <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submit('babyHeartRate')">
-                    <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="goToHistory('addBabyHeartRate')">
-                </div>
-            </div>
-        </ion-content>
-    </ion-view>
-</ion-pane>
-
+            </ion-content>
+</ion-modal-view>
