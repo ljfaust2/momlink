@@ -354,77 +354,6 @@ angular.module('momlink.controllers', [])
             $scope.modal.show();
         })
     }
-    $scope.editEvent = function (eventID) {
-        $scope.modal = $ionicModal.fromTemplateUrl('eventModal.html', {
-            scope: $scope,
-            animation: 'slide-in-up'
-        }).then(function (modal) {
-            $scope.modal = modal;
-            $scope.modal.show();
-        })
-        $scope.eventIDEdit = eventID;
-    }
-    $scope.pullEventInfo = function () {
-        var db = PouchDB('momlink');
-        db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                event = events[i]
-                if (event['id'] == $scope.eventIDEdit) {
-                    $('#title').val(event['title']);
-                    $('#type').val(event['type']);
-                    $('#date').val(event['day']);
-                    $('#start').val(event['start']);
-                    $('#end').val(event['end']);
-                    $('#venue').val(event['venue']);
-                    $('#description').val(event['description']);
-                }
-            }
-        });
-    }
-    $scope.updateEvent = function (eventID) {
-        var db = PouchDB('momlink');
-        db.get('events').then(function (doc) {
-            var color;
-            switch ($("#type").val()) {
-                case 'OB Appt':
-                    color = 'blue';
-                    break;
-                case 'Referral':
-                    color = 'yellow';
-                    break;
-                case 'Lab':
-                    color = 'red';
-                    break;
-                case 'PNCC':
-                    color = 'green';
-                    break;
-                case 'Ultra':
-                    color = 'orange';
-                    break;
-                case 'Class':
-                    color = 'purple';
-                    break;
-                case 'Other':
-                    color = 'black';
-                    break;
-            }
-            events = doc['events'];
-            for (i in events) {
-                event = events[i]
-                if (event['id'] == eventID) {
-                    event['title'] = $('#title').val();
-                    event['type'] = $('#type').val();
-                    event['day'] = $('#day').val();
-                    event['start'] = $('#start').val();
-                    event['end'] = $('#end').val();
-                    event['venue'] = $('#venue').val();
-                    event['description'] = $('#description').val();
-                    db.put(doc);
-                }
-            }
-        });      
-    }
     $scope.saveEvent = function () {
         //checks if all necessary fields have been filled
         var pass = true;
@@ -471,8 +400,8 @@ angular.module('momlink.controllers', [])
                     color = 'black';
                     break;
             }
-            start = $('#start').val();
-            end = $('#end').val();
+            start = $('#date').val() + "T" + $('#start').val();
+            end = $('#date').val() + "T" + $('#end').val();
             db.get('events').then(function (doc) {
                 var id = moment().format('MM-DD-YYYYThh:mm:ssa')
                 $scope.eventID = id;
@@ -488,12 +417,12 @@ angular.module('momlink.controllers', [])
                     "color": color,
                     "scheduledBy": '0'
                 };
+                console.log(event)
                 doc['events'].push(event);
                 return db.put(doc);
             }).then(function (doc) {
                 $scope.toNewPage($scope.sLink, $scope.sTitle);
                 $scope.closeModal();
-                delete $scope.eventIDeventIDEdit;
                 delete $scope.sLink;
                 delete $scope.sTitle;
                 if ($scope.sCallback != null) {
@@ -519,11 +448,13 @@ angular.module('momlink.controllers', [])
                     var month = String(event['day']).substring(5, 7);
                     var day = String(event['day']).substring(8, 10);
                     var date = month + '/' + day + '/' + year;
+                    var startTime = String(event['start']).substr(String(event['start']).indexOf("T") + 1);
+                    var endTime = String(event['end']).substr(String(event['end']).indexOf("T") + 1);
                     //render template
                     templateHTML = '<p><b>' + event['type'] + '</b></p>';
                     templateHTML += '<p><b>Date</b>: ' + date + '</p>';
-                    templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(event['start']) + '</p>';
-                    templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(event['end']) + '</p>';
+                    templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
+                    templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
                     if (event.venue != '') {
                         templateHTML += '<p><b>Venue</b>: ' + event['venue'] + '</p>'
                     }
@@ -535,17 +466,10 @@ angular.module('momlink.controllers', [])
                         title: event['title'],
                         template: templateHTML,
                         buttons: [
-                            {
-                                text: 'Edit', onTap: function (e) {
-                                    $scope.editEvent(eventID);
-                                    return 'Cancel';
-                                },
-                                type: 'button-positive'
-                            },
-                            {
-                                text: 'Close', onTap: function (e) { return 'Cancel'; },
-                                type: 'button-positive'
-                            }
+                          {
+                              text: 'Close', onTap: function (e) { return 'Cancel'; },
+                              type: 'button-positive'
+                          }
                         ],
                     });
                 }
@@ -566,7 +490,6 @@ angular.module('momlink.controllers', [])
         }
         return time;
     }
-
 
     $scope.fileDownload = function () {
         document.addEventListener("deviceready", function () {
@@ -777,7 +700,33 @@ angular.module('momlink.controllers', [])
                 events: doc['events'],
                 eventRender: function (event, element) {
                     element.click(function () {
-                        $scope.viewEvent(event.id)
+                        //format date and time
+                        var date = String(event.start._d).split(' ').slice(0, 4);
+                        date = String(date).split(',').join(' ');
+                        var startTime = String(event.start._i).substr(String(event.start._i).indexOf("T") + 1);
+                        var endTime = String(event.end._i).substr(String(event.end._i).indexOf("T") + 1);
+                        //render template
+                        templateHTML = '<p><b>' + event.type + '</b></p>';
+                        templateHTML += '<p><b>Date</b>: ' + date + '</p>';
+                        templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
+                        templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
+                        if (event.venue != '') {
+                            templateHTML += '<p><b>Venue</b>: ' + event.venue + '</p>'
+                        }
+                        if (event.description != '') {
+                            templateHTML += '<p><b>Description</b>: ' + event.description + '</p>'
+                        }
+                        //view event
+                        var alertPopup = $ionicPopup.show({
+                            title: event.title,
+                            template: templateHTML,
+                            buttons: [
+                              {
+                                  text: 'Close', onTap: function (e) { return 'Cancel'; },
+                                  type: 'button-positive'
+                              }
+                            ],
+                        });
                     })
                     return ['all', event.scheduledBy].indexOf($('#filter').html()) >= 0
                 }
