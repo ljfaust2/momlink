@@ -209,8 +209,10 @@ angular.module('momlink.controllers', [])
         db.get('events').then(function (doc) {
             events = doc['events'];
             for (i in events) {
-                if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
-                    count++;
+                if (events[i]['survey'] != null) {
+                    if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
+                        count++;
+                    }
                 }
             }
             if (count > 0) {
@@ -377,29 +379,6 @@ angular.module('momlink.controllers', [])
         }
         if (pass == true) {
             var db = PouchDB('momlink');
-            switch ($("#type").val()) {
-                case 'OB Appt':
-                    color = 'blue';
-                    break;
-                case 'Referral':
-                    color = 'yellow';
-                    break;
-                case 'Lab':
-                    color = 'red';
-                    break;
-                case 'PNCC':
-                    color = 'green';
-                    break;
-                case 'Ultra':
-                    color = 'orange';
-                    break;
-                case 'Class':
-                    color = 'purple';
-                    break;
-                case 'Other':
-                    color = 'black';
-                    break;
-            }
             start = $('#date').val() + "T" + $('#start').val();
             end = $('#date').val() + "T" + $('#end').val();
             db.get('events').then(function (doc) {
@@ -414,10 +393,9 @@ angular.module('momlink.controllers', [])
                     "end": end,
                     "venue": $('#venue').val(),
                     "description": $('#description').val(),
-                    "color": color,
+                    "color": $scope.getColor($('#type').val()),
                     "scheduledBy": '0'
                 };
-                console.log(event)
                 doc['events'].push(event);
                 return db.put(doc);
             }).then(function (doc) {
@@ -436,8 +414,9 @@ angular.module('momlink.controllers', [])
             $scope.modal.remove();
         });
     };
-
-    $scope.viewEvent = function (eventID) {
+    $scope.viewEvent = function (eventID, link, title) {
+        $scope.sLink = link;
+        $scope.sTitle = title;
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
             events = doc['events'];
@@ -448,8 +427,8 @@ angular.module('momlink.controllers', [])
                     var month = String(event['day']).substring(5, 7);
                     var day = String(event['day']).substring(8, 10);
                     var date = month + '/' + day + '/' + year;
-                    var startTime = String(event['start']).substr(String(event['start']).indexOf("T") + 1);
-                    var endTime = String(event['end']).substr(String(event['end']).indexOf("T") + 1);
+                    var startTime = $scope.parseTime(event['start']);
+                    var endTime = $scope.parseTime(event['end']);
                     //render template
                     templateHTML = '<p><b>' + event['type'] + '</b></p>';
                     templateHTML += '<p><b>Date</b>: ' + date + '</p>';
@@ -466,6 +445,13 @@ angular.module('momlink.controllers', [])
                         title: event['title'],
                         template: templateHTML,
                         buttons: [
+                            {
+                                text: 'Edit', onTap: function (e) {
+                                    $scope.editEvent(eventID);
+                                    return 'Cancel';
+                                },
+                                type: 'button-positive'
+                            },
                           {
                               text: 'Close', onTap: function (e) { return 'Cancel'; },
                               type: 'button-positive'
@@ -476,7 +462,89 @@ angular.module('momlink.controllers', [])
             }
         });
     }
+    $scope.editEvent = function (eventID) {
+        $scope.modal = $ionicModal.fromTemplateUrl('editEventModal.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function (modal) {
+            $scope.modal = modal;
+            $scope.modal.show();
+        })
+        $scope.eventID = eventID;
+    }
+    $scope.pullEvent = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            events = doc['events'];
+            for (i in events) {
+                event = events[i]
+                if (event['id'] == $scope.eventID) {
+                    $('#title').val(event['title']);
+                    $('#type').val(event['type']);
+                    $('#date').val(event['day']);
+                    $('#start').val($scope.parseTime(event['start']));
+                    $('#end').val($scope.parseTime(event['end']));
+                    $('#venue').val(event['venue']);
+                    $('#description').val(event['description']);
+                }
+            }
+        });
+    }
+    $scope.updateEvent = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            events = doc['events'];
+            for (i in events) {
+                event = events[i]
+                if (event['id'] == $scope.eventID) {
+                    event['title'] = $('#title').val();
+                    event['type'] = $('#type').val();
+                    event['day'] = $('#date').val();
+                    start = $('#date').val() + "T" + $('#start').val();
+                    end = $('#date').val() + "T" + $('#end').val();
+                    event['start'] = start;
+                    event['end'] = end;
+                    event['venue'] = $('#venue').val();
+                    event['description'] = $('#description').val();
+                    event['color'] = $scope.getColor($('#type').val());
+                    return db.put(doc);
+                }
+            }
+        }).then(function () {
+            if ($scope.sLink != '' && $scope.sTitle != '') {
+                $scope.toNewPage($scope.sLink, $scope.sTitle)
+                delete $scope.sLink;
+                delete $scope.sTitle;
+            }
+            $scope.closeModal();
+        })
+    }
     //helper functions
+    $scope.getColor = function (type) {
+        switch (type) {
+            case 'OB Appt':
+                type = 'blue';
+                return type;
+            case 'Referral':
+                type = 'teal';
+                return type;
+            case 'Lab':
+                type = 'red';
+                return type;
+            case 'PNCC':
+                type = 'green';
+                return type;
+            case 'Ultra':
+                type = 'orange';
+                return type;
+            case 'Class':
+                type = 'purple';
+                return type;
+            case 'Other':
+                type = 'black';
+                return type;
+        }
+    }
     $scope.convert24to12 = function (time) {
         if (parseInt(time.substring(0, 2)) >= 12) {
             if (parseInt(time.substring(0, 2)) > 12) {
@@ -488,6 +556,10 @@ angular.module('momlink.controllers', [])
         else {
             time += ' AM'
         }
+        return time;
+    }
+    $scope.parseTime = function (time) {
+        time = String(time).substr(String(time).indexOf("T") + 1);
         return time;
     }
 
@@ -700,33 +772,7 @@ angular.module('momlink.controllers', [])
                 events: doc['events'],
                 eventRender: function (event, element) {
                     element.click(function () {
-                        //format date and time
-                        var date = String(event.start._d).split(' ').slice(0, 4);
-                        date = String(date).split(',').join(' ');
-                        var startTime = String(event.start._i).substr(String(event.start._i).indexOf("T") + 1);
-                        var endTime = String(event.end._i).substr(String(event.end._i).indexOf("T") + 1);
-                        //render template
-                        templateHTML = '<p><b>' + event.type + '</b></p>';
-                        templateHTML += '<p><b>Date</b>: ' + date + '</p>';
-                        templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
-                        templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
-                        if (event.venue != '') {
-                            templateHTML += '<p><b>Venue</b>: ' + event.venue + '</p>'
-                        }
-                        if (event.description != '') {
-                            templateHTML += '<p><b>Description</b>: ' + event.description + '</p>'
-                        }
-                        //view event
-                        var alertPopup = $ionicPopup.show({
-                            title: event.title,
-                            template: templateHTML,
-                            buttons: [
-                              {
-                                  text: 'Close', onTap: function (e) { return 'Cancel'; },
-                                  type: 'button-positive'
-                              }
-                            ],
-                        });
+                        $scope.viewEvent(event.id, 'calendar.html', 'Calendar');
                     })
                     return ['all', event.scheduledBy].indexOf($('#filter').html()) >= 0
                 }
@@ -1296,8 +1342,10 @@ angular.module('momlink.controllers', [])
         db.get('events').then(function (doc) {
             events = doc['events'];
             for (i in events) {
-                if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
-                    html += `<a class="item" ng-click="renderSurvey('` + events[i]['id'] + `')">` + events[i]['title'] + ` follow-up</a>`
+                if (events[i]['survey'] != null) {
+                    if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
+                        html += `<a class="item" ng-click="renderSurvey('` + events[i]['id'] + `')">` + events[i]['title'] + ` follow-up</a>`
+                    }
                 }
             }
             html += '</div>';
