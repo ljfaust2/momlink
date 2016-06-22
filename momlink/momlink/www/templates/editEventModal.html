@@ -3,8 +3,8 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();">Cancel</button>
         <h1 class="title" id="headline">Create Event</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="false">
-        <div class="list has-header" ng-controller="CalendarController" ng-init="pullEvent()">
+    <ion-content overflow-scroll="false" ng-controller="CalendarController" ng-init="pullEvent()">
+        <div id="eventPart1" class="list">
             <label class="item item-input">
                 <span class="input-label">Title</span>
                 <input id="title" type="text">
@@ -41,12 +41,21 @@
             <label class="item item-input">
                 <textarea id="description" rows="4" placeholder="Notes"></textarea>
             </label>
-        </div>
-        <br />
-        <div class="row padding">
             <div class="col text-center">
-                <input type="button" class="button button-block button-positive" value="Update" ng-click="updateEvent()">
+                <input type="button" class="button button-block button-positive" value="NEXT" ng-click="goToEventPart2()">
             </div>
         </div>
-        </ion-content>
+        <div id="eventPart2" class="list" style="display:none">
+            <div class="item item-divider">
+                Questions
+            </div>
+            <div class="item item-checkbox">Q1<label class="checkbox"><input type="checkbox" name="Q" value="Q1"></label></div>
+            <div class="item item-checkbox">Q2<label class="checkbox"><input type="checkbox" name="Q" value="Q2"></label></div>
+            <div class="item item-checkbox">Q3<label class="checkbox"><input type="checkbox" name="Q" value="Q3"></label></div>
+            <div class="col text-center">
+                <input type="button" class="button button-block button-positive" value="UPDATE" ng-click="updateEvent()">
+                <input type="button" class="button button-block button-stable" value="BACK" ng-click="goToEventPart1()">
+            </div>
+        </div>
+    </ion-content>
 </ion-modal-view>

@@ -381,6 +381,10 @@ angular.module('momlink.controllers', [])
             var db = PouchDB('momlink');
             start = $('#date').val() + "T" + $('#start').val();
             end = $('#date').val() + "T" + $('#end').val();
+            var questions = [];
+            $("input[name=Q]:checked").each(function () {
+                questions.push($(this).val())
+            });
             db.get('events').then(function (doc) {
                 var id = moment().format('MM-DD-YYYYThh:mm:ssa')
                 $scope.eventID = id;
@@ -393,12 +397,16 @@ angular.module('momlink.controllers', [])
                     "end": end,
                     "venue": $('#venue').val(),
                     "description": $('#description').val(),
+                    "questions": questions,
                     "color": $scope.getColor($('#type').val()),
                     "scheduledBy": '0'
                 };
                 doc['events'].push(event);
                 return db.put(doc);
             }).then(function (doc) {
+                db.get('events').then(function (doc) {
+                    console.log(doc)
+                })
                 $scope.toNewPage($scope.sLink, $scope.sTitle);
                 $scope.closeModal();
                 delete $scope.sLink;
@@ -486,12 +494,23 @@ angular.module('momlink.controllers', [])
                     $('#end').val($scope.parseTime(event['end']));
                     $('#venue').val(event['venue']);
                     $('#description').val(event['description']);
+                    for (i in event['questions']) {
+                        $("input[name=Q]").each(function () {
+                            if (event['questions'][i] == $(this).val()) {
+                                $(this).prop('checked', true);
+                            }
+                        });
+                    }
                 }
             }
         });
     }
     $scope.updateEvent = function () {
         var db = PouchDB('momlink');
+        var questions = [];
+        $("input[name=Q]:checked").each(function () {
+            questions.push($(this).val())
+        });
         db.get('events').then(function (doc) {
             events = doc['events'];
             for (i in events) {
@@ -506,6 +525,7 @@ angular.module('momlink.controllers', [])
                     event['end'] = end;
                     event['venue'] = $('#venue').val();
                     event['description'] = $('#description').val();
+                    event['questions'] = questions,
                     event['color'] = $scope.getColor($('#type').val());
                     return db.put(doc);
                 }
@@ -518,6 +538,14 @@ angular.module('momlink.controllers', [])
             }
             $scope.closeModal();
         })
+    }
+    $scope.goToEventPart2 = function () {
+        $('#eventPart1').css('display', 'none')
+        $('#eventPart2').css('display', '')
+    }
+    $scope.goToEventPart1 = function () {
+        $('#eventPart1').css('display', '')
+        $('#eventPart2').css('display', 'none')
     }
     //helper functions
     $scope.getColor = function (type) {
@@ -1515,41 +1543,45 @@ angular.module('momlink.controllers', [])
         db.get('profile').then(function (doc) {
             start = doc['startDate'];
             end = doc['deliveryDate'];
-            //if these values are null, say they must set start and end dates
-        }).then(function (doc) {
-            var html = '';
-            var weekCounter = 1;
-            //convert start/end date to moment
-            today = moment()
-            displayStart = moment(start)
-            displayEnd = moment(end)
-            //generate weeks until end/current date
-            html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
-            do {
-                //display Date formats starting and ending dates for the week
-                displayDate = String(moment(displayStart).format('ddd MMM Do') + ` - ` + moment(displayStart.add(6, 'days')).format('ddd MMM Do'))
-                displayStart.subtract(6, 'days');
-                //highlight the current week
-                if (displayStart <= today && displayStart.add(6, 'days') >= today) {
-                    html += `<div class="col-33 text-center padding activeWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
-                }
-                    //normal week
-                else {
-                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
-                }
-                //3 dates per column
-                if (weekCounter % 3 == 0) {
-                    html += '</div><div class="row" style="padding-right:0; padding-left:0">'
-                }
-                displayStart.add(1, 'days')
-                weekCounter++;
-            } while (displayStart <= today && displayStart <= displayEnd)
-            html += '</div>'
-            //keep current week for saving photos, decrement 1 to keep consistent
-            weekCounter--;
-            $scope.currentWeek = weekCounter;
-            $('#photoJournal').html(html);
-            $compile($('#photoJournal'))($scope);
+            if (end == '') {
+                $('#photoJournal').html('Please set your expected delivery date in the "My Profile" section');
+                $compile($('#photoJournal'))($scope);
+            }
+            else {
+                var html = '';
+                var weekCounter = 1;
+                //convert start/end date to moment
+                today = moment()
+                displayStart = moment(start)
+                displayEnd = moment(end)
+                //generate weeks until end/current date
+                html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
+                do {
+                    //display Date formats starting and ending dates for the week
+                    displayDate = String(moment(displayStart).format('ddd MMM Do') + ` - ` + moment(displayStart.add(6, 'days')).format('ddd MMM Do'))
+                    displayStart.subtract(6, 'days');
+                    //highlight the current week
+                    if (displayStart <= today && displayStart.add(6, 'days') >= today) {
+                        html += `<div class="col-33 text-center padding activeWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
+                    }
+                        //normal week
+                    else {
+                        html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
+                    }
+                    //3 dates per column
+                    if (weekCounter % 3 == 0) {
+                        html += '</div><div class="row" style="padding-right:0; padding-left:0">'
+                    }
+                    displayStart.add(1, 'days')
+                    weekCounter++;
+                } while (displayStart <= today && displayStart <= displayEnd)
+                html += '</div>'
+                //keep current week for saving photos, decrement 1 to keep consistent
+                weekCounter--;
+                $scope.currentWeek = weekCounter;
+                $('#photoJournal').html(html);
+                $compile($('#photoJournal'))($scope);
+            }
         });
     }
     $scope.renderGallery = function (displayDate, week) {
@@ -1879,7 +1911,6 @@ angular.module('momlink.controllers', [])
             $('#dEmail').val(doc['doctorsEmail']);
             $('#dNumber').val(doc['doctorsPhone']);
         });
-
         //local storage
         //get filesystem
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, getFS);
@@ -2085,7 +2116,7 @@ angular.module('momlink.controllers', [])
             allowEdit: false,
             encodingType: Camera.EncodingType.JPEG,
             popoverOptions: CameraPopoverOptions,
-            saveToPhotoAlbum: true,
+            saveToPhotoAlbum: false,
             correctOrientation: true
         });
         onPhotoDataSuccess = function (imageData) {
@@ -2108,6 +2139,7 @@ angular.module('momlink.controllers', [])
             function successMove(entry) {
                 //reload page to see new entries
                 console.log(entry.toURL())
+                //$scope.toNewPage('myProfile.html', 'My Profile')
             }
             function resOnError(error) {
                 alert(error.code);
@@ -2305,6 +2337,7 @@ angular.module('momlink.controllers', [])
         });
         db.get('profile').catch(function (err) {
             if (err.status === 404) {
+                //start date will be the day they create their account
                 db.put({
                     "_id": "profile",
                     "name": "",
