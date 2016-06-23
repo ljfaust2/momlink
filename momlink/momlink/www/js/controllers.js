@@ -591,14 +591,16 @@ angular.module('momlink.controllers', [])
         return time;
     }
 
-    $scope.fileDownload = function () {
+
+
+    /*$scope.fileDownload = function () {
         document.addEventListener("deviceready", function () {
             //The directory to store data
             var store = cordova.file.dataDirectory;
             //URL of our asset
-            var assetURL = "http://www.webmd.com/fibromyalgia/guide/fibromyalgia-and-pregnancy";
+            var assetURL = "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk";
             //File name of our important data file we didn't ship with the app
-            var fileName = "webmd.html";
+            var fileName = "webmd14.html";
             //Check for the file. 
             window.resolveLocalFileSystemURL(store + fileName, appStart, downloadAsset);
 
@@ -608,7 +610,7 @@ angular.module('momlink.controllers', [])
                 fileTransfer.download(assetURL, store + fileName,
                     function (entry) {
                         console.log("Success!");
-                        appStart();
+                        appStart(entry);
                     },
                     function (err) {
                         console.log("Error");
@@ -616,13 +618,24 @@ angular.module('momlink.controllers', [])
                     });
             }
             function appStart(entry) {
-                html = `<iframe src="` + entry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
-                $("#content").html(html);
+                console.log(entry.toURL())
+                var html2 = '';
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
+                    dir.getFile("webmd14.html", { create: false }, function (fileEntry) {
+                        console.log(fileEntry.toURL())
+                        html2 = `<iframe src="` + fileEntry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
+                        console.log('lol')
+                        console.log(html2)
+                        $("#content").html(html2);
+                    });
+                });
+
                 //$compile($("#content"))($scope);
-                console.log("App ready!");
+                //console.log("App ready!");
             }
         })
-    }
+    }*/
+
 })
 
 .controller('NutritionController', function ($scope, $ionicPopup) {
@@ -1151,7 +1164,6 @@ angular.module('momlink.controllers', [])
                 colSpacer++;
             }
             html += '</div>';
-            console.log(doc)
             $('#' + type).html(html);
             $compile($('#' + type))($scope);
         })
@@ -1206,19 +1218,41 @@ angular.module('momlink.controllers', [])
                     html += `<button class ="button button-icon icon ion-close-round" ng-click="recordTime('` + article['id'] + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
                     html += `<button class ="button button-icon icon icon-right ion-help" ng-click="recordTime('` + article['id'] + `'); closeModal(); renderQuiz('` + type + `','` + article['id'] + `','` + category + `');">Take Quiz &nbsp;</button>`;
                     html += `</div>`;
-                    html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
-                    html += `</ion-modal-view>`
-                    //updated last time article was read
-                    article['lastRead'] = String(moment().format('MM-DD-YYYY'));
-                    return db.put(doc)
+                    //if category is set to local and network is not available then
+                    var networkState = navigator.connection.type;
+                    articleCategory = String(article['category']).replace(/\s/g, '');
+                    if (window.localStorage.getItem(articleCategory) == 'true' && networkState == Connection.NONE) {
+                        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
+                            dir.getFile(article['id'].concat('.html'), { create: false }, function (fileEntry) {
+                                console.log(fileEntry.toURL())
+                                html += `<iframe src="` + fileEntry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
+                                html += `</ion-modal-view>`
+                                //updated last time article was read
+                                article['lastRead'] = String(moment().format('MM-DD-YYYY'));
+                                $scope.modal = $ionicModal.fromTemplate(html, {
+                                    scope: $scope,
+                                    animation: 'slide-in-up'
+                                });
+                                $scope.openModal();
+                                return db.put(doc)
+                            });
+                        });
+                    }
+                        //if network is available
+                    else {
+                        html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
+                        html += `</ion-modal-view>`
+                        //updated last time article was read
+                        article['lastRead'] = String(moment().format('MM-DD-YYYY'));
+                        $scope.modal = $ionicModal.fromTemplate(html, {
+                            scope: $scope,
+                            animation: 'slide-in-up'
+                        });
+                        $scope.openModal();
+                        return db.put(doc)
+                    }
                 }
             }
-        }).then(function () {
-            $scope.modal = $ionicModal.fromTemplate(html, {
-                scope: $scope,
-                animation: 'slide-in-up'
-            });
-            $scope.openModal();
         })
     };
     $scope.renderQuiz = function (type, articleID, category) {
@@ -1361,6 +1395,150 @@ angular.module('momlink.controllers', [])
             $scope.modal.remove();
         });
     };
+    $scope.renderDownloadCategories = function () {
+        var db = PouchDB('momlink');
+        var htmlSaved = '';
+        var categories = {};
+        db.get('articles').then(function (doc) {
+            //get all unique categories
+            for (i in doc['shared']) {
+                categories[doc['shared'][i]['category']] = 0;
+            }
+            for (i in doc['history']) {
+                categories[doc['shared'][i]['category']] = 0;
+            }
+            for (i in categories) {
+                noSpaces = String(i).replace(/\s/g, '');
+                htmlSaved += `<div class="row item">`
+                htmlSaved += `<div class="col no-padding">`
+                htmlSaved += `<ion-toggle ng-model="` + noSpaces + `" ng-checked="` + localStorage.getItem(noSpaces) + `" ng-click="toggleChange('` + String(noSpaces) + `',` + noSpaces + `)" style="border:none">` + i + `</ion-toggle>`;
+                htmlSaved += `</div>`
+                htmlSaved += `<div class="col-10 no-padding">`
+                htmlSaved += `<a class="button button-icon icon ion-loop" ng-click="updateArticles('` + String(noSpaces) + `')"></a>`;
+                htmlSaved += `</div>`
+                htmlSaved += `</div>`
+            }
+            $('#Saved').html(htmlSaved);
+            $compile($('#Saved'))($scope);
+        })
+    };
+    $scope.toggleChange = function (category, state) {
+        if (state == true) {
+            localStorage.setItem(category, true);
+            //download all articles for that category
+            document.addEventListener("deviceready", function () {
+                var db = PouchDB('momlink');
+                db.get('articles').then(function (doc) {
+                    //get all unique categories
+                    for (i in doc['shared']) {
+                        articleCategory = String(doc['shared'][i]['category']).replace(/\s/g, '');
+                        if (articleCategory == category) {
+                            $scope.downloadArticle(doc['shared'][i]['link'], doc['shared'][i]['id']);
+                        }
+                    }
+                    for (i in doc['history']) {
+                        articleCategory = String(doc['history'][i]['category']).replace(/\s/g, '');
+                        if (articleCategory == category) {
+                            $scope.downloadArticle(doc['history'][i]['link'], doc['history'][i]['id']);
+                        }
+                    }
+                })
+            })
+        }
+        else {
+            localStorage.setItem(category, false);
+            //delete all local articles for that category
+            document.addEventListener("deviceready", function () {
+                var db = PouchDB('momlink');
+                db.get('articles').then(function (doc) {
+                    //get all unique categories
+                    for (i in doc['shared']) {
+                        articleCategory = String(doc['shared'][i]['category']).replace(/\s/g, '');
+                        if (articleCategory == category) {
+                            $scope.deleteArticle(doc['shared'][i]['id']);
+                        }
+                    }
+                    for (i in doc['history']) {
+                        articleCategory = String(doc['history'][i]['category']).replace(/\s/g, '');
+                        if (articleCategory == category) {
+                            $scope.deleteArticle(doc['history'][i]['id']);
+                        }
+                    }
+                })
+            })
+        }
+    }
+    $scope.updateArticles = function (category) {
+        if (localStorage.getItem(category) == 'true') {
+            console.log(category)
+            console.log('rofl')
+            var db = PouchDB('momlink');
+            db.get('articles').then(function (doc) {
+                for (i in doc['shared']) {
+                    articleCategory = String(doc['shared'][i]['category']).replace(/\s/g, '');
+                    if (articleCategory == category) {
+                        $scope.deleteArticle(doc['shared'][i]['id']);
+                    }
+                }
+                for (i in doc['history']) {
+                    articleCategory = String(doc['history'][i]['category']).replace(/\s/g, '');
+                    if (articleCategory == category) {
+                        $scope.deleteArticle(doc['history'][i]['id']);
+                    }
+                }
+                for (i in doc['shared']) {
+                    articleCategory = String(doc['shared'][i]['category']).replace(/\s/g, '');
+                    if (articleCategory == category) {
+                        $scope.downloadArticle(doc['shared'][i]['link'], doc['shared'][i]['id']);
+                    }
+                }
+                for (i in doc['history']) {
+                    articleCategory = String(doc['history'][i]['category']).replace(/\s/g, '');
+                    if (articleCategory == category) {
+                        $scope.downloadArticle(doc['history'][i]['link'], doc['history'][i]['id']);
+                    }
+                }
+            })
+        }
+    }
+    $scope.downloadArticle = function (articleURL, articleID) {
+        //The directory to store data
+        var store = cordova.file.dataDirectory;
+        //URL of our asset
+        var assetURL = articleURL;
+        //File name of our important data file we didn't ship with the app
+        var fileName = articleID.concat('.html');
+        //Check for the file. 
+        window.resolveLocalFileSystemURL(store + fileName, doNothing, downloadAsset);
+        function downloadAsset() {
+            var fileTransfer = new FileTransfer();
+            console.log("About to start transfer");
+            fileTransfer.download(assetURL, store + fileName,
+                function (entry) {
+                    console.log("Success!");
+                },
+                function (err) {
+                    console.log(err);
+                });
+        }
+        function doNothing(entry) {
+            //this should not fire on download
+            console.log('deletion was not successful')
+        }
+    }
+    $scope.deleteArticle = function (articleID) {
+        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
+            dir.getFile(articleID.concat('.html'), { create: false }, function (fileEntry) {
+                fileEntry.remove(function (file) {
+                    console.log("deletion successful");
+                }, function () {
+                    console.log("error " + error.code);
+                }, function () {
+                    console.log("cannot access file system");
+                });
+            });
+        });
+    }
 })
 
 .controller('SurveyController', function ($scope, $ionicPopup, $ionicModal, $compile) {
@@ -1387,8 +1565,10 @@ angular.module('momlink.controllers', [])
         db.get('events').then(function (doc) {
             events = doc['events'];
             for (i in events) {
-                if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length > 2) {
-                    html += `<a class="item" ng-click="">` + events[i]['title'] + ` follow-up</a>`
+                if (events[i]['survey'] != null) {
+                    if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length > 2) {
+                        html += `<a class="item" ng-click="">` + events[i]['title'] + ` follow-up</a>`
+                    }
                 }
             }
             html += '</div>';
@@ -1588,7 +1768,8 @@ angular.module('momlink.controllers', [])
         var colSpacer = 1;
         html = `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderPhotoJournal()"></button><div class ="title">` + displayDate + `</div></div>`;
         //populate space with photos from selected week
-        html += '<div class="row has-header" style="padding-right:0; padding-left:0; padding-top:0">'
+        html += '<div class="list has-header">'
+        html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0;">'
         //get filesystem/get all pictures for the week
         var A = function (callback) {
             setTimeout(function () {
@@ -1621,7 +1802,7 @@ angular.module('momlink.controllers', [])
                 //get file
                 function getPic(pic) {
                     //add html img and append pic to it
-                    html += `<div class="col-33 photoJournalBorder"><image src="` + pic.toURL() + `" style="height:100px; width:100%"></div>`;
+                    html += `<div class="col-33 photoJournalBorder"><image src="` + pic.toURL() + `" onclick="" style="max-width:100%;height:auto;"></div>`;
                     if (counter >= dirSize) {
                         callback();
                     }
@@ -1635,6 +1816,7 @@ angular.module('momlink.controllers', [])
         };
         //end html string and recompile page
         var B = function () {
+            html += '</div>';
             html += '</div>';
             $('#photoJournal').html(html);
             $compile($('#photoJournal'))($scope);
@@ -2424,7 +2606,7 @@ angular.module('momlink.controllers', [])
                             "title": "Title 1",
                             "description": "Description 1",
                             "category": "Category 1",
-                            "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
+                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -2441,7 +2623,7 @@ angular.module('momlink.controllers', [])
                             "title": "Title 2",
                             "description": "Description 2",
                             "category": "Category 1",
-                            "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
+                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -2458,7 +2640,7 @@ angular.module('momlink.controllers', [])
                             "title": "Title 3",
                             "description": "Description 3",
                             "category": "Category 2",
-                            "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
+                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -2475,7 +2657,7 @@ angular.module('momlink.controllers', [])
                             "title": "Title 4",
                             "description": "Description 4",
                             "category": "Category 2",
-                            "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
+                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -2492,7 +2674,7 @@ angular.module('momlink.controllers', [])
                             "title": "Title 5",
                             "description": "Description 5",
                             "category": "Category 2",
-                            "link": "http://www.webmd.com/baby/news/20160511/too-much-folic-acid-in-pregnancy-tied-to-raised-autism-risk-in-study",
+                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},

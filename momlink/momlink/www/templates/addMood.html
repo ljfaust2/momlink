@@ -3,7 +3,7 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
         <h1 class="title" id="headline">Mood</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="false" class="has-header" ng-controller="DBController">
+    <ion-content overflow-scroll="true" class="has-header" ng-controller="DBController">
         <div class="row">
             <div class="col text-center"><img src="../img/moods/bored.png" ng-click="submitSet('Bored', 'mood');closeModal();" style="max-width:75px;max-height:75px;vertical-align:middle"><p>Bored</p></div>
             <div class="col text-center"><img src="../img/moods/calm.png" ng-click="submitSet('Calm', 'mood');closeModal();" style="max-width:75px;max-height:75px;vertical-align:middle"><p>Calm</p></div>

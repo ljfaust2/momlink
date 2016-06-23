@@ -32,13 +32,13 @@
                     <button class="button button-icon" ng-click="toggleRightSideMenu()"><i id="menuIcon" class="icon ion-navicon-round"></i></button>
                 </div>
             </ion-header-bar>
-            <div id="content" ng-click="closeTopMenu()">
+            <div id="content" ng-click="closeTopMenu()" ng-init="fileDownload()">
                 <ion-pane>
                     <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="renderSubheaderDate()">
                         <h2 class="title" id="todaysDate"></h2>
                     </ion-subheader-bar>
                     <ion-view>
-                        <ion-content overflow-scroll="false" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderSurveyBadge();">
+                        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderSurveyBadge();">
                             <ion-slides style="height:15%; background-color:deeppink;">
                                 <ion-slide-page>
                                     <div id="appointmentsHeader" class="centerWhite"></div>

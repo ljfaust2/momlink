@@ -33,6 +33,18 @@
         },
         "cordova-plugin-file-transfer": {
             "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
+        },
+        "es.keensoft.fullscreenimage": {
+            "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
+        },
+        "com.sarriaroman.PhotoViewer": {
+            "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
+        },
+        "cordova-open": {
+            "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
+        },
+        "cordova-plugin-file-opener2": {
+            "PACKAGE_NAME": "io.cordova.myappe2785d518e9f4f6ea03055878dd7a400"
         }
     },
     "dependent_plugins": {}
