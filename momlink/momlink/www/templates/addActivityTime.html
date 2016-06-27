@@ -1,6 +1,6 @@
-﻿<div ng-controller="ActivityController">
+﻿<div ng-controller="TrackCtrl">
     <div class="row padding has-subheader">
-        <div class="col" ng-controller="ClockController">
+        <div class="col" ng-controller="ClockCtrl">
             <div id="EXAMPLE_4" class="example" style="background: url(../img/temp/clock.png); background-size: 150px 150px; background-repeat: no-repeat;">
                 <div id="CLOCK_HOLDER" class="CLOCK_HOLDER"></div>
             </div>
@@ -13,15 +13,15 @@
                 <p id="hour" style="font-size: 50px; line-height: 50px;">00</p><p id="hour" style="font-size: 50px; line-height: 50px;">:</p><p id="minute" style="font-size: 50px; line-height: 50px;">00</p>
             </div>
             <div class="row padding">
-                <input type="button" class="button button-small button-assertive" value="-1 Hour" ng-click="subtractHour()">&nbsp
-                <input type="button" class="button button-small button-balanced" value="+1 Hour" ng-click="addHour()">
+                <input type="button" class="button button-small button-assertive" value="-1 Hour" ng-click="actSubtractHour()">&nbsp
+                <input type="button" class="button button-small button-balanced" value="+1 Hour" ng-click="actAddHour()">
             </div>
         </div>
     </div>
-    <div class="row padding" ng-controller="DBController">
+    <div class="row padding" ng-controller="TrackCtrl">
         <div class="col">
             <center>
-                <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear()">
+                <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="actClear()">
                 <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submitAct();closeModal();">
             </center>
         </div>

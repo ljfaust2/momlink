@@ -3,7 +3,7 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
         <h1 class="title" id="headline">Pain Scale</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="true" class="has-header" ng-controller="PainScaleController">
+    <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl">
         <div class="row padding">
             <div class="col">
                 <center>
@@ -24,7 +24,7 @@
                 </div>
             </div>
         </div>
-        <div class="row padding" ng-controller="DBController">
+        <div class="row padding" ng-controller="TrackCtrl">
             <div class="col text-center">
                 <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submitPain('pain');closeModal()">
             </div>

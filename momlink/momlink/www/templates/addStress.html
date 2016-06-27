@@ -3,35 +3,33 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
         <h1 class="title" id="headline">Stressors</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="true" class="has-header" ng-controller="DataController">
-        <div ng-controller="DBController">
-            <div class="row">
-                <div class="col text-center">
-                    <input type="image" src="" ng-click="submitSet('Family/Relationships','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
-                    <p>Family/Relationships</p>
-                </div>
-                <div class="col text-center">
-                    <input type="image" src="" ng-click="submitSet('Housing','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
-                    <p>Housing</p>
-                </div>
+    <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl">
+        <div class="row">
+            <div class="col text-center">
+                <input type="image" src="" ng-click="submitSet('Family/Relationships','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
+                <p>Family/Relationships</p>
             </div>
-            <div class="row">
-                <div class="col text-center">
-                    <input type="image" src="" ng-click="submitSet('Finances','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
-                    <p>Finances</p>
-                </div>
-                <div class="col text-center">
-                    <input type="image" src="" ng-click="submitSet('Domestic Violence','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
-                    <p>Domestic Violence</p>
-                </div>
+            <div class="col text-center">
+                <input type="image" src="" ng-click="submitSet('Housing','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
+                <p>Housing</p>
             </div>
-            <div class="row">
-                <div class="col text-center">
-                    <input type="image" src="" ng-click="submitSet('Material Needs','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
-                    <p>Material Needs</p>
-                </div>
-                <div class="col text-center">
-                </div>
+        </div>
+        <div class="row">
+            <div class="col text-center">
+                <input type="image" src="" ng-click="submitSet('Finances','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
+                <p>Finances</p>
+            </div>
+            <div class="col text-center">
+                <input type="image" src="" ng-click="submitSet('Domestic Violence','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
+                <p>Domestic Violence</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center">
+                <input type="image" src="" ng-click="submitSet('Material Needs','stress');closeModal();" style="width:100px;height:100px; border:1px solid black;">
+                <p>Material Needs</p>
+            </div>
+            <div class="col text-center">
             </div>
         </div>
     </ion-content>

@@ -1,12 +1,12 @@
 ﻿<ion-pane>
     <ion-view>
-        <ion-content overflow-scroll="true" class="has-header" ng-controller="ProfileController">
+        <ion-content overflow-scroll="true" class="has-header" ng-controller="ProfileCtrl">
             <div class="col text-center padding-top">
                 <center>
                     <img id="profilePic" src="" style="max-width:90%; max-height:150px;" />
                 </center>
             </div>
-            <div class="col padding-bottom text-right" ng-controller="CameraController" ng-init="initializeDevice()">
+            <div class="col padding-bottom text-right" ng-controller="CameraCtrl" ng-init="initializeDevice()">
                 <img src="../img/temp/camera.PNG" ng-click="takeProfilePhoto()" style="width:30px; height:25px;" />
             </div>
             <div class="list" ng-init="getProfile()">

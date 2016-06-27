@@ -3,7 +3,7 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
         <h1 class="title" id="headline">Blood Glucose</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="true" class="has-header" ng-controller="AddSubController">
+    <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl">
         <script id="popover.html" type="text/ng-template">
             <ion-popover-view>
                 <div class="padding">
@@ -11,7 +11,7 @@
                 </div>
             </ion-popover-view>
         </script>
-        <div class="row" ng-controller="PopOverController">
+        <div class="row" ng-controller="PopOverCtrl">
             <div class="col text-right">
                 <button class="button button-icon icon ion-information-circled" ng-click="openPopover($event)"></button>
             </div>
@@ -31,7 +31,7 @@
         </div>
         <br />
         <div class="row padding">
-            <div class="col text-center" ng-controller="DBController">
+            <div class="col text-center" ng-controller="TrackCtrl">
                 <input type="button" class="button button-block button-stable" value="CLEAR" ng-click="clear('count', 80)">
                 <input type="button" class="button button-block button-positive" value="SUBMIT" ng-click="submit('bloodGlucose');closeModal();">
             </div>

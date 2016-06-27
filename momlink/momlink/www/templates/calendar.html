@@ -3,7 +3,7 @@
 <link rel='stylesheet' href='../lib/fullcalendar/dist/fullcalendar.min.css' />
 <ion-pane>
     <ion-view overflow-scroll="true">
-        <ion-content class="has-header has-footer padding" ng-controller="CalendarController">
+        <ion-content class="has-header has-footer padding" ng-controller="CalendarCtrl">
             <div id='calendar' ng-init="showCalendar()"></div>
             <div id="filter"style="visibility:hidden">all</div>
         </ion-content>
@@ -19,7 +19,7 @@
         </div>
     </ion-view>
 </ion-pane>
-<ion-footer-bar class="bar-positive" style="padding:0px" ng-controller="CalendarController">
+<ion-footer-bar class="bar-positive" style="padding:0px" ng-controller="CalendarCtrl">
     <div class="col text-left"><button class="button button-icon" ng-click="filterEvents('0')">Personal</button></div>
     <div class="col text-center"><button class="button button-icon" ng-click="filterEvents('all')">All</button></div>
     <div class="col text-right"><button class="button button-icon" ng-click="filterEvents('1')">PNCC</button></div>
