@@ -64,7 +64,7 @@ angular.module('momlink.controllers', [])
             }
             todaysEvents = sortTimes(todaysEvents)
             for (j in todaysEvents) {
-                html += `<div class="col" ng-click="viewEvent('` + todaysEvents[j][1] + `')">`;
+                html += `<div class="col" ng-click="viewEvent('` + todaysEvents[j][1] + `', 'home.html', 'Momlink')">`;
                 html += `<img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"><br>`;
                 html += $scope.convert24to12(todaysEvents[j][0]) + `</div>`;
                 eventsToday = true;
@@ -344,10 +344,9 @@ angular.module('momlink.controllers', [])
         }
     };
 
-    $scope.createEvent = function (link, title, callback) {
-        $scope.sLink = link;
-        $scope.sTitle = title;
-        $scope.sCallback = callback;
+    $scope.createEvent = function (link, title) {
+        $scope.returnLink = link;
+        $scope.returnTitle = title;
         $scope.modal = $ionicModal.fromTemplateUrl('eventModal.html', {
             scope: $scope,
             animation: 'slide-in-up'
@@ -404,15 +403,22 @@ angular.module('momlink.controllers', [])
                 doc['events'].push(event);
                 return db.put(doc);
             }).then(function (doc) {
-                db.get('events').then(function (doc) {
-                    console.log(doc)
-                })
-                $scope.toNewPage($scope.sLink, $scope.sTitle);
-                $scope.closeModal();
-                delete $scope.sLink;
-                delete $scope.sTitle;
-                if ($scope.sCallback != null) {
-                    $scope.sCallback();
+                //update referral meeting
+                referral = window.localStorage.getItem('referralName');
+                if (referral != null) {
+                    db.get('referrals').then(function (doc) {
+                        i = doc['referrals'].findIndex(function (e) { return e.name === referral });
+                        doc['referrals'][i]['meeting'] = $scope.eventID;
+                        return db.put(doc);
+                    }).then(function (doc) {
+                        $scope.toNewPage('referrals.html', 'Referrals');
+                        $scope.closeModal();
+                        window.localStorage.removeItem('referralName')
+                    });
+                }
+                else {
+                    $scope.toNewPage('calendar.html', 'Calendar');
+                    $scope.closeModal();
                 }
             });
         }
@@ -423,51 +429,46 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.viewEvent = function (eventID, link, title) {
-        $scope.sLink = link;
-        $scope.sTitle = title;
+        $scope.returnLink = link;
+        $scope.returnTitle = title;
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                event = events[i]
-                if (event['id'] == eventID) {
-                    var year = String(event['day']).substring(0, 4);
-                    var month = String(event['day']).substring(5, 7);
-                    var day = String(event['day']).substring(8, 10);
-                    var date = month + '/' + day + '/' + year;
-                    var startTime = $scope.parseTime(event['start']);
-                    var endTime = $scope.parseTime(event['end']);
-                    //render template
-                    templateHTML = '<p><b>' + event['type'] + '</b></p>';
-                    templateHTML += '<p><b>Date</b>: ' + date + '</p>';
-                    templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
-                    templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
-                    if (event.venue != '') {
-                        templateHTML += '<p><b>Venue</b>: ' + event['venue'] + '</p>'
-                    }
-                    if (event.description != '') {
-                        templateHTML += '<p><b>Description</b>: ' + event['description'] + '</p>'
-                    }
-                    //view event
-                    var alertPopup = $ionicPopup.show({
-                        title: event['title'],
-                        template: templateHTML,
-                        buttons: [
-                            {
-                                text: 'Edit', onTap: function (e) {
-                                    $scope.editEvent(eventID);
-                                    return 'Cancel';
-                                },
-                                type: 'button-positive'
-                            },
-                          {
-                              text: 'Close', onTap: function (e) { return 'Cancel'; },
-                              type: 'button-positive'
-                          }
-                        ],
-                    });
-                }
+            i = doc['events'].findIndex(function (e) { return e.id === eventID });
+            var year = String(doc['events'][i]['day']).substring(0, 4);
+            var month = String(doc['events'][i]['day']).substring(5, 7);
+            var day = String(doc['events'][i]['day']).substring(8, 10);
+            var date = month + '/' + day + '/' + year;
+            var startTime = $scope.parseTime(doc['events'][i]['start']);
+            var endTime = $scope.parseTime(doc['events'][i]['end']);
+            //render template
+            templateHTML = '<p><b>' + doc['events'][i]['type'] + '</b></p>';
+            templateHTML += '<p><b>Date</b>: ' + date + '</p>';
+            templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
+            templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
+            if (doc['events'][i].venue != '') {
+                templateHTML += '<p><b>Venue</b>: ' + doc['events'][i]['venue'] + '</p>'
             }
+            if (doc['events'][i].description != '') {
+                templateHTML += '<p><b>Description</b>: ' + doc['events'][i]['description'] + '</p>'
+            }
+            //view event
+            var alertPopup = $ionicPopup.show({
+                title: doc['events'][i]['title'],
+                template: templateHTML,
+                buttons: [
+                    {
+                        text: 'Edit', onTap: function (e) {
+                            $scope.editEvent(eventID);
+                            return 'Cancel';
+                        },
+                        type: 'button-positive'
+                    },
+                  {
+                      text: 'Close', onTap: function (e) { return 'Cancel'; },
+                      type: 'button-positive'
+                  }
+                ],
+            });
         });
     }
     $scope.editEvent = function (eventID) {
@@ -483,25 +484,20 @@ angular.module('momlink.controllers', [])
     $scope.pullEvent = function () {
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                event = events[i]
-                if (event['id'] == $scope.eventID) {
-                    $('#title').val(event['title']);
-                    $('#type').val(event['type']);
-                    $('#date').val(event['day']);
-                    $('#start').val($scope.parseTime(event['start']));
-                    $('#end').val($scope.parseTime(event['end']));
-                    $('#venue').val(event['venue']);
-                    $('#description').val(event['description']);
-                    for (i in event['questions']) {
-                        $("input[name=Q]").each(function () {
-                            if (event['questions'][i] == $(this).val()) {
-                                $(this).prop('checked', true);
-                            }
-                        });
+            i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            $('#title').val(doc['events'][i]['title']);
+            $('#type').val(doc['events'][i]['type']);
+            $('#date').val(doc['events'][i]['day']);
+            $('#start').val($scope.parseTime(doc['events'][i]['start']));
+            $('#end').val($scope.parseTime(doc['events'][i]['end']));
+            $('#venue').val(doc['events'][i]['venue']);
+            $('#description').val(doc['events'][i]['description']);
+            for (j in doc['events'][i]['questions']) {
+                $("input[name=Q]").each(function () {
+                    if (doc['events'][i]['questions'][j] == $(this).val()) {
+                        $(this).prop('checked', true);
                     }
-                }
+                });
             }
         });
     }
@@ -512,33 +508,52 @@ angular.module('momlink.controllers', [])
             questions.push($(this).val())
         });
         db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                event = events[i]
-                if (event['id'] == $scope.eventID) {
-                    event['title'] = $('#title').val();
-                    event['type'] = $('#type').val();
-                    event['day'] = $('#date').val();
-                    start = $('#date').val() + "T" + $('#start').val();
-                    end = $('#date').val() + "T" + $('#end').val();
-                    event['start'] = start;
-                    event['end'] = end;
-                    event['venue'] = $('#venue').val();
-                    event['description'] = $('#description').val();
-                    event['questions'] = questions,
-                    event['color'] = $scope.getColor($('#type').val());
-                    return db.put(doc);
-                }
-            }
+            i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            doc['events'][i]['title'] = $('#title').val();
+            doc['events'][i]['type'] = $('#type').val();
+            doc['events'][i]['day'] = $('#date').val();
+            start = $('#date').val() + "T" + $('#start').val();
+            end = $('#date').val() + "T" + $('#end').val();
+            doc['events'][i]['start'] = start;
+            doc['events'][i]['end'] = end;
+            doc['events'][i]['venue'] = $('#venue').val();
+            doc['events'][i]['description'] = $('#description').val();
+            doc['events'][i]['questions'] = questions,
+            doc['events'][i]['color'] = $scope.getColor($('#type').val());
+            return db.put(doc);
         }).then(function () {
-            if ($scope.sLink != '' && $scope.sTitle != '') {
-                $scope.toNewPage($scope.sLink, $scope.sTitle)
-                delete $scope.sLink;
-                delete $scope.sTitle;
+            if ($scope.returnLink != '' && $scope.returnTitle != '') {
+                $scope.toNewPage($scope.returnLink, $scope.returnTitle)
+                delete $scope.returnLink;
+                delete $scope.returnTitle;
             }
             $scope.closeModal();
         })
     }
+    $scope.deleteEvent = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            doc['events'].splice(i, 1)
+            return db.put(doc);
+        }).then(function () {
+            //if attached to referral, update meeting ID
+            db.get('referrals').then(function (doc) {
+                i = doc['referrals'].findIndex(function (e) { return e.meeting === $scope.eventID });
+                if (i >= 0) {
+                    doc['referrals'][i]['meeting'] = '';
+                }
+                return db.put(doc);
+            }).then(function () {
+                if ($scope.returnLink != '' && $scope.returnTitle != '') {
+                    $scope.toNewPage($scope.returnLink, $scope.returnTitle)
+                    delete $scope.returnLink;
+                    delete $scope.returnTitle;
+                }
+                $scope.closeModal();
+            })
+        })
+    };
     $scope.goToEventPart2 = function () {
         $('#eventPart1').css('display', 'none')
         $('#eventPart2').css('display', '')
@@ -590,52 +605,6 @@ angular.module('momlink.controllers', [])
         time = String(time).substr(String(time).indexOf("T") + 1);
         return time;
     }
-
-
-
-    /*$scope.fileDownload = function () {
-        document.addEventListener("deviceready", function () {
-            //The directory to store data
-            var store = cordova.file.dataDirectory;
-            //URL of our asset
-            var assetURL = "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk";
-            //File name of our important data file we didn't ship with the app
-            var fileName = "webmd14.html";
-            //Check for the file. 
-            window.resolveLocalFileSystemURL(store + fileName, appStart, downloadAsset);
-
-            function downloadAsset() {
-                var fileTransfer = new FileTransfer();
-                console.log("About to start transfer");
-                fileTransfer.download(assetURL, store + fileName,
-                    function (entry) {
-                        console.log("Success!");
-                        appStart(entry);
-                    },
-                    function (err) {
-                        console.log("Error");
-                        console.dir(err);
-                    });
-            }
-            function appStart(entry) {
-                console.log(entry.toURL())
-                var html2 = '';
-                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
-                    dir.getFile("webmd14.html", { create: false }, function (fileEntry) {
-                        console.log(fileEntry.toURL())
-                        html2 = `<iframe src="` + fileEntry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
-                        console.log('lol')
-                        console.log(html2)
-                        $("#content").html(html2);
-                    });
-                });
-
-                //$compile($("#content"))($scope);
-                //console.log("App ready!");
-            }
-        })
-    }*/
-
 })
 
 .controller('NutritionController', function ($scope, $ionicPopup) {
@@ -1672,7 +1641,7 @@ angular.module('momlink.controllers', [])
                             html += `<button class="button button-small button-positive" ng-click="schedule('` + referrals[i]['name'] + `')">Schedule Meeting</button>`;
                         }
                         else {
-                            html += `<button class="button button-small button-stable" ng-click="viewEvent('` + referrals[i]['meeting'] + `')">View Meeting</button>`;
+                            html += `<button class="button button-small button-stable" ng-click="viewEvent('` + referrals[i]['meeting'] + `', 'referrals.html', 'Referrals')">View Meeting</button>`;
                         }
                         html += '</div>';
                     }
@@ -1686,31 +1655,8 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.schedule = function (name) {
-        $scope.createEvent('referrals.html', 'Referrals', updateReferral);
-        //needs to run after createEvent
-        function updateReferral() {
-            delete $scope.sCallback;
-            var db = PouchDB('momlink');
-            var index = 0;
-            db.get('referrals').then(function (doc) {
-                //get referral         
-                referral = doc['referrals'];
-                for (i in referral) {
-                    if (referral[i]['name'] == name) {
-                        index = i;
-                    }
-                }
-                //set meeting status to id of the event
-                if ($scope.eventID != null) {
-                    referral[index]['meeting'] = $scope.eventID;
-                }
-                //update database
-                return db.put(doc);
-            }).then(function (doc) {
-                window.localStorage.removeItem('eventID');
-                $scope.toNewPage('referrals.html', 'Referrals');
-            });
-        }
+        window.localStorage.setItem('referralName', name);
+        $scope.createEvent('referrals.html', 'Referrals');
     }
 })
 
@@ -1882,28 +1828,18 @@ angular.module('momlink.controllers', [])
     $scope.pullNote = function () {
         var db = PouchDB('momlink');
         db.get('journal').then(function (doc) {
-            notes = doc['notes'];
-            for (i in notes) {
-                note = notes[i]
-                if (note['id'] == $scope.noteID) {
-                    $('#subject').val(note['subject']);
-                    $('#description').val(note['description']);
-                }
-            }
+            i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            $('#subject').val(doc['notes'][i]['subject']);
+            $('#description').val(doc['notes'][i]['description']);
         })
     };
     $scope.updateNote = function () {
         var db = PouchDB('momlink');
         db.get('journal').then(function (doc) {
-            notes = doc['notes'];
-            for (i in notes) {
-                note = notes[i]
-                if (note['id'] == $scope.noteID) {
-                    note['subject'] = $('#subject').val();
-                    note['description'] = $('#description').val();
-                    return db.put(doc);
-                }
-            }
+            i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            doc['notes'][i]['subject'] = $('#subject').val();
+            doc['notes'][i]['description'] = $('#description').val();
+            return db.put(doc);
         }).then(function () {
             $scope.toNewPage('journal.html', 'My Journal');
             $scope.closeModal();
@@ -1912,14 +1848,9 @@ angular.module('momlink.controllers', [])
     $scope.deleteNote = function () {
         var db = PouchDB('momlink');
         db.get('journal').then(function (doc) {
-            notes = doc['notes'];
-            for (i in notes) {
-                note = notes[i]
-                if (note['id'] == $scope.noteID) {
-                    notes.splice(i, 1)
-                    return db.put(doc);
-                }
-            }
+            i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            doc['notes'].splice(i, 1)
+            return db.put(doc);
         }).then(function () {
             $scope.toNewPage('journal.html', 'My Journal');
             $scope.closeModal();
