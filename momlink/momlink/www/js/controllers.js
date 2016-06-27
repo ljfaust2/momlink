@@ -220,6 +220,7 @@ angular.module('momlink.controllers', [])
                     "_id": "referrals",
                     "referrals": [
                         {
+                            "id": "1",
                             "name": "First Last",
                             "address": "555 Chicago",
                             "phone": "555-555-5555",
@@ -228,6 +229,7 @@ angular.module('momlink.controllers', [])
                             "meeting": ""
                         },
                         {
+                            "id": "2",
                             "name": "First Last1",
                             "address": "555 Chicago1",
                             "phone": "",
@@ -236,6 +238,7 @@ angular.module('momlink.controllers', [])
                             "meeting": ""
                         },
                         {
+                            "id": "3",
                             "name": "First Last2",
                             "address": "555 Chicago2",
                             "phone": "555-555-5555",
@@ -244,6 +247,7 @@ angular.module('momlink.controllers', [])
                             "meeting": ""
                         },
                         {
+                            "id": "4",
                             "name": "First Last3",
                             "address": "555 Chicago3",
                             "phone": "555-555-5555",
@@ -252,6 +256,7 @@ angular.module('momlink.controllers', [])
                             "meeting": ""
                         },
                         {
+                            "id": "5",
                             "name": "First Last4",
                             "address": "555 Chicago4",
                             "phone": "555-555-5555",
@@ -858,10 +863,10 @@ angular.module('momlink.controllers', [])
                 return db.put(doc);
             }).then(function (doc) {
                 //update referral meeting
-                referral = window.localStorage.getItem('referralName');
+                referral = window.localStorage.getItem('referralID');
                 if (referral != null) {
                     db.get('referrals').then(function (doc) {
-                        i = doc['referrals'].findIndex(function (e) { return e.name === referral });
+                        i = doc['referrals'].findIndex(function (e) { return e.id === referral });
                         doc['referrals'][i]['meeting'] = $scope.eventID;
                         return db.put(doc);
                     }).then(function (doc) {
@@ -2091,7 +2096,7 @@ angular.module('momlink.controllers', [])
                         html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
                         html += '<p>Email: ' + referrals[i]['email'] + '</p>';
                         if (referrals[i]['meeting'] == '') {
-                            html += `<button class="button button-small button-positive" ng-click="schedule('` + referrals[i]['name'] + `')">Schedule Meeting</button>`;
+                            html += `<button class="button button-small button-positive" ng-click="schedule('` + referrals[i]['id'] + `')">Schedule Meeting</button>`;
                         }
                         else {
                             html += `<button class="button button-small button-stable" ng-click="viewEvent('` + referrals[i]['meeting'] + `', 'referrals.html', 'Referrals')">View Meeting</button>`;
@@ -2107,8 +2112,8 @@ angular.module('momlink.controllers', [])
             })
         });
     };
-    $scope.schedule = function (name) {
-        window.localStorage.setItem('referralName', name);
+    $scope.schedule = function (id) {
+        window.localStorage.setItem('referralID', id);
         $scope.createEvent('referrals.html', 'Referrals');
     }
 })
