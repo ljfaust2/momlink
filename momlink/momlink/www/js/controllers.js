@@ -1825,7 +1825,25 @@ angular.module('momlink.controllers', [])
         A(function () {
             B();
         });
-    }
+    };
+    $scope.renderNotes = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('journal').then(function (doc) {
+            notes = doc['notes'];
+            html += '<div class="list">';
+            for (i in notes) {
+                html += `<a class="item" ng-click="editNote('` + notes[i]['id'] + `')">`;
+                html += '<h2 style="display:inline">' + notes[i]['subject'] + '</h2> &nbsp;';
+                html += '<p style="display:inline">' + notes[i]['date'] + '</p>';
+                html += '<p>' + notes[i]['description'] + '</p>';
+                html += '</a>';
+            }
+            html += '</div>';
+            $('#notes').html(html);
+            $compile($('#notes'))($scope);
+        });
+    };
     $scope.createNote = function (link, title) {
         $scope.modal = $ionicModal.fromTemplateUrl('noteModal.html', {
             scope: $scope,
@@ -1839,6 +1857,7 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('journal').then(function (doc) {
             var note = {
+                "id": new Date(),
                 "date": moment().format('MMMM Do YYYY'),
                 "subject": $('#subject').val(),
                 "description": $("#description").val()
@@ -1850,27 +1869,65 @@ angular.module('momlink.controllers', [])
             $scope.closeModal();
         });
     };
+    $scope.editNote = function (noteID) {
+        $scope.modal = $ionicModal.fromTemplateUrl('editNoteModal.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function (modal) {
+            $scope.modal = modal;
+            $scope.modal.show();
+        })
+        $scope.noteID = noteID;
+    };
+    $scope.pullNote = function () {
+        var db = PouchDB('momlink');
+        db.get('journal').then(function (doc) {
+            notes = doc['notes'];
+            for (i in notes) {
+                note = notes[i]
+                if (note['id'] == $scope.noteID) {
+                    $('#subject').val(note['subject']);
+                    $('#description').val(note['description']);
+                }
+            }
+        })
+    };
+    $scope.updateNote = function () {
+        var db = PouchDB('momlink');
+        db.get('journal').then(function (doc) {
+            notes = doc['notes'];
+            for (i in notes) {
+                note = notes[i]
+                if (note['id'] == $scope.noteID) {
+                    note['subject'] = $('#subject').val();
+                    note['description'] = $('#description').val();
+                    return db.put(doc);
+                }
+            }
+        }).then(function () {
+            $scope.toNewPage('journal.html', 'My Journal');
+            $scope.closeModal();
+        })
+    };
+    $scope.deleteNote = function () {
+        var db = PouchDB('momlink');
+        db.get('journal').then(function (doc) {
+            notes = doc['notes'];
+            for (i in notes) {
+                note = notes[i]
+                if (note['id'] == $scope.noteID) {
+                    notes.splice(i, 1)
+                    return db.put(doc);
+                }
+            }
+        }).then(function () {
+            $scope.toNewPage('journal.html', 'My Journal');
+            $scope.closeModal();
+        })
+    };
     $scope.closeModal = function () {
         $scope.modal.hide().then(function () {
             $scope.modal.remove();
-        });
-    };
-    $scope.showNotes = function () {
-        var db = PouchDB('momlink');
-        var html = '';
-        db.get('journal').then(function (doc) {
-            notes = doc['notes'];
-            html += '<div class="list">';
-            for (i in notes) {
-                html += '<div class="item">';
-                html += '<h2 style="display:inline">' + notes[i]['subject'] + '</h2> &nbsp;';
-                html += '<p style="display:inline">' + notes[i]['date'] + '</p>';
-                html += '<p>' + notes[i]['description'] + '</p>';
-                html += '</div>';
-            }
-            html += '</div>';
-            $('#notes').html(html);
-            $compile($('#notes'))($scope);
         });
     };
     $scope.showVisits = function () {
