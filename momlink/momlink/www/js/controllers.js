@@ -803,7 +803,7 @@ angular.module('momlink.controllers', [])
     };
 
     $scope.openFile = function (file, type) {
-        cordova.plugins.fileOpener2.open(file, type);
+        cordova.plugins.fileOpener2.open(file,type);
     }
 
     //event functions
@@ -2193,7 +2193,7 @@ angular.module('momlink.controllers', [])
                         }
                         //get render weeks photos
                         for (j = 0; j < weeksPhotos.length; j++) {
-                            html += `<div class="col-33 photoJournalBorder"><image src="` + weeksPhotos[j] + `" ng-click="openFile(` + weeksPhotos[j] + `, 'image/jpeg'` + `)" style="max-width:100%;height:auto;"></div>`;
+                            html += `<div class="col-33 photoJournalBorder"><image src="` + weeksPhotos[j] + `" ng-click="openFile('` + String(weeksPhotos[j]) + `','image/jpeg')" style="max-width:100%;height:auto;"></div>`;
                             if (colSpacer % 3 == 0) {
                                 html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
                             }
