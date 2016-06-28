@@ -105,11 +105,11 @@ angular.module('momlink.controllers', [])
                     "shared": [
                         {
                             "id": "1",
-                            "title": "Title 1",
-                            "description": "Description 1",
-                            "category": "Category 1",
+                            "title": "Smoking During Pregnancy",
+                            "description": "Smoking during pregnancy may increase the risk that a child could develop schizophrenia, new research suggests.",
+                            "category": "Smoking",
                             "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
-                            "dateShared": "",
+                            "dateShared": "6/28/2016",
                             "lastRead": "",
                             "readHistory": {},
                             "quizHistory": {},
@@ -122,11 +122,11 @@ angular.module('momlink.controllers', [])
                         },
                         {
                             "id": "2",
-                            "title": "Title 2",
-                            "description": "Description 2",
-                            "category": "Category 1",
-                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
-                            "dateShared": "",
+                            "title": "BP Problems During Pregnancy, Heart Trouble Later?",
+                            "description": "Pregnant women who have blood pressure in the high-normal range may have an increased risk for metabolic syndrome after they give birth, a new study indicates.",
+                            "category": "Blood Pressure",
+                            "link": "http://www.webmd.com/baby/news/20160627/blood-pressure-problems-during-pregnancy-heart-trouble-later",
+                            "dateShared": "6/28/2016",
                             "lastRead": "",
                             "readHistory": {},
                             "quizHistory": {},
@@ -141,7 +141,7 @@ angular.module('momlink.controllers', [])
                             "id": "3",
                             "title": "Title 3",
                             "description": "Description 3",
-                            "category": "Category 2",
+                            "category": "Category 1",
                             "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
                             "dateShared": "",
                             "lastRead": "",
@@ -1539,7 +1539,7 @@ angular.module('momlink.controllers', [])
     $scope.renderCategories = function (type) {
         var db = PouchDB('momlink');
         var html = '';
-        var colSpacer = 1;
+        var colSpacer = 2;
         var categories = {};
         db.get('articles').then(function (doc) {
             //get all unique categories
@@ -2516,7 +2516,6 @@ angular.module('momlink.controllers', [])
         totalHours.value = 0;
         $('#hour').html(("0" + totalMinutes.value).slice(-2));
     }
-
 
     $scope.submitAct = function (type) {
         var db = PouchDB('momlink');
