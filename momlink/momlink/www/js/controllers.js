@@ -802,6 +802,10 @@ angular.module('momlink.controllers', [])
         }
     };
 
+    $scope.openFile = function (file, type) {
+        cordova.plugins.fileOpener2.open(file, type);
+    }
+
     //event functions
     $scope.createEvent = function (link, title) {
         $scope.returnLink = link;
@@ -1053,10 +1057,10 @@ angular.module('momlink.controllers', [])
                 hour = time.slice(0, 2) % 12;
                 time = String(hour).concat(time.slice(2, 5))
             }
-            time += ' PM'
+            time += 'pm'
         }
         else {
-            time += ' AM'
+            time += 'am'
         }
         return time;
     }
@@ -2169,65 +2173,40 @@ angular.module('momlink.controllers', [])
         });
     }
     $scope.renderGallery = function (displayDate, week) {
+        var weeksPhotos = [];
+        var selectedWeek = 'Week' + String(week);
+        var counter = 1;
         var colSpacer = 1;
         html = `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderPhotoJournal()"></button><div class ="title">` + displayDate + `</div></div>`;
-        //populate space with photos from selected week
-        html += '<div class="list has-header">'
-        html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0;">'
-        //get filesystem/get all pictures for the week
-        var A = function (callback) {
-            setTimeout(function () {
-                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, getFS)
-                function getFS(fileSystem) {
-                    selectedWeek = 'Week' + String(week)
-                    fileSystem.root.getDirectory(selectedWeek, { create: true, exclusive: false }, getDir)
-                }
-                //get directory
-                var dirSize;
-                var counter = 1;
-                var colSpacer = 1;
-                function getDir(dir) {
-                    //get all pictures in the directory
-                    var directoryReader = dir.createReader();
-                    directoryReader.readEntries(success, fail);
-                    function success(entries) {
-                        if (entries.length == 0) {
-                            callback()
+        html += '<div class="list has-header">';
+        html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0;">';
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+            dir.getDirectory('MomLink', { create: false, exclusive: false },
+            function (directory) {
+                directory.createReader().readEntries(
+                    function (entries) {
+                        //get urls of photos for the week
+                        for (i = 0; i < entries.length; i++) {
+                            if (entries[i].name.substr(0, entries[i].name.indexOf('T')) == selectedWeek) {
+                                weeksPhotos.push(entries[i].toURL())
+                            }
                         }
-                        dirSize = entries.length;
-                        for (var i = 0; i < entries.length; i++) {
-                            dir.getFile(entries[i]['name'], { create: false, exclusive: false }, getPic)
+                        //get render weeks photos
+                        for (j = 0; j < weeksPhotos.length; j++) {
+                            html += `<div class="col-33 photoJournalBorder"><image src="` + weeksPhotos[j] + `" ng-click="openFile(` + weeksPhotos[j] + `, 'image/jpeg'` + `)" style="max-width:100%;height:auto;"></div>`;
+                            if (colSpacer % 3 == 0) {
+                                html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
+                            }
+                            colSpacer++;
+                            counter++;
                         }
+                        html += '</div>';
+                        html += '</div>';
+                        $('#photoJournal').html(html);
+                        $compile($('#photoJournal'))($scope);
                     }
-                    function fail(entries) {
-                        console.log('fail')
-                    }
-                }
-                //get file
-                function getPic(pic) {
-                    //add html img and append pic to it
-                    html += `<div class="col-33 photoJournalBorder"><image src="` + pic.toURL() + `" onclick="" style="max-width:100%;height:auto;"></div>`;
-                    if (counter >= dirSize) {
-                        callback();
-                    }
-                    if (colSpacer % 3 == 0) {
-                        html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
-                    }
-                    colSpacer++;
-                    counter++;
-                }
-            }, 200);
-        };
-        //end html string and recompile page
-        var B = function () {
-            html += '</div>';
-            html += '</div>';
-            $('#photoJournal').html(html);
-            $compile($('#photoJournal'))($scope);
-        };
-        //need to wait until function A has finished before calling B
-        A(function () {
-            B();
+                );
+            });
         });
     };
     $scope.renderNotes = function () {
@@ -2426,10 +2405,12 @@ angular.module('momlink.controllers', [])
                 for (var i in elements) {
                     if (date == elements[i]["date"]) {
                         if (type == 'activity') {
-                            hist += '<center><div class="item">' + elements[i]["time"] + ' &nbsp; Act: ' + elements[i]["act"] + ' &nbsp; Length: ' + elements[i]["value"] + '</div></center>';
+                            time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
+                            hist += '<center><div class="item">' + $scope.convert24to12(time) + ' &nbsp; ' + elements[i]["act"] + ' &nbsp; Length: ' + elements[i]["value"] + '</div></center>';
                         }
                         else {
-                            hist += '<center><div class="item">Time: ' + elements[i]["time"] + '&nbsp; &nbsp; &nbsp; ' + elements[i]["value"] + '</div></center>';
+                            time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
+                            hist += '<center><div class="item">' + $scope.convert24to12(time) + '&nbsp; &nbsp; &nbsp; ' + elements[i]["value"] + '</div></center>';
                         }
                     }
                 }
@@ -2536,14 +2517,7 @@ angular.module('momlink.controllers', [])
         $('#hour').html(("0" + totalMinutes.value).slice(-2));
     }
 
-    getDate = function () {
-        date = moment().format('MM/DD/YYYY')
-        return date;
-    }
-    getTime = function () {
-        time = moment().format('hh:mm:ss')
-        return time;
-    }
+
     $scope.submitAct = function (type) {
         var db = PouchDB('momlink');
         hour = $('#hour').html();
@@ -2551,9 +2525,9 @@ angular.module('momlink.controllers', [])
         value = String(hour + ":" + min);
         db.get('track').then(function (doc) {
             var element = {
-                "uniqueId": new Date().toJSON(),
-                "date": getDate(),
-                "time": getTime(),
+                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                "date": moment().format('MM/DD/YYYY'),
+                "time": moment().format('HH:mm:ss'),
                 "act": $scope.selectAct,
                 "value": value
             };
@@ -2568,9 +2542,9 @@ angular.module('momlink.controllers', [])
         value = $('#count').html();
         db.get('track').then(function (doc) {
             var element = {
-                "uniqueId": new Date().toJSON(),
-                "date": getDate(),
-                "time": getTime(),
+                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                "date": moment().format('MM/DD/YYYY'),
+                "time": moment().format('HH:mm:ss'),
                 "value": value
             };
             doc[type].push(element);
@@ -2604,9 +2578,9 @@ angular.module('momlink.controllers', [])
         }
         db.get('track').then(function (doc) {
             var element = {
-                "uniqueId": new Date().toJSON(),
-                "date": getDate(),
-                "time": getTime(),
+                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                "date": moment().format('MM/DD/YYYY'),
+                "time": moment().format('HH:mm:ss'),
                 "value": value
             };
             doc[type].push(element);
@@ -2619,9 +2593,9 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('track').then(function (doc) {
             var element = {
-                "uniqueId": new Date().toJSON(),
-                "date": getDate(),
-                "time": getTime(),
+                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                "date": moment().format('MM/DD/YYYY'),
+                "time": moment().format('HH:mm:ss'),
                 "value": $('#count').html() + "/" + $('#count2').html()
             };
             doc['bloodPressure'].push(element);
@@ -2634,9 +2608,9 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('track').then(function (doc) {
             var element = {
-                "uniqueId": new Date().toJSON(),
-                "date": getDate(),
-                "time": getTime(),
+                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                "date": moment().format('MM/DD/YYYY'),
+                "time": moment().format('HH:mm:ss'),
                 "value": parseInt($('#count12').html()) * (.5) + parseInt($('#count1').html())
             };
             doc[type].push(element);
@@ -2649,9 +2623,9 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('track').then(function (doc) {
             var element = {
-                "uniqueId": new Date().toJSON(),
-                "date": getDate(),
-                "time": getTime(),
+                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                "date": moment().format('MM/DD/YYYY'),
+                "time": moment().format('HH:mm:ss'),
                 "value": value
             };
             doc[type].push(element);
@@ -2714,21 +2688,22 @@ angular.module('momlink.controllers', [])
             $('#dEmail').val(doc['doctorsEmail']);
             $('#dNumber').val(doc['doctorsPhone']);
         });
-        //local storage
-        //get filesystem
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, getFS);
-        function getFS(fileSystem) {
-            fileSystem.root.getDirectory("photos", { create: false, exclusive: false }, getDir)
-        }
-        //get directory
-        function getDir(dir) {
-            dir.getFile("profilePic.jpg", { create: false, exclusive: false }, getPic)
-        }
-        //get file
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+            dir.getDirectory('MomLink', { create: false, exclusive: false },
+            function (directory) {
+                directory.getFile("profilePic.jpg", { create: false, exclusive: false }, getPic);
+            },
+            resOnError);
+        },
+        resOnError);
         function getPic(pic) {
-            //do things with file
             var img = document.getElementById('profilePic');
             img.src = pic.toURL();
+        }
+        function resOnError(error) {
+            if (error.code != '1') {
+                alert(error.code);
+            }
         }
     }
 })
@@ -2866,18 +2841,15 @@ angular.module('momlink.controllers', [])
             correctOrientation: true
         });
         onPhotoDataSuccess = function (imageData) {
-            //local storage
             window.resolveLocalFileSystemURL(imageData, resolveOnSuccess, resOnError);
             //Callback function when the file system url has been resolved
             function resolveOnSuccess(entry) {
-                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fileSys) {
-                    //The folder is created if doesn't exist
-                    fileSys.root.getDirectory('photos',
-                                    { create: true, exclusive: false },
-                                    function (directory) {
-                                        entry.moveTo(directory, 'profilePic.jpg', successMove, resOnError);
-                                    },
-                                    resOnError);
+                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                    dir.getDirectory('MomLink', { create: true, exclusive: false },
+                    function (directory) {
+                        entry.moveTo(directory, 'profilePic.jpg', successMove, resOnError);
+                    },
+                    resOnError);
                 },
                 resOnError);
             }
@@ -2893,7 +2865,7 @@ angular.module('momlink.controllers', [])
         }
     }
     $scope.takeJournalPhoto = function () {
-        var name = moment().format('YYYY-MM-DDhhmmssa');
+        var name = moment().format('TMMDDYYYYhhmmss');
         week = 'Week' + $scope.currentWeek;
         navigator.camera.getPicture(function (imageData) {
             onPhotoDataSuccess(imageData)
@@ -2911,17 +2883,14 @@ angular.module('momlink.controllers', [])
             window.resolveLocalFileSystemURL(imageData, resolveOnSuccess, resOnError);
             //Callback function when the file system url has been resolved
             function resolveOnSuccess(entry) {
-                fileName = name + ".jpg";
-                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fileSys) {
-                    //The folder is created if doesn't exist
-                    fileSys.root.getDirectory(week,
-                                    { create: true, exclusive: false },
-                                    function (directory) {
-                                        entry.moveTo(directory, fileName, successMove, resOnError);
-                                    },
-                                    resOnError);
-                },
-                resOnError);
+                fileName = week + name + ".jpg";
+                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                    dir.getDirectory('MomLink', { create: true, exclusive: false },
+                    function (directory) {
+                        console.log(fileName)
+                        entry.moveTo(directory, fileName, successMove, resOnError);
+                    }, resOnError);
+                }, resOnError);
             }
             //Callback function when the file has been moved successfully - inserting the complete path
             function successMove(entry) {
