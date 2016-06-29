@@ -803,7 +803,11 @@ angular.module('momlink.controllers', [])
     };
 
     $scope.openFile = function (file, type) {
-        cordova.plugins.fileOpener2.open(file,type);
+        cordova.plugins.fileOpener2.open(file, type);
+    }
+    $scope.shareImage = function (file) {
+        console.log(file);
+        window.plugins.socialsharing.share(null, null, file, null, null, null)
     }
 
     //event functions
@@ -2193,7 +2197,8 @@ angular.module('momlink.controllers', [])
                         }
                         //get render weeks photos
                         for (j = 0; j < weeksPhotos.length; j++) {
-                            html += `<div class="col-33 photoJournalBorder"><image src="` + weeksPhotos[j] + `" ng-click="openFile('` + String(weeksPhotos[j]) + `','image/jpeg')" style="max-width:100%;height:auto;"></div>`;
+                            html += `<div class="col-33 photoJournalBorder"><image src="` + weeksPhotos[j] + `" ng-click="openFile('` + String(weeksPhotos[j]) + `','image/jpeg')" style="max-width:100%;height:auto%;">`
+                            html += `<button class="button button-small button-full button-positive" ng-click="shareImage('` + weeksPhotos[j] + `')">SHARE</button></div>`;
                             if (colSpacer % 3 == 0) {
                                 html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
                             }
