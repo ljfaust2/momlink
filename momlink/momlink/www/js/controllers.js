@@ -1648,15 +1648,15 @@ angular.module('momlink.controllers', [])
                 if (article['id'] == id) {
                     html += `<ion-modal-view>`;
                     html += `<div class="bar bar-footer" ng-init="startSessionTimer()">`;
-                    html += `<button class ="button button-icon icon ion-close-round" ng-click="recordTime('` + article['id'] + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
-                    html += `<button class ="button button-icon icon icon-right ion-help" ng-click="recordTime('` + article['id'] + `'); closeModal(); renderQuiz('` + type + `','` + article['id'] + `','` + category + `');">Take Quiz &nbsp;</button>`;
+                    html += `<button class ="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
+                    html += `<button class ="button button-icon icon icon-right ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">Take Quiz &nbsp;</button>`;
                     html += `</div>`;
                     //if category is set to local and network is not available then
                     var networkState = navigator.connection.type;
                     articleCategory = String(article['category']).replace(/\s/g, '');
                     if (window.localStorage.getItem(articleCategory) == 'true' && networkState == Connection.NONE) {
                         window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
-                            dir.getFile(article['id'].concat('.html'), { create: false }, function (fileEntry) {
+                            dir.getFile(id.concat('.html'), { create: false }, function (fileEntry) {
                                 console.log(fileEntry.toURL())
                                 html += `<iframe src="` + fileEntry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
                                 html += `</ion-modal-view>`
@@ -1668,10 +1668,10 @@ angular.module('momlink.controllers', [])
                                 });
                                 $scope.openModal();
                                 return db.put(doc)
-                            });
+                            }, function (error) {console.log(error) });
                         });
                     }
-                        //if network is available
+                    //if network is available
                     else {
                         html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
                         html += `</ion-modal-view>`
@@ -1938,8 +1938,6 @@ angular.module('momlink.controllers', [])
     $scope.downloadArticle = function (articleURL, articleID) {
         //The directory to store data
         var store = cordova.file.dataDirectory;
-        //URL of our asset
-        var assetURL = articleURL;
         //File name of our important data file we didn't ship with the app
         var fileName = articleID.concat('.html');
         //Check for the file. 
@@ -1947,8 +1945,9 @@ angular.module('momlink.controllers', [])
         function downloadAsset() {
             var fileTransfer = new FileTransfer();
             console.log("About to start transfer");
-            fileTransfer.download(assetURL, store + fileName,
+            fileTransfer.download(articleURL, store + fileName,
                 function (entry) {
+                    console.log(entry);
                     console.log("Success!");
                 },
                 function (err) {
