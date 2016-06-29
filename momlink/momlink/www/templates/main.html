@@ -10,6 +10,7 @@
     <script src="../cordova.js"></script>
     <script src="../lib/pouchdb-5.4.1.js"></script>
     <script src="../lib/raphael-min.js"></script>
+    <script src="../lib/readability/Readability.js"></script>
     <!--Calendar-->
     <script src="../lib/moment/min/moment.min.js"></script>
     <script src="../lib/fullcalendar/dist/fullcalendar.min.js"></script>
@@ -38,7 +39,7 @@
                     </ion-subheader-bar>
                     <ion-view>
                         <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderSurveyBadge();">
-                            <ion-slides style="height:15%; background-color:deeppink;">
+                            <ion-slides style="height:30%; background-color:deeppink;">
                                 <ion-slide-page>
                                     <div id="appointmentsHeader" class="centerWhite"></div>
                                 </ion-slide-page>
@@ -54,13 +55,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="max-width:100%; height:auto;vertical-align:middle"><p>Education</p></div>
-                                    <div class="col"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="toNewPage('journal.html', 'My Journal')" style="max-width:100%; height:auto;vertical-align:middle"><p>Journal</p></div>
-                                    <div class="col"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="toNewPage('myProfile.html', 'My Profile')" style="max-width:100%; height:auto;vertical-align:middle"><p>My Profile</p></div>
-                                </div>
-                                <div class="row">
                                     <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('track.html', 'Track')" style="max-width:100%; height:auto;vertical-align:middle"><p>Track</p></div>
                                     <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%; height:auto;vertical-align:middle"><p>Survey</p></div>
-                                    <div class="col"><img src="../img/temp/refresh.png" ng-click="" style="max-width:100%; height:auto;vertical-align:middle"><p>Update</p></div>
                                 </div>
                             </center>
                         </ion-content>
@@ -74,10 +70,10 @@
                 <a class="item item-icon-left" ng-click="toNewPage('calendar.html', 'Calendar');toggleRightSideMenu()"><i class="icon ion-calendar"></i>Calendar</a>
                 <a class="item item-icon-left" ng-click="toNewPage('referrals.html', 'Referrals');toggleRightSideMenu()"><i class="icon ion-ios-people"></i>Referrals</a>
                 <a class="item item-icon-left" ng-click="toNewPage('education.html', 'Education');toggleRightSideMenu()"><i class="icon ion-folder"></i>Education</a>
-                <a class="item item-icon-left" ng-click="toNewPage('journal.html', 'My Journal');toggleRightSideMenu()"><i class="icon ion-ios-bookmarks"></i>Journal</a>
-                <a class="item item-icon-left" ng-click="toNewPage('myProfile.html', 'My Profile');toggleRightSideMenu()"><i class="icon ion-person"></i>My Profile</a>
                 <a class="item item-icon-left" ng-click="toNewPage('track.html', 'Track');toggleRightSideMenu()"><i class="icon ion-clipboard"></i>Track</a>
                 <a class="item item-icon-left" ng-click="toNewPage('survey.html', 'Track');toggleRightSideMenu()"><i class="icon ion-clipboard"></i>Survey</a>
+                <a class="item item-icon-left" ng-click="toNewPage('journal.html', 'My Journal');toggleRightSideMenu()"><i class="icon ion-ios-bookmarks"></i>Journal</a>
+                <a class="item item-icon-left" ng-click="toNewPage('myProfile.html', 'My Profile');toggleRightSideMenu()"><i class="icon ion-person"></i>My Profile</a>
                 <a class="item item-icon-left" ng-click=""><i class="icon ion-loop"></i>Update</a>
                 <a class="item item-icon-left" ng-click="logout()"><i class="icon ion-locked"></i>Logout</a>
             </div>

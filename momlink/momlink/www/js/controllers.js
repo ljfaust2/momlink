@@ -139,10 +139,10 @@ angular.module('momlink.controllers', [])
                         },
                         {
                             "id": "3",
-                            "title": "Title 3",
-                            "description": "Description 3",
-                            "category": "Category 1",
-                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
+                            "title": "Folic Acid Now Added to Corn Masa Flour: FDA",
+                            "description": "Adding folic acid to corn masa flour could help reduce birth defects among Hispanic babies in the United States, the U.S. Food and Drug Administration says.",
+                            "category": "Diet",
+                            "link": "http://www.webmd.com/baby/news/20160617/folic-acid-now-added-to-corn-masa-flour-fda",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -156,10 +156,10 @@ angular.module('momlink.controllers', [])
                         },
                         {
                             "id": "4",
-                            "title": "Title 4",
-                            "description": "Description 4",
-                            "category": "Category 2",
-                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
+                            "title": "Are Mom’s Diet Drinks Boosting Baby’s Weight?",
+                            "description": "Pregnant women who drink artificially sweetened drinks every day may be more likely to give birth to heavier babies who are then more likely to become overweight children, researchers report.",
+                            "category": "Diet",
+                            "link": "http://www.webmd.com/baby/news/20160509/artificial-sweeteners-during-pregnancy-may-make-for-heavier-infants",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -173,10 +173,10 @@ angular.module('momlink.controllers', [])
                         },
                         {
                             "id": "5",
-                            "title": "Title 5",
-                            "description": "Description 5",
-                            "category": "Category 2",
-                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
+                            "title": "Lots of Fish in Pregnancy and Kids' Obesity Risk",
+                            "description": "Babies whose mothers eat high amounts of fish during pregnancy appear to be at raised risk for obesity in childhood, and pollutants in the fish may drive the effect, a new study finds.",
+                            "category": "Diet",
+                            "link": "http://www.webmd.com/baby/news/20160215/lots-of-fish-in-pregnancy-tied-to-higher-obesity-risk-in-kids",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -559,7 +559,7 @@ angular.module('momlink.controllers', [])
                         articleHtml = `<div class="row centerWhite" ng-controller="EducationCtrl">`;
                         articleHtml += `<div class="col-15" align="left"><img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"></div>`;
                         articleHtml += `<div class="col no-padding" align="left">`;
-                        articleHtml += `<span style="display: inline-block; max-height:50%; line-height: 95%; overflow:hidden">` + articles[k]['description'] + `</span>`;
+                        articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[k]['description'] + `</span>`;
                         articleHtml += `<br /><a ng-click="renderArticle('shared','` + articles[k]['id'] + `')" style="color:white"><u>Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared','` + articles[k]['id'] + `')" style="color:white"><u>Take Quiz</u></a>`;
                         articleHtml += `</div></div>`;
                         $('#articlesHeader').fadeOut("slow", function () {
@@ -579,7 +579,7 @@ angular.module('momlink.controllers', [])
                     setTimeout(function () {
                         renderArticle(k);
                         if (--i) cycleTodaysEvents(i);
-                    }, 7000)
+                    }, 9000)
                 })(Number.POSITIVE_INFINITY);
             }
         })
@@ -873,14 +873,20 @@ angular.module('momlink.controllers', [])
                 //update referral meeting
                 referral = window.localStorage.getItem('referralID');
                 if (referral != null) {
+                    console.log(window.localStorage.getItem('referralID'))
                     db.get('referrals').then(function (doc) {
-                        i = doc['referrals'].findIndex(function (e) { return e.id === referral });
+                        //i = doc['referrals'].findIndex(function (e) { return e.id === referral });
+                        for (i in doc['referrals']) {
+                            if (doc['referrals'][i]['id'] === referral) {
+                                break;
+                            }
+                        }
                         doc['referrals'][i]['meeting'] = $scope.eventID;
                         return db.put(doc);
                     }).then(function (doc) {
                         $scope.toNewPage('referrals.html', 'Referrals');
                         $scope.closeModal();
-                        window.localStorage.removeItem('referralName')
+                        window.localStorage.removeItem('referralID')
                     });
                 }
                 else {
@@ -895,7 +901,12 @@ angular.module('momlink.controllers', [])
         $scope.returnTitle = title;
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
-            i = doc['events'].findIndex(function (e) { return e.id === eventID });
+            //i = doc['events'].findIndex(function (e) { return e.id === eventID });
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === eventID) {
+                    break;
+                }
+            }
             var year = String(doc['events'][i]['day']).substring(0, 4);
             var month = String(doc['events'][i]['day']).substring(5, 7);
             var day = String(doc['events'][i]['day']).substring(8, 10);
@@ -946,7 +957,12 @@ angular.module('momlink.controllers', [])
     $scope.pullEvent = function () {
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
-            i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === eventID) {
+                    break;
+                }
+            }
             $('#title').val(doc['events'][i]['title']);
             $('#type').val(doc['events'][i]['type']);
             $('#date').val(doc['events'][i]['day']);
@@ -970,7 +986,12 @@ angular.module('momlink.controllers', [])
             questions.push($(this).val())
         });
         db.get('events').then(function (doc) {
-            i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === $scope.eventID) {
+                    break;
+                }
+            }
             doc['events'][i]['title'] = $('#title').val();
             doc['events'][i]['type'] = $('#type').val();
             doc['events'][i]['day'] = $('#date').val();
@@ -995,13 +1016,23 @@ angular.module('momlink.controllers', [])
     $scope.deleteEvent = function () {
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
-            i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === $scope.eventID) {
+                    break;
+                }
+            }
             doc['events'].splice(i, 1)
             return db.put(doc);
         }).then(function () {
             //if attached to referral, update meeting ID
             db.get('referrals').then(function (doc) {
-                i = doc['referrals'].findIndex(function (e) { return e.meeting === $scope.eventID });
+                //i = doc['referrals'].findIndex(function (e) { return e.meeting === $scope.eventID });
+                for (i in doc['events']) {
+                    if (doc['events'][i]['meeting'] === $scope.eventID) {
+                        break;
+                    }
+                }
                 if (i >= 0) {
                     doc['referrals'][i]['meeting'] = '';
                 }
@@ -1072,6 +1103,22 @@ angular.module('momlink.controllers', [])
         time = String(time).substr(String(time).indexOf("T") + 1);
         return time;
     }
+
+    /*$scope.test = function () {
+        console.log('hit')
+        document.location = 'http://www.webmd.com/baby/smoking-during-pregnancy';
+        var loc = document.location;
+        var uri = {
+            spec: loc.href,
+            host: loc.host,
+            prePath: loc.protocol + "//" + loc.host,
+            scheme: loc.protocol.substr(0, loc.protocol.indexOf(":")),
+            pathBase: loc.protocol + "//" + loc.host + loc.pathname.substr(0, loc.pathname.lastIndexOf("/") + 1)
+        };
+        var article = new Readability(uri, document).parse();
+        html = `<iframe src="` + article + `" style="width:100%; height: 100%;"></iframe>`
+        $('#content').html(html);
+    }*/
 })
 
 .controller('NutritionCtrl', function ($scope, $ionicPopup) {
@@ -2269,7 +2316,12 @@ angular.module('momlink.controllers', [])
     $scope.pullNote = function () {
         var db = PouchDB('momlink');
         db.get('journal').then(function (doc) {
-            i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            //i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            for (i in doc['notes']) {
+                if (doc['notes'][i]['id'] === $scope.noteID) {
+                    break;
+                }
+            }
             $('#subject').val(doc['notes'][i]['subject']);
             $('#description').val(doc['notes'][i]['description']);
         })
@@ -2277,7 +2329,12 @@ angular.module('momlink.controllers', [])
     $scope.updateNote = function () {
         var db = PouchDB('momlink');
         db.get('journal').then(function (doc) {
-            i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            //i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            for (i in doc['notes']) {
+                if (doc['notes'][i]['id'] === $scope.noteID) {
+                    break;
+                }
+            }
             doc['notes'][i]['subject'] = $('#subject').val();
             doc['notes'][i]['description'] = $('#description').val();
             return db.put(doc);
@@ -2289,7 +2346,12 @@ angular.module('momlink.controllers', [])
     $scope.deleteNote = function () {
         var db = PouchDB('momlink');
         db.get('journal').then(function (doc) {
-            i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            //i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
+            for (i in doc['notes']) {
+                if (doc['notes'][i]['id'] === $scope.noteID) {
+                    break;
+                }
+            }
             doc['notes'].splice(i, 1)
             return db.put(doc);
         }).then(function () {
