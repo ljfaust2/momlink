@@ -603,6 +603,12 @@ angular.module('momlink.controllers', [])
         }, false);
     }
 
+    /*$scope.addClickListener = function () {
+        document.addEventListener("click", function (event) {
+            console.log(event.fromElement)
+        }, false);
+    }*/
+
     //function for registration
     /*
     $scope.register = function () {
@@ -751,6 +757,13 @@ angular.module('momlink.controllers', [])
                 cssClass: 'popup-vertical-buttons',
                 buttons: [
                     {
+                        text: 'Call', onTap: function (e) {
+                            window.location.href="tel://"+'1-' + referrals[i]['phone'];
+                            return 'call';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
                         text: 'Text', onTap: function (e) {
                             text();
                             return 'text';
@@ -774,7 +787,32 @@ angular.module('momlink.controllers', [])
             });
         }
         else if (email == '' && phone != '') {
-            text();
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Call', onTap: function (e) {
+                            window.location.href = "tel://" + '1-' + referrals[i]['phone'];
+                            return 'call';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Text', onTap: function (e) {
+                            text();
+                            return 'text';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            return 'cancel';
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
         }
         else if (phone == '' && email != '') {
             mail();
@@ -959,7 +997,7 @@ angular.module('momlink.controllers', [])
         db.get('events').then(function (doc) {
             //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
             for (i in doc['events']) {
-                if (doc['events'][i]['id'] === eventID) {
+                if (doc['events'][i]['id'] === $scope.eventID) {
                     break;
                 }
             }
@@ -1030,11 +1068,9 @@ angular.module('momlink.controllers', [])
                 //i = doc['referrals'].findIndex(function (e) { return e.meeting === $scope.eventID });
                 for (i in doc['events']) {
                     if (doc['events'][i]['meeting'] === $scope.eventID) {
+                        doc['referrals'][i]['meeting'] = '';
                         break;
                     }
-                }
-                if (i >= 0) {
-                    doc['referrals'][i]['meeting'] = '';
                 }
                 return db.put(doc);
             }).then(function () {
@@ -1057,6 +1093,7 @@ angular.module('momlink.controllers', [])
     }
     $scope.closeModal = function () {
         $scope.modal.hide().then(function () {
+            window.localStorage.removeItem('referralID');
             $scope.modal.remove();
         });
     };
@@ -1665,17 +1702,15 @@ angular.module('momlink.controllers', [])
                     else { html += '<h2>' + article['title'] + '</h2>'; }
                     html += '<p>' + article['description'] + '</p>';
                     html += '<p>Shared: ' + article['dateShared'] + '</p>';
-                    if (type == 'history') {
-                        var bestScore = 0;
-                        html += '<p>Quiz Attempts: ' + Object.keys(article['quizHistory']).length + '</p>';
-                        for (j in article['quizHistory']) {
-                            if (article['quizHistory'][j].substring(0, 1) > String(bestScore).substring(0, 1)) {
-                                bestScore = article['quizHistory'][j]
-                            }
-                            //console.log(article['quizHistory'][j])
+                    var bestScore = 0;
+                    html += '<p>Quiz Attempts: ' + Object.keys(article['quizHistory']).length + '</p>';
+                    for (j in article['quizHistory']) {
+                        if (article['quizHistory'][j].substring(0, 1) > String(bestScore).substring(0, 1)) {
+                            bestScore = article['quizHistory'][j]
                         }
-                        html += '<p>Best Score: ' + bestScore + '</p>';
+                        //console.log(article['quizHistory'][j])
                     }
+                    html += '<p>Best Score: ' + bestScore + '</p>';
                     html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz</button>`;
                     html += '</div>';
                 }
@@ -1715,10 +1750,10 @@ angular.module('momlink.controllers', [])
                                 });
                                 $scope.openModal();
                                 return db.put(doc)
-                            }, function (error) {console.log(error) });
+                            }, function (error) { console.log(error) });
                         });
                     }
-                    //if network is available
+                        //if network is available
                     else {
                         html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
                         html += `</ion-modal-view>`
@@ -1814,7 +1849,7 @@ angular.module('momlink.controllers', [])
                 ],
             })
         }).then(function () {
-            if (type == 'shared') {
+            if (type == 'shared' && score == article['quiz'].length) {
                 $scope.moveToHistory(type, articleID, category);
             }
             else {
@@ -2124,7 +2159,7 @@ angular.module('momlink.controllers', [])
     };
 })
 
-.controller('ReferralCtrl', function ($scope, $ionicPopup, $timeout, $compile) {
+.controller('ReferralCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
     $scope.showReferrals = function (type) {
         var db = PouchDB('momlink');
         var html = '<div class="list">';
@@ -2140,22 +2175,14 @@ angular.module('momlink.controllers', [])
                     }
                     var today = moment().format('YYYY-MM-DD')
                     if ((type == 'recent' && (meetingTime == '' || moment(meetingTime) >= moment(today))) || (type == 'previous' && (moment(meetingTime) < moment(today)))) {
-                        html += '<div class="item item-thumbnail-left">';
+                        html += `<a class="item item-thumbnail-left" ng-click="schedule('` + referrals[i]['id'] + `')">`;
                         html += `<img src="">`;
                         html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
-                        html += `<a class="button button-small button-positive icon ion-ios-telephone-outline" ng-href="tel: ` + '1-' + referrals[i]['phone'] + `" style="display:inline"></a>&nbsp;`
-                        html += `<a class="button button-small button-positive icon ion-ios-email-outline" ng-click="newMessage('` + referrals[i]['email'] + `','` + referrals[i]['phone'] + `')" style="display:inline"></a>`
                         html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
                         html += '<p>Address: ' + referrals[i]['address'] + '</p>';
                         html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
                         html += '<p>Email: ' + referrals[i]['email'] + '</p>';
-                        if (referrals[i]['meeting'] == '') {
-                            html += `<button class="button button-small button-positive" ng-click="schedule('` + referrals[i]['id'] + `')">Schedule Meeting</button>`;
-                        }
-                        else {
-                            html += `<button class="button button-small button-stable" ng-click="viewEvent('` + referrals[i]['meeting'] + `', 'referrals.html', 'Referrals')">View Meeting</button>`;
-                        }
-                        html += '</div>';
+                        html += '</a>';
                     }
                     meetingTime = '';
                 }
@@ -2167,8 +2194,61 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.schedule = function (id) {
-        window.localStorage.setItem('referralID', id);
-        $scope.createEvent('referrals.html', 'Referrals');
+        var db = PouchDB('momlink');
+        db.get('referrals').then(function (doc) {
+            for (i in doc['referrals']) {
+                if (doc['referrals'][i]['id'] === id) { break; }
+            }
+            if (doc['referrals'][i]['meeting'] == '') {
+                $ionicPopup.show({
+                    title: 'Have you contacted this referral?',
+                    cssClass: 'popup-vertical-buttons',
+                    buttons: [
+                        {
+                            text: 'Yes', onTap: function (e) {
+                                scheduleMeeting(doc['referrals'][i]['email'], doc['referrals'][i]['phone']);
+                            },
+                            type: 'button-positive'
+                        },
+                        {
+                            text: 'No', onTap: function (e) {
+                                $scope.newMessage(doc['referrals'][i]['email'], doc['referrals'][i]['phone']);
+                            },
+                            type: 'button-positive'
+                        },
+                        {
+                            text: 'Cancel', onTap: function (e) {
+                                return 'cancel';
+                            },
+                            type: 'button-stable'
+                        }
+                    ],
+                })
+            }
+            else {
+                $scope.viewEvent(doc['referrals'][i]['meeting'], 'referrals.html', 'Referrals')
+            }
+        })
+        scheduleMeeting = function () {
+            $ionicPopup.show({
+                title: 'Have you scheduled a meeting with this referral?',
+                buttons: [
+                    {
+                        text: 'Yes', onTap: function (e) {
+                            window.localStorage.setItem('referralID', id);
+                            $scope.createEvent('referrals.html', 'Referrals');
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'No', onTap: function (e) {
+                            $scope.newMessage();
+                        },
+                        type: 'button-positive'
+                    }
+                ],
+            });
+        }
     }
 })
 
@@ -2318,9 +2398,7 @@ angular.module('momlink.controllers', [])
         db.get('journal').then(function (doc) {
             //i = doc['notes'].findIndex(function (e) { return e.id === $scope.noteID });
             for (i in doc['notes']) {
-                if (doc['notes'][i]['id'] === $scope.noteID) {
-                    break;
-                }
+                if (doc['notes'][i]['id'] === $scope.noteID) { break; }
             }
             $('#subject').val(doc['notes'][i]['subject']);
             $('#description').val(doc['notes'][i]['description']);
