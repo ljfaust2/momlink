@@ -685,6 +685,7 @@ angular.module('momlink.controllers', [])
     $scope.renderBadges = function () {
         var db = PouchDB('momlink');
         var countEvents = 0;
+        var countArticles = 0;
         var countMessages = 0;
         //Survey Badge
         db.get('events').then(function (doc) {
@@ -701,8 +702,23 @@ angular.module('momlink.controllers', [])
                 $('#survey').html(html);
                 $compile($('#survey'))($scope);
             }
+        }).then(function (doc) {
+            //Education Badge
+            db.get('articles').then(function (doc) {
+                for (i in doc['shared']) {
+                    if (doc['shared'][i]['lastRead'] == '') {
+                        countArticles++;
+                    }
+                }
+                if (countArticles > 0) {
+                    html = `<img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countArticles + `</span><p>Education</p>`;
+                    $('#education').html(html);
+                    $compile($('#education'))($scope);
+                }
+            });
+        }).then(function (doc) {
             //Inbox Badge
-            SMS.listSMS({ box: '', maxCount: 100000 }, function (data) {
+            /*SMS.listSMS({ box: '', maxCount: 100000 }, function (data) {
                 for (i in data) {
                     if (data[i].seen != 1) {
                         countMessages++;
@@ -713,8 +729,8 @@ angular.module('momlink.controllers', [])
                     $('#inbox').html(html);
                     $compile($('#inbox'))($scope);
                 }
-            }, function (error) { console.log(error) });
-        });
+            }, function (error) { console.log(error) });*/
+        })
     };
     $scope.removeSplash = function () {
         //wait until the page has loaded to remove the splash screen{
@@ -1185,7 +1201,7 @@ angular.module('momlink.controllers', [])
         db.get('userData').then(function (doc) {
             date = new moment().format('MM/DD/YYYY');
             time = new moment().format('hh:mm:ssa');
-            doc['userData'].push([event, date , time])
+            doc['userData'].push([event, date, time])
             return db.put(doc);
         })
     }
