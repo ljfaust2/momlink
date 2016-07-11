@@ -42,10 +42,10 @@ angular.module('momlink.controllers', [])
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        { "name": "PNCC1", "email": "pncc1@gmail.com", "phone": "555-555-5555", "image": "../img/temp/pncc1.jpg" },
-                        { "name": "PNCC2", "email": "pncc2@gmail.com", "phone": "", "image": "../img/temp/pncc2.jpg" },
-                        { "name": "PNCC3", "email": "", "phone": "555-555-5555", "image": "../img/temp/pncc3.jpg" },
-                        { "name": "PNCC4", "email": "", "phone": "", "image": "../img/temp/pncc3.jpg" }
+                        { "name": "Danna Shanley", "email": "shanley@gmail.com", "phone": "555-555-5555", "image": "../img/temp/pncc1.jpg" },
+                        { "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "", "image": "../img/temp/pncc2.jpg" },
+                        { "name": "Jane Marston", "email": "", "phone": "555-555-5555", "image": "../img/temp/pncc3.jpg" },
+                        { "name": "Kendra Venne", "email": "", "phone": "", "image": "../img/temp/pncc4.jpg" }
                     ]
                 });
             }
@@ -57,13 +57,13 @@ angular.module('momlink.controllers', [])
                     "events": [
                         {
                             "id": '06-20-2016T10:53:29am',
-                            "title": 'test',
+                            "title": 'Survey Test',
                             "type": 'Lab',
                             "day": '2016-06-20',
                             "start": '2016-06-20T10:11',
                             "end": '2016-06-20T11:11',
-                            "venue": 'asdfasd',
-                            "description": 'sdfadsf',
+                            "venue": '',
+                            "description": '',
                             "color": 'red',
                             "scheduledBy": '0',
                             "survey":
@@ -221,50 +221,63 @@ angular.module('momlink.controllers', [])
                     "referrals": [
                         {
                             "id": "1",
-                            "name": "First Last",
-                            "address": "555 Chicago",
-                            "phone": "555-555-5555",
-                            "email": "first@email.com",
-                            "date": "3/22/2016",
-                            "meeting": ""
+                            "name": "Active Health & Wellness Center",
+                            "address": "South Bend, Indiana",
+                            "phone": "877-826-7357",
+                            "email": "",
+                            "date": "7/5/2016",
+                            "meeting": "",
+                            "img": "../img/referrals/ahwc.png"
                         },
                         {
                             "id": "2",
-                            "name": "First Last1",
-                            "address": "555 Chicago1",
-                            "phone": "",
-                            "email": "first@email.com1",
-                            "date": "3/23/2016",
-                            "meeting": ""
+                            "name": "Smoking Cessation Program",
+                            "address": "South Bend, Indiana",
+                            "phone": "574-647-6880",
+                            "email": "greene@gmail.com",
+                            "date": "7/1/2016",
+                            "meeting": "",
+                            "img": "../img/referrals/smokingCessation.PNG"
                         },
                         {
                             "id": "3",
-                            "name": "First Last2",
-                            "address": "555 Chicago2",
-                            "phone": "555-555-5555",
-                            "email": "first@email.com2",
-                            "date": "3/24/2016",
-                            "meeting": ""
+                            "name": "Childbirth Center Classes",
+                            "address": "South Bend, Indiana",
+                            "phone": "574-647-3540",
+                            "email": "",
+                            "date": "6/28/2016",
+                            "meeting": "",
+                            "img": "../img/referrals/mh.PNG"
                         },
                         {
                             "id": "4",
-                            "name": "First Last3",
-                            "address": "555 Chicago3",
-                            "phone": "555-555-5555",
-                            "email": "first@email.com3",
-                            "date": "3/24/2016",
-                            "meeting": ""
+                            "name": "Karissa Morelock",
+                            "address": "South Bend, Indiana",
+                            "phone": "574-318-3412",
+                            "email": "morelock@gmail.com",
+                            "date": "6/25/2016",
+                            "meeting": "",
+                            "img": "../img/referrals/morelock.jpg"
                         },
                         {
                             "id": "5",
-                            "name": "First Last4",
-                            "address": "555 Chicago4",
+                            "name": "Andrew McMahon",
+                            "address": "Concord, Massachusetts",
                             "phone": "555-555-5555",
-                            "email": "first@email.com4",
-                            "date": "3/25/2016",
-                            "meeting": ""
-                        }
+                            "email": "amitw@gmail.com",
+                            "date": "6/22/2016",
+                            "meeting": "",
+                            "img": "../img/referrals/amm.jpg"
+                        },
                     ],
+                });
+            }
+        });
+        db.get('userData').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "userData",
+                    "userData": []
                 });
             }
         });
@@ -495,6 +508,7 @@ angular.module('momlink.controllers', [])
         });
     }*/
     $scope.toggleRightSideMenu = function () {
+        $scope.trackBehavior('side menu triggered')
         $ionicSideMenuDelegate.toggleRight();
     };
 
@@ -523,7 +537,7 @@ angular.module('momlink.controllers', [])
             todaysEvents = sortTimes(todaysEvents)
             for (j in todaysEvents) {
                 html += `<div class="col" ng-click="viewEvent('` + todaysEvents[j][1] + `', 'home.html', 'Momlink')">`;
-                html += `<img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"><br>`;
+                html += `<img src="../img/mainIcons/momlink_icon-17.png" style="height:60%;"><br>`;
                 html += $scope.convert24to12(todaysEvents[j][0]) + `</div>`;
                 eventsToday = true;
             }
@@ -557,10 +571,14 @@ angular.module('momlink.controllers', [])
                 function renderArticle(index) {
                     for (j in articles) {
                         articleHtml = `<div class="row centerWhite" ng-controller="EducationCtrl">`;
-                        articleHtml += `<div class="col-15" align="left"><img src="../img/mainIcons/momlink_icon-16.png" style="height:60%;"></div>`;
+                        var img;
+                        if (articles[k]['category'] == 'Smoking') { img = '../img/articles/smoking.png' }
+                        if (articles[k]['category'] == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
+                        if (articles[k]['category'] == 'Diet') { img = '../img/articles/diet.png' }
+                        articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
                         articleHtml += `<div class="col no-padding" align="left">`;
                         articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[k]['description'] + `</span>`;
-                        articleHtml += `<br /><a ng-click="renderArticle('shared','` + articles[k]['id'] + `')" style="color:white"><u>Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared','` + articles[k]['id'] + `')" style="color:white"><u>Take Quiz</u></a>`;
+                        articleHtml += `<br /><a ng-click="renderArticle('shared','` + articles[k]['id'] + `')" style="color:white"><u style="font-size: 110%;">Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared','` + articles[k]['id'] + `')" style="color:white"><u style="font-size: 110%;">Take Quiz</u></a>`;
                         articleHtml += `</div></div>`;
                         $('#articlesHeader').fadeOut("slow", function () {
                             $('#articlesHeader').html(articleHtml);
@@ -588,6 +606,7 @@ angular.module('momlink.controllers', [])
     pageHistory = [];
     $scope.addBackButtonListener = function () {
         document.addEventListener("backbutton", function (event) {
+            $scope.trackBehavior('used back button')
             //if on homepage then exit app
             if ($('#headline').html() == 'Momlink') {
                 navigator.app.exitApp();
@@ -603,12 +622,6 @@ angular.module('momlink.controllers', [])
         }, false);
     }
 
-    /*$scope.addClickListener = function () {
-        document.addEventListener("click", function (event) {
-            console.log(event.fromElement)
-        }, false);
-    }*/
-
     //function for registration
     /*
     $scope.register = function () {
@@ -621,6 +634,7 @@ angular.module('momlink.controllers', [])
     //the first page in history should always be home.html
     currentPage = 'home.html';
     $scope.toNewPage = function (nextPage, nextHeadline, history) {
+        $scope.trackBehavior(nextPage)
         //prevents adding pages to history when using the back button
         if (history != true || nextPage == 'home.html') {
             //empty pageHistory
@@ -652,6 +666,7 @@ angular.module('momlink.controllers', [])
     };
 
     $scope.autoLogin = function () {
+        $scope.trackBehavior('auto login');
         //if they've logged in previously, skip the login screen
         document.addEventListener("deviceready", function () {
             if (window.localStorage.getItem('username') != null && window.localStorage.getItem('password') != null) {
@@ -667,24 +682,39 @@ angular.module('momlink.controllers', [])
             }
         });
     };
-    $scope.renderSurveyBadge = function () {
+    $scope.renderBadges = function () {
         var db = PouchDB('momlink');
-        var count = 0;
+        var countEvents = 0;
+        var countMessages = 0;
+        //Survey Badge
         db.get('events').then(function (doc) {
             events = doc['events'];
             for (i in events) {
                 if (events[i]['survey'] != null) {
                     if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
-                        count++;
+                        countEvents++;
                     }
                 }
             }
-            if (count > 0) {
-                html = `<img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + count + `</span><p>Survey</p>`;
+            if (countEvents > 0) {
+                html = `<img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countEvents + `</span><p>Survey</p>`;
                 $('#survey').html(html);
                 $compile($('#survey'))($scope);
             }
-        })
+            //Inbox Badge
+            SMS.listSMS({ box: '', maxCount: 100000 }, function (data) {
+                for (i in data) {
+                    if (data[i].seen != 1) {
+                        countMessages++;
+                    }
+                }
+                if (countMessages > 0) {
+                    html = `<img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countMessages + `</span><p>Inbox</p>`;
+                    $('#inbox').html(html);
+                    $compile($('#inbox'))($scope);
+                }
+            }, function (error) { console.log(error) });
+        });
     };
     $scope.removeSplash = function () {
         //wait until the page has loaded to remove the splash screen{
@@ -696,12 +726,14 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('login').then(function (doc) {
             if (user == doc['username'] && pass == doc['password']) {
+                $scope.trackBehavior('logged in');
                 window.localStorage.setItem('username', doc['username'])
                 window.localStorage.setItem('password', doc['password'])
                 //set username and password variables
                 window.location = "templates/main.html";
             }
             else {
+                $scope.trackBehavior('failed login');
                 var alertPopup = $ionicPopup.alert({
                     title: 'Your username or password is incorrect'
                 });
@@ -709,6 +741,7 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.logout = function () {
+        $scope.trackBehavior('logged out');
         window.localStorage.removeItem('username');
         window.localStorage.removeItem('password');
         delete $scope.trackType;
@@ -758,7 +791,7 @@ angular.module('momlink.controllers', [])
                 buttons: [
                     {
                         text: 'Call', onTap: function (e) {
-                            window.location.href="tel://"+'1-' + referrals[i]['phone'];
+                            window.location.href = "tel://" + '1-' + phone;
                             return 'call';
                         },
                         type: 'button-positive'
@@ -793,7 +826,7 @@ angular.module('momlink.controllers', [])
                 buttons: [
                     {
                         text: 'Call', onTap: function (e) {
-                            window.location.href = "tel://" + '1-' + referrals[i]['phone'];
+                            window.location.href = "tel://" + '1-' + phone;
                             return 'call';
                         },
                         type: 'button-positive'
@@ -850,6 +883,7 @@ angular.module('momlink.controllers', [])
 
     //event functions
     $scope.createEvent = function (link, title) {
+        $scope.trackBehavior('created event');
         $scope.returnLink = link;
         $scope.returnTitle = title;
         $scope.modal = $ionicModal.fromTemplateUrl('eventModal.html', {
@@ -861,6 +895,7 @@ angular.module('momlink.controllers', [])
         })
     }
     $scope.saveEvent = function () {
+        $scope.trackBehavior('saved event');
         //checks if all necessary fields have been filled
         var pass = true;
         var fields = { '#title': 'title', '#type': 'type', '#date': 'date', '#start': 'start time', '#end': 'end time' };
@@ -935,6 +970,7 @@ angular.module('momlink.controllers', [])
         }
     }
     $scope.viewEvent = function (eventID, link, title) {
+        $scope.trackBehavior('viewed event');
         $scope.returnLink = link;
         $scope.returnTitle = title;
         var db = PouchDB('momlink');
@@ -983,6 +1019,7 @@ angular.module('momlink.controllers', [])
         });
     }
     $scope.editEvent = function (eventID) {
+        $scope.trackBehavior('edited event');
         $scope.modal = $ionicModal.fromTemplateUrl('editEventModal.html', {
             scope: $scope,
             animation: 'slide-in-up'
@@ -1018,6 +1055,7 @@ angular.module('momlink.controllers', [])
         });
     }
     $scope.updateEvent = function () {
+        $scope.trackBehavior('updated event');
         var db = PouchDB('momlink');
         var questions = [];
         $("input[name=Q]:checked").each(function () {
@@ -1052,6 +1090,7 @@ angular.module('momlink.controllers', [])
         })
     }
     $scope.deleteEvent = function () {
+        $scope.trackBehavior('deleted event');
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
             //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
@@ -1066,8 +1105,8 @@ angular.module('momlink.controllers', [])
             //if attached to referral, update meeting ID
             db.get('referrals').then(function (doc) {
                 //i = doc['referrals'].findIndex(function (e) { return e.meeting === $scope.eventID });
-                for (i in doc['events']) {
-                    if (doc['events'][i]['meeting'] === $scope.eventID) {
+                for (i in doc['referrals']) {
+                    if (doc['referrals'][i]['meeting'] === $scope.eventID) {
                         doc['referrals'][i]['meeting'] = '';
                         break;
                     }
@@ -1139,6 +1178,24 @@ angular.module('momlink.controllers', [])
     $scope.parseTime = function (time) {
         time = String(time).substr(String(time).indexOf("T") + 1);
         return time;
+    }
+
+    $scope.trackBehavior = function (event) {
+        var db = PouchDB('momlink');
+        db.get('userData').then(function (doc) {
+            date = new moment().format('MM/DD/YYYY');
+            time = new moment().format('hh:mm:ssa');
+            doc['userData'].push([event, date , time])
+            return db.put(doc);
+        })
+    }
+    $scope.displayBehavior = function () {
+        var db = PouchDB('momlink');
+        db.get('userData').then(function (doc) {
+            for (i in doc['userData']) {
+                console.log(doc['userData'][i][0] + ' ' + doc['userData'][i][1] + ' ' + doc['userData'][i][2])
+            }
+        })
     }
 
     /*$scope.test = function () {
@@ -1354,11 +1411,15 @@ angular.module('momlink.controllers', [])
             referrals = doc['referrals'];
             html += '<div class="list">';
             for (i in referrals) {
-                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + referrals[i]['email'] + `','` + referrals[i]['phone'] + `')">`;
-                html += `<img src="">`;
+                html += `<div class="item item-thumbnail-left" ng-click="renderConversation('referrals` + `','` + referrals[i]['name'] + `','` + referrals[i]['phone'] + `','` + referrals[i]['email'] + `')">`;
+                html += `<img src="` + referrals[i]['img'] + `">`;
                 html += '<h2>' + referrals[i]['name'] + '</h2>';
-                html += '<p>' + referrals[i]['phone'] + '</p>';
-                html += '<p>' + referrals[i]['email'] + '</p>';
+                if (referrals[i]['phone'] != '') {
+                    html += '<p>' + referrals[i]['phone'] + '</p>';
+                }
+                if (referrals[i]['email'] != '') {
+                    html += '<p>' + referrals[i]['email'] + '</p>';
+                }
                 html += '</div>';
             }
             html += '</div>';
@@ -1373,17 +1434,43 @@ angular.module('momlink.controllers', [])
             pncc = doc['pncc'];
             html += '<div class="list">';
             for (i in pncc) {
-                html += `<div class="item item-thumbnail-left" ng-click="newMessage('` + pncc[i]['email'] + `','` + pncc[i]['phone'] + `')">`;
+                html += `<div class="item item-thumbnail-left" ng-click="renderConversation('pncc'` + `,'` + pncc[i]['name'] + `','` + pncc[i]['phone'] + `','` + pncc[i]['email'] + `')">`;
                 html += `<img src="` + pncc[i]['image'] + `">`;
                 html += '<h2>' + pncc[i]['name'] + '</h2>';
-                html += '<p>' + pncc[i]['email'] + '</p>';
-                html += '<p>' + pncc[i]['phone'] + '</p>';
+                if (pncc[i]['phone'] != '') {
+                    html += '<p>' + pncc[i]['phone'] + '</p>';
+                }
+                if (pncc[i]['email'] != '') {
+                    html += '<p>' + pncc[i]['email'] + '</p>';
+                }
                 html += '</div>';
             }
             html += '</div>';
             $("#pncc").html(html);
             $compile($("#pncc"))($scope);
         });
+    };
+    $scope.renderConversation = function (type, name, phone, email) {
+        console.log('what');
+        var html = '';
+        if (type == 'referrals') { show = 'showReferralContacts()'; }
+        else { show = 'showPNCCContacts()'; }
+        html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="` + show + `"></button><div class="title">` + name + `</div><button class ="button button-icon icon ion-email" ng-click="newMessage('` + email + `','` + phone + `')"></button></div>`
+        html += '<div class="list has-header">';
+        //for loop through inbox sms, if empty, no messages to display
+        SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
+            for (i in data.reverse()) {
+                if (data[i].type == 1) {
+                    html += '<div class="item item-text-wrap" style="color: #e6005c;">' + data[i].body + '</div>';
+                }
+                else {
+                    html += '<div class="item item-text-wrap" style="color: #0866c6;">' + data[i].body + '</div>';
+                }
+            }
+            html += '</div>';
+            $("#".concat(type)).html(html);
+            $compile($("#".concat(type)))($scope);
+        }, function (error) { console.log(error) });
     };
 })
 
@@ -1658,17 +1745,21 @@ angular.module('momlink.controllers', [])
             html += '<div class="row has-header" style="padding-right:0;padding-left:0;padding-top:0">'
             if (type == 'shared') {
                 html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All')" style="position:relative">
-                     <img class="autoSize" src="../img/mainIcons/momlink_icon-16.png">
+                     <img class="autoSize" src="../img/articles/all.png">
                      <span class ="badge badge-positive topRightBadge">` + totalUnreadArticles + `</span>All</div>`;
             }
             else {
                 html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All')" style="position:relative">
-                     <img class="autoSize" src="../img/mainIcons/momlink_icon-16.png">All</div>`;
+                     <img class ="autoSize" src="../img/articles/all.png">All</div>`;
             }
             for (i in categories) {
                 //add column
                 html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','` + i + `')" style="position:relative">`;
-                html += '<image class="autoSize" src="../img/mainIcons/momlink_icon-16.png">'
+                var img;
+                if (i == 'Smoking') { img = '../img/articles/smoking.png' }
+                if (i == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
+                if (i == 'Diet') { img = '../img/articles/diet.png' }
+                html += `<image class="autoSize" src="` + img + `">`;
                 if (categories[i] > 0) {
                     html += '<span class="badge badge-positive topRightBadge">' + categories[i] + '</span>';
                 }
@@ -1695,8 +1786,8 @@ angular.module('momlink.controllers', [])
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['category'] == category || category == 'All') {
-                    html += `<div class="item item-thumbnail-left">`;
-                    html += `<img ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')" src="../img/temp/article.jpg">`;
+                    html += `<div class="item item-thumbnail-left item-text-wrap">`;
+                    html += `<img ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')" src="../img/articles/webmd.png">`;
                     //bold if the article has not been read
                     if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
                     else { html += '<h2>' + article['title'] + '</h2>'; }
@@ -2175,13 +2266,19 @@ angular.module('momlink.controllers', [])
                     }
                     var today = moment().format('YYYY-MM-DD')
                     if ((type == 'recent' && (meetingTime == '' || moment(meetingTime) >= moment(today))) || (type == 'previous' && (moment(meetingTime) < moment(today)))) {
-                        html += `<a class="item item-thumbnail-left" ng-click="schedule('` + referrals[i]['id'] + `')">`;
-                        html += `<img src="">`;
+                        html += `<a class="item item-thumbnail-left item-text-wrap" ng-click="schedule('` + referrals[i]['id'] + `')">`;
+                        html += `<img src="` + referrals[i]['img'] + `">`;
                         html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
                         html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
-                        html += '<p>Address: ' + referrals[i]['address'] + '</p>';
-                        html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
-                        html += '<p>Email: ' + referrals[i]['email'] + '</p>';
+                        if (referrals[i]['address'] != '') {
+                            html += '<p>Address: ' + referrals[i]['address'] + '</p>';
+                        }
+                        if (referrals[i]['phone'] != '') {
+                            html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
+                        }
+                        if (referrals[i]['email'] != '') {
+                            html += '<p>Email: ' + referrals[i]['email'] + '</p>';
+                        }
                         html += '</a>';
                     }
                     meetingTime = '';

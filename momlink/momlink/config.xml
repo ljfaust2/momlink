@@ -74,4 +74,5 @@
   <plugin name="cordova-plugin-file-opener2" version="2.0.2" src="https://github.com/pwlin/cordova-plugin-file-opener2" />
   <plugin name="cordova-plugin-file-opener2" version="2.0.2" src="https://github.com/pwlin/cordova-plugin-file-opener2" />
   <plugin name="cordova-plugin-x-socialsharing" version="5.1.1" src="https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin" />
+  <plugin name="cordova-plugin-sms" version="1.0.5" src="https://github.com/floatinghotpot/cordova-plugin-sms" />
 </widget>
