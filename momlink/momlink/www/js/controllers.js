@@ -67,6 +67,7 @@ angular.module('momlink.controllers', [])
                             "description": '',
                             "color": 'red',
                             "scheduledBy": '0',
+                            "viewed": '0',
                             "survey":
                                 [
                                 ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer']],
@@ -624,8 +625,8 @@ angular.module('momlink.controllers', [])
     }
     $scope.clickListener = function () {
         document.addEventListener("click", function myListener(event) {
-            console.log(event.target);
-            console.log(arguments.callee.name)
+            //console.log(event.target);
+            //console.log(arguments.callee.name)
         }, false);
     };
 
@@ -691,22 +692,23 @@ angular.module('momlink.controllers', [])
     };
     $scope.renderBadges = function () {
         var db = PouchDB('momlink');
-        var countEvents = 0;
+        var countSurveys = 0;
         var countArticles = 0;
         var countMessages = 0;
         var countReferrals = 0;
+        var countEvents = 0;
         //Survey Badge
         db.get('events').then(function (doc) {
             events = doc['events'];
             for (i in events) {
                 if (events[i]['survey'] != null) {
                     if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
-                        countEvents++;
+                        countSurveys++;
                     }
                 }
             }
-            if (countEvents > 0) {
-                html = `<img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countEvents + `</span><p>Survey</p>`;
+            if (countSurveys > 0) {
+                html = `<img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countSurveys + `</span><p>Survey</p>`;
                 $('#survey').html(html);
                 $compile($('#survey'))($scope);
             }
@@ -725,13 +727,12 @@ angular.module('momlink.controllers', [])
                 }
             });
         }).then(function () {
-            //Referrals Bade
-            db.get('referrals').then(function (doc){
+            //Referrals Badge
+            db.get('referrals').then(function (doc) {
                 for (i in doc['referrals']) {
                     if (doc['referrals'][i]['meeting'] == '') {
                         countReferrals++;
                     }
-                    console.log(countReferrals)
                 }
                 if (countReferrals > 0) {
                     html = `<img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countReferrals + `</span><p>Referrals</p>`;
@@ -739,8 +740,21 @@ angular.module('momlink.controllers', [])
                     $compile($('#referrals'))($scope);
                 }
             })
-        }
-        ).then(function (doc) {
+        }).then(function (doc) {
+            //Calendar Badge
+            db.get('events').then(function (doc) {
+                for (i in doc['events']) {
+                    if (doc['events'][i]['viewed'] == '0') {
+                        countEvents++;
+                    }
+                }
+                if (countEvents > 0) {
+                    html = `<img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countEvents + `</span><p>Calendar</p>`;
+                    $('#calendar').html(html);
+                    $compile($('#calendar'))($scope);
+                }
+            })
+        }).then(function (doc) {
             //Inbox Badge
             /*SMS.listSMS({ box: '', maxCount: 100000 }, function (data) {
                 for (i in data) {
@@ -978,6 +992,7 @@ angular.module('momlink.controllers', [])
                     "description": $('#description').val(),
                     "questions": questions,
                     "color": $scope.getColor($('#type').val()),
+                    "viewed": '1',
                     "scheduledBy": '0'
                 };
                 doc['events'].push(event);
@@ -1056,6 +1071,8 @@ angular.module('momlink.controllers', [])
                   }
                 ],
             });
+            doc['events'][i]['viewed'] = '1';
+            return db.put(doc);
         });
     }
     $scope.editEvent = function (eventID) {
@@ -1229,13 +1246,13 @@ angular.module('momlink.controllers', [])
             return db.put(doc);
         })
     }
-    $scope.displayBehavior = function () {
+
+    $scope.inspectDB = function () {
         var db = PouchDB('momlink');
-        db.get('userData').then(function (doc) {
-            for (i in doc['userData']) {
-                console.log(doc['userData'][i][0] + ' ' + doc['userData'][i][1] + ' ' + doc['userData'][i][2])
-            }
-        })
+        db.allDocs({ include_docs: true }).then(function (res) {
+            var docs = res.rows.map(function (row) { return row.doc; });
+            console.log(docs);
+        }).catch(console.log.bind(console));
     }
 
     /*$scope.test = function () {
@@ -1962,6 +1979,7 @@ angular.module('momlink.controllers', [])
                         }
                     }
                     finalScore = score + '/' + quiz.length;
+                    //also need to record answers selected
                     article['quizHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = finalScore;
                     return db.put(doc)
                 }
