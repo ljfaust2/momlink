@@ -20,7 +20,7 @@
     <script src="../js/controllers.js"></script>
     <link href="../css/style.css" rel="stylesheet">
 </head>
-<body ng-app="momlink" ng-controller="HeaderCtrl" ng-init="addBackButtonListener(); removeSplash();">
+<body ng-app="momlink" ng-controller="HeaderCtrl" ng-init="backButtonListener(); clickListener(); removeSplash();">
     <ion-side-menus>
         <ion-side-menu-content drag-content="false">
             <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderCtrl">
@@ -51,7 +51,7 @@
                                 <div class="row">
                                     <div id="inbox" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="max-width:100%;height:auto;vertical-align:middle"><p>Inbox</p></div>
                                     <div class="col"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="max-width:100%;height:auto;vertical-align:middle"><p>Calendar</p></div>
-                                    <div class="col"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="max-width:100%;height:auto;vertical-align:middle"><p>Referrals</p></div>
+                                    <div id="referrals" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="max-width:100%;height:auto;vertical-align:middle"><p>Referrals</p></div>
                                 </div>
                                 <div class="row">
                                     <div id="education" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="max-width:100%; height:auto;vertical-align:middle"><p>Education</p></div>

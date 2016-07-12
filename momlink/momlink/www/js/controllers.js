@@ -14,6 +14,7 @@ angular.module('momlink.controllers', [])
                     "password": "p",
                     "reset_code": "595",
                     "answer": "Yes",
+                    "agency": "",
                     "sec_question": "?",
                     "client_id": "08798a24b703fb7b9d5d231ab30008d3"
                 });
@@ -58,7 +59,7 @@ angular.module('momlink.controllers', [])
                         {
                             "id": '06-20-2016T10:53:29am',
                             "title": 'Survey Test',
-                            "type": 'Lab',
+                            "category": 'Lab',
                             "day": '2016-06-20',
                             "start": '2016-06-20T10:11',
                             "end": '2016-06-20T11:11',
@@ -604,7 +605,7 @@ angular.module('momlink.controllers', [])
     };
 
     pageHistory = [];
-    $scope.addBackButtonListener = function () {
+    $scope.backButtonListener = function () {
         document.addEventListener("backbutton", function (event) {
             $scope.trackBehavior('used back button')
             //if on homepage then exit app
@@ -621,6 +622,12 @@ angular.module('momlink.controllers', [])
             }
         }, false);
     }
+    $scope.clickListener = function () {
+        document.addEventListener("click", function myListener(event) {
+            console.log(event.target);
+            console.log(arguments.callee.name)
+        }, false);
+    };
 
     //function for registration
     /*
@@ -687,6 +694,7 @@ angular.module('momlink.controllers', [])
         var countEvents = 0;
         var countArticles = 0;
         var countMessages = 0;
+        var countReferrals = 0;
         //Survey Badge
         db.get('events').then(function (doc) {
             events = doc['events'];
@@ -716,7 +724,23 @@ angular.module('momlink.controllers', [])
                     $compile($('#education'))($scope);
                 }
             });
-        }).then(function (doc) {
+        }).then(function () {
+            //Referrals Bade
+            db.get('referrals').then(function (doc){
+                for (i in doc['referrals']) {
+                    if (doc['referrals'][i]['meeting'] == '') {
+                        countReferrals++;
+                    }
+                    console.log(countReferrals)
+                }
+                if (countReferrals > 0) {
+                    html = `<img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countReferrals + `</span><p>Referrals</p>`;
+                    $('#referrals').html(html);
+                    $compile($('#referrals'))($scope);
+                }
+            })
+        }
+        ).then(function (doc) {
             //Inbox Badge
             /*SMS.listSMS({ box: '', maxCount: 100000 }, function (data) {
                 for (i in data) {
@@ -946,7 +970,7 @@ angular.module('momlink.controllers', [])
                 var event = {
                     "id": id,
                     "title": $('#title').val(),
-                    "type": $("#type").val(),
+                    "category": $("#type").val(),
                     "day": $('#date').val(),
                     "start": start,
                     "end": end,
@@ -1004,7 +1028,7 @@ angular.module('momlink.controllers', [])
             var startTime = $scope.parseTime(doc['events'][i]['start']);
             var endTime = $scope.parseTime(doc['events'][i]['end']);
             //render template
-            templateHTML = '<p><b>' + doc['events'][i]['type'] + '</b></p>';
+            templateHTML = '<p><b>' + doc['events'][i]['category'] + '</b></p>';
             templateHTML += '<p><b>Date</b>: ' + date + '</p>';
             templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
             templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
@@ -1055,7 +1079,7 @@ angular.module('momlink.controllers', [])
                 }
             }
             $('#title').val(doc['events'][i]['title']);
-            $('#type').val(doc['events'][i]['type']);
+            $('#type').val(doc['events'][i]['category']);
             $('#date').val(doc['events'][i]['day']);
             $('#start').val($scope.parseTime(doc['events'][i]['start']));
             $('#end').val($scope.parseTime(doc['events'][i]['end']));
@@ -1085,7 +1109,7 @@ angular.module('momlink.controllers', [])
                 }
             }
             doc['events'][i]['title'] = $('#title').val();
-            doc['events'][i]['type'] = $('#type').val();
+            doc['events'][i]['category'] = $('#type').val();
             doc['events'][i]['day'] = $('#date').val();
             start = $('#date').val() + "T" + $('#start').val();
             end = $('#date').val() + "T" + $('#end').val();
