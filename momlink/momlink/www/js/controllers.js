@@ -476,7 +476,6 @@ angular.module('momlink.controllers', [])
         });*/
         //db.destroy();
     }
-
     /*$scope.getInformation = function () {
         // Which fetches are repeatable.
         // All sends are repeatable.
@@ -510,7 +509,6 @@ angular.module('momlink.controllers', [])
         });
     }*/
     $scope.toggleRightSideMenu = function () {
-        $scope.trackBehavior('side menu triggered')
         $ionicSideMenuDelegate.toggleRight();
     };
 
@@ -608,7 +606,6 @@ angular.module('momlink.controllers', [])
     pageHistory = [];
     $scope.backButtonListener = function () {
         document.addEventListener("backbutton", function (event) {
-            $scope.trackBehavior('used back button')
             //if on homepage then exit app
             if ($('#headline').html() == 'Momlink') {
                 navigator.app.exitApp();
@@ -623,12 +620,7 @@ angular.module('momlink.controllers', [])
             }
         }, false);
     }
-    $scope.clickListener = function () {
-        document.addEventListener("click", function myListener(event) {
-            //console.log(event.target);
-            //console.log(arguments.callee.name)
-        }, false);
-    };
+
 
     //function for registration
     /*
@@ -640,23 +632,23 @@ angular.module('momlink.controllers', [])
     */
 
     //the first page in history should always be home.html
-    currentPage = 'home.html';
+    $scope.currentPage = 'home.html';
     $scope.toNewPage = function (nextPage, nextHeadline, history) {
-        $scope.trackBehavior(nextPage)
         //prevents adding pages to history when using the back button
         if (history != true || nextPage == 'home.html') {
             //empty pageHistory
             if (nextPage == 'home.html') {
                 pageHistory = [];
-                currentPage = 'home.html';
+                $scope.currentPage = 'home.html';
             }
             //save current page and headline to history before moving to requested page
             if (document.getElementById('headline') != null) {
                 var currentHeadline = $('#headline').html();
             }
-            pageHistory.push([currentHeadline, currentPage])
+            pageHistory.push([currentHeadline, $scope.currentPage])
             //console.log(pageHistory)
-            currentPage = nextPage;
+            $scope.currentPage = nextPage;
+            window.localStorage.setItem('currentPage', $scope.currentPage);
         }
         //load in the requested page      
         var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
@@ -673,8 +665,22 @@ angular.module('momlink.controllers', [])
         xhr.send();
     };
 
+    $scope.clickListener = function () {
+        var db = PouchDB('momlink');
+        document.addEventListener("click", function myListener(event) {
+            db.get('userData').then(function (doc) {
+                date = new moment().format('MM/DD/YYYY');
+                time = new moment().format('hh:mm:ssa');
+                if (event.target.getAttribute("ng-click") != null) {
+                    console.log([event.target.getAttribute("ng-click"), window.localStorage.getItem('currentPage'), date, time]);
+                    doc['userData'].push([event.target.getAttribute("ng-click"), window.localStorage.getItem('currentPage'), date, time])
+                }
+                return db.put(doc);
+            })
+        }, false);
+    };
+
     $scope.autoLogin = function () {
-        $scope.trackBehavior('auto login');
         //if they've logged in previously, skip the login screen
         document.addEventListener("deviceready", function () {
             if (window.localStorage.getItem('username') != null && window.localStorage.getItem('password') != null) {
@@ -780,14 +786,12 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('login').then(function (doc) {
             if (user == doc['username'] && pass == doc['password']) {
-                $scope.trackBehavior('logged in');
                 window.localStorage.setItem('username', doc['username'])
                 window.localStorage.setItem('password', doc['password'])
                 //set username and password variables
                 window.location = "templates/main.html";
             }
             else {
-                $scope.trackBehavior('failed login');
                 var alertPopup = $ionicPopup.alert({
                     title: 'Your username or password is incorrect'
                 });
@@ -795,7 +799,6 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.logout = function () {
-        $scope.trackBehavior('logged out');
         window.localStorage.removeItem('username');
         window.localStorage.removeItem('password');
         delete $scope.trackType;
@@ -818,6 +821,7 @@ angular.module('momlink.controllers', [])
     $scope.goToAddEvent = function () {
         title = $scope.trackType.split(/(?=[A-Z])/).splice(1, 100)
         title = title.join(' ')
+        window.localStorage.setItem('currentPage', $scope.trackType + ".html");
         $scope.modal = $ionicModal.fromTemplateUrl($scope.trackType + ".html", {
             scope: $scope,
             animation: 'slide-in-up'
@@ -828,6 +832,7 @@ angular.module('momlink.controllers', [])
     };
     $scope.goToAct = function (act) {
         $scope.selectAct = act;
+        window.localStorage.setItem('currentPage', 'addActivityTime.html');
         $.ajax({
             url: 'addActivityTime.html',
             success: function (data) {
@@ -937,7 +942,6 @@ angular.module('momlink.controllers', [])
 
     //event functions
     $scope.createEvent = function (link, title) {
-        $scope.trackBehavior('created event');
         $scope.returnLink = link;
         $scope.returnTitle = title;
         $scope.modal = $ionicModal.fromTemplateUrl('eventModal.html', {
@@ -949,7 +953,6 @@ angular.module('momlink.controllers', [])
         })
     }
     $scope.saveEvent = function () {
-        $scope.trackBehavior('saved event');
         //checks if all necessary fields have been filled
         var pass = true;
         var fields = { '#title': 'title', '#type': 'type', '#date': 'date', '#start': 'start time', '#end': 'end time' };
@@ -1025,7 +1028,6 @@ angular.module('momlink.controllers', [])
         }
     }
     $scope.viewEvent = function (eventID, link, title) {
-        $scope.trackBehavior('viewed event');
         $scope.returnLink = link;
         $scope.returnTitle = title;
         var db = PouchDB('momlink');
@@ -1076,7 +1078,6 @@ angular.module('momlink.controllers', [])
         });
     }
     $scope.editEvent = function (eventID) {
-        $scope.trackBehavior('edited event');
         $scope.modal = $ionicModal.fromTemplateUrl('editEventModal.html', {
             scope: $scope,
             animation: 'slide-in-up'
@@ -1112,7 +1113,6 @@ angular.module('momlink.controllers', [])
         });
     }
     $scope.updateEvent = function () {
-        $scope.trackBehavior('updated event');
         var db = PouchDB('momlink');
         var questions = [];
         $("input[name=Q]:checked").each(function () {
@@ -1147,7 +1147,6 @@ angular.module('momlink.controllers', [])
         })
     }
     $scope.deleteEvent = function () {
-        $scope.trackBehavior('deleted event');
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
             //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
@@ -1235,16 +1234,6 @@ angular.module('momlink.controllers', [])
     $scope.parseTime = function (time) {
         time = String(time).substr(String(time).indexOf("T") + 1);
         return time;
-    }
-
-    $scope.trackBehavior = function (event) {
-        var db = PouchDB('momlink');
-        db.get('userData').then(function (doc) {
-            date = new moment().format('MM/DD/YYYY');
-            time = new moment().format('hh:mm:ssa');
-            doc['userData'].push([event, date, time])
-            return db.put(doc);
-        })
     }
 
     $scope.inspectDB = function () {

@@ -25,14 +25,14 @@
         <ion-side-menu-content drag-content="false">
             <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderCtrl">
                 <div class="buttons">
-                    <button class="button button-icon icon ion-ios-home" ng-click="toNewPage('home.html', 'Momlink');closeTopMenu()"></button>
+                    <button class="button button-icon icon ion-ios-home" ng-click="toNewPage('home.html', 'Momlink')"></button>
                 </div>
                 <h1 class="title" id="headline">Momlink</h1>
                 <div class="buttons">
                     <button class="button button-icon" ng-click="toggleRightSideMenu()"><i id="menuIcon" class="icon ion-navicon-round"></i></button>
                 </div>
             </ion-header-bar>
-            <div id="content" ng-click="closeTopMenu()" ng-init="fileDownload()">
+            <div id="content" ng-init="fileDownload()">
                 <ion-pane>
                     <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="renderSubheaderDate()">
                         <h2 class="title" id="todaysDate"></h2>
