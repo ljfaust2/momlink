@@ -1842,10 +1842,9 @@ angular.module('momlink.controllers', [])
                     var bestScore = 0;
                     html += '<p>Quiz Attempts: ' + Object.keys(article['quizHistory']).length + '</p>';
                     for (j in article['quizHistory']) {
-                        if (article['quizHistory'][j].substring(0, 1) > String(bestScore).substring(0, 1)) {
-                            bestScore = article['quizHistory'][j]
+                        if (article['quizHistory'][j][0].substring(0, 1) > String(bestScore).substring(0, 1)) {
+                            bestScore = article['quizHistory'][j][0];
                         }
-                        //console.log(article['quizHistory'][j])
                     }
                     html += '<p>Best Score: ' + bestScore + '</p>';
                     html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz</button>`;
@@ -1955,6 +1954,7 @@ angular.module('momlink.controllers', [])
         var score = 0;
         var finalScore;
         db.get('articles').then(function (doc) {
+            var usersAnswers = [];
             sharedArticles = doc[type];
             for (i in sharedArticles) {
                 article = sharedArticles[i]
@@ -1962,6 +1962,7 @@ angular.module('momlink.controllers', [])
                     quiz = article['quiz'];
                     for (j in quiz) {
                         selectedAnswer = $(`input[name="` + String(j) + `"]:checked`, `#`.concat(j)).val();
+                        usersAnswers.push(selectedAnswer);
                         correctAnswer = quiz[j][1][quiz[j][2]];
                         if (selectedAnswer == correctAnswer) {
                             score++;
@@ -1969,7 +1970,7 @@ angular.module('momlink.controllers', [])
                     }
                     finalScore = score + '/' + quiz.length;
                     //also need to record answers selected
-                    article['quizHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = finalScore;
+                    article['quizHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = [finalScore, usersAnswers];
                     return db.put(doc)
                 }
             }
