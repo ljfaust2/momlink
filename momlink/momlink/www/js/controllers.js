@@ -621,16 +621,6 @@ angular.module('momlink.controllers', [])
         }, false);
     }
 
-
-    //function for registration
-    /*
-    $scope.register = function () {
-        call initialize db
-        add info to login table
-        use current day as starting date for profile
-    };
-    */
-
     //the first page in history should always be home.html
     $scope.currentPage = 'home.html';
     $scope.toNewPage = function (nextPage, nextHeadline, history) {
@@ -668,16 +658,27 @@ angular.module('momlink.controllers', [])
     $scope.clickListener = function () {
         var db = PouchDB('momlink');
         document.addEventListener("click", function myListener(event) {
-            db.get('userData').then(function (doc) {
-                date = new moment().format('MM/DD/YYYY');
-                time = new moment().format('hh:mm:ssa');
-                if (event.target.getAttribute("ng-click") != null) {
+            if (event.target.getAttribute("ng-click") != null && event.target.getAttribute("ng-click") != '$buttonTapped(button, $event)') {
+                db.get('userData').then(function (doc) {
+                    date = new moment().format('MM/DD/YYYY');
+                    time = new moment().format('hh:mm:ssa');
                     console.log([event.target.getAttribute("ng-click"), window.localStorage.getItem('currentPage'), date, time]);
                     doc['userData'].push([event.target.getAttribute("ng-click"), window.localStorage.getItem('currentPage'), date, time])
-                }
-                return db.put(doc);
-            })
+                    return db.put(doc);
+                })
+            }
         }, false);
+    };
+//clickTracker handles popups that cannot be tracked via clickListener
+    $scope.clickTracker = function (event) {
+        var db = PouchDB('momlink');
+        db.get('userData').then(function (doc) {
+            date = new moment().format('MM/DD/YYYY');
+            time = new moment().format('hh:mm:ssa');
+            console.log([event, window.localStorage.getItem('currentPage'), date, time]);
+            doc['userData'].push([event, window.localStorage.getItem('currentPage'), date, time])
+            return db.put(doc);
+        })
     };
 
     $scope.autoLogin = function () {
@@ -850,6 +851,7 @@ angular.module('momlink.controllers', [])
                 buttons: [
                     {
                         text: 'Call', onTap: function (e) {
+                            $scope.clickTracker('call');
                             window.location.href = "tel://" + '1-' + phone;
                             return 'call';
                         },
@@ -857,6 +859,7 @@ angular.module('momlink.controllers', [])
                     },
                     {
                         text: 'Text', onTap: function (e) {
+                            $scope.clickTracker('text');
                             text();
                             return 'text';
                         },
@@ -864,6 +867,7 @@ angular.module('momlink.controllers', [])
                     },
                     {
                         text: 'Email', onTap: function (e) {
+                            $scope.clickTracker('email');
                             mail();
                             return 'email';
                         },
@@ -871,6 +875,7 @@ angular.module('momlink.controllers', [])
                     },
                     {
                         text: 'Cancel', onTap: function (e) {
+                            $scope.clickTracker('cancelMessage');
                             return 'cancel';
                         },
                         type: 'button-stable'
@@ -885,6 +890,7 @@ angular.module('momlink.controllers', [])
                 buttons: [
                     {
                         text: 'Call', onTap: function (e) {
+                            $scope.clickTracker('call');
                             window.location.href = "tel://" + '1-' + phone;
                             return 'call';
                         },
@@ -892,6 +898,7 @@ angular.module('momlink.controllers', [])
                     },
                     {
                         text: 'Text', onTap: function (e) {
+                            $scope.clickTracker('text');
                             text();
                             return 'text';
                         },
@@ -899,6 +906,7 @@ angular.module('momlink.controllers', [])
                     },
                     {
                         text: 'Cancel', onTap: function (e) {
+                            $scope.clickTracker('cancelMessage');
                             return 'cancel';
                         },
                         type: 'button-stable'
@@ -1062,13 +1070,17 @@ angular.module('momlink.controllers', [])
                 buttons: [
                     {
                         text: 'Edit', onTap: function (e) {
+                            $scope.clickTracker('editEvent');
                             $scope.editEvent(eventID);
                             return 'Cancel';
                         },
                         type: 'button-positive'
                     },
                   {
-                      text: 'Close', onTap: function (e) { return 'Cancel'; },
+                      text: 'Close', onTap: function (e) {
+                          $scope.clickTracker('closeEvent');
+                          return 'Cancel';
+                      },
                       type: 'button-positive'
                   }
                 ],
@@ -1497,7 +1509,6 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.renderConversation = function (type, name, phone, email) {
-        console.log('what');
         var html = '';
         if (type == 'referrals') { show = 'showReferralContacts()'; }
         else { show = 'showPNCCContacts()'; }
@@ -1940,6 +1951,7 @@ angular.module('momlink.controllers', [])
                   {
                       text: 'Finish', onTap: function (e) {
                           //score the quiz
+                          $scope.clickTracker('finishQuiz');
                           $scope.gradeQuiz(type, articleID, category);
                           return 'Create';
                       },
@@ -1981,6 +1993,7 @@ angular.module('momlink.controllers', [])
                 buttons: [
                   {
                       text: 'Finish', onTap: function (e) {
+                          $scope.clickTracker('closeQuizResults');
                           return 'Create';
                       },
                       type: 'button-positive'
@@ -2264,6 +2277,7 @@ angular.module('momlink.controllers', [])
                 buttons: [
                   {
                       text: 'Finish', onTap: function (e) {
+                          $scope.clickTracker('finishSurvey');
                           $scope.saveSurvey(eventID);
                           return 'Create';
                       },
@@ -2351,18 +2365,21 @@ angular.module('momlink.controllers', [])
                     buttons: [
                         {
                             text: 'Yes', onTap: function (e) {
+                                $scope.clickTracker('contactedReferral(yes)');
                                 scheduleMeeting(doc['referrals'][i]['email'], doc['referrals'][i]['phone']);
                             },
                             type: 'button-positive'
                         },
                         {
                             text: 'No', onTap: function (e) {
+                                $scope.clickTracker('contactedReferral(no)');
                                 $scope.newMessage(doc['referrals'][i]['email'], doc['referrals'][i]['phone']);
                             },
                             type: 'button-positive'
                         },
                         {
                             text: 'Cancel', onTap: function (e) {
+                                $scope.clickTracker('contactedReferral(cancel)');
                                 return 'cancel';
                             },
                             type: 'button-stable'
@@ -2381,12 +2398,14 @@ angular.module('momlink.controllers', [])
                     {
                         text: 'Yes', onTap: function (e) {
                             window.localStorage.setItem('referralID', id);
+                            $scope.clickTracker('scheduledReferralMeeting(yes)');
                             $scope.createEvent('referrals.html', 'Referrals');
                         },
                         type: 'button-positive'
                     },
                     {
                         text: 'No', onTap: function (e) {
+                            $scope.clickTracker('scheduledReferralMeeting(no)');
                             $scope.newMessage();
                         },
                         type: 'button-positive'
