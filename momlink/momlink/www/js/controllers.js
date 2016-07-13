@@ -558,9 +558,9 @@ angular.module('momlink.controllers', [])
             })
         }
     };
-    $scope.renderArticlesHeader = function () {
+    $scope.resetArticleHeader = function () {
         var db = PouchDB('momlink');
-        var k = 0;
+        cycle1 = 0;
         db.get('articles').then(function (doc) {
             articles = doc['shared'];
             if (articles == '') {
@@ -568,34 +568,59 @@ angular.module('momlink.controllers', [])
                 $compile($('#articlesHeader'))($scope);
             }
             else {
-                function renderArticle(index) {
-                    for (j in articles) {
-                        articleHtml = `<div class="row centerWhite" ng-controller="EducationCtrl">`;
-                        var img;
-                        if (articles[k]['category'] == 'Smoking') { img = '../img/articles/smoking.png' }
-                        if (articles[k]['category'] == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
-                        if (articles[k]['category'] == 'Diet') { img = '../img/articles/diet.png' }
-                        articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
-                        articleHtml += `<div class="col no-padding" align="left">`;
-                        articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[k]['description'] + `</span>`;
-                        articleHtml += `<br /><a ng-click="renderArticle('shared','` + articles[k]['id'] + `')" style="color:white"><u style="font-size: 110%;">Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared','` + articles[k]['id'] + `')" style="color:white"><u style="font-size: 110%;">Take Quiz</u></a>`;
-                        articleHtml += `</div></div>`;
-                        $('#articlesHeader').fadeOut("slow", function () {
-                            $('#articlesHeader').html(articleHtml);
-                            $compile($('#articlesHeader'))($scope);
-                            $('#articlesHeader').fadeIn("slow");
-                        });
+                articleHtml = `<div class="row centerWhite" ng-controller="EducationCtrl">`;
+                var img;
+                if (articles[cycle1]['category'] == 'Smoking') { img = '../img/articles/smoking.png' }
+                if (articles[cycle1]['category'] == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
+                if (articles[cycle1]['category'] == 'Diet') { img = '../img/articles/diet.png' }
+                articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
+                articleHtml += `<div class="col no-padding" align="left">`;
+                articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle1]['description'] + `</span>`;
+                articleHtml += `<br /><a ng-click="renderArticle('shared',` + String(articles[cycle1]['id']) + `);clickTracker('renderArticle(shared)')" style="color:white"><u style="font-size: 110%;">Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared',` + String(articles[cycle1]['id']) + `);clickTracker('renderQuiz(shared)')" style="color:white"><u style="font-size: 110%;">Take Quiz</u></a>`;
+                articleHtml += `</div></div>`;
+                $('#articlesHeader').html(articleHtml);
+                $compile($('#articlesHeader'))($scope);
+            }
+        })
+    };
+    $scope.renderArticlesHeader = function () {
+        var db = PouchDB('momlink');
+        cycle = 0;
+        db.get('articles').then(function (doc) {
+            articles = doc['shared'];
+            if (articles == '') {
+                $('#articlesHeader').html('No New Articles');
+                $compile($('#articlesHeader'))($scope);
+            }
+            else {
+                renderHeaderArticle = function () {
+                    articleHtml = `<div class="row centerWhite" ng-controller="EducationCtrl">`;
+                    var img;
+                    if (articles[cycle]['category'] == 'Smoking') { img = '../img/articles/smoking.png' }
+                    if (articles[cycle]['category'] == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
+                    if (articles[cycle]['category'] == 'Diet') { img = '../img/articles/diet.png' }
+                    articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
+                    articleHtml += `<div class="col no-padding" align="left">`;
+                    articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle]['description'] + `</span>`;
+                    articleHtml += `<br /><a ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderArticle(shared)')" style="color:white"><u style="font-size: 110%;">Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderQuiz(shared)')" style="color:white"><u style="font-size: 110%;">Take Quiz</u></a>`;
+                    articleHtml += `</div></div>`;
+                    $('#articlesHeader').fadeOut("slow", function () {
+                        $('#articlesHeader').html(articleHtml);
+                        $compile($('#articlesHeader'))($scope);
+                        $('#articlesHeader').fadeIn("slow");
+                    });
+                    if (cycle == (articles.length - 1)) {
+                        cycle = 0;
                     }
-                    k++;
-                    if (k == articles.length) {
-                        k = 0;
+                    else {
+                        cycle++;
                     }
                 }
-                renderArticle(k);
+                renderHeaderArticle();
                 //cycle through new/unread articles    
                 (function cycleTodaysEvents(i) {
                     setTimeout(function () {
-                        renderArticle(k);
+                        renderHeaderArticle();
                         if (--i) cycleTodaysEvents(i);
                     }, 9000)
                 })(Number.POSITIVE_INFINITY);
@@ -611,6 +636,7 @@ angular.module('momlink.controllers', [])
                 navigator.app.exitApp();
             }
             else {
+                $scope.clickTracker('backButton');
                 lastPage = pageHistory.pop();
                 //console.log(pageHistory)
                 headline = lastPage[0];
@@ -669,7 +695,7 @@ angular.module('momlink.controllers', [])
             }
         }, false);
     };
-//clickTracker handles popups that cannot be tracked via clickListener
+    //clickTracker handles popups that cannot be tracked via clickListener
     $scope.clickTracker = function (event) {
         var db = PouchDB('momlink');
         db.get('userData').then(function (doc) {
@@ -685,13 +711,12 @@ angular.module('momlink.controllers', [])
         //if they've logged in previously, skip the login screen
         document.addEventListener("deviceready", function () {
             if (window.localStorage.getItem('username') != null && window.localStorage.getItem('password') != null) {
-                $scope.renderArticlesHeader();
+                window.localStorage.setItem('currentPage', 'home.html')
                 window.location = "templates/main.html";
             }
             else {
                 //add this in to remove white flash
                 //$(window).bind("load", function () {
-                $scope.renderArticlesHeader();
                 navigator.splashscreen.hide()
                 //});
             }
@@ -1012,7 +1037,6 @@ angular.module('momlink.controllers', [])
                 //update referral meeting
                 referral = window.localStorage.getItem('referralID');
                 if (referral != null) {
-                    console.log(window.localStorage.getItem('referralID'))
                     db.get('referrals').then(function (doc) {
                         //i = doc['referrals'].findIndex(function (e) { return e.id === referral });
                         for (i in doc['referrals']) {
@@ -1036,6 +1060,7 @@ angular.module('momlink.controllers', [])
         }
     }
     $scope.viewEvent = function (eventID, link, title) {
+        $scope.clickTracker('viewEvent');
         $scope.returnLink = link;
         $scope.returnTitle = title;
         var db = PouchDB('momlink');

@@ -20,7 +20,7 @@
     <script src="../js/controllers.js"></script>
     <link href="../css/style.css" rel="stylesheet">
 </head>
-<body ng-app="momlink" ng-controller="HeaderCtrl" ng-init="backButtonListener(); clickListener(); removeSplash();">
+<body ng-app="momlink" ng-controller="HeaderCtrl" ng-init="backButtonListener(); clickListener(); removeSplash(); renderArticlesHeader();">
     <ion-side-menus>
         <ion-side-menu-content drag-content="false">
             <ion-header-bar align-title="middle" class="bar-positive" ng-controller="HeaderCtrl">
@@ -32,13 +32,13 @@
                     <button class="button button-icon" ng-click="toggleRightSideMenu()"><i id="menuIcon" class="icon ion-navicon-round"></i></button>
                 </div>
             </ion-header-bar>
-            <div id="content" ng-init="fileDownload()">
+            <div id="content">
                 <ion-pane>
                     <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="renderSubheaderDate()">
                         <h2 class="title" id="todaysDate"></h2>
                     </ion-subheader-bar>
                     <ion-view>
-                        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderBadges();">
+                        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderBadges();">
                             <ion-slides style="height:30%; background-color:deeppink;">
                                 <ion-slide-page>
                                     <div id="appointmentsHeader" class="centerWhite"></div>
