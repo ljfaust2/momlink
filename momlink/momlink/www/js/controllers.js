@@ -77,7 +77,8 @@ angular.module('momlink.controllers', [])
                             "dateSurveyGiven": '7/18/2016',
                             "dateSurveyTaken": ''
                         }
-                    ]
+                    ],
+                    "questions": ['Q1', 'Q2', 'Q3']
                 });
             }
         });
@@ -578,7 +579,8 @@ angular.module('momlink.controllers', [])
                 articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
                 articleHtml += `<div class="col no-padding" align="left">`;
                 articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle1]['description'] + `</span>`;
-                articleHtml += `<br /><a ng-click="renderArticle('shared',` + String(articles[cycle1]['id']) + `);clickTracker('renderArticle(shared)')" style="color:white"><u style="font-size: 110%;">Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared',` + String(articles[cycle1]['id']) + `);clickTracker('renderQuiz(shared)')" style="color:white"><u style="font-size: 110%;">Take Quiz</u></a>`;
+                articleHtml += `<button class="button button-small button-stable" ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderArticle(shared)')">Read More</button>&nbsp;`;
+                articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderQuiz(shared)')">Take Quiz</button>`;
                 articleHtml += `</div></div>`;
                 $('#articlesHeader').html(articleHtml);
                 $compile($('#articlesHeader'))($scope);
@@ -604,7 +606,8 @@ angular.module('momlink.controllers', [])
                     articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
                     articleHtml += `<div class="col no-padding" align="left">`;
                     articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle]['description'] + `</span>`;
-                    articleHtml += `<br /><a ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderArticle(shared)')" style="color:white"><u style="font-size: 110%;">Read More</u></a>&nbsp;<a ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderQuiz(shared)')" style="color:white"><u style="font-size: 110%;">Take Quiz</u></a>`;
+                    articleHtml += `<button class="button button-small button-stable" ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderArticle(shared)')">Read More</button>&nbsp;`;
+                    articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderQuiz(shared)')">Take Quiz</button>`;
                     articleHtml += `</div></div>`;
                     $('#articlesHeader').fadeOut("slow", function () {
                         $('#articlesHeader').html(articleHtml);
@@ -988,78 +991,56 @@ angular.module('momlink.controllers', [])
         })
     }
     $scope.saveEvent = function () {
-        //checks if all necessary fields have been filled
-        var pass = true;
-        var fields = { '#title': 'title', '#type': 'type', '#date': 'date', '#start': 'start time', '#end': 'end time' };
-        for (var key in fields) {
-            if ($(key).val() == null || $(key).val() == '') {
-                var alertPopup = $ionicPopup.alert({
-                    title: 'Please select a ' + fields[key],
-                });
-                alertPopup;
-                pass = false;
-                return;
-            }
-        }
-        if ($('#start').val() > $('#end').val()) {
-            var alertPopup = $ionicPopup.alert({
-                title: 'Starting time must occur before ending time',
-            });
-            alertPopup;
-            pass = false;
-        }
-        if (pass == true) {
-            var db = PouchDB('momlink');
-            start = $('#date').val() + "T" + $('#start').val();
-            end = $('#date').val() + "T" + $('#end').val();
-            var questions = [];
-            $("input[name=Q]:checked").each(function () {
-                questions.push($(this).val())
-            });
-            db.get('events').then(function (doc) {
-                var id = moment().format('MM-DD-YYYYThh:mm:ssa')
-                $scope.eventID = id;
-                var event = {
-                    "id": id,
-                    "title": $('#title').val(),
-                    "category": $("#type").val(),
-                    "day": $('#date').val(),
-                    "start": start,
-                    "end": end,
-                    "venue": $('#venue').val(),
-                    "description": $('#description').val(),
-                    "questions": questions,
-                    "color": $scope.getColor($('#type').val()),
-                    "viewed": '1',
-                    "scheduledBy": '0'
-                };
-                doc['events'].push(event);
-                return db.put(doc);
-            }).then(function (doc) {
-                //update referral meeting
-                referral = window.localStorage.getItem('referralID');
-                if (referral != null) {
-                    db.get('referrals').then(function (doc) {
-                        //i = doc['referrals'].findIndex(function (e) { return e.id === referral });
-                        for (i in doc['referrals']) {
-                            if (doc['referrals'][i]['id'] === referral) {
-                                break;
-                            }
+        var db = PouchDB('momlink');
+        start = $('#date').val() + "T" + $('#start').val();
+        end = $('#date').val() + "T" + $('#end').val();
+        var questions = [];
+        $("input[name=Q]:checked").each(function () {
+            questions.push($(this).val())
+        });
+        db.get('events').then(function (doc) {
+            var id = moment().format('MM-DD-YYYYThh:mm:ssa')
+            $scope.eventID = id;
+            var event = {
+                "id": id,
+                "title": $('#title').val(),
+                "category": $("#type").val(),
+                "day": $('#date').val(),
+                "start": start,
+                "end": end,
+                "venue": $('#venue').val(),
+                "description": $('#description').val(),
+                "questions": questions,
+                "color": $scope.getColor($('#type').val()),
+                "viewed": '1',
+                "scheduledBy": '0'
+            };
+            doc['events'].push(event);
+            return db.put(doc);
+        }).then(function (doc) {
+            //update referral meeting
+            referral = window.localStorage.getItem('referralID');
+            if (referral != null) {
+                db.get('referrals').then(function (doc) {
+                    //i = doc['referrals'].findIndex(function (e) { return e.id === referral });
+                    for (i in doc['referrals']) {
+                        if (doc['referrals'][i]['id'] === referral) {
+                            break;
                         }
-                        doc['referrals'][i]['meeting'] = $scope.eventID;
-                        return db.put(doc);
-                    }).then(function (doc) {
-                        $scope.toNewPage('referrals.html', 'Referrals');
-                        $scope.closeModal();
-                        window.localStorage.removeItem('referralID')
-                    });
-                }
-                else {
-                    $scope.toNewPage('calendar.html', 'Calendar');
+                    }
+                    doc['referrals'][i]['meeting'] = $scope.eventID;
+                    return db.put(doc);
+                }).then(function (doc) {
+                    $scope.toNewPage('referrals.html', 'Referrals');
                     $scope.closeModal();
-                }
-            });
-        }
+                    window.localStorage.removeItem('referralID')
+                });
+            }
+            else {
+                $scope.toNewPage('calendar.html', 'Calendar');
+                $scope.closeModal();
+            }
+        });
     }
     $scope.viewEvent = function (eventID, link, title) {
         $scope.clickTracker('viewEvent');
@@ -1218,8 +1199,30 @@ angular.module('momlink.controllers', [])
         })
     };
     $scope.goToEventPart2 = function () {
-        $('#eventPart1').css('display', 'none')
-        $('#eventPart2').css('display', '')
+        var pass = true;
+        var fields = { '#title': 'title', '#type': 'type', '#date': 'date', '#start': 'start time', '#end': 'end time' };
+        for (var key in fields) {
+            if ($(key).val() == null || $(key).val() == '') {
+                var alertPopup = $ionicPopup.alert({
+                    title: 'Please select a ' + fields[key],
+                });
+                alertPopup;
+                pass = false;
+                return;
+            }
+        }
+        if ($('#start').val() > $('#end').val()) {
+            var alertPopup = $ionicPopup.alert({
+                title: 'Starting time must occur before ending time',
+            });
+            alertPopup;
+            pass = false;
+        }
+        //checks if all necessary fields have been filled before moving to part 2
+        if (pass == true) {
+            $('#eventPart1').css('display', 'none')
+            $('#eventPart2').css('display', '')
+        }
     }
     $scope.goToEventPart1 = function () {
         $('#eventPart1').css('display', '')
@@ -1460,7 +1463,7 @@ angular.module('momlink.controllers', [])
     };
 })
 
-.controller('CalendarCtrl', function ($scope, $ionicPopup) {
+.controller('CalendarCtrl', function ($scope, $ionicPopup, $compile) {
     $scope.showCalendar = function () {
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
@@ -1485,6 +1488,86 @@ angular.module('momlink.controllers', [])
     $scope.filterEvents = function (num) {
         $('#filter').html(num)
         $('#calendar').fullCalendar('rerenderEvents');
+    };
+    $scope.renderEventQuestions = function () {
+        var questionsHtml = '';
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            for (i in doc['questions']) {
+                questionsHtml += `<div class="item item-checkbox item-icon-right" on-hold="deleteQuestion('` + doc['questions'][i] + `')">` + doc['questions'][i] + `<label class="checkbox"><input type="checkbox" name="Q" value="` + doc['questions'][i] + `"></label></div>`;
+            }
+            $('#eventQuestions').html(questionsHtml);
+            $compile($('#eventQuestions'))($scope);
+        })
+    };
+    $scope.addQuestion = function () {
+        $ionicPopup.show({
+            template: `<input id="question" type="text">`,
+            title: 'Add question',
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'Add',
+                  type: 'button-positive',
+                  onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      db.get('events').then(function (doc) {
+                          doc['questions'].push($('#question').val())
+                          return db.put(doc);
+                      }).then(function () {
+                          $scope.renderEventQuestions();
+                          $scope.repopulateQuestions();
+                      })
+                  }
+              },
+              { text: 'Cancel' }
+            ]
+        });
+    };
+    $scope.deleteQuestion = function (question) {
+        $ionicPopup.show({
+            title: 'Are you sure you want to delete this question?',
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'Delete',
+                  type: 'button-assertive',
+                  onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      db.get('events').then(function (doc) {
+                          for (i in doc['questions']) {
+                              if (doc['questions'][i] === question) {
+                                  break;
+                              }
+                          }
+                          doc['questions'].splice(i, 1)
+                          return db.put(doc);
+                      }).then(function () {
+                          $scope.renderEventQuestions();
+                          $scope.repopulateQuestions();
+                      })
+                  }
+              },
+              { text: 'Cancel' }
+            ]
+        });
+    };
+    $scope.repopulateQuestions = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === $scope.eventID) {
+                    break;
+                }
+            }
+            for (j in doc['events'][i]['questions']) {
+                $("input[name=Q]").each(function () {
+                    if (doc['events'][i]['questions'][j] == $(this).val()) {
+                        $(this).prop('checked', true);
+                    }
+                });
+            }
+        });
     };
 })
 
@@ -1885,7 +1968,12 @@ angular.module('momlink.controllers', [])
                         }
                     }
                     html += '<p>Best Score: ' + bestScore + '</p>';
-                    html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz</button>`;
+                    if (type == 'shared') {
+                        html += `<button class="button button-small button-positive" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz</button>`;
+                    }
+                    else {
+                        html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz</button>`;
+                    }
                     html += '</div>';
                 }
             }
@@ -1976,14 +2064,20 @@ angular.module('momlink.controllers', [])
                 template: html,
                 buttons: [
                   {
-                      text: 'Finish', onTap: function (e) {
+                      text: 'Grade', onTap: function (e) {
                           //score the quiz
                           $scope.clickTracker('finishQuiz');
                           $scope.gradeQuiz(type, articleID, category);
                           return 'Create';
                       },
                       type: 'button-positive'
-                  }
+                  },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            return 'Close';
+                        },
+                        type: 'button-stable'
+                    }
                 ],
             });
         });
