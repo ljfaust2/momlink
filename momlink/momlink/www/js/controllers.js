@@ -286,7 +286,7 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
-        /*db.get('classes').catch(function (err) {
+        db.get('classes').catch(function (err) {
             if (err.status === 404) {
                 db.put({
                     "_id": "classes",
@@ -476,7 +476,7 @@ angular.module('momlink.controllers', [])
                     ]
                 });
             }
-        });*/
+        });
         //db.destroy();
     }
     /*$scope.getInformation = function () {
@@ -579,8 +579,8 @@ angular.module('momlink.controllers', [])
                 articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
                 articleHtml += `<div class="col no-padding" align="left">`;
                 articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle1]['description'] + `</span>`;
-                articleHtml += `<button class="button button-small button-stable" ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderArticle(shared)')">Read More</button>&nbsp;`;
-                articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderQuiz(shared)')">Take Quiz</button>`;
+                articleHtml += `<button class="button button-small button-stable" ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `)">Read More</button>&nbsp;`;
+                articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `)">Take Quiz</button>`;
                 articleHtml += `</div></div>`;
                 $('#articlesHeader').html(articleHtml);
                 $compile($('#articlesHeader'))($scope);
@@ -606,8 +606,8 @@ angular.module('momlink.controllers', [])
                     articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
                     articleHtml += `<div class="col no-padding" align="left">`;
                     articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle]['description'] + `</span>`;
-                    articleHtml += `<button class="button button-small button-stable" ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderArticle(shared)')">Read More</button>&nbsp;`;
-                    articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `);clickTracker('renderQuiz(shared)')">Take Quiz</button>`;
+                    articleHtml += `<button class="button button-small button-stable" ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `)">Read More</button>&nbsp;`;
+                    articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `)">Take Quiz</button>`;
                     articleHtml += `</div></div>`;
                     $('#articlesHeader').fadeOut("slow", function () {
                         $('#articlesHeader').html(articleHtml);
@@ -653,7 +653,7 @@ angular.module('momlink.controllers', [])
     }
 
     //the first page in history should always be home.html
-    $scope.currentPage = 'home.html';
+    var currentPage = 'home.html';
     $scope.toNewPage = function (nextPage, nextHeadline, history) {
         //prevents adding pages to history when using the back button
         if (history != true || nextPage == 'home.html') {
@@ -666,10 +666,8 @@ angular.module('momlink.controllers', [])
             if (document.getElementById('headline') != null) {
                 var currentHeadline = $('#headline').html();
             }
-            pageHistory.push([currentHeadline, $scope.currentPage])
-            //console.log(pageHistory)
-            $scope.currentPage = nextPage;
-            window.localStorage.setItem('currentPage', $scope.currentPage);
+            pageHistory.push([currentHeadline, currentPage])
+            currentPage = nextPage;
         }
         //load in the requested page      
         var xhr = typeof XMLHttpRequest != 'undefined' ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
@@ -689,12 +687,20 @@ angular.module('momlink.controllers', [])
     $scope.clickListener = function () {
         var db = PouchDB('momlink');
         document.addEventListener("click", function myListener(event) {
-            if (event.target.getAttribute("ng-click") != null && event.target.getAttribute("ng-click") != '$buttonTapped(button, $event)') {
+            clickFunction = event.target.getAttribute("ng-click");
+            if (clickFunction != null && clickFunction != '$buttonTapped(button, $event)') {
+                //grab modal headline first, if that doesn't exist then grab app headline
+                if ($('#modalHeadline').html() != null) {
+                    currentPage = $('#modalHeadline').html();
+                }
+                else {
+                    currentPage = $('#headline').html();
+                }
                 db.get('userData').then(function (doc) {
                     date = new moment().format('MM/DD/YYYY');
                     time = new moment().format('hh:mm:ssa');
-                    console.log([event.target.getAttribute("ng-click"), window.localStorage.getItem('currentPage'), date, time]);
-                    doc['userData'].push([event.target.getAttribute("ng-click"), window.localStorage.getItem('currentPage'), date, time])
+                    console.log([currentPage, clickFunction, date, time]);
+                    doc['userData'].push([currentPage, clickFunction, date, time])
                     return db.put(doc);
                 })
             }
@@ -702,12 +708,14 @@ angular.module('momlink.controllers', [])
     };
     //clickTracker handles popups that cannot be tracked via clickListener
     $scope.clickTracker = function (event) {
+        //grab modal headline first, if that doesn't exist then grab app headline
+        currentPage = $('#headline').html();
         var db = PouchDB('momlink');
         db.get('userData').then(function (doc) {
             date = new moment().format('MM/DD/YYYY');
             time = new moment().format('hh:mm:ssa');
-            console.log([event, window.localStorage.getItem('currentPage'), date, time]);
-            doc['userData'].push([event, window.localStorage.getItem('currentPage'), date, time])
+            console.log([currentPage, event, date, time]);
+            doc['userData'].push([currentPage, event, date, time])
             return db.put(doc);
         })
     };
@@ -847,7 +855,6 @@ angular.module('momlink.controllers', [])
         } else {
             $scope.toNewPage('history.html', 'History')
         }
-
     };
     $scope.goToAddEvent = function () {
         title = $scope.trackType.split(/(?=[A-Z])/).splice(1, 100)
@@ -1284,6 +1291,11 @@ angular.module('momlink.controllers', [])
             var docs = res.rows.map(function (row) { return row.doc; });
             console.log(docs);
         }).catch(console.log.bind(console));
+        /*db.get('userData').then(function (doc) {
+            for (i in doc['userData']) {
+                console.log(String(doc['userData'][i]))
+            }
+        })*/
     }
 
     /*$scope.test = function () {
@@ -1641,7 +1653,7 @@ angular.module('momlink.controllers', [])
     };
 })
 
-/*.controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
+.controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showPlans = function () {
         html = `<div class="item item-divider">Plans</div>
                 <div class="item item-thumbnail-left" ng-click="showClasses('crib')">
@@ -1872,8 +1884,47 @@ angular.module('momlink.controllers', [])
         }).then(function (doc) {
             document.getElementById('amount').innerHTML = coupons.length + 'x';
         });
-    }
-})*/
+    };
+    $scope.inventoryList = [
+      { item: "Baby Carrier", price: "7" },
+      { item: "Baby Wipes", price: "1" },
+      { item: "Baby Lotion", price: "1" },
+      { item: "Baby Wash", price: "1" },
+      { item: "Bath Tub", price: "7" },
+      { item: "Bibs", price: "1" },
+      { item: "Blankets - Large", price: "2-3" },
+      { item: "Blankets - Small", price: "1" },
+      { item: "Booster Seat", price: "7" },
+      { item: "Boppy", price: "8" },
+      { item: "Breastfeeding Pads", price: "2" },
+      { item: "Breastfeeding Cover Ups", price: "3" },
+      { item: "Breastfeeding Storage Bags", price: "2" },
+      { item: "Breastfeeding Lotion", price: "2" },
+      { item: "Cabinet Locks", price: "1" },
+      { item: "Clothing - New", price: "2-4" },
+      { item: "Clothing - Old", price: "1" },
+      { item: "Crib Sheets", price: "2" },
+      { item: "Diapers", price: "1" },
+      { item: "Diaper Bags - Large", price: "8" },
+      { item: "Diaper Bags - Small", price: "7" },
+      { item: "High Chairs", price: "14" },
+      { item: "Hooded Towels", price: "3" },
+      { item: "Nail Clippers", price: "1" },
+      { item: "Nasal Aspirator", price: "1" },
+      { item: "Outlet Covers", price: "1" },
+      { item: "Pack-N-Play", price: "14" },
+      { item: "Pack-N-Play Sheets", price: "2" },
+      { item: "Potty Chair - Large", price: "7" },
+      { item: "Potty Chair - Small", price: "6" },
+      { item: "Scratch Mittens", price: "1" },
+      { item: "Sippy Cups", price: "1" },
+      { item: "Snack Cups", price: "1" },
+      { item: "Strollers", price: "14" },
+      { item: "Thermometers", price: "1" },
+      { item: "Underwear", price: "1" },
+      { item: "Washcloths", price: "2" }
+    ]
+})
 
 .controller('EducationCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
     var timer;
@@ -1911,17 +1962,17 @@ angular.module('momlink.controllers', [])
             //render categories
             html += '<div class="row has-header" style="padding-right:0;padding-left:0;padding-top:0">'
             if (type == 'shared') {
-                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All')" style="position:relative">
+                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All');clickTracker('renderCategories(All)')" style="position:relative">
                      <img class="autoSize" src="../img/articles/all.png">
                      <span class ="badge badge-positive topRightBadge">` + totalUnreadArticles + `</span>All</div>`;
             }
             else {
-                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All')" style="position:relative">
+                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All');clickTracker('renderCategories(All)')" style="position:relative">
                      <img class ="autoSize" src="../img/articles/all.png">All</div>`;
             }
             for (i in categories) {
                 //add column
-                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','` + i + `')" style="position:relative">`;
+                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','` + i + `');clickTracker('renderCategories(` + i + `)')" style="position:relative">`;
                 var img;
                 if (i == 'Smoking') { img = '../img/articles/smoking.png' }
                 if (i == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
@@ -3336,45 +3387,3 @@ angular.module('momlink.controllers', [])
         }
     }
 })
-
-/*.controller('DataController', function ($scope, $compile) {
-    $scope.inventoryList = [
-      { item: "Baby Carrier", price: "7" },
-      { item: "Baby Wipes", price: "1" },
-      { item: "Baby Lotion", price: "1" },
-      { item: "Baby Wash", price: "1" },
-      { item: "Bath Tub", price: "7" },
-      { item: "Bibs", price: "1" },
-      { item: "Blankets - Large", price: "2-3" },
-      { item: "Blankets - Small", price: "1" },
-      { item: "Booster Seat", price: "7" },
-      { item: "Boppy", price: "8" },
-      { item: "Breastfeeding Pads", price: "2" },
-      { item: "Breastfeeding Cover Ups", price: "3" },
-      { item: "Breastfeeding Storage Bags", price: "2" },
-      { item: "Breastfeeding Lotion", price: "2" },
-      { item: "Cabinet Locks", price: "1" },
-      { item: "Clothing - New", price: "2-4" },
-      { item: "Clothing - Old", price: "1" },
-      { item: "Crib Sheets", price: "2" },
-      { item: "Diapers", price: "1" },
-      { item: "Diaper Bags - Large", price: "8" },
-      { item: "Diaper Bags - Small", price: "7" },
-      { item: "High Chairs", price: "14" },
-      { item: "Hooded Towels", price: "3" },
-      { item: "Nail Clippers", price: "1" },
-      { item: "Nasal Aspirator", price: "1" },
-      { item: "Outlet Covers", price: "1" },
-      { item: "Pack-N-Play", price: "14" },
-      { item: "Pack-N-Play Sheets", price: "2" },
-      { item: "Potty Chair - Large", price: "7" },
-      { item: "Potty Chair - Small", price: "6" },
-      { item: "Scratch Mittens", price: "1" },
-      { item: "Sippy Cups", price: "1" },
-      { item: "Snack Cups", price: "1" },
-      { item: "Strollers", price: "14" },
-      { item: "Thermometers", price: "1" },
-      { item: "Underwear", price: "1" },
-      { item: "Washcloths", price: "2" }
-    ]
-})*/
