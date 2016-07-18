@@ -73,7 +73,9 @@ angular.module('momlink.controllers', [])
                                 ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer']],
                                 ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer']],
                                 ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer']]
-                                ]
+                                ],
+                            "dateSurveyGiven": '7/18/2016',
+                            "dateSurveyTaken": ''
                         }
                     ]
                 });
@@ -788,7 +790,7 @@ angular.module('momlink.controllers', [])
             })
         }).then(function (doc) {
             //Inbox Badge
-            SMS.listSMS({ box: 'inbox', maxCount: 100000 }, function (data) {
+            /*SMS.listSMS({ box: 'inbox', maxCount: 100000 }, function (data) {
                 for (i in data) {
                     if (data[i].read != 1) {
                         countMessages++;
@@ -799,7 +801,7 @@ angular.module('momlink.controllers', [])
                     $('#inbox').html(html);
                     $compile($('#inbox'))($scope);
                 }
-            }, function (error) { console.log(error) });
+            }, function (error) { console.log(error) });*/
         })
     };
     $scope.removeSplash = function () {
@@ -1465,9 +1467,9 @@ angular.module('momlink.controllers', [])
             $('#calendar').fullCalendar({
                 height: "auto",
                 header: {
-                    left: 'prev, next, today',
+                    left: 'prev,next,today',
                     center: 'title',
-                    right: 'basicDay, basicWeek, month'
+                    right: 'basicDay,basicWeek,month'
                 },
                 defaultView: 'basicDay',
                 events: doc['events'],
@@ -2243,7 +2245,7 @@ angular.module('momlink.controllers', [])
             for (i in events) {
                 if (events[i]['survey'] != null) {
                     if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
-                        html += `<a class="item" ng-click="renderSurvey('` + events[i]['id'] + `')">` + events[i]['title'] + ` follow-up</a>`
+                        html += `<a class="item" ng-click="renderSurvey('` + events[i]['id'] + `')">` + events[i]['title'] + ` follow-up` + ' <p> Given on: ' + events[i]['dateSurveyGiven'] + `</p></a>`;
                     }
                 }
             }
@@ -2260,7 +2262,7 @@ angular.module('momlink.controllers', [])
             for (i in events) {
                 if (events[i]['survey'] != null) {
                     if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length > 2) {
-                        html += `<a class="item" ng-click="">` + events[i]['title'] + ` follow-up</a>`
+                        html += `<a class="item" ng-click="">` + events[i]['title'] + ` follow-up` + ' <p> Taken on: ' + events[i]['dateSurveyTaken'] + `</p></a>`;
                     }
                 }
             }
@@ -2323,6 +2325,7 @@ angular.module('momlink.controllers', [])
                         selectedAnswer = $(`input[name="` + String(j) + `"]:checked`, `#`.concat(j)).val();
                         event['survey'][j].push(selectedAnswer);
                     }
+                    event['dateSurveyTaken'] = moment().format('MM/DD/YYYY');
                     return db.put(doc)
                 }
             }
