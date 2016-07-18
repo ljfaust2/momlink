@@ -43,7 +43,7 @@ angular.module('momlink.controllers', [])
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        { "name": "Danna Shanley", "email": "shanley@gmail.com", "phone": "555-555-5555", "image": "../img/temp/pncc1.jpg" },
+                        { "name": "Danna Shanley", "email": "shanley@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc1.jpg" },
                         { "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "", "image": "../img/temp/pncc2.jpg" },
                         { "name": "Jane Marston", "email": "", "phone": "555-555-5555", "image": "../img/temp/pncc3.jpg" },
                         { "name": "Kendra Venne", "email": "", "phone": "", "image": "../img/temp/pncc4.jpg" }
@@ -788,9 +788,9 @@ angular.module('momlink.controllers', [])
             })
         }).then(function (doc) {
             //Inbox Badge
-            /*SMS.listSMS({ box: '', maxCount: 100000 }, function (data) {
+            SMS.listSMS({ box: 'inbox', maxCount: 100000 }, function (data) {
                 for (i in data) {
-                    if (data[i].seen != 1) {
+                    if (data[i].read != 1) {
                         countMessages++;
                     }
                 }
@@ -799,7 +799,7 @@ angular.module('momlink.controllers', [])
                     $('#inbox').html(html);
                     $compile($('#inbox'))($scope);
                 }
-            }, function (error) { console.log(error) });*/
+            }, function (error) { console.log(error) });
         })
     };
     $scope.removeSplash = function () {
@@ -1465,7 +1465,7 @@ angular.module('momlink.controllers', [])
             $('#calendar').fullCalendar({
                 height: "auto",
                 header: {
-                    left: 'prev,next, today',
+                    left: 'prev, next, today',
                     center: 'title',
                     right: 'basicDay, basicWeek, month'
                 },
@@ -2826,7 +2826,6 @@ angular.module('momlink.controllers', [])
     $scope.clear = function (id, num) {
         $("#" + id).html(num);
     }
-
     var hour = 0;
     var totalMinutes = $('#minute');
     var totalHours = $('#hour');
