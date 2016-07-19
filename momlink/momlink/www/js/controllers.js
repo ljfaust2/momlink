@@ -2993,48 +2993,63 @@ angular.module('momlink.controllers', [])
         }
         else {
             var type;
+            var img;
             switch ($scope.trackType) {
                 case 'addActivity':
                     type = 'activity';
+                    img = '../img/trackers/activity.png';
                     break;
                 case 'addBabyHeartRate':
                     type = 'babyHeartRate';
+                    img = '../img/trackers/babyHeartRate.png';
                     break;
                 case 'addBloodGlucose':
                     type = 'bloodGlucose';
+                    img = '../img/trackers/bloodGlucose.png';
                     break;
                 case 'addBloodIron':
                     type = 'bloodIron';
+                    img = '../img/trackers/bloodIron.png';
                     break;
                 case 'addBloodPressure':
                     type = 'bloodPressure';
+                    img = '../img/trackers/bloodPressure.png';
                     break;
                 case 'addCaffeine':
                     type = 'caffeine';
+                    img = '../img/trackers/caffeine.png';
                     break;
                 case 'addCigarette':
                     type = 'cigarette';
+                    img = '../img/trackers/cigarette.png';
                     break;
                 case 'addNutrition':
                     type = 'nutrition';
+                    img = '../img/trackers/nutrition.png';
                     break;
                 case 'addKicks':
                     type = 'kicks';
+                    img = '../img/trackers/kicks.png';
                     break;
                 case 'addMood':
                     type = 'mood';
+                    img = '../img/trackers/mood.png';
                     break;
                 case 'addPain':
                     type = 'pain';
+                    img = '../img/trackers/pain.png';
                     break;
                 case 'addPill':
                     type = 'pill';
+                    img = '../img/trackers/pill.png';
                     break;
                 case 'addStress':
                     type = 'stress';
+                    img = '../img/trackers/stress.png';
                     break;
                 case 'addWeight':
                     type = 'weight';
+                    img = '../img/trackers/weight.png';
                     break;
             }
             var db = PouchDB('momlink');
@@ -3045,14 +3060,16 @@ angular.module('momlink.controllers', [])
                 elements = doc[type]
                 for (var i in elements) {
                     if (date == elements[i]["date"]) {
-                        if (type == 'activity') {
-                            time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
-                            hist += `<center><div class="item" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')">` + $scope.convert24to12(time) + ` &nbsp; ` + elements[i]["act"] + ` &nbsp; Length: ` + elements[i]["value"] + `</div></center>`;
+                        //get images
+                        if(type == 'activity'){
+                            img = $scope.getActivityImg(elements[i]["act"]);
                         }
-                        else {
-                            time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
-                            hist += `<center><div class="item" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')">` + $scope.convert24to12(time) + `&nbsp; &nbsp; &nbsp; ` + elements[i]["value"] + `</div></center>`;
+                        if (type == 'mood') {
+                            img = $scope.getMoodImg(elements[i]["value"]);
                         }
+                        //add element
+                        time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
+                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')"><img src='` + img + `' ><h2>` + elements[i]["value"] + `</h2><p>Time: ` + $scope.convert24to12(time) + `</p></div>`;
                     }
                 }
                 //if date has no values, then display default image
@@ -3067,7 +3084,54 @@ angular.module('momlink.controllers', [])
             })
         };
     }
+    $scope.getActivityImg = function (type) {
+        switch (type) {
+            case 'Bike':
+                return '../img/activities/bike.png';
+            case 'Clean':
+                return '../img/activities/clean.png';
+            case 'Dance':
+                return '../img/activities/dance.png';
+            case 'Exercise':
+                return '../img/activities/exercise.png';
+            case 'Run':
+                return '../img/activities/run.png';
+            case 'Shop':
+                return '../img/activities/shop.png';
+            case 'Walk':
+                return '../img/activities/walk.png';
+            case 'Walk Dog':
+                return '../img/activities/walk_dog.png';
+        }
+    };
+    $scope.getMoodImg = function (type) {
+        switch (type) {
+            case 'Bored':
+                return '../img/moods/bored.png';
+            case 'Calm':
+                return '../img/moods/calm.png';
+            case 'Cheerful':
+                return '../img/moods/cheerful.png';
+            case 'Excited':
+                return '../img/moods/excited.png';
+            case 'Irritated':
+                return '../img/moods/irritated.png';
+            case 'Neutral':
+                return '../img/moods/neutral.png';
+            case 'Relaxed':
+                return '../img/moods/relaxed.png';
+            case 'Sad':
+                return '../img/moods/sad.png';
+            case 'Tense':
+                return '../img/moods/tense.png';
+        }
+    };
+    /*$scope.getPainImg = function () {
 
+    }
+    $scope.getStressorImg = function () {
+
+    };*/
     $scope.updateFace = function (value) {
         face = "";
         if (value == 1) {
@@ -3097,7 +3161,6 @@ angular.module('momlink.controllers', [])
         document.getElementById("face").src = "../img/painScale/" + face + ".png";
         $('#description').html(description);
     };
-
     $scope.setActive = function (type) {
         document.getElementById('count').classList.remove('activeBorder')
         document.getElementById('count2').classList.remove('activeBorder')

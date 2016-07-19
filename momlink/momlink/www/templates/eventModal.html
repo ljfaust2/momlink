@@ -1,4 +1,5 @@
-﻿<ion-modal-view>
+﻿<script src="../lib/jquery.ddslick.js"></script>
+<ion-modal-view>
     <ion-header-bar align-title="middle" class="bar-positive">
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();">Cancel</button>
         <h1 class="title" id="modalHeadline">Create Event</h1>
@@ -13,7 +14,7 @@
                 Type
                 <select id="type">
                     <option disabled="true" selected>Choose One</option>
-                    <option value="OB Appt">OB Appt</option>
+                    <option value="OB Appt" data-imagesrc="../img/trackers/activity.png">OB Appt</option>
                     <option value="Lab">Lab</option>
                     <option value="Referral">Referral</option>
                     <option value="PNCC">PNCC</option>
