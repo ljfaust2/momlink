@@ -103,6 +103,21 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
+        db.get('nutrition').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "nutrition",
+                    'fruits': [],
+                    "vegetables": [],
+                    "proteins": [],
+                    "grains": [],
+                    "dairy": [],
+                    "fluids": [],
+                    "sweets": [],
+                    "fats/oils": [],
+                });
+            }
+        });
         db.get('articles').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -684,6 +699,7 @@ angular.module('momlink.controllers', [])
         xhr.send();
     };
 
+    //clickTracker handles popups that cannot be tracked via clickListener
     $scope.clickListener = function () {
         var db = PouchDB('momlink');
         document.addEventListener("click", function myListener(event) {
@@ -706,7 +722,6 @@ angular.module('momlink.controllers', [])
             }
         }, false);
     };
-    //clickTracker handles popups that cannot be tracked via clickListener
     $scope.clickTracker = function (event) {
         //grab modal headline first, if that doesn't exist then grab app headline
         currentPage = $('#headline').html();
@@ -1315,50 +1330,79 @@ angular.module('momlink.controllers', [])
     }*/
 })
 
-.controller('NutritionCtrl', function ($scope, $ionicPopup) {
-    $scope.nutritionCircle = function (id, size, min) {
-        var bg = document.getElementById(id);
-        var ctx = ctx = bg.getContext('2d');
-        var image = new Image();
-        var circ = Math.PI * 2;
-        var quart = Math.PI / 2;
-        var draw = function (current) {
-            ctx.beginPath();
-            //need to center based on height and width
-            ctx.arc(bg.width / 2, bg.height / 2, 70, -(quart), ((circ) * current) - quart, false);
-            ctx.stroke();
+.controller('NutritionCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
+    $scope.refreshNutritionPage = function () {
+        //clean canvases
+        var categories = ['fruits', 'vegetables', 'proteins', 'grains', 'dairy', 'fluids', 'sweets', 'fats/oils'];
+        for (i in categories) {
+            var bg = document.getElementById(categories[i]);
+            var ctx = bg.getContext('2d');
+            ctx.clearRect(0, 0, 1000, 1000);
         }
-        if (size >= min && (id != 'sweets' && id != 'fatsoils')) {
-            image.src = '../img/food/star.png';
-            image.onload = function () {
-                ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
-            }
-        }
-        if (size == 100 && (id != 'sweets' && id != 'fatsoils')) {
-            image.src = '../img/food/crown.png';
-            ctx.clearRect(0, 0, bg.width, bg.height);
-            image.onload = function () {
-                ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
-            }
-        }
-        if ((size >= min || size == 100) && (id == 'sweets' || id == 'fatsoils')) {
-            image.src = '../img/food/sadface.png';
-            image.onload = function () {
-                ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
-            }
-        }
-        ctx.lineWidth = 10.0;
-        //draw background line
-        ctx.strokeStyle = '#b5b5b5';
-        draw(1);
-        //draw progress line
-        if (id == 'sweets' || id == 'fatsoils') {
-            ctx.strokeStyle = '#bb1a1d';
-        }
-        else { ctx.strokeStyle = '#2486ae'; }
-        draw(size / 100);
+        //redraw circles
+        $scope.nutritionCircle('fruits', '5', '10');
+        $scope.nutritionCircle('vegetables', '5', '10');
+        $scope.nutritionCircle('proteins', '5', '10');
+        $scope.nutritionCircle('grains', '5', '10');
+        $scope.nutritionCircle('dairy', '5', '10');
+        $scope.nutritionCircle('fluids', '5', '10');
+        $scope.nutritionCircle('sweets', '5', '10');
+        $scope.nutritionCircle('fats/oils', '5', '10');
     };
-    $scope.showFoodFluid = function (food, fluid, hp1, hp2, f1, f2) {
+    $scope.nutritionCircle = function (id, min, max) {
+        var db = PouchDB('momlink');
+        var size = 0;
+        db.get('nutrition').then(function (doc) {
+            //only count those where the day matches
+            for (i in doc[id]) {
+                if (moment($scope.currentDate).format('MM/DD/YYYY') == doc[id][i]['date']) {
+                    size += doc[id][i]['value'];
+                }
+            }
+        }).then(function (doc) {
+            var bg = document.getElementById(id);
+            var ctx = bg.getContext('2d');
+            var image = new Image();
+            var circ = Math.PI * 2;
+            var quart = Math.PI / 2;
+            var draw = function (current) {
+                ctx.beginPath();
+                //need to center based on height and width
+                ctx.arc(bg.width / 2, bg.height / 2, 70, -(quart), ((circ) * current) - quart, false);
+                ctx.stroke();
+            }
+            if (size >= min && (id != 'sweets' && id != 'fats/oils')) {
+                image.src = '../img/food/star.png';
+                image.onload = function () {
+                    ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
+                }
+            }
+            if (size == 100 && (id != 'sweets' && id != 'fats/oils')) {
+                image.src = '../img/food/crown.png';
+                ctx.clearRect(0, 0, bg.width, bg.height);
+                image.onload = function () {
+                    ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
+                }
+            }
+            if ((size >= min || size == 100) && (id == 'sweets' || id == 'fats/oils')) {
+                image.src = '../img/food/sadface.png';
+                image.onload = function () {
+                    ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
+                }
+            }
+            ctx.lineWidth = 10.0;
+            //draw background line
+            ctx.strokeStyle = '#b5b5b5';
+            draw(1);
+            //draw progress line
+            if (id == 'sweets' || id == 'fats/oils') {
+                ctx.strokeStyle = '#bb1a1d';
+            }
+            else { ctx.strokeStyle = '#2486ae'; }
+            draw(size / max);
+        });
+    };
+    $scope.showFoodFluid = function (category, food, fluid, hp1, hp2, f1, f2) {
         $scope.choice = $ionicPopup.show({
             template: '<div class="text-center">' +
                         '<img src="../img/food/' + food + '" ng-click="showFoodAmount()" style="width:100px; height:100px" />' +
@@ -1390,7 +1434,9 @@ angular.module('momlink.controllers', [])
                 title: 'How much?',
                 buttons: [
                   {
-                      text: 'Save', onTap: function (e) { return 'Saved'; },
+                      text: 'Save', onTap: function (e) {
+                          $scope.saveAmount(category, 'solid');
+                      },
                       type: 'button-positive'
                   },
                   {
@@ -1426,7 +1472,9 @@ angular.module('momlink.controllers', [])
                 title: 'How much?',
                 buttons: [
                   {
-                      text: 'Save', onTap: function (e) { return 'Saved'; },
+                      text: 'Save', onTap: function (e) {
+                          $scope.saveAmount(category, 'fluid');
+                      },
                       type: 'button-positive'
                   },
                   {
@@ -1440,7 +1488,7 @@ angular.module('momlink.controllers', [])
             });
         };
     };
-    $scope.showAmount = function (type, hp1, hp2) {
+    $scope.showAmount = function (category, type, hp1, hp2) {
         $ionicPopup.show({
             template: '<div class="row" ng-controller="TrackCtrl">' +
                            '<div class="col text-center">' +
@@ -1463,13 +1511,125 @@ angular.module('momlink.controllers', [])
             title: 'How much did you ' + type + '?',
             buttons: [
               {
-                  text: 'Save', onTap: function (e) { return 'Saved'; },
+                  text: 'Save', onTap: function (e) {
+                      var consistency;
+                      if (category == 'fluids') {
+                          consistency = 'liquid';
+                      }
+                      else {
+                          consistency = 'solid';
+                      }
+                      $scope.saveAmount(category, consistency);
+                  },
                   type: 'button-positive'
               },
               {
                   text: 'Cancel', onTap: function (e) { return 'Cancel'; },
                   type: 'button-positive'
               }
+            ]
+        });
+    };
+    $scope.saveAmount = function (category, consistency) {
+        var db = PouchDB('momlink');
+        value = $('#count').html();
+        db.get('nutrition').then(function (doc) {
+            var element = {
+                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                "date": moment($scope.currentDate).format('MM/DD/YYYY'),
+                "time": moment().format('HH:mm:ss'),
+                "value": parseInt($('#count1').html()) + parseInt($('#count12').html()) / 2,
+                "consistency": consistency
+            };
+            doc[category].push(element);
+            return db.put(doc);
+        }).then(function (doc) {
+            var bg = document.getElementById(category);
+            var ctx = bg.getContext('2d');
+            ctx.clearRect(0, 0, 1000, 1000);
+            $scope.nutritionCircle(category, '5', '10');
+        });
+    };
+    $scope.formatDate = function (d) {
+        var selectedDate = moment(d).format('MMMM Do YYYY')
+        today = moment().format('MMMM Do YYYY')
+        $scope.currentDate = d;
+        if (selectedDate == today) {
+            selectedDate = "Today, ".concat(selectedDate);
+        }
+        return selectedDate;
+    };
+    $scope.increaseDate = function () {
+        var d = new Date($scope.currentDate);
+        d.setDate(d.getDate() + 1)
+        $('#todaysDate').html($scope.formatDate(d));
+    };
+    $scope.decreaseDate = function () {
+        var d = new Date($scope.currentDate);
+        d.setDate(d.getDate() - 1)
+        $('#todaysDate').html($scope.formatDate(d));
+    };
+    $scope.renderNutritionHistory = function (category) {
+        $scope.modal = $ionicModal.fromTemplateUrl('nutritionHistoryModal.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function (modal) {
+            $scope.modal = modal;
+            $scope.modal.show();
+            var db = PouchDB('momlink');
+            db.get('nutrition').then(function (doc) {
+                var html = '';
+                for (i in doc[category]) {
+                    if (moment($scope.currentDate).format('MM/DD/YYYY') == doc[category][i]["date"]) {
+                        html += `<center><div class="item" on-hold="deleteElement('` + category + `','` + doc[category][i]["id"] + `')">` + $scope.convert24to12(doc[category][i]["time"]) + `&nbsp; &nbsp; &nbsp; ` + doc[category][i]["value"] + `</div></center>`;
+                    }
+                }
+                console.log(html)
+                $('#nutritionHistory').html(html);
+                $compile($('#nutritionHistory'))($scope);
+            })
+        })
+    };
+    $scope.closeModal = function () {
+        $scope.refreshNutritionPage();
+        $scope.modal.hide().then(function () {
+            $scope.modal.remove();
+        });
+    };
+    $scope.deleteElement = function (category, id) {
+        $ionicPopup.show({
+            title: 'Are you sure you want to delete this?',
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'Delete',
+                  type: 'button-assertive',
+                  onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      db.get('nutrition').then(function (doc) {
+                          for (i in doc[category]) {
+                              if (doc[category][i]['id'] === id) {
+                                  break;
+                              }
+                          }
+                          doc[category].splice(i, 1)
+                          return db.put(doc);
+                      }).then(function () {
+                          var db = PouchDB('momlink');
+                          db.get('nutrition').then(function (doc) {
+                              var html = '';
+                              for (i in doc[category]) {
+                                  if (moment($scope.currentDate).format('MM/DD/YYYY') == doc[category][i]["date"]) {
+                                      html += `<center><div class="item" on-hold="deleteElement('` + doc[category] + `','` + doc[category][i]["id"] + `')">` + $scope.convert24to12(doc[category][i]["time"]) + `&nbsp; &nbsp; &nbsp; ` + doc[category][i]["value"] + `</div></center>`;
+                                  }
+                              }
+                              $('#nutritionHistory').html(html);
+                              $compile($('#nutritionHistory'))($scope);
+                          })
+                      })
+                  }
+              },
+              { text: 'Cancel' }
             ]
         });
     };
@@ -1796,7 +1956,7 @@ angular.module('momlink.controllers', [])
     $scope.showInventory = function () {
         $ionicPopup.show({
             template: '<style>.popup { height:400px; width:95%; }</style>' +
-                      `<div ng-controller="DataController">
+                      `<div ng-controller="CouponController">
                        <div class="row">
                                 <div class="col text-left">
                                     <u style="font-size:large;">Item</u>
@@ -2799,8 +2959,8 @@ angular.module('momlink.controllers', [])
     };
 })
 
-.controller('TrackCtrl', function ($scope, $ionicModal) {
-    formatDate = function (d) {
+.controller('TrackCtrl', function ($scope, $ionicModal, $ionicPopup, $compile) {
+    $scope.formatDate = function (d) {
         var selectedDate = moment(d).format('MMMM Do YYYY')
         today = moment().format('MMMM Do YYYY')
         $scope.currentDate = d;
@@ -2812,12 +2972,12 @@ angular.module('momlink.controllers', [])
     $scope.increaseDate = function () {
         var d = new Date($scope.currentDate);
         d.setDate(d.getDate() + 1)
-        $('#todaysDate').html(formatDate(d));
+        $('#todaysDate').html($scope.formatDate(d));
     };
     $scope.decreaseDate = function () {
         var d = new Date($scope.currentDate);
         d.setDate(d.getDate() - 1)
-        $('#todaysDate').html(formatDate(d));
+        $('#todaysDate').html($scope.formatDate(d));
     };
     $scope.loadHistory = function () {
         //nutrition is handled differently
@@ -2887,11 +3047,11 @@ angular.module('momlink.controllers', [])
                     if (date == elements[i]["date"]) {
                         if (type == 'activity') {
                             time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
-                            hist += '<center><div class="item">' + $scope.convert24to12(time) + ' &nbsp; ' + elements[i]["act"] + ' &nbsp; Length: ' + elements[i]["value"] + '</div></center>';
+                            hist += `<center><div class="item" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')">` + $scope.convert24to12(time) + ` &nbsp; ` + elements[i]["act"] + ` &nbsp; Length: ` + elements[i]["value"] + `</div></center>`;
                         }
                         else {
                             time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
-                            hist += '<center><div class="item">' + $scope.convert24to12(time) + '&nbsp; &nbsp; &nbsp; ' + elements[i]["value"] + '</div></center>';
+                            hist += `<center><div class="item" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')">` + $scope.convert24to12(time) + `&nbsp; &nbsp; &nbsp; ` + elements[i]["value"] + `</div></center>`;
                         }
                     }
                 }
@@ -2903,6 +3063,7 @@ angular.module('momlink.controllers', [])
                     hist += `</div></div>`;
                 }
                 $('#history').html(hist);
+                $compile($('#history'))($scope);
             })
         };
     }
@@ -3113,29 +3274,34 @@ angular.module('momlink.controllers', [])
             $scope.toNewPage('history.html', 'History');
         });
     }
-})
-
-.controller('PopOverCtrl', function ($scope, $ionicPopover) {
-    $ionicPopover.fromTemplateUrl('popover.html', {
-        scope: $scope
-    }).then(function (popover) {
-        $scope.popover = popover;
-    });
-    $scope.openPopover = function ($event) {
-        $scope.popover.show($event);
+    $scope.deleteElement = function (category, id) {
+        //console.log(category, id)
+        $ionicPopup.show({
+            title: 'Are you sure you want to delete this?',
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'Delete',
+                  type: 'button-assertive',
+                  onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      db.get('track').then(function (doc) {
+                          for (i in doc[category]) {
+                              if (doc[category][i]['id'] === id) {
+                                  break;
+                              }
+                          }
+                          doc[category].splice(i, 1)
+                          return db.put(doc);
+                      }).then(function () {
+                          $scope.loadHistory();
+                      })
+                  }
+              },
+              { text: 'Cancel' }
+            ]
+        });
     };
-    $scope.closePopover = function () {
-        $scope.popover.hide();
-    };
-    $scope.$on('$destroy', function () {
-        $scope.popover.remove();
-    });
-    $scope.$on('popover.hidden', function () {
-        // Execute action
-    });
-    $scope.$on('popover.removed', function () {
-        // Execute action
-    });
 })
 
 .controller('ProfileCtrl', function ($scope) {
@@ -3386,4 +3552,27 @@ angular.module('momlink.controllers', [])
             alert('Failed because: ' + message);
         }
     }
+})
+
+.controller('PopOverCtrl', function ($scope, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('popover.html', {
+        scope: $scope
+    }).then(function (popover) {
+        $scope.popover = popover;
+    });
+    $scope.openPopover = function ($event) {
+        $scope.popover.show($event);
+    };
+    $scope.closePopover = function () {
+        $scope.popover.hide();
+    };
+    $scope.$on('$destroy', function () {
+        $scope.popover.remove();
+    });
+    $scope.$on('popover.hidden', function () {
+        // Execute action
+    });
+    $scope.$on('popover.removed', function () {
+        // Execute action
+    });
 })
