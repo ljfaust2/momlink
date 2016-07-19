@@ -647,7 +647,24 @@ angular.module('momlink.controllers', [])
             }
         })
     };
-
+    $scope.getAppointmentImg = function (type) {
+        switch (type) {
+            case 'OB Appt':
+                return '';
+            case 'Lab':
+                return '';
+            case 'Referral':
+                return '';
+            case 'PNCC':
+                return '';
+            case 'Ultra':
+                return '';
+            case 'Class':
+                return '';
+            case 'Other':
+                return '';
+        }
+    };
     pageHistory = [];
     $scope.backButtonListener = function () {
         document.addEventListener("backbutton", function (event) {
@@ -1140,6 +1157,7 @@ angular.module('momlink.controllers', [])
             }
             $('#title').val(doc['events'][i]['title']);
             $('#type').val(doc['events'][i]['category']);
+            document.getElementById(doc['events'][i]['category']).classList.add('activeBorder');
             $('#date').val(doc['events'][i]['day']);
             $('#start').val($scope.parseTime(doc['events'][i]['start']));
             $('#end').val($scope.parseTime(doc['events'][i]['end']));
@@ -1740,6 +1758,17 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
+    };
+    $scope.selectCategory = function (category) {
+        document.getElementById('OB Appt').classList.remove('activeBorder');
+        document.getElementById('Lab').classList.remove('activeBorder');
+        document.getElementById('Referral').classList.remove('activeBorder');
+        document.getElementById('PNCC').classList.remove('activeBorder');
+        document.getElementById('Ultra').classList.remove('activeBorder');
+        document.getElementById('Class').classList.remove('activeBorder');
+        document.getElementById('Other').classList.remove('activeBorder');
+        document.getElementById(category).classList.add('activeBorder');
+        $('#type').val(category);
     };
 })
 
@@ -3061,7 +3090,7 @@ angular.module('momlink.controllers', [])
                 for (var i in elements) {
                     if (date == elements[i]["date"]) {
                         //get images
-                        if(type == 'activity'){
+                        if (type == 'activity') {
                             img = $scope.getActivityImg(elements[i]["act"]);
                         }
                         if (type == 'mood') {

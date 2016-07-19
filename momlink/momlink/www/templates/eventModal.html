@@ -10,19 +10,19 @@
                 <span class="input-label">Title</span>
                 <input id="title" type="text">
             </label>
-            <label class="item item-input item-select">
-                Type
-                <select id="type">
-                    <option disabled="true" selected>Choose One</option>
-                    <option value="OB Appt" data-imagesrc="../img/trackers/activity.png">OB Appt</option>
-                    <option value="Lab">Lab</option>
-                    <option value="Referral">Referral</option>
-                    <option value="PNCC">PNCC</option>
-                    <option value="Ultra">Ultra</option>
-                    <option value="Class">Class</option>
-                    <option value="Other">Other</option>
-                </select>
-            </label>
+            <div id="type" class="item item-divider">Category (choose one of the following)</div>
+            <div class="row text-center">
+                <div id="OB Appt" class="col" ng-click="selectCategory('OB Appt')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">OB Appt</div>
+                <div id="Lab" class="col" ng-click="selectCategory('Lab')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Lab</div>
+                <div id="Referral" class="col" ng-click="selectCategory('Referral')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Referral</div>
+                <div id="PNCC" class="col" ng-click="selectCategory('PNCC')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">PNCC</div>
+            </div>
+            <div class="row text-center">
+                <div id="Ultra" class="col" ng-click="selectCategory('Ultra')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Ultra</div>
+                <div id="Class" class="col" ng-click="selectCategory('Class')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Class</div>
+                <div id="Other" class="col" ng-click="selectCategory('Other')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Other</div>
+                <div class="col"></div>
+            </div>
             <label class="item item-input">
                 <span class="input-label">Date</span>
                 <input id="date" type="date">
