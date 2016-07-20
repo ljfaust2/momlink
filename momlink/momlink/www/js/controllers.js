@@ -3528,6 +3528,28 @@ angular.module('momlink.controllers', [])
     $scope.updateProfile = function () {
         var db = PouchDB('momlink');
         db.get('profile').then(function (doc) {
+            window.resolveLocalFileSystemURL(document.getElementById('profilePic').src, resolveOnSuccess, resOnError);
+            //Callback function when the file system url has been resolved
+            function resolveOnSuccess(entry) {
+                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                    dir.getDirectory('MomLink', { create: true, exclusive: false },
+                    function (directory) {
+                        entry.moveTo(directory, 'profilePic.jpg', successMove, resOnError);
+                    },
+                    resOnError);
+                },
+                resOnError);
+            }
+            //Callback function when the file has been moved successfully - inserting the complete path
+            function successMove(entry) {
+                //reload page to see new entries
+                console.log(entry.toURL())
+                //$scope.toNewPage('myProfile.html', 'My Profile')
+            }
+            function resOnError(error) {
+                alert(error.code);
+            }
+
             doc['name'] = $('#name').val(),
             doc['email'] = $('#email').val(),
             doc['age'] = $('#age').val(),
@@ -3706,27 +3728,7 @@ angular.module('momlink.controllers', [])
             correctOrientation: true
         });
         onPhotoDataSuccess = function (imageData) {
-            window.resolveLocalFileSystemURL(imageData, resolveOnSuccess, resOnError);
-            //Callback function when the file system url has been resolved
-            function resolveOnSuccess(entry) {
-                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
-                    dir.getDirectory('MomLink', { create: true, exclusive: false },
-                    function (directory) {
-                        entry.moveTo(directory, 'profilePic.jpg', successMove, resOnError);
-                    },
-                    resOnError);
-                },
-                resOnError);
-            }
-            //Callback function when the file has been moved successfully - inserting the complete path
-            function successMove(entry) {
-                //reload page to see new entries
-                console.log(entry.toURL())
-                //$scope.toNewPage('myProfile.html', 'My Profile')
-            }
-            function resOnError(error) {
-                alert(error.code);
-            }
+            document.getElementById('profilePic').src = imageData;
         }
     }
     $scope.takeJournalPhoto = function () {
