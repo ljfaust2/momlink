@@ -3,27 +3,35 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
         <h1 class="title" id="modalHeadline">New Pill</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="true" class="has-header">
+    <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl">
         <div class="col text-center padding-top">
-            <img style="width:90%; height:150px;" />
+            <img id="pillImg" style="max-width:100%; max-height:100%;" />
         </div>
-        <div class="col padding-bottom text-right">
-            <img src="../img/temp/camera.PNG" style="width:30px; height:25px;" />
+        <div class="col padding-bottom text-right" ng-controller="CameraCtrl">
+            <img src="../img/temp/camera.PNG" ng-click="takePillPhoto()" style="width:30px; height:25px;" />
         </div>
         <div class="list">
             <label class="item item-input item-stacked-label">
                 <span class="input-label">Pill name</span>
-                <input type="text" placeholder="Pill name">
+                <input id="pillName" type="text" placeholder="Pill name">
             </label>
             <label class="item item-input item-stacked-label">
                 <span class="input-label">When should this pill be taken?</span>
-                <input type="time" placeholder="Time">
+                <input id="timeTaken" type="time" placeholder="Time">
             </label>
         </div>
-        <div class="row">
-            <div class="col text-center " ng-controller="TrackCtrl">
-                <input type="button" class="button button-block button-positive" value="ADD" ng-click="submit('BP');closeModal();">
-            </div>
+        <div class="row text-center">
+            <div id="Sun" class="col" ng-click="selectDay('Sun')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Sun</div>
+            <div id="Mon" class="col" ng-click="selectDay('Mon')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Mon</div>
+            <div id="Tue" class="col" ng-click="selectDay('Tue')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Tue</div>
+            <div id="Wed" class="col" ng-click="selectDay('Wed')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Wed</div>
+            <div id="Thu" class="col" ng-click="selectDay('Thu')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Thu</div>
+            <div id="Fri" class="col" ng-click="selectDay('Fri')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Fri</div>
+            <div id="Sat" class="col" ng-click="selectDay('Sat')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Sat</div>
+        </div>
+        <div class="padding-left padding-right">
+            <input type="button" class="button button-block button-positive" value="ADD" ng-click="submitPill();closeModal();">
+            <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="closeModal();">
         </div>
     </ion-content>
 </ion-modal-view>

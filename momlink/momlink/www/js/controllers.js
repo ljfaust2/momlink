@@ -532,7 +532,7 @@ angular.module('momlink.controllers', [])
 
     //ion-subheader
     $scope.renderSubheaderDate = function () {
-        today = moment().format('MMMM Do YYYY')
+        today = moment().format('MMMM Do YYYY');
         document.getElementById("todaysDate").innerHTML = "Today, " + today;
         //used by History subheader
         var date = new Date()
@@ -1270,7 +1270,7 @@ angular.module('momlink.controllers', [])
     }
     $scope.closeModal = function () {
         $scope.modal.hide().then(function () {
-            window.localStorage.removeItem('referralID');
+            //window.localStorage.removeItem('referralID');
             $scope.modal.remove();
         });
     };
@@ -3009,6 +3009,7 @@ angular.module('momlink.controllers', [])
         $('#todaysDate').html($scope.formatDate(d));
     };
     $scope.loadHistory = function () {
+        var db = PouchDB('momlink');
         //nutrition is handled differently
         var el = $scope.trackType;
         if (el == 'addNutrition') {
@@ -3019,6 +3020,63 @@ angular.module('momlink.controllers', [])
                 $scope.modal = modal;
                 $scope.modal.show();
             })
+        }
+        else if (el == 'addPill') {
+            db.get('track').then(function (doc) {
+                var hist = '';
+                pills = doc['pill'];
+                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                    dir.getDirectory('MomLink', { create: false, exclusive: false },
+                    function (directory) {
+                        //get pills for today with id name and time
+                        var todaysPills = [];
+                        for (var i in pills) {
+                            for (j in pills[i]['daysTaken']) {
+                                if (String($scope.currentDate).substring(0, 3) == pills[i]['daysTaken'][j]) {
+                                    time = pills[i]["time"].substring(0, pills[i]["time"].length - 3);
+                                    todaysPills.push([pills[i]['id'], pills[i]['name'], time])
+                                }
+                            }
+                        }
+                        //get picture for each pill
+                        directory.createReader().readEntries(
+                            function (entries) {
+                                for (k in todaysPills) {
+                                    for (l = 0; l < entries.length; l++) {
+                                        if (entries[l].name == todaysPills[k][0] + '.jpg') {
+                                            todaysPills[k].push(entries[l].toURL());
+                                        }
+                                    }
+                                }
+                                //build string
+                                for (m in todaysPills) {
+                                    if (todaysPills[m][3] == null) {
+                                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('pill','` + todaysPills[m][0] + `')"><img src='../img/trackers/pill.png' ><h2>` + todaysPills[m][1] + `</h2><p>Take on ` + todaysPills[m][2] + `</p></div>`;
+                                    }
+                                    else {
+                                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('pill','` + todaysPills[m][0] + `')"><img src='` + todaysPills[m][3] + `' ><h2>` + todaysPills[m][1] + `</h2><p>Take on ` + todaysPills[m][2] + `</p></div>`;
+                                    }
+                                }
+                                if (hist == '') {
+                                    hist += `<div class="row">`;
+                                    hist += `<div class="col text-center">`;
+                                    hist += 'No Pills Today';
+                                    hist += `</div></div>`;
+                                }
+                                $('#history').html(hist);
+                                $compile($('#history'))($scope);
+                            }
+                        );
+                    },
+                    resOnError);
+                },
+                resOnError);
+            })
+            function resOnError(error) {
+                if (error.code != '1' && error.code != '5') {
+                    alert(error.code);
+                }
+            }
         }
         else {
             var type;
@@ -3068,10 +3126,6 @@ angular.module('momlink.controllers', [])
                     type = 'pain';
                     img = '../img/trackers/pain.png';
                     break;
-                case 'addPill':
-                    type = 'pill';
-                    img = '../img/trackers/pill.png';
-                    break;
                 case 'addStress':
                     type = 'stress';
                     img = '../img/trackers/stress.png';
@@ -3081,7 +3135,6 @@ angular.module('momlink.controllers', [])
                     img = '../img/trackers/weight.png';
                     break;
             }
-            var db = PouchDB('momlink');
             db.get('track').then(function (doc) {
                 var date = new Date($scope.currentDate);
                 date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
@@ -3113,6 +3166,7 @@ angular.module('momlink.controllers', [])
             })
         };
     }
+
     $scope.getActivityImg = function (type) {
         switch (type) {
             case 'Bike':
@@ -3249,6 +3303,14 @@ angular.module('momlink.controllers', [])
         totalHours.value = 0;
         $('#hour').html(("0" + totalMinutes.value).slice(-2));
     }
+    $scope.selectDay = function (day) {
+        if (document.getElementById(day).classList.contains('activeBorder')) {
+            document.getElementById(day).classList.remove('activeBorder')
+        }
+        else {
+            document.getElementById(day).classList.add('activeBorder')
+        }
+    };
 
     $scope.submitAct = function (type) {
         var db = PouchDB('momlink');
@@ -3366,8 +3428,52 @@ angular.module('momlink.controllers', [])
             $scope.toNewPage('history.html', 'History');
         });
     }
+    $scope.submitPill = function () {
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            var id = moment().format('MM-DD-YYYYThhmmssa');
+            var daysTaken = [];
+            var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            for (i in days) {
+                if (document.getElementById(days[i]).classList.contains('activeBorder')) {
+                    daysTaken.push(days[i]);
+                }
+            }
+            //save image
+            window.resolveLocalFileSystemURL(document.getElementById('pillImg').src, resolveOnSuccess, resOnError);
+            function resolveOnSuccess(entry) {
+                fileName = id + ".jpg";
+                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                    dir.getDirectory('MomLink', { create: true, exclusive: false },
+                    function (directory) {
+                        console.log(fileName)
+                        entry.moveTo(directory, fileName, successMove, resOnError);
+                    }, resOnError);
+                }, resOnError);
+            }
+            function successMove(entry) {
+                console.log(entry.toURL())
+            }
+            function resOnError(error) {
+                alert(error.code);
+            }
+
+            var element = {
+                "id": id,
+                "date": moment().format('MM/DD/YYYY'),
+                "time": moment().format('HH:mm:ss'),
+                "name": $('#pillName').val(),
+                "timeTaken": $('#timeTaken').val(),
+                "daysTaken": daysTaken
+            };
+            doc['pill'].push(element);
+            return db.put(doc);
+        }).then(function (doc) {
+
+            $scope.toNewPage('history.html', 'History');
+        });
+    }
     $scope.deleteElement = function (category, id) {
-        //console.log(category, id)
         $ionicPopup.show({
             title: 'Are you sure you want to delete this?',
             scope: $scope,
@@ -3386,6 +3492,23 @@ angular.module('momlink.controllers', [])
                           doc[category].splice(i, 1)
                           return db.put(doc);
                       }).then(function () {
+                          if (category == 'pill') {
+                              //if its a pill, delete it's associated picture
+                              window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                                  dir.getDirectory('MomLink', { create: false, exclusive: false },
+                                  function (directory) {
+                                      directory.createReader().readEntries(
+                                          function (entries) {
+                                              for (j = 0; j < entries.length; j++) {
+                                                  if (entries[j].name == id + '.jpg') {
+                                                      entries[j].remove();
+                                                  }
+                                              }
+                                          }
+                                      );
+                                  }, resOnError);
+                              }, resOnError);
+                          }
                           $scope.loadHistory();
                       })
                   }
@@ -3393,6 +3516,11 @@ angular.module('momlink.controllers', [])
               { text: 'Cancel' }
             ]
         });
+        function resOnError(error) {
+            //if (error.code != '1' && error.code != '5') {
+                alert(error.code);
+            //}
+        }
     };
 })
 
@@ -3637,6 +3765,24 @@ angular.module('momlink.controllers', [])
             function resOnError(error) {
                 alert(error.code);
             }
+        }
+    }
+    $scope.takePillPhoto = function () {
+        navigator.camera.getPicture(function (imageData) {
+            onPhotoDataSuccess(imageData)
+        }, $scope.onFail, {
+            quality: 40,
+            destinationType: Camera.DestinationType.FILE_URI,
+            sourceType: Camera.PictureSourceType.CAMERA,
+            allowEdit: true,
+            targetWidth: 300,
+            targetHeight: 300,
+            encodingType: Camera.EncodingType.JPEG,
+            popoverOptions: CameraPopoverOptions,
+            correctOrientation: true
+        });
+        onPhotoDataSuccess = function (imageData) {
+            document.getElementById('pillImg').src = imageData;
         }
     }
     $scope.onFail = function (message) {
