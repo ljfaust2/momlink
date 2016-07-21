@@ -82,6 +82,17 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
+        db.get('tasks').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "tasks",
+                    'tasks': [
+                        ['12345', 'class', 'Safety Class', 'Attend a Safety Class', 'no'],
+                        ['12346', 'class', 'BABE Class', 'Attend a BABE Class', 'no']
+                    ]
+                });
+            }
+        });
         db.get('track').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -301,7 +312,7 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
-        db.get('classes').catch(function (err) {
+        /*db.get('classes').catch(function (err) {
             if (err.status === 404) {
                 db.put({
                     "_id": "classes",
@@ -491,7 +502,7 @@ angular.module('momlink.controllers', [])
                     ]
                 });
             }
-        });
+        });*/
         //db.destroy();
     }
     /*$scope.getInformation = function () {
@@ -1110,6 +1121,12 @@ angular.module('momlink.controllers', [])
             if (doc['events'][i].description != '') {
                 templateHTML += '<p><b>Description</b>: ' + doc['events'][i]['description'] + '</p>'
             }
+            if (doc['events'][i]['questions'].size != 0) {
+                templateHTML += '<p><b>Questions</b>:</p>'
+                for (j in doc['events'][i].questions) {
+                    templateHTML += doc['events'][i]['questions'][j] + '<br>';
+                }
+            }
             //view event
             var alertPopup = $ionicPopup.show({
                 title: doc['events'][i]['title'],
@@ -1318,6 +1335,11 @@ angular.module('momlink.controllers', [])
         return time;
     }
 
+    $scope.speak = function (text) {
+        responsiveVoice.speak(text)
+        var msg = new SpeechSynthesisUtterance();
+    }
+
     $scope.inspectDB = function () {
         var db = PouchDB('momlink');
         db.allDocs({ include_docs: true }).then(function (res) {
@@ -1330,22 +1352,6 @@ angular.module('momlink.controllers', [])
             }
         })*/
     }
-
-    /*$scope.test = function () {
-        console.log('hit')
-        document.location = 'http://www.webmd.com/baby/smoking-during-pregnancy';
-        var loc = document.location;
-        var uri = {
-            spec: loc.href,
-            host: loc.host,
-            prePath: loc.protocol + "//" + loc.host,
-            scheme: loc.protocol.substr(0, loc.protocol.indexOf(":")),
-            pathBase: loc.protocol + "//" + loc.host + loc.pathname.substr(0, loc.pathname.lastIndexOf("/") + 1)
-        };
-        var article = new Readability(uri, document).parse();
-        html = `<iframe src="` + article + `" style="width:100%; height: 100%;"></iframe>`
-        $('#content').html(html);
-    }*/
 })
 
 .controller('NutritionCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
@@ -1842,7 +1848,7 @@ angular.module('momlink.controllers', [])
     };
 })
 
-.controller('CouponController', function ($scope, $ionicPopup, $timeout, $compile) {
+/*.controller('CouponCtrl', function ($scope, $ionicPopup, $timeout, $compile) {
     $scope.showPlans = function () {
         html = `<div class="item item-divider">Plans</div>
                 <div class="item item-thumbnail-left" ng-click="showClasses('crib')">
@@ -1985,7 +1991,7 @@ angular.module('momlink.controllers', [])
     $scope.showInventory = function () {
         $ionicPopup.show({
             template: '<style>.popup { height:400px; width:95%; }</style>' +
-                      `<div ng-controller="CouponController">
+                      `<div ng-controller="CouponCtrl">
                        <div class="row">
                                 <div class="col text-left">
                                     <u style="font-size:large;">Item</u>
@@ -2113,6 +2119,29 @@ angular.module('momlink.controllers', [])
       { item: "Underwear", price: "1" },
       { item: "Washcloths", price: "2" }
     ]
+})*/
+
+.controller('CarSeatCtrl', function ($scope, $compile) {
+    $scope.renderCarSeatGrid = function () {
+        var db = PouchDB('momlink');
+        var counter = 1;
+        //get start/end date
+        db.get('carSeat').then(function (doc) {
+            var html = '';
+            html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">';
+            for (i in doc['carSeat']) {
+                html += `<div class="col-33 text-center padding nonActiveWeek" ng-click=""><b>` + i + `</b></div>`;
+                //3 items per column
+                if (counter % 3 == 0) {
+                    html += '</div><div class="row" style="padding-right:0; padding-left:0">';
+                }
+                counter++;
+            }
+            html += '</div>'
+            $('#carSeat').html(html);
+            $compile($('#carSeat'))($scope);
+        });
+    }
 })
 
 .controller('EducationCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
@@ -2232,8 +2261,9 @@ angular.module('momlink.controllers', [])
                 if (article['id'] == id) {
                     html += `<ion-modal-view>`;
                     html += `<div class="bar bar-footer" ng-init="startSessionTimer()">`;
-                    html += `<button class ="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
-                    html += `<button class ="button button-icon icon icon-right ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">Take Quiz &nbsp;</button>`;
+                    html += `<button class="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
+                    html += `<button class="button button-icon icon ion-volume-medium" ng-click="">Listen</button>`;
+                    html += `<button class="button button-icon icon icon-right ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">Take Quiz &nbsp;</button>`;
                     html += `</div>`;
                     //if category is set to local and network is not available then
                     var networkState = navigator.connection.type;
@@ -2274,7 +2304,7 @@ angular.module('momlink.controllers', [])
     };
     $scope.renderQuiz = function (type, articleID, category) {
         var db = PouchDB('momlink');
-        var html = '';
+        var html = '<div ng-controller="HeaderCtrl">';
         db.get('articles').then(function (doc) {
             sharedArticles = doc[type];
             for (i in sharedArticles) {
@@ -2286,38 +2316,39 @@ angular.module('momlink.controllers', [])
                         question = quiz[j][0];
                         answers = quiz[j][1];
                         //render question
-                        html += `  <div class="item item-divider">` + question + `</div>`;
+                        html += `<div class="item item-divider item-icon-right">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
                         //render answers
                         html += `<form id="` + String(j) + `">`
                         html += `<ion-list>`
                         for (k = 0; k < answers.length; k++) {
                             answer = quiz[j][1][k];
-                            html += `<ion-radio name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio>`;
+                            html += `<i class="icon ion-volume-medium" ng-click="speak('` + answer + `')"></i><ion-radio name="` + String(j) + `" value="` + String(answer) + `">` + answer + ` </ion-radio>`;
                         }
                         html += `</ion-list>`
                         html += `</form>`
                     }
                 }
             }
+            html += '</div>';
             $ionicPopup.show({
                 title: 'Quiz',
                 template: html,
                 buttons: [
-                  {
-                      text: 'Grade', onTap: function (e) {
-                          //score the quiz
-                          $scope.clickTracker('finishQuiz');
-                          $scope.gradeQuiz(type, articleID, category);
-                          return 'Create';
-                      },
-                      type: 'button-positive'
-                  },
-                    {
-                        text: 'Cancel', onTap: function (e) {
-                            return 'Close';
-                        },
-                        type: 'button-stable'
-                    }
+            {
+                text: 'Grade', onTap: function (e) {
+                    //score the quiz
+                    $scope.clickTracker('finishQuiz');
+                    $scope.gradeQuiz(type, articleID, category);
+                    return 'Create';
+                },
+                type: 'button-positive'
+            },
+            {
+                text: 'Cancel', onTap: function (e) {
+                    return 'Close';
+                },
+                type: 'button-stable'
+            }
                 ],
             });
         });
@@ -2352,13 +2383,13 @@ angular.module('momlink.controllers', [])
                 title: 'Results',
                 template: '<div style="text-align:center">Your Score: ' + finalScore + '</div>',
                 buttons: [
-                  {
-                      text: 'Finish', onTap: function (e) {
-                          $scope.clickTracker('closeQuizResults');
-                          return 'Create';
-                      },
-                      type: 'button-positive'
-                  }
+            {
+                text: 'Finish', onTap: function (e) {
+                    $scope.clickTracker('closeQuizResults');
+                    return 'Create';
+                },
+                type: 'button-positive'
+            }
                 ],
             })
         }).then(function () {
@@ -2568,6 +2599,7 @@ angular.module('momlink.controllers', [])
             });
         });
     }
+
 })
 
 .controller('SurveyCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
@@ -2607,7 +2639,7 @@ angular.module('momlink.controllers', [])
     };
     $scope.renderSurvey = function (eventID) {
         var db = PouchDB('momlink');
-        var html = '';
+        var html = '<div ng-controller="HeaderCtrl">';
         db.get('events').then(function (doc) {
             events = doc['events'];
             for (i in events) {
@@ -2619,31 +2651,38 @@ angular.module('momlink.controllers', [])
                         question = survey[j][0];
                         answers = survey[j][1];
                         //render question
-                        html += `  <div class="item item-divider">` + question + `</div>`;
+                        html += `  <div class="item item-icon-right item-divider">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
                         //render answers
-                        html += `<form id="` + String(j) + `">`
-                        html += `<ion-list>`
+                        html += `<form id="` + String(j) + `">`;
+                        html += `<ion-list>`;
                         for (k = 0; k < answers.length; k++) {
                             answer = survey[j][1][k];
-                            html += `<ion-radio name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio>`;
+                            html += `<ion-radio name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio><i class="icon ion-volume-medium" ng-click="speak('` + answer + `')"></i>`;
                         }
-                        html += `</ion-list>`
-                        html += `</form>`
+                        html += `</ion-list>`;
+                        html += `</form>`;
                     }
                 }
             }
+            html += '</div>';
             $ionicPopup.show({
                 title: 'Survey',
                 template: html,
                 buttons: [
-                  {
-                      text: 'Finish', onTap: function (e) {
-                          $scope.clickTracker('finishSurvey');
-                          $scope.saveSurvey(eventID);
-                          return 'Create';
-                      },
-                      type: 'button-positive'
-                  }
+            {
+                text: 'Finish', onTap: function (e) {
+                    $scope.clickTracker('finishSurvey');
+                    $scope.saveSurvey(eventID);
+                    return 'Create';
+                },
+                type: 'button-positive'
+            },
+            {
+                text: 'Cancel', onTap: function (e) {
+                    return 'Cancel';
+                },
+                type: 'button-stable'
+            }
                 ],
             });
         });
@@ -2725,27 +2764,27 @@ angular.module('momlink.controllers', [])
                     title: 'Have you contacted this referral?',
                     cssClass: 'popup-vertical-buttons',
                     buttons: [
-                        {
-                            text: 'Yes', onTap: function (e) {
-                                $scope.clickTracker('contactedReferral(yes)');
-                                scheduleMeeting(doc['referrals'][i]['email'], doc['referrals'][i]['phone']);
-                            },
-                            type: 'button-positive'
-                        },
-                        {
-                            text: 'No', onTap: function (e) {
-                                $scope.clickTracker('contactedReferral(no)');
-                                $scope.newMessage(doc['referrals'][i]['email'], doc['referrals'][i]['phone']);
-                            },
-                            type: 'button-positive'
-                        },
-                        {
-                            text: 'Cancel', onTap: function (e) {
-                                $scope.clickTracker('contactedReferral(cancel)');
-                                return 'cancel';
-                            },
-                            type: 'button-stable'
-                        }
+                {
+                    text: 'Yes', onTap: function (e) {
+                        $scope.clickTracker('contactedReferral(yes)');
+                        scheduleMeeting(doc['referrals'][i]['email'], doc['referrals'][i]['phone']);
+                    },
+                    type: 'button-positive'
+                },
+                {
+                    text: 'No', onTap: function (e) {
+                        $scope.clickTracker('contactedReferral(no)');
+                        $scope.newMessage(doc['referrals'][i]['email'], doc['referrals'][i]['phone']);
+                    },
+                    type: 'button-positive'
+                },
+                {
+                    text: 'Cancel', onTap: function (e) {
+                        $scope.clickTracker('contactedReferral(cancel)');
+                        return 'cancel';
+                    },
+                    type: 'button-stable'
+                }
                     ],
                 })
             }
@@ -2757,21 +2796,21 @@ angular.module('momlink.controllers', [])
             $ionicPopup.show({
                 title: 'Have you scheduled a meeting with this referral?',
                 buttons: [
-                    {
-                        text: 'Yes', onTap: function (e) {
-                            window.localStorage.setItem('referralID', id);
-                            $scope.clickTracker('scheduledReferralMeeting(yes)');
-                            $scope.createEvent('referrals.html', 'Referrals');
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'No', onTap: function (e) {
-                            $scope.clickTracker('scheduledReferralMeeting(no)');
-                            $scope.newMessage();
-                        },
-                        type: 'button-positive'
-                    }
+            {
+                text: 'Yes', onTap: function (e) {
+                    window.localStorage.setItem('referralID', id);
+                    $scope.clickTracker('scheduledReferralMeeting(yes)');
+                    $scope.createEvent('referrals.html', 'Referrals');
+                },
+                type: 'button-positive'
+            },
+            {
+                text: 'No', onTap: function (e) {
+                    $scope.clickTracker('scheduledReferralMeeting(no)');
+                    $scope.newMessage();
+                },
+                type: 'button-positive'
+            }
                 ],
             });
         }
@@ -2868,21 +2907,39 @@ angular.module('momlink.controllers', [])
     };
     $scope.renderNotes = function () {
         var db = PouchDB('momlink');
-        var html = '';
+        var html = '<div class="list">';
         db.get('journal').then(function (doc) {
             notes = doc['notes'];
-            html += '<div class="list">';
             for (i in notes) {
                 html += `<a class="item" ng-click="editNote('` + notes[i]['id'] + `')">`;
-                html += '<h2 style="display:inline">' + notes[i]['subject'] + '</h2> &nbsp;';
+                html += '<h2 style="display:inline">Note: ' + notes[i]['subject'] + '</h2> &nbsp;';
                 html += '<p style="display:inline">' + notes[i]['date'] + '</p>';
+                html += '<p>Personal Note</p>';
                 html += '<p>' + notes[i]['description'] + '</p>';
                 html += '</a>';
             }
-            html += '</div>';
-            $('#notes').html(html);
-            $compile($('#notes'))($scope);
-        });
+        }).then(function () {
+            db.get('events').then(function (doc) {
+                for (i in doc['events']) {
+                    if (doc['events'][i]['notes'] != '') {
+                        html += `<a class="item" ng-click="editEventNotes('` + doc['events'][i]['id'] + `')">`;
+                        html += '<h2 style="display:inline">' + doc['events'][i]['title'] + '</h2> &nbsp;';
+                        var year = String(doc['events'][i]['day']).substring(0, 4);
+                        var month = String(doc['events'][i]['day']).substring(5, 7);
+                        var day = String(doc['events'][i]['day']).substring(8, 10);
+                        var date = month + '/' + day + '/' + year;
+                        html += '<p style="display:inline">' + date + '</p>';
+                        html += '<p>Event Note</p>';
+                        html += '<p>' + doc['events'][i]['description'] + '</p>';
+                        html += '</a>';
+                    }
+                }
+                html += '</div>';
+                $('#notes').html(html);
+                $compile($('#notes'))($scope);
+            });
+        })
+
     };
     $scope.createNote = function (link, title) {
         $scope.modal = $ionicModal.fromTemplateUrl('noteModal.html', {
@@ -2898,7 +2955,7 @@ angular.module('momlink.controllers', [])
         db.get('journal').then(function (doc) {
             var note = {
                 "id": new Date(),
-                "date": moment().format('MMMM Do YYYY'),
+                "date": moment().format('MM/DD/YYYY'),
                 "subject": $('#subject').val(),
                 "description": $("#description").val()
             };
@@ -2919,6 +2976,55 @@ angular.module('momlink.controllers', [])
         })
         $scope.noteID = noteID;
     };
+    $scope.editEventNotes = function (eventID) {
+        $scope.eventID = eventID;
+        $scope.modal = $ionicModal.fromTemplateUrl('editEventNoteModal.html', {
+            scope: $scope,
+            animation: 'slide-in-up'
+        }).then(function (modal) {
+            $scope.modal = modal;
+            $scope.modal.show();
+        })
+    }
+    $scope.pullEventNotes = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === $scope.eventID) {
+                    break;
+                }
+            }
+            $('#description').val(doc['events'][i]['description']);
+            for (j in doc['events'][i]['questions']) {
+                $("input[name=Q]").each(function () {
+                    if (doc['events'][i]['questions'][j] == $(this).val()) {
+                        $(this).prop('checked', true);
+                    }
+                });
+            }
+        });
+    }
+    $scope.updateEventNotes = function () {
+        var db = PouchDB('momlink');
+        var questions = [];
+        $("input[name=Q]:checked").each(function () {
+            questions.push($(this).val())
+        });
+        db.get('events').then(function (doc) {
+            //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === $scope.eventID) {
+                    break;
+                }
+            }
+            doc['events'][i]['description'] = $('#description').val();
+            doc['events'][i]['questions'] = questions;
+            return db.put(doc);
+        }).then(function () {
+            $scope.closeModal();
+        })
+    }
     $scope.pullNote = function () {
         var db = PouchDB('momlink');
         db.get('journal').then(function (doc) {
@@ -3478,47 +3584,47 @@ angular.module('momlink.controllers', [])
             title: 'Are you sure you want to delete this?',
             scope: $scope,
             buttons: [
-              {
-                  text: 'Delete',
-                  type: 'button-assertive',
-                  onTap: function (e) {
-                      var db = PouchDB('momlink');
-                      db.get('track').then(function (doc) {
-                          for (i in doc[category]) {
-                              if (doc[category][i]['id'] === id) {
-                                  break;
-                              }
-                          }
-                          doc[category].splice(i, 1)
-                          return db.put(doc);
-                      }).then(function () {
-                          if (category == 'pill') {
-                              //if its a pill, delete it's associated picture
-                              window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
-                                  dir.getDirectory('MomLink', { create: false, exclusive: false },
-                                  function (directory) {
-                                      directory.createReader().readEntries(
-                                          function (entries) {
-                                              for (j = 0; j < entries.length; j++) {
-                                                  if (entries[j].name == id + '.jpg') {
-                                                      entries[j].remove();
-                                                  }
-                                              }
-                                          }
-                                      );
-                                  }, resOnError);
-                              }, resOnError);
-                          }
-                          $scope.loadHistory();
-                      })
-                  }
-              },
-              { text: 'Cancel' }
+        {
+            text: 'Delete',
+            type: 'button-assertive',
+            onTap: function (e) {
+                var db = PouchDB('momlink');
+                db.get('track').then(function (doc) {
+                    for (i in doc[category]) {
+                        if (doc[category][i]['id'] === id) {
+                            break;
+                        }
+                    }
+                    doc[category].splice(i, 1)
+                    return db.put(doc);
+                }).then(function () {
+                    if (category == 'pill') {
+                        //if its a pill, delete it's associated picture
+                        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                            dir.getDirectory('MomLink', { create: false, exclusive: false },
+                            function (directory) {
+                                directory.createReader().readEntries(
+                                    function (entries) {
+                                        for (j = 0; j < entries.length; j++) {
+                                            if (entries[j].name == id + '.jpg') {
+                                                entries[j].remove();
+                                            }
+                                        }
+                                    }
+                                );
+                            }, resOnError);
+                        }, resOnError);
+                    }
+                    $scope.loadHistory();
+                })
+            }
+        },
+        { text: 'Cancel' }
             ]
         });
         function resOnError(error) {
             //if (error.code != '1' && error.code != '5') {
-                alert(error.code);
+            alert(error.code);
             //}
         }
     };
@@ -3606,97 +3712,97 @@ angular.module('momlink.controllers', [])
         this.draw();
     }
     Clock.prototype =
-    {
-        init: function () {
-            this.defaults =
-            {
-                size: 150,
-                centerColor: '#21344b',
-                centerRadius: 5,
-                centerStrokeWidth: 5,
-                centerStrokeOpacity: 0.8,
-                minuteColor: '#ff0000',
-                minuteLength: 75,
-                minuteStrokeWidth: 10,
-                minuteStrokeOpacity: 0.8,
-                speed: 100,
-                allowMinuteFullRotation: false,
-                minuteDraggable: true,
-                minuteDragSnap: 1
-            };
-        },
-        create: function () {
-            this.paper = Raphael(this.containerID, this.size, this.size);
-        },
-        draw: function () {
-            var objMinuteFullPath;
-            var objMinutePath;
-            var iMinuteLength;
-            var objMinuteImage;
-            var objCenterImage;
-            this.minute = this.paper.set();
-            // Draw the hand
-            objMinuteFullPath = this.paper
-                .path("M" + this.size / 2 + "," + this.size / 2 + "L" + this.size / 2 + ",0")
-                .attr
-                ({
-                    'stroke-width': 0
-                });
-            iMinuteLength = objMinuteFullPath.getTotalLength();
-            objMinutePath = this.paper
-                .path(objMinuteFullPath.getSubpath(0, iMinuteLength * this.minuteLength / 100))
-                .attr({
-                    stroke: this.minuteColor,
-                    'stroke-width': this.minuteStrokeWidth,
-                    'stroke-opacity': this.minuteStrokeOpacity
-                });
-            this.minute.push(objMinutePath);
-            // Draw the center circle of analog clock
-            this.paper
-                .circle(this.size / 2, this.size / 2, this.centerRadius)
-                .attr({
-                    fill: this.centerColor,
-                    "stroke-width": this.centerStrokeWidth,
-                    'stroke-opacity': this.centerStrokeOpacity
-                });
-            if (objCenterImage) {
-                objCenterImage.toFront();
-            }
-            this.minute.angle = 0;
-            this.minute.value = 0;
-            this.minute.previousValue = 0;
-            this.minute.allowFullRotation = this.allowMinuteFullRotation;
-            this.assignEventHandlers();
-        },
-        assignEventHandlers: function () {
-            var THIS;
-            var fnMinute_OnDragMove;
-            THIS = this;
-            fnMinute_OnDragMove = function (dx, dy, x, y) {
-                var x1, y1, x2, y2, iAngle, iAdditionalAngle, objOffset;
-                objOffset = $('#' + THIS.containerID).offset();
-                if (THIS.minuteDraggable) {
-                    x1 = THIS.size / 2;
-                    y1 = THIS.size / 2;
-                    x2 = x - objOffset.left;
-                    y2 = y - objOffset.top;
-                    iAngle = Raphael.angle(x1, y1, x2, y2);
-                    iAngle = iAngle - (iAngle % (THIS.minuteDragSnap * 6)) - 90;
-                    if (iAngle < 0) {
-                        iAngle = iAngle + 360;
-                    }
-                    THIS.minute.angle = iAngle;
-                    THIS.minute.value = (THIS.minute.angle / 360 * 60).toFixed();
-                    this.transform(['r', iAngle, x1, y1]);
-                    $('#minute').html(("0" + THIS.minute.value).slice(-2));
-                    if (THIS.onMinuteDragMove) {
-                        THIS.onMinuteDragMove.apply(THIS, arguments);
-                    }
-                }
-            };
-            this.minute.drag(fnMinute_OnDragMove);
-        }
-    };
+                          {
+                              init: function () {
+                                  this.defaults =
+                                                {
+                                                    size: 150,
+                                                    centerColor: '#21344b',
+                                                    centerRadius: 5,
+                                                    centerStrokeWidth: 5,
+                                                    centerStrokeOpacity: 0.8,
+                                                    minuteColor: '#ff0000',
+                                                    minuteLength: 75,
+                                                    minuteStrokeWidth: 10,
+                                                    minuteStrokeOpacity: 0.8,
+                                                    speed: 100,
+                                                    allowMinuteFullRotation: false,
+                                                    minuteDraggable: true,
+                                                    minuteDragSnap: 1
+                                                };
+                              },
+                              create: function () {
+                                  this.paper = Raphael(this.containerID, this.size, this.size);
+                              },
+                              draw: function () {
+                                  var objMinuteFullPath;
+                                  var objMinutePath;
+                                  var iMinuteLength;
+                                  var objMinuteImage;
+                                  var objCenterImage;
+                                  this.minute = this.paper.set();
+                                  // Draw the hand
+                                  objMinuteFullPath = this.paper
+                                      .path("M" + this.size / 2 + "," + this.size / 2 + "L" + this.size / 2 + ",0")
+                                      .attr
+                                      ({
+                                          'stroke-width': 0
+                                      });
+                                  iMinuteLength = objMinuteFullPath.getTotalLength();
+                                  objMinutePath = this.paper
+                                      .path(objMinuteFullPath.getSubpath(0, iMinuteLength * this.minuteLength / 100))
+                                      .attr({
+                                          stroke: this.minuteColor,
+                                          'stroke-width': this.minuteStrokeWidth,
+                                          'stroke-opacity': this.minuteStrokeOpacity
+                                      });
+                                  this.minute.push(objMinutePath);
+                                  // Draw the center circle of analog clock
+                                  this.paper
+                                      .circle(this.size / 2, this.size / 2, this.centerRadius)
+                                      .attr({
+                                          fill: this.centerColor,
+                                          "stroke-width": this.centerStrokeWidth,
+                                          'stroke-opacity': this.centerStrokeOpacity
+                                      });
+                                  if (objCenterImage) {
+                                      objCenterImage.toFront();
+                                  }
+                                  this.minute.angle = 0;
+                                  this.minute.value = 0;
+                                  this.minute.previousValue = 0;
+                                  this.minute.allowFullRotation = this.allowMinuteFullRotation;
+                                  this.assignEventHandlers();
+                              },
+                              assignEventHandlers: function () {
+                                  var THIS;
+                                  var fnMinute_OnDragMove;
+                                  THIS = this;
+                                  fnMinute_OnDragMove = function (dx, dy, x, y) {
+                                      var x1, y1, x2, y2, iAngle, iAdditionalAngle, objOffset;
+                                      objOffset = $('#' + THIS.containerID).offset();
+                                      if (THIS.minuteDraggable) {
+                                          x1 = THIS.size / 2;
+                                          y1 = THIS.size / 2;
+                                          x2 = x - objOffset.left;
+                                          y2 = y - objOffset.top;
+                                          iAngle = Raphael.angle(x1, y1, x2, y2);
+                                          iAngle = iAngle - (iAngle % (THIS.minuteDragSnap * 6)) - 90;
+                                          if (iAngle < 0) {
+                                              iAngle = iAngle + 360;
+                                          }
+                                          THIS.minute.angle = iAngle;
+                                          THIS.minute.value = (THIS.minute.angle / 360 * 60).toFixed();
+                                          this.transform(['r', iAngle, x1, y1]);
+                                          $('#minute').html(("0" + THIS.minute.value).slice(-2));
+                                          if (THIS.onMinuteDragMove) {
+                                              THIS.onMinuteDragMove.apply(THIS, arguments);
+                                          }
+                                      }
+                                  };
+                                  this.minute.drag(fnMinute_OnDragMove);
+                              }
+                          };
     $(document).ready(function () {
         objClock = new Clock('CLOCK_HOLDER');
     });

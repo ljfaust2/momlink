@@ -10,11 +10,12 @@
     <script src="../cordova.js"></script>
     <script src="../lib/pouchdb-5.4.1.js"></script>
     <script src="../lib/raphael-min.js"></script>
-    <script src="../lib/readability/Readability.js"></script>
     <!--Calendar-->
     <script src="../lib/moment/min/moment.min.js"></script>
     <script src="../lib/fullcalendar-2.9.0/fullcalendar.min.js"></script>
     <link rel='stylesheet' href='../lib/fullcalendar-2.9.0/fullcalendar.min.css' />
+    <!--Speech Synthesis-->
+    <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
     <!--My Scripts-->
     <script src="../js/app.js"></script>
     <script src="../js/controllers.js"></script>
@@ -57,7 +58,6 @@
                                     <div id="education" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="max-width:100%; height:auto;vertical-align:middle"><p>Education</p></div>
                                     <div class="col"><img src="../img/mainIcons/track.png" ng-click="toNewPage('track.html', 'Track')" style="max-width:100%; height:auto;vertical-align:middle"><p>Track</p></div>
                                     <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%; height:auto;vertical-align:middle"><p>Survey</p></div>
-                                    <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="toNewPage('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
                                 </div>
                                 <button ng-click="inspectDB()">Show DB</button>
                             </center>
@@ -73,8 +73,8 @@
                 <a class="item item-icon-left" ng-click="toNewPage('referrals.html', 'Referrals');toggleRightSideMenu()"><i class="icon ion-ios-people"></i>Referrals</a>
                 <a class="item item-icon-left" ng-click="toNewPage('education.html', 'Education');toggleRightSideMenu()"><i class="icon ion-folder"></i>Education</a>
                 <a class="item item-icon-left" ng-click="toNewPage('track.html', 'Track');toggleRightSideMenu()"><i class="icon ion-edit"></i>Track</a>
-                <a class="item item-icon-left" ng-click="toNewPage('survey.html', 'Track');toggleRightSideMenu()"><i class="icon ion-clipboard"></i>Survey</a>
-                <a class="item item-icon-left" ng-click="toNewPage('coupons.html', 'My Journal');toggleRightSideMenu()"><i class="icon ion-cash"></i>Coupons</a>
+                <a class="item item-icon-left" ng-click="toNewPage('survey.html', 'Survey');toggleRightSideMenu()"><i class="icon ion-clipboard"></i>Survey</a>
+                <a class="item item-icon-left" ng-click="toNewPage('carSeat.html', 'Car Seat');toggleRightSideMenu()"><i class="icon ion-checkmark-round"></i>Car Seat</a>
                 <a class="item item-icon-left" ng-click="toNewPage('journal.html', 'My Journal');toggleRightSideMenu()"><i class="icon ion-ios-bookmarks"></i>Journal</a>
                 <a class="item item-icon-left" ng-click="toNewPage('myProfile.html', 'My Profile');toggleRightSideMenu()"><i class="icon ion-person"></i>My Profile</a>
                 <a class="item item-icon-left" ng-click=""><i class="icon ion-loop"></i>Update</a>

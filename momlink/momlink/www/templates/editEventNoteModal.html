@@ -1,0 +1,21 @@
+﻿<ion-modal-view>
+    <ion-header-bar align-title="middle" class="bar-positive">
+        <button class="button button-icon icon ion-close-round" ng-click="closeModal();">Cancel</button>
+        <h1 class="title" id="modalHeadline">Update Event Notes</h1>
+    </ion-header-bar>
+    <ion-content overflow-scroll="true" ng-controller="CalendarCtrl" ng-init="renderEventQuestions();pullEventNotes()">
+        <div class="list">
+            <div class="item item-divider">
+                Add questions to address at the meeting
+            </div>
+            <div id="eventQuestions"></div>
+            <a class="item" ng-click="addQuestion()"><i class="ion-plus-round"></i> Add new question</a>
+            <label class="item item-input">
+                <textarea id="description" rows="4" placeholder="Notes"></textarea>
+            </label>
+            <div class="col text-center">
+                <input type="button" class="button button-block button-positive" value="UPDATE" ng-click="updateEventNotes();closeModal();">
+            </div>
+        </div>
+    </ion-content>
+</ion-modal-view>
