@@ -82,11 +82,11 @@ angular.module('momlink.controllers', [])
                 });
             }
         });
-        db.get('tasks').catch(function (err) {
+        db.get('goals').catch(function (err) {
             if (err.status === 404) {
                 db.put({
-                    "_id": "tasks",
-                    'tasks': [
+                    "_id": "goals",
+                    'goals': [
                         ['12345', 'class', 'Safety Class', 'Attend a Safety Class', 'no'],
                         ['12346', 'class', 'BABE Class', 'Attend a BABE Class', 'no']
                     ]
@@ -140,6 +140,7 @@ angular.module('momlink.controllers', [])
                             "description": "Smoking during pregnancy may increase the risk that a child could develop schizophrenia, new research suggests.",
                             "category": "Smoking",
                             "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
+                            "format": "Website",
                             "dateShared": "6/28/2016",
                             "lastRead": "",
                             "readHistory": {},
@@ -157,6 +158,7 @@ angular.module('momlink.controllers', [])
                             "description": "Pregnant women who have blood pressure in the high-normal range may have an increased risk for metabolic syndrome after they give birth, a new study indicates.",
                             "category": "Blood Pressure",
                             "link": "http://www.webmd.com/baby/news/20160627/blood-pressure-problems-during-pregnancy-heart-trouble-later",
+                            "format": "Website",
                             "dateShared": "6/28/2016",
                             "lastRead": "",
                             "readHistory": {},
@@ -174,6 +176,7 @@ angular.module('momlink.controllers', [])
                             "description": "Adding folic acid to corn masa flour could help reduce birth defects among Hispanic babies in the United States, the U.S. Food and Drug Administration says.",
                             "category": "Diet",
                             "link": "http://www.webmd.com/baby/news/20160617/folic-acid-now-added-to-corn-masa-flour-fda",
+                            "format": "Website",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -191,6 +194,7 @@ angular.module('momlink.controllers', [])
                             "description": "Pregnant women who drink artificially sweetened drinks every day may be more likely to give birth to heavier babies who are then more likely to become overweight children, researchers report.",
                             "category": "Diet",
                             "link": "http://www.webmd.com/baby/news/20160509/artificial-sweeteners-during-pregnancy-may-make-for-heavier-infants",
+                            "format": "Website",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -208,6 +212,7 @@ angular.module('momlink.controllers', [])
                             "description": "Babies whose mothers eat high amounts of fish during pregnancy appear to be at raised risk for obesity in childhood, and pollutants in the fish may drive the effect, a new study finds.",
                             "category": "Diet",
                             "link": "http://www.webmd.com/baby/news/20160215/lots-of-fish-in-pregnancy-tied-to-higher-obesity-risk-in-kids",
+                            "format": "Website",
                             "dateShared": "",
                             "lastRead": "",
                             "readHistory": {},
@@ -560,13 +565,14 @@ angular.module('momlink.controllers', [])
             for (i in events) {
                 if (events[i]['day'] == moment().format('YYYY-MM-DD')) {
                     startingTime = String(events[i]['start']).substr(String(events[i]['start']).indexOf("T") + 1);
-                    todaysEvents.push([startingTime, [events[i]['id']]]);
+                    todaysEvents.push([startingTime, events[i]['id'], events[i]['category']]);
                 }
             }
+            //elements in todaysEvents are comprised of [time, id, category]
             todaysEvents = sortTimes(todaysEvents)
             for (j in todaysEvents) {
-                html += `<div class="col" ng-click="viewEvent('` + todaysEvents[j][1] + `', 'home.html', 'Momlink')">`;
-                html += `<img src="../img/mainIcons/momlink_icon-17.png" style="height:60%;"><br>`;
+                html += `<div class="col">`;
+                html += `<img src="'` + $scope.getEventImg(todaysEvents[j][2]) + `'" ng-click="viewEvent('` + todaysEvents[j][1] + `', 'home.html', 'Momlink')" style="height:60%;"><br>`;
                 html += $scope.convert24to12(todaysEvents[j][0]) + `</div>`;
                 eventsToday = true;
             }
@@ -587,6 +593,25 @@ angular.module('momlink.controllers', [])
             })
         }
     };
+    $scope.getEventImg = function (type) {
+        switch (type) {
+            case 'OB Appt':
+                return '../img/mainIcons/momlink_icon-19.png';
+            case 'Lab':
+                return '../img/mainIcons/momlink_icon-19.png';
+            case 'Referral':
+                return '../img/mainIcons/momlink_icon-19.png';
+            case 'PNCC':
+                return '../img/mainIcons/momlink_icon-19.png';
+            case 'Ultra':
+                return '../img/mainIcons/momlink_icon-19.png';
+            case 'Class':
+                return '../img/mainIcons/momlink_icon-19.png';
+            case 'Other':
+                return '../img/mainIcons/momlink_icon-19.png';
+        }
+    };
+
     $scope.resetArticleHeader = function () {
         var db = PouchDB('momlink');
         cycle1 = 0;
@@ -1093,7 +1118,6 @@ angular.module('momlink.controllers', [])
         });
     }
     $scope.viewEvent = function (eventID, link, title) {
-        $scope.clickTracker('viewEvent');
         $scope.returnLink = link;
         $scope.returnTitle = title;
         var db = PouchDB('momlink');
@@ -1464,7 +1488,9 @@ angular.module('momlink.controllers', [])
                       type: 'button-positive'
                   },
                   {
-                      text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                      text: 'Cancel', onTap: function (e) {
+                          $scope.clickTracker('cancelAmount(' + category + ')');
+                      },
                       type: 'button-positive'
                   }
                 ]
@@ -1502,7 +1528,9 @@ angular.module('momlink.controllers', [])
                       type: 'button-positive'
                   },
                   {
-                      text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                      text: 'Cancel', onTap: function (e) {
+                          $scope.clickTracker('cancelAmount(' + category + ')');
+                      },
                       type: 'button-positive'
                   }
                 ]
@@ -1555,6 +1583,7 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.saveAmount = function (category, consistency) {
+        $scope.clickTracker('saveAmount(' + category + ',' + consistency + ')');
         var db = PouchDB('momlink');
         value = $('#count').html();
         db.get('nutrition').then(function (doc) {
@@ -1674,6 +1703,7 @@ angular.module('momlink.controllers', [])
                 events: doc['events'],
                 eventRender: function (event, element) {
                     element.click(function () {
+                        $scope.clickTracker(`viewEvent(`+ event.id + ', calendar.html' + ', Calendar'+`)`);
                         $scope.viewEvent(event.id, 'calendar.html', 'Calendar');
                     })
                     return ['all', event.scheduledBy].indexOf($('#filter').html()) >= 0
@@ -2121,16 +2151,17 @@ angular.module('momlink.controllers', [])
     ]
 })*/
 
-.controller('CarSeatCtrl', function ($scope, $compile) {
-    $scope.renderCarSeatGrid = function () {
+.controller('GoalsCtrl', function ($scope, $compile) {
+    $scope.renderGoalsGrid = function () {
         var db = PouchDB('momlink');
         var counter = 1;
         //get start/end date
-        db.get('carSeat').then(function (doc) {
+        db.get('goals').then(function (doc) {
             var html = '';
             html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">';
-            for (i in doc['carSeat']) {
-                html += `<div class="col-33 text-center padding nonActiveWeek" ng-click=""><b>` + i + `</b></div>`;
+            //tasks is a 2D array where each array consists of [id, type, name, description, completed]
+            for (i in doc['goals']) {
+                html += `<div class="col-33 text-center padding nonActiveWeek" ng-click=""><b>` + doc['goals'][i][3] + `</b></div>`;
                 //3 items per column
                 if (counter % 3 == 0) {
                     html += '</div><div class="row" style="padding-right:0; padding-left:0">';
@@ -2138,8 +2169,8 @@ angular.module('momlink.controllers', [])
                 counter++;
             }
             html += '</div>'
-            $('#carSeat').html(html);
-            $compile($('#carSeat'))($scope);
+            $('#goalsGrid').html(html);
+            $compile($('#goalsGrid'))($scope);
         });
     }
 })
@@ -2223,7 +2254,7 @@ angular.module('momlink.controllers', [])
                 article = sharedArticles[i]
                 if (article['category'] == category || category == 'All') {
                     html += `<div class="item item-thumbnail-left item-text-wrap">`;
-                    html += `<img ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')" src="../img/articles/webmd.png">`;
+                    html += `<img ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')" src="` + $scope.getFormatImg(article['format']) + `">`;
                     //bold if the article has not been read
                     if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
                     else { html += '<h2>' + article['title'] + '</h2>'; }
@@ -2250,6 +2281,20 @@ angular.module('momlink.controllers', [])
             $('#' + type).html(html);
             $compile($('#' + type))($scope);
         });
+    };
+    $scope.getFormatImg = function (type) {
+        switch (type) {
+            case 'Website':
+                return '../img/formats/website.png';
+            case 'PDF':
+                return '../img/formats/pdf.png';
+            case 'Image':
+                return '../img/formats/image.png';
+            case 'Audio':
+                return '../img/formats/audio.png';
+            case 'Video':
+                return '../img/formats/video.png';
+        }
     };
     $scope.renderArticle = function (type, id, category) {
         var db = PouchDB('momlink');
@@ -2345,6 +2390,7 @@ angular.module('momlink.controllers', [])
             },
             {
                 text: 'Cancel', onTap: function (e) {
+                    $scope.clickTracker('cancelQuiz');
                     return 'Close';
                 },
                 type: 'button-stable'
@@ -2487,6 +2533,7 @@ angular.module('momlink.controllers', [])
     };
     $scope.toggleChange = function (category, state) {
         if (state == true) {
+            $scope.clickTracker('downloadArticles(' + category + ')');
             localStorage.setItem(category, true);
             //download all articles for that category
             document.addEventListener("deviceready", function () {
@@ -2508,6 +2555,7 @@ angular.module('momlink.controllers', [])
             })
         }
         else {
+            $scope.clickTracker('deleteArticles(' + category + ')');
             //delete all local articles for that category
             localStorage.setItem(category, false);
             document.addEventListener("deviceready", function () {
@@ -2531,6 +2579,7 @@ angular.module('momlink.controllers', [])
         }
     }
     $scope.updateArticles = function (category) {
+        $scope.clickTracker('updateArticles(' + category + ')');
         if (localStorage.getItem(category) == 'true') {
             var db = PouchDB('momlink');
             db.get('articles').then(function (doc) {
@@ -2679,7 +2728,7 @@ angular.module('momlink.controllers', [])
             },
             {
                 text: 'Cancel', onTap: function (e) {
-                    return 'Cancel';
+                    $scope.clickTracker('cancelSurvey');
                 },
                 type: 'button-stable'
             }
@@ -2826,45 +2875,44 @@ angular.module('momlink.controllers', [])
         db.get('profile').then(function (doc) {
             start = doc['startDate'];
             end = doc['deliveryDate'];
+            var html = '';
+            var weekCounter = 1;
+            //convert start/end date to moment
+            today = moment()
+            displayStart = moment(start)
             if (end == '') {
-                $('#photoJournal').html('Please set your expected delivery date in the "My Profile" section');
-                $compile($('#photoJournal'))($scope);
+                displayEnd = today
             }
             else {
-                var html = '';
-                var weekCounter = 1;
-                //convert start/end date to moment
-                today = moment()
-                displayStart = moment(start)
                 displayEnd = moment(end)
-                //generate weeks until end/current date
-                html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
-                do {
-                    //display Date formats starting and ending dates for the week
-                    displayDate = String(moment(displayStart).format('ddd MMM Do') + ` - ` + moment(displayStart.add(6, 'days')).format('ddd MMM Do'))
-                    displayStart.subtract(6, 'days');
-                    //highlight the current week
-                    if (displayStart <= today && displayStart.add(6, 'days') >= today) {
-                        html += `<div class="col-33 text-center padding activeWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
-                    }
-                        //normal week
-                    else {
-                        html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
-                    }
-                    //3 dates per column
-                    if (weekCounter % 3 == 0) {
-                        html += '</div><div class="row" style="padding-right:0; padding-left:0">'
-                    }
-                    displayStart.add(1, 'days')
-                    weekCounter++;
-                } while (displayStart <= today && displayStart <= displayEnd)
-                html += '</div>'
-                //keep current week for saving photos, decrement 1 to keep consistent
-                weekCounter--;
-                $scope.currentWeek = weekCounter;
-                $('#photoJournal').html(html);
-                $compile($('#photoJournal'))($scope);
             }
+            //generate weeks until end/current date
+            html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
+            do {
+                //display Date formats starting and ending dates for the week
+                displayDate = String(moment(displayStart).format('ddd MMM Do') + ` - ` + moment(displayStart.add(6, 'days')).format('ddd MMM Do'))
+                displayStart.subtract(6, 'days');
+                //highlight the current week
+                if (displayStart <= today && displayStart.add(6, 'days') >= today) {
+                    html += `<div class="col-33 text-center padding activeWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
+                }
+                    //normal week
+                else {
+                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
+                }
+                //3 dates per column
+                if (weekCounter % 3 == 0) {
+                    html += '</div><div class="row" style="padding-right:0; padding-left:0">'
+                }
+                displayStart.add(1, 'days')
+                weekCounter++;
+            } while (displayStart <= today || displayStart <= displayEnd)
+            html += '</div>'
+            //keep current week for saving photos, decrement 1 to keep consistent
+            weekCounter--;
+            $scope.currentWeek = weekCounter;
+            $('#photoJournal').html(html);
+            $compile($('#photoJournal'))($scope);
         });
     }
     $scope.renderGallery = function (displayDate, week) {
@@ -2977,6 +3025,7 @@ angular.module('momlink.controllers', [])
         $scope.noteID = noteID;
     };
     $scope.editEventNotes = function (eventID) {
+        $scope.clickTracker('openEventNotes');
         $scope.eventID = eventID;
         $scope.modal = $ionicModal.fromTemplateUrl('editEventNoteModal.html', {
             scope: $scope,
@@ -3180,7 +3229,7 @@ angular.module('momlink.controllers', [])
             })
             function resOnError(error) {
                 if (error.code != '1' && error.code != '5') {
-                    alert(error.code);
+                    console.log(error.code);
                 }
             }
         }
@@ -3387,27 +3436,26 @@ angular.module('momlink.controllers', [])
     $scope.clear = function (id, num) {
         $("#" + id).html(num);
     }
-    var hour = 0;
     var totalMinutes = $('#minute');
-    var totalHours = $('#hour');
+    totalHours = $('#hour');
+    totalHours.value = 0;
+    console.log(totalHours)
     $scope.actAddHour = function () {
-        hour++;
-        totalHours.value = hour;
+        totalHours.value++;
         $('#hour').html(("0" + totalHours.value).slice(-2));
     }
     $scope.actSubtractHour = function () {
         if (totalHours.value > 0) {
-            hour--;
-            totalHours.value = hour;
+            totalHours.value--;
             $('#hour').html(("0" + totalHours.value).slice(-2));
         }
     }
     $scope.actClear = function () {
-        hour = 0;
         totalMinutes.value = 0;
         $('#minute').html(("0" + totalMinutes.value).slice(-2));
+        totalHours = $('#hour');
         totalHours.value = 0;
-        $('#hour').html(("0" + totalMinutes.value).slice(-2));
+        $('#hour').html(("0" + totalHours.value).slice(-2));
     }
     $scope.selectDay = function (day) {
         if (document.getElementById(day).classList.contains('activeBorder')) {
@@ -3561,7 +3609,7 @@ angular.module('momlink.controllers', [])
                 console.log(entry.toURL())
             }
             function resOnError(error) {
-                alert(error.code);
+                console.log(error.code);
             }
 
             var element = {
@@ -3615,6 +3663,7 @@ angular.module('momlink.controllers', [])
                             }, resOnError);
                         }, resOnError);
                     }
+                    $scope.clickTracker(`deleteElement('` + category + `')`)
                     $scope.loadHistory();
                 })
             }
@@ -3624,7 +3673,7 @@ angular.module('momlink.controllers', [])
         });
         function resOnError(error) {
             //if (error.code != '1' && error.code != '5') {
-            alert(error.code);
+            console.log(error.code);
             //}
         }
     };
@@ -3653,7 +3702,7 @@ angular.module('momlink.controllers', [])
                 //$scope.toNewPage('myProfile.html', 'My Profile')
             }
             function resOnError(error) {
-                alert(error.code);
+                console.log(error.code);
             }
 
             doc['name'] = $('#name').val(),
@@ -3694,9 +3743,7 @@ angular.module('momlink.controllers', [])
             img.src = pic.toURL();
         }
         function resOnError(error) {
-            if (error.code != '1') {
-                alert(error.code);
-            }
+            console.log(error.code);
         }
     }
 })
@@ -3871,7 +3918,7 @@ angular.module('momlink.controllers', [])
                 console.log(entry.toURL())
             }
             function resOnError(error) {
-                alert(error.code);
+                console.log(error.code);
             }
         }
     }
