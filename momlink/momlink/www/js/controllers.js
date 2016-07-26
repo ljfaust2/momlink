@@ -75,7 +75,22 @@ angular.module('momlink.controllers', [])
                                 ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer']]
                                 ],
                             "dateSurveyGiven": '7/18/2016',
-                            "dateSurveyTaken": ''
+                            "dateSurveyTaken": '',
+                            "questions": []
+                        },
+                        {
+                            "id": '07-25-2016T10:42:29am',
+                            "title": 'Goals Test',
+                            "category": 'Class',
+                            "day": '2016-06-20',
+                            "start": '2016-07-21T11:11',
+                            "end": '2016-07-21T11:33',
+                            "venue": 'Somewhere',
+                            "description": '',
+                            "color": 'purple',
+                            "scheduledBy": '1',
+                            "viewed": '0',
+                            "questions": []
                         }
                     ],
                     "questions": ['Q1', 'Q2', 'Q3']
@@ -87,8 +102,8 @@ angular.module('momlink.controllers', [])
                 db.put({
                     "_id": "goals",
                     'goals': [
-                        ['12345', 'class', 'Safety Class', 'Attend a Safety Class', 'no'],
-                        ['12346', 'class', 'BABE Class', 'Attend a BABE Class', 'no']
+                        ['12345', 'class', 'Safety Class', 'Attend a Safety Class', 'false'],
+                        ['07-25-2016T10:42:29am', 'class', 'BABE Class', 'Attend a BABE Class', 'false']
                     ]
                 });
             }
@@ -572,7 +587,7 @@ angular.module('momlink.controllers', [])
             todaysEvents = sortTimes(todaysEvents)
             for (j in todaysEvents) {
                 html += `<div class="col">`;
-                html += `<img src="'` + $scope.getEventImg(todaysEvents[j][2]) + `'" ng-click="viewEvent('` + todaysEvents[j][1] + `', 'home.html', 'Momlink')" style="height:60%;"><br>`;
+                html += `<img src="` + $scope.getEventImg(todaysEvents[j][2]) + `" ng-click="viewEvent('` + todaysEvents[j][1] + `', 'home.html', 'Momlink')" style="height:60%;"><br>`;
                 html += $scope.convert24to12(todaysEvents[j][0]) + `</div>`;
                 eventsToday = true;
             }
@@ -596,17 +611,17 @@ angular.module('momlink.controllers', [])
     $scope.getEventImg = function (type) {
         switch (type) {
             case 'OB Appt':
-                return '../img/mainIcons/momlink_icon-19.png';
+                return '../img/eventCategories/obAppt.png';
             case 'Lab':
-                return '../img/mainIcons/momlink_icon-19.png';
+                return '../img/eventCategories/lab.png';
             case 'Referral':
-                return '../img/mainIcons/momlink_icon-19.png';
+                return '../img/eventCategories/referral.png';
             case 'PNCC':
-                return '../img/mainIcons/momlink_icon-19.png';
+                return '../img/eventCategories/pncc.png';
             case 'Ultra':
-                return '../img/mainIcons/momlink_icon-19.png';
+                return '../img/eventCategories/ultra.png';
             case 'Class':
-                return '../img/mainIcons/momlink_icon-19.png';
+                return '../img/eventCategories/class.png';
             case 'Other':
                 return '../img/mainIcons/momlink_icon-19.png';
         }
@@ -1360,6 +1375,7 @@ angular.module('momlink.controllers', [])
     }
 
     $scope.speak = function (text) {
+        console.log(text)
         responsiveVoice.speak(text)
         var msg = new SpeechSynthesisUtterance();
     }
@@ -1703,7 +1719,7 @@ angular.module('momlink.controllers', [])
                 events: doc['events'],
                 eventRender: function (event, element) {
                     element.click(function () {
-                        $scope.clickTracker(`viewEvent(`+ event.id + ', calendar.html' + ', Calendar'+`)`);
+                        $scope.clickTracker(`viewEvent(` + event.id + ', calendar.html' + ', Calendar' + `)`);
                         $scope.viewEvent(event.id, 'calendar.html', 'Calendar');
                     })
                     return ['all', event.scheduledBy].indexOf($('#filter').html()) >= 0
@@ -2173,6 +2189,34 @@ angular.module('momlink.controllers', [])
             $compile($('#goalsGrid'))($scope);
         });
     }
+    //for each
+    $scope.checkClasses = function () {
+        classes = [];
+        var db = PouchDB('momlink');
+        db.get('goals').then(function (doc) {
+            for (i in doc['goals']) {
+                //check for any class related goals not yet completed
+                if (doc['goals'][i][1] == 'class' && doc['goals'][i][4] == 'false') {
+                    //get the corresponding event
+                    classes.push()
+                    console.log(doc['goals'][i][4])
+                    return db.put(doc)
+                }
+            }
+
+        });
+        db.get('events').then(function (doc2) {
+            for (j in doc2['events']) {
+                if (doc2['events'][j]['id'] == doc['goals'][i][0]) {
+                    //check if the event has passed
+                    if (moment(doc2['events'][j]['end']) < moment()) {
+                        console.log('what')
+                        doc['goals'][i][4] = 'true';
+                    }
+                }
+            }
+        })
+    }
 })
 
 .controller('EducationCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
@@ -2367,7 +2411,7 @@ angular.module('momlink.controllers', [])
                         html += `<ion-list>`
                         for (k = 0; k < answers.length; k++) {
                             answer = quiz[j][1][k];
-                            html += `<i class="icon ion-volume-medium" ng-click="speak('` + answer + `')"></i><ion-radio name="` + String(j) + `" value="` + String(answer) + `">` + answer + ` </ion-radio>`;
+                            html += `<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio><button class="col icon ion-volume-medium" ng-click="speak('` + answer + `')"></button></div>`;
                         }
                         html += `</ion-list>`
                         html += `</form>`
@@ -2706,7 +2750,7 @@ angular.module('momlink.controllers', [])
                         html += `<ion-list>`;
                         for (k = 0; k < answers.length; k++) {
                             answer = survey[j][1][k];
-                            html += `<ion-radio name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio><i class="icon ion-volume-medium" ng-click="speak('` + answer + `')"></i>`;
+                            html += `<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio><button class="col icon ion-volume-medium" ng-click="speak('` + answer + `')"></button></div>`;
                         }
                         html += `</ion-list>`;
                         html += `</form>`;
