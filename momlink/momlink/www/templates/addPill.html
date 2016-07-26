@@ -15,10 +15,18 @@
                 <span class="input-label">Pill name</span>
                 <input id="pillName" type="text" placeholder="Pill name">
             </label>
+            <div class="item"><i class="button-icon icon ion-clock"></i><i class="button-icon icon ion-plus-round" ng-click="addTime()" style="color:#528ef4"></i></div>
+            <div id="times"></div>
             <label class="item item-input item-stacked-label">
-                <span class="input-label">When should this pill be taken?</span>
-                <input id="timeTaken" type="time" placeholder="Time">
+                <span class="input-label">Dosage</span>
+                <input id="dosage" type="number" placeholder="Amount">
             </label>
+        </div>
+        <div id="meal" class="row text-center">
+            <div id="withFood" class="col" ng-click="selectHow('withFood')"><img src="../img/pills/withFood.gif" style="max-width:100%;height:auto;vertical-align:middle">With Food</div>
+            <div id="withoutFood" class="col" ng-click="selectHow('withoutFood')"><img src="../img/pills/withoutFood.gif" style="max-width:100%;height:auto;vertical-align:middle">Without Food</div>
+            <div id="beforeMeal" class="col" ng-click="selectHow('beforeMeal')"><img src="../img/pills/beforeMeal.gif" style="max-width:100%;height:auto;vertical-align:middle">Before Meal</div>
+            <div id="afterMeal" class="col" ng-click="selectHow('afterMeal')"><img src="../img/pills/afterMeal.gif" style="max-width:100%;height:auto;vertical-align:middle">After Meal</div>
         </div>
         <div class="row text-center">
             <div id="Sun" class="col" ng-click="selectDay('Sun')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Sun</div>
@@ -29,6 +37,7 @@
             <div id="Fri" class="col" ng-click="selectDay('Fri')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Fri</div>
             <div id="Sat" class="col" ng-click="selectDay('Sat')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Sat</div>
         </div>
+        <ion-toggle id="notify" ng-model="notify" ><i class="button-icon icon ion-android-notifications-none"></i>Set Alert?</ion-toggle>
         <div class="padding-left padding-right">
             <input type="button" class="button button-block button-positive" value="ADD" ng-click="submitPill();closeModal();">
             <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="closeModal();">
