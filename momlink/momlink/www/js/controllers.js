@@ -1129,7 +1129,7 @@ angular.module('momlink.controllers', [])
                     window.localStorage.removeItem('referralID')
                 });
             }
-            else if ($scope.returnTitle == 'Goals'){
+            else if ($scope.returnTitle == 'Goals') {
                 //attach eventID to goal 
                 id = window.localStorage.getItem('goalID');
                 db.get('goals').then(function (doc) {
@@ -1152,7 +1152,7 @@ angular.module('momlink.controllers', [])
             else {
                 $scope.toNewPage($scope.returnLink, $scope.returnTitle)
                 delete $scope.returnLink;
-                delete $scope.returnTitle;              
+                delete $scope.returnTitle;
                 $scope.closeModal();
             }
         });
@@ -1244,9 +1244,15 @@ angular.module('momlink.controllers', [])
             $('#end').val($scope.parseTime(doc['events'][i]['end']));
             $('#venue').val(doc['events'][i]['venue']);
             $('#description').val(doc['events'][i]['description']);
+            //populate all current questiions
+            for (j in doc['events'][i]['questions']) {
+                console.log(doc['events'][i]['questions'][j])
+            }
+            //grab extra questions from db
             for (j in doc['events'][i]['questions']) {
                 $("input[name=Q]").each(function () {
                     if (doc['events'][i]['questions'][j] == $(this).val()) {
+                        //console.log(doc['events'][i]['questions'][j])
                         $(this).prop('checked', true);
                     }
                 });
@@ -2253,11 +2259,11 @@ angular.module('momlink.controllers', [])
                                 if (doc['goals'][i]['completed'] == 'true') {
                                     html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent('` + doc['goals'][i]['eventID'] + `','goals.html','Goals')" style="background-color: #528ef4; color:white;"><b>` + doc['goals'][i]['name'] + `<br><i class="icon ion-checkmark-round"></i></b></div>`;
                                 }
-                                //event has been registered
+                                    //event has been registered
                                 else if (doc['goals'][i]['eventID'] != '' && doc['goals'][i]['eventID'] != null) {
                                     html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent('` + doc['goals'][i]['eventID'] + `','goals.html','Goals')" style="background-color: #528ef4; color:white;"><b>` + doc['goals'][i]['name'] + `</b></div>`;
                                 }
-                                //event has not been started
+                                    //event has not been started
                                 else {
                                     if (doc['goals'][i]['type'] == 'class') {
                                         html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewClasses('` + doc['goals'][i]['name'] + `','` + doc['goals'][i]['id'] + `')"><b>` + doc['goals'][i]['name'] + `</b></div>`;
@@ -2368,7 +2374,7 @@ angular.module('momlink.controllers', [])
         });
     };
     $scope.setGoalID = function (id) {
-        window.localStorage.setItem('goalID',id);
+        window.localStorage.setItem('goalID', id);
     }
 })
 
@@ -2494,55 +2500,74 @@ angular.module('momlink.controllers', [])
         }
     };
     $scope.renderArticle = function (type, id, category) {
-        var db = PouchDB('momlink');
-        var html = '';
-        db.get('articles').then(function (doc) {
-            sharedArticles = doc[type];
-            for (i in sharedArticles) {
-                article = sharedArticles[i]
-                if (article['id'] == id) {
-                    html += `<ion-modal-view>`;
-                    html += `<div class="bar bar-footer" ng-init="startSessionTimer()">`;
-                    html += `<button class="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
-                    html += `<button class="button button-icon icon ion-volume-medium" ng-click="">Listen</button>`;
-                    html += `<button class="button button-icon icon icon-right ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">Take Quiz &nbsp;</button>`;
-                    html += `</div>`;
-                    //if category is set to local and network is not available then
-                    var networkState = navigator.connection.type;
-                    articleCategory = String(article['category']).replace(/\s/g, '');
-                    if (window.localStorage.getItem(articleCategory) == 'true' && networkState == Connection.NONE) {
-                        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
-                            dir.getFile(id.concat('.html'), { create: false }, function (fileEntry) {
-                                console.log(fileEntry.toURL())
-                                html += `<iframe src="` + fileEntry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
-                                html += `</ion-modal-view>`
-                                //updated last time article was read
-                                article['lastRead'] = String(moment().format('MM-DD-YYYY'));
-                                $scope.modal = $ionicModal.fromTemplate(html, {
-                                    scope: $scope,
-                                    animation: 'slide-in-up'
-                                });
-                                $scope.openModal();
-                                return db.put(doc)
-                            }, function (error) { console.log(error) });
-                        });
-                    }
-                        //if network is available
-                    else {
-                        html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
-                        html += `</ion-modal-view>`
-                        //updated last time article was read
-                        article['lastRead'] = String(moment().format('MM-DD-YYYY'));
-                        $scope.modal = $ionicModal.fromTemplate(html, {
-                            scope: $scope,
-                            animation: 'slide-in-up'
-                        });
-                        $scope.openModal();
-                        return db.put(doc)
-                    }
+        $ionicPopup.show({
+            title: 'Have you read this article before?',
+            buttons: [
+                {
+                    text: 'Yes', onTap: function (e) {
+                        //take quiz
+                        $scope.renderQuiz(type, id, category);
+                    },
+                    type: 'button-stable'
+                },
+                {
+                    text: 'No', onTap: function (e) {
+                        //read article
+                        var db = PouchDB('momlink');
+                        var html = '';
+                        db.get('articles').then(function (doc) {
+                            sharedArticles = doc[type];
+                            for (i in sharedArticles) {
+                                article = sharedArticles[i]
+                                if (article['id'] == id) {
+                                    html += `<ion-modal-view>`;
+                                    html += `<div class="bar bar-footer" ng-init="startSessionTimer()">`;
+                                    html += `<button class="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
+                                    html += `<button class="button button-icon icon ion-volume-medium" ng-click="">Listen</button>`;
+                                    html += `<button class="button button-icon icon icon-right ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">Take Quiz &nbsp;</button>`;
+                                    html += `</div>`;
+                                    //if category is set to local and network is not available then
+                                    var networkState = navigator.connection.type;
+                                    articleCategory = String(article['category']).replace(/\s/g, '');
+                                    if (window.localStorage.getItem(articleCategory) == 'true' && networkState == Connection.NONE) {
+                                        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
+                                            dir.getFile(id.concat('.html'), { create: false }, function (fileEntry) {
+                                                console.log(fileEntry.toURL())
+                                                html += `<iframe src="` + fileEntry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
+                                                html += `</ion-modal-view>`
+                                                //updated last time article was read
+                                                article['lastRead'] = String(moment().format('MM-DD-YYYY'));
+                                                $scope.modal = $ionicModal.fromTemplate(html, {
+                                                    scope: $scope,
+                                                    animation: 'slide-in-up'
+                                                });
+                                                $scope.openModal();
+                                                return db.put(doc)
+                                            }, function (error) { console.log(error) });
+                                        });
+                                    }
+                                        //if network is available
+                                    else {
+                                        html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
+                                        html += `</ion-modal-view>`
+                                        //updated last time article was read
+                                        article['lastRead'] = String(moment().format('MM-DD-YYYY'));
+                                        $scope.modal = $ionicModal.fromTemplate(html, {
+                                            scope: $scope,
+                                            animation: 'slide-in-up'
+                                        });
+                                        $scope.openModal();
+                                        return db.put(doc)
+                                    }
+                                }
+                            }
+                        })
+                    },
+                    type: 'button-stable'
                 }
-            }
-        })
+            ],
+        });
+
     };
     $scope.renderQuiz = function (type, articleID, category) {
         var db = PouchDB('momlink');
