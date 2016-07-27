@@ -528,11 +528,10 @@ angular.module('momlink.controllers', [])
         });*/
         //db.destroy();
     }
-    /*$scope.getInformation = function () {
+    $scope.getInformation = function () {
         // Which fetches are repeatable.
         // All sends are repeatable.
         document.addEventListener("deviceready", function () {
-
             client_referral_education_fetched = false;
             pncc_fetched = false;
             if (navigator.network.connection.type == Connection.NONE) {
@@ -559,7 +558,7 @@ angular.module('momlink.controllers', [])
                 }
             }
         });
-    }*/
+    }
     $scope.toggleRightSideMenu = function () {
         $ionicSideMenuDelegate.toggleRight();
     };
@@ -1434,6 +1433,18 @@ angular.module('momlink.controllers', [])
             }
         })*/
     }
+
+    /*$scope.test5() = function () {
+        var text = "";
+        if (window.getSelection) {
+            text = window.getSelection().toString();
+            console.log(text);
+        } else if (document.selection && document.selection.type != "Control") {
+            text = document.selection.createRange().text;
+            console.log(text);
+        }
+        return text;
+    }*/
 })
 
 .controller('NutritionCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
@@ -2523,7 +2534,7 @@ angular.module('momlink.controllers', [])
                                     html += `<ion-modal-view>`;
                                     html += `<div class="bar bar-footer" ng-init="startSessionTimer()">`;
                                     html += `<button class="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
-                                    html += `<button class="button button-icon icon ion-volume-medium" ng-click="">Listen</button>`;
+                                    html += `<button class="button button-icon icon ion-volume-medium" ng-click="test5()">Listen</button>`;
                                     html += `<button class="button button-icon icon icon-right ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">Take Quiz &nbsp;</button>`;
                                     html += `</div>`;
                                     //if category is set to local and network is not available then
