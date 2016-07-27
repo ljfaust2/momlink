@@ -559,6 +559,13 @@ angular.module('momlink.controllers', [])
             }
         });
     }
+    $scope.clientUpdates = function () {
+        // Which fetches are repeatable.
+        // All sends are repeatable.
+        document.addEventListener("deviceready", function () {
+
+        });
+    }
     $scope.toggleRightSideMenu = function () {
         $ionicSideMenuDelegate.toggleRight();
     };
