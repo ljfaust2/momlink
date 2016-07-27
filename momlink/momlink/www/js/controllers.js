@@ -94,7 +94,7 @@ angular.module('momlink.controllers', [])
                                 '07/17/2016': ['Venue2', '12:00', '15:00', 'Instructor2'],
                                 '07/18/2016': ['Venue3', '12:00', '15:00', 'Instructor3'],
                                 '07/19/2016': ['Venue4', '12:00', '15:00', 'Instructor4']
-                            },'eventID':'', 'completed': 'false'
+                            }, 'eventID': '', 'completed': 'false'
                         },
                         {
                             'id': '12346', 'name': 'Attend a BABE Class', 'type': 'class', 'classes': {
@@ -103,6 +103,9 @@ angular.module('momlink.controllers', [])
                                 '07/29/2016': ['Venue3', '12:00', '15:00', 'Instructor 3'],
                                 '07/30/2016': ['Venue4', '12:00', '15:00', 'Instructor 4']
                             }, 'eventID': '', 'completed': 'false'
+                        },
+                        {
+                            'id': '12347', 'name': 'Meet with a PNCC', 'type': 'meet', 'eventID': '', 'completed': 'false'
                         }
                     ]
                 });
@@ -1126,8 +1129,30 @@ angular.module('momlink.controllers', [])
                     window.localStorage.removeItem('referralID')
                 });
             }
+            else if ($scope.returnTitle == 'Goals'){
+                //attach eventID to goal 
+                id = window.localStorage.getItem('goalID');
+                db.get('goals').then(function (doc) {
+                    for (i in doc['goals']) {
+                        if (doc['goals'][i]['id'] == id) {
+                            doc['goals'][i]['eventID'] = $scope.eventID;
+                            return db.put(doc);
+                        }
+                    }
+                }).then(function () {
+                    console.log(window.localStorage.getItem('goalID'))
+                    delete $scope.eventID;
+                    $scope.toNewPage($scope.returnLink, $scope.returnTitle)
+                    delete $scope.returnLink;
+                    delete $scope.returnTitle;
+                    $scope.closeModal();
+                    window.localStorage.removeItem('goalID')
+                })
+            }
             else {
-                $scope.toNewPage('calendar.html', 'Calendar');
+                $scope.toNewPage($scope.returnLink, $scope.returnTitle)
+                delete $scope.returnLink;
+                delete $scope.returnTitle;              
                 $scope.closeModal();
             }
         });
@@ -2180,38 +2205,37 @@ angular.module('momlink.controllers', [])
 
 .controller('GoalsCtrl', function ($scope, $compile, $ionicPopup) {
     $scope.renderGoalsGrid = function () {
-        classes = [];
+        goals = [];
         var db = PouchDB('momlink');
         //check if any classes have been completed
         db.get('goals').then(function (doc) {
             for (i in doc['goals']) {
                 //check for any class related goals not yet completed
-                if (doc['goals'][i]['type'] == 'class' && doc['goals'][i]['completed'] == 'false') {
-                    classes.push(doc['goals'][i])
+                if ((doc['goals'][i]['type'] == 'class' || doc['goals'][i]['type'] == 'meet') && doc['goals'][i]['completed'] == 'false') {
+                    goals.push(doc['goals'][i])
                 }
             }
         }).then(function () {
-            if (classes.length > 0) {
+            if (goals.length > 0) {
                 db.get('events').then(function (doc) {
-                    for (i in classes) {
+                    for (i in goals) {
                         for (j in doc['events']) {
                             //get the corresponding event
-                            if (doc['events'][j]['id'] == classes[i]['eventID']) {
+                            if (doc['events'][j]['id'] == goals[i]['eventID']) {
                                 //check if the event has passed
                                 if (moment(doc['events'][j]['end']) < moment()) {
                                     //if event has passed, change 'completed' to true
-                                    classes[i]['completed'] = 'true';
+                                    goals[i]['completed'] = 'true';
                                 }
                             }
                         }
                     }
                 }).then(function () {
-                    console.log(classes)
                     //update db
                     db.get('goals').then(function (doc) {
-                        for (i in classes) {
+                        for (i in goals) {
                             for (j in doc['goals']) {
-                                if (doc['goals'][j]['id'] == classes[i]['id'] && classes[i]['completed'] == 'true') {
+                                if (doc['goals'][j]['id'] == goals[i]['id'] && goals[i]['completed'] == 'true') {
                                     doc['goals'][j]['completed'] = 'true';
                                 }
                             }
@@ -2225,17 +2249,22 @@ angular.module('momlink.controllers', [])
                             var html = '';
                             html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">';
                             for (i in doc['goals']) {
-                                //if event has been completed
-                                console.log(doc['goals'])
+                                //event has been completed
                                 if (doc['goals'][i]['completed'] == 'true') {
                                     html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent('` + doc['goals'][i]['eventID'] + `','goals.html','Goals')" style="background-color: #528ef4; color:white;"><b>` + doc['goals'][i]['name'] + `<br><i class="icon ion-checkmark-round"></i></b></div>`;
                                 }
-                                    //event has been registered
+                                //event has been registered
                                 else if (doc['goals'][i]['eventID'] != '' && doc['goals'][i]['eventID'] != null) {
                                     html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent('` + doc['goals'][i]['eventID'] + `','goals.html','Goals')" style="background-color: #528ef4; color:white;"><b>` + doc['goals'][i]['name'] + `</b></div>`;
                                 }
+                                //event has not been started
                                 else {
-                                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewClasses('` + doc['goals'][i]['name'] + `','` + doc['goals'][i]['id'] + `')"><b>` + doc['goals'][i]['name'] + `</b></div>`;
+                                    if (doc['goals'][i]['type'] == 'class') {
+                                        html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewClasses('` + doc['goals'][i]['name'] + `','` + doc['goals'][i]['id'] + `')"><b>` + doc['goals'][i]['name'] + `</b></div>`;
+                                    }
+                                    if (doc['goals'][i]['type'] == 'meet') {
+                                        html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="setGoalID('` + doc['goals'][i]['id'] + `');createEvent('goals.html', 'Goals');"><b>` + doc['goals'][i]['name'] + `</b></div>`;
+                                    }
                                 }
                                 //3 items per column
                                 if (counter % 3 == 0) {
@@ -2266,7 +2295,7 @@ angular.module('momlink.controllers', [])
             //pull class dates from goal
             html = `<div class="list">`;
             for (var j in doc['goals'][i]['classes']) {
-                html += `<div class="item item-button-right">` + j + `<button class="button button-small button-positive" ng-click="showInfo('` + id + `','`+name+`','`+ doc['goals'][i]['classes'][j] + `','` + j + `')">View</button></div>`;
+                html += `<div class="item item-button-right">` + j + `<button class="button button-small button-positive" ng-click="showInfo('` + id + `','` + name + `','` + doc['goals'][i]['classes'][j] + `','` + j + `')">View</button></div>`;
             }
             html += `</div>`;
             //show dates
@@ -2338,6 +2367,9 @@ angular.module('momlink.controllers', [])
             ]
         });
     };
+    $scope.setGoalID = function (id) {
+        window.localStorage.setItem('goalID',id);
+    }
 })
 
 .controller('EducationCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
@@ -3817,11 +3849,11 @@ angular.module('momlink.controllers', [])
                 console.log(error.code);
             }
             //add alert for pill
-            if ($scope.notify == true) {
+            /*if ($scope.notify == true) {
                 document.addEventListener('deviceready', function () {
 
                 }, false);
-            }
+            }*/
             var element = {
                 "id": id,
                 "date": moment().format('MM/DD/YYYY'),
