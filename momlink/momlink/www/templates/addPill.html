@@ -19,23 +19,25 @@
             <div id="times"></div>
             <label class="item item-input item-stacked-label">
                 <span class="input-label">Dosage</span>
-                <input id="dosage" type="number" placeholder="Amount">
+                <input id="dosage" type="number" placeholder="# of pills">
             </label>
-        </div>
-        <div id="meal" class="row text-center">
-            <div id="withFood" class="col" ng-click="selectHow('withFood')"><img src="../img/pills/withFood.gif" style="max-width:100%;height:auto;vertical-align:middle">With Food</div>
-            <div id="withoutFood" class="col" ng-click="selectHow('withoutFood')"><img src="../img/pills/withoutFood.gif" style="max-width:100%;height:auto;vertical-align:middle">Without Food</div>
-            <div id="beforeMeal" class="col" ng-click="selectHow('beforeMeal')"><img src="../img/pills/beforeMeal.gif" style="max-width:100%;height:auto;vertical-align:middle">Before Meal</div>
-            <div id="afterMeal" class="col" ng-click="selectHow('afterMeal')"><img src="../img/pills/afterMeal.gif" style="max-width:100%;height:auto;vertical-align:middle">After Meal</div>
-        </div>
-        <div class="row text-center">
-            <div id="Sun" class="col" ng-click="selectDay('Sun')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Sun</div>
-            <div id="Mon" class="col" ng-click="selectDay('Mon')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Mon</div>
-            <div id="Tue" class="col" ng-click="selectDay('Tue')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Tue</div>
-            <div id="Wed" class="col" ng-click="selectDay('Wed')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Wed</div>
-            <div id="Thu" class="col" ng-click="selectDay('Thu')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Thu</div>
-            <div id="Fri" class="col" ng-click="selectDay('Fri')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Fri</div>
-            <div id="Sat" class="col" ng-click="selectDay('Sat')"><img src="../img/mainIcons/momlink_icon-16.png" style="max-width:100%;height:auto;vertical-align:middle">Sat</div>
+            <div id="type" class="item item-text-wrap item-divider">Restrictions (choose one of the following, if any)</div>
+            <div id="meal" class="row text-center">
+                <div id="withFood" class="col" ng-click="selectHow('withFood')"><img src="../img/pills/withFood.jpg" style="max-width:100%;height:auto;vertical-align:middle">With Food</div>
+                <div id="withoutFood" class="col" ng-click="selectHow('withoutFood')"><img src="../img/pills/withoutFood.jpg" style="max-width:100%;height:auto;vertical-align:middle">Without Food</div>
+                <div id="beforeMeal" class="col" ng-click="selectHow('beforeMeal')"><img src="../img/pills/beforeMeal.jpg" style="max-width:100%;height:auto;vertical-align:middle">Before Meal</div>
+                <div id="afterMeal" class="col" ng-click="selectHow('afterMeal')"><img src="../img/pills/afterMeal.jpg" style="max-width:100%;height:auto;vertical-align:middle">After Meal</div>
+            </div>
+            <div id="type" class="item item-text-wrap item-divider">Select all days to take this pill</div>
+            <div class="row text-center">
+                <div id="Sun" class="col" ng-click="selectDay('Sun')"><img src="../img/pills/sun.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
+                <div id="Mon" class="col" ng-click="selectDay('Mon')"><img src="../img/pills/mon.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
+                <div id="Tue" class="col" ng-click="selectDay('Tue')"><img src="../img/pills/tue.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
+                <div id="Wed" class="col" ng-click="selectDay('Wed')"><img src="../img/pills/wed.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
+                <div id="Thu" class="col" ng-click="selectDay('Thu')"><img src="../img/pills/thu.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
+                <div id="Fri" class="col" ng-click="selectDay('Fri')"><img src="../img/pills/fri.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
+                <div id="Sat" class="col" ng-click="selectDay('Sat')"><img src="../img/pills/sat.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
+            </div>
         </div>
         <!--<ion-toggle id="notify" ng-model="notify" ><i class="button-icon icon ion-android-notifications-none"></i>Set Alert?</ion-toggle>-->
         <div class="padding-left padding-right">

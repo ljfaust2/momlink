@@ -58,11 +58,11 @@ angular.module('momlink.controllers', [])
                     "events": [
                         {
                             "id": '06-20-2016T10:53:29am',
-                            "title": 'Survey Test',
-                            "category": 'Lab',
-                            "day": '2016-06-20',
-                            "start": '2016-06-20T10:11',
-                            "end": '2016-06-20T11:11',
+                            "title": 'Smoking Cessation Program',
+                            "category": 'Referral',
+                            "day": '2016-07-27',
+                            "start": '2016-07-27T10:11',
+                            "end": '2016-07-27T14:11',
                             "venue": '',
                             "description": '',
                             "color": 'red',
@@ -70,16 +70,15 @@ angular.module('momlink.controllers', [])
                             "viewed": '0',
                             "survey":
                                 [
-                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer']],
-                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer']],
-                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer']]
+                                ['Please rate your experience', ['Satisfactory', 'Unsatisfactory']],
+                                ['How likely are you to reccommend us to a friend?', ['Unlikely', 'Likely', 'Very Likely']]
                                 ],
-                            "dateSurveyGiven": '7/18/2016',
+                            "dateSurveyGiven": '7/27/2016',
                             "dateSurveyTaken": '',
                             "questions": []
                         }
                     ],
-                    "questions": ['Q1', 'Q2', 'Q3']
+                    "questions": [`How can I tell if the symptoms I'm having are normal?`, 'When should I call a doctor?', `Is there anything I should do to prepare?`]
                 });
             }
         });
@@ -183,9 +182,9 @@ angular.module('momlink.controllers', [])
                             "quizHistory": {},
                             "quiz":
                                 [
-                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
-                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
-                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
+                                ['Pregnant women with high blood pressure may have an increased risk for metabolic syndrome.', ['True', 'False'], '0'],
+                                ['The study found that women with high blood pressure were twice as likely to develop metabolic syndrome.', ['True', 'False'], '1'],
+                                ['Metabolic syndrome increases the risk of heart disease.', ['True', 'False'], '0']
                                 ]
                         },
                         {
@@ -1441,17 +1440,28 @@ angular.module('momlink.controllers', [])
         })*/
     }
 
-    /*$scope.test5() = function () {
-        var text = "";
-        if (window.getSelection) {
-            text = window.getSelection().toString();
-            console.log(text);
-        } else if (document.selection && document.selection.type != "Control") {
-            text = document.selection.createRange().text;
-            console.log(text);
-        }
-        return text;
-    }*/
+    $scope.sendLog = function () {
+        var db = PouchDB('momlink');
+        var log = '';
+        db.get('userData').then(function (doc) {
+            console.log(doc);
+            for (i in doc['userData']) {
+                for (j in doc['userData'][i]) {
+                    log += doc['userData'][i][j];
+                    log += ',';
+                }
+                log += ' @@@@@ ';
+                log += '\n';
+            }
+        }).then(function () {
+            //console.log(log)
+            window.cordova.plugins.email.open({
+                to: 'lfaust@nd.edu',
+                subject: 'Click Log',
+                body: log
+            });
+        })
+    }
 })
 
 .controller('NutritionCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
@@ -1796,7 +1806,7 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
             for (i in doc['questions']) {
-                questionsHtml += `<div class="item item-checkbox item-icon-right" on-hold="deleteQuestion('` + doc['questions'][i] + `')">` + doc['questions'][i] + `<label class="checkbox"><input type="checkbox" name="Q" value="` + doc['questions'][i] + `"></label></div>`;
+                questionsHtml += `<div class="item item-checkbox item-icon-right item-text-wrap" on-hold="deleteQuestion('` + doc['questions'][i] + `')">` + doc['questions'][i] + `<label class="checkbox"><input type="checkbox" name="Q" value="` + doc['questions'][i] + `"></label></div>`;
             }
             $('#eventQuestions').html(questionsHtml);
             $compile($('#eventQuestions'))($scope);
@@ -2540,10 +2550,10 @@ angular.module('momlink.controllers', [])
                                 if (article['id'] == id) {
                                     html += `<ion-modal-view>`;
                                     html += `<div class="bar bar-footer" ng-init="startSessionTimer()">`;
-                                    html += `<button class="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">Close</button>`;
-                                    html += `<button class="button button-icon icon ion-volume-medium" ng-click="test5()">Listen</button>`;
-                                    html += `<button class="button button-icon icon icon-right ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">Take Quiz &nbsp;</button>`;
+                                    html += `<button class="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">&nbsp;Close</button>`;
+                                    html += `<button class="button button-icon icon ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">&nbsp;Take Quiz</button>`;
                                     html += `</div>`;
+                                    html += `<div class="float-button-hasFooter"><span class="height-fix"><button class="button button-light button-rounded content" ng-click="readText()"><i class="icon ion-volume-medium" style="color: black !important;"></i></button></span></div>`;
                                     //if category is set to local and network is not available then
                                     var networkState = navigator.connection.type;
                                     articleCategory = String(article['category']).replace(/\s/g, '');
@@ -2564,9 +2574,9 @@ angular.module('momlink.controllers', [])
                                             }, function (error) { console.log(error) });
                                         });
                                     }
-                                        //if network is available
+                                    //if network is available
                                     else {
-                                        html += `<iframe src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
+                                        html += `<iframe id="frame" src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
                                         html += `</ion-modal-view>`
                                         //updated last time article was read
                                         article['lastRead'] = String(moment().format('MM-DD-YYYY'));
@@ -2585,8 +2595,8 @@ angular.module('momlink.controllers', [])
                 }
             ],
         });
-
     };
+
     $scope.renderQuiz = function (type, articleID, category) {
         var db = PouchDB('momlink');
         var html = '<div ng-controller="HeaderCtrl">';
@@ -2601,7 +2611,7 @@ angular.module('momlink.controllers', [])
                         question = quiz[j][0];
                         answers = quiz[j][1];
                         //render question
-                        html += `<div class="item item-divider item-icon-right">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
+                        html += `<div class="item item-text-wrap item-divider item-icon-right">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
                         //render answers
                         html += `<form id="` + String(j) + `">`
                         html += `<ion-list>`
@@ -2889,6 +2899,24 @@ angular.module('momlink.controllers', [])
         });
     }
 
+    $scope.readText = function () {
+        var text = "";
+        var iframe = document.getElementById('frame');
+        var idoc = iframe.contentDocument || iframe.contentWindow.document; // ie compatibility
+        if (idoc.getSelection) {
+            text = idoc.getSelection().toString();
+            if (text == '') {
+                $ionicPopup.alert({
+                    title: 'Please highlight an area of text to listen to.',
+                });
+            }
+            $scope.speak(text);
+        }
+        /*else if (document.selection && document.selection.type != "Control") {
+            text = document.selection.createRange().text;
+            $scope.speak(text);
+        }*/
+    }
 })
 
 .controller('SurveyCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
@@ -2940,7 +2968,7 @@ angular.module('momlink.controllers', [])
                         question = survey[j][0];
                         answers = survey[j][1];
                         //render question
-                        html += `  <div class="item item-icon-right item-divider">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
+                        html += `  <div class="item item-text-wrap item-icon-right item-divider">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
                         //render answers
                         html += `<form id="` + String(j) + `">`;
                         html += `<ion-list>`;
