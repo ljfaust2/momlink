@@ -78,8 +78,13 @@ angular.module('momlink.controllers', [])
                             "questions": []
                         }
                     ],
-                    "questions": [`How can I tell if the symptoms I'm having are normal?`, 'When should I call a doctor?', `Is there anything I should do to prepare?`]
-                });
+                    "questions": 
+                        {
+                            '1':`How can I tell if the symptoms I'm having are normal?`,
+                            '2':`When should I call a doctor?`,
+                            '3':`Is there anything I should do to prepare?`
+                        }
+                    });
             }
         });
         db.get('goals').catch(function (err) {
@@ -527,37 +532,350 @@ angular.module('momlink.controllers', [])
         });*/
         //db.destroy();
     }
-    $scope.getInformation = function () {
+    /*$scope.getInformation = function () {
         // Which fetches are repeatable.
         // All sends are repeatable.
         document.addEventListener("deviceready", function () {
-            client_referral_education_fetched = false;
-            pncc_fetched = false;
-            if (navigator.network.connection.type == Connection.NONE) {
-                alert('No network connection.');
-            } else {
-                // fetch pncc information
-                if (!pncc_fetched) {
-                    // PNCC INFORMATION. FETCH ONCE.
-                    pncc_fetched = true;
 
-                    // Hard-Coded pncc_id - depends on username
-                    var pncc_data = { 'pncc_id': 9888 };
+        });
+    }*/
 
-                    $.ajax({
-                        url: 'https://momlink.crc.nd.edu/~jonathan/send_pncc.php',
-                        type: 'POST',
-                        dataType: 'json',
-                        data: pncc_data,
-                        success: function (data) {
-                            alert("Successfully Retrieved Data.");
-                            console.log(data)
+    $scope.getInformation = function (which_script, update_type, reg_log, reg_pss, reg_pss, reg_sec, reg_ans, first_time_user) {
+        /*
+            which_script:
+                Determines which set of information is updated
+                1 => update
+                2 => register
+                3 => first_time_user
+
+            update_type:
+                1 => Update All
+                2 => Update Referrals Only
+                3 => Update Topics Only
+                4 => Update Messages Only
+                5 => Update Events Only
+                6 => Update PNCC Only
+
+            reg_log:
+                if new registration, the login id of new user
+
+            reg_pss:
+                if new registration, the password of new user
+
+            reg_sec:
+                if new registration, the security question of the new user
+
+            reg_ans:
+                if new registration, the security question answer of the new user
+
+            first_time_user:
+                the username of the first time app user
+
+            The following is the default:
+                which_script = 1
+                update_type = 1
+                reg_log = ""
+                reg_pss = ""
+                reg_sec = ""
+                reg_ans = ""
+                first_time_user = ""
+        */
+        // Default Parameters
+        var which_script = typeof which_script !== 'undefined' ? which_script : 1;
+        var update_type = typeof update_type !== 'undefined' ? update_type : 1;
+        var reg_log = typeof reg_log !== 'undefined' ? reg_log : "";
+        var reg_pss = typeof reg_pss !== 'undefined' ? reg_pss : "";
+        var reg_sec = typeof reg_sec !== 'undefined' ? reg_sec : "";
+        var reg_ans = typeof reg_ans !== 'undefined' ? reg_ans : "";
+        var first_time_user = typeof first_time_user !== 'undefined' ? first_time_user : "";
+
+        // TEMP SET CLIENT ID: 9999 FOR TESTING
+        // UPDATE AGENCY ID AS WELL FROM DATABASE
+        var client_id = 9999;
+        var agency_id = 9999;
+
+        var db = PouchDB('momlink');
+
+        if (navigator.connection.type == Connection.NONE) {
+            $ionicPopup.alert({ title: 'No network connection' });
+        }
+        else {
+            switch (which_script) {
+                case 1:
+                    // Update
+                    db.get('login').then(function (doc) {
+                        var post_information = { 'client_id': client_id, 'type': update_type, 'agency': agency_id };
+                        $.ajax({
+                            url: 'https://momlink.crc.nd.edu/~jonathan/current/update.php',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: post_information,
+                            complete: function (data) {
+                                data = JSON.parse(data['responseText']);
+                                switch (update_type) {
+                                    case 1:
+                                        update_all(data);
+                                        break;
+                                    case 2:
+                                        update_referrals(data['referrals']);
+                                        break;
+                                    case 3:
+                                        update_topics(data['topics']);
+                                        break;
+                                    case 4:
+                                        update_messages(data['messages']);
+                                        break;
+                                    case 5:
+                                        update_events(data['events']);
+                                        break;
+                                    case 6:
+                                        update_pncc(data['pncc']);
+                                        break;
+                                }
+                            }
+                        });
+                    });
+                    break;
+                case 2:
+                    // New User Registration
+                    // TODO: Think more about this registration process...should there be some sort of output?
+                    // I still believe there should be a login script...
+                    //           On login, call the login script which will fetch the login information...
+                    //           The app will then auto call update...
+                    if (reg_log != "" && reg_pss != "" && reg_sec != "" && reg_ans != "") {
+                        var post_information = { 'username': reg_log, 'password': reg_pss, 'sec_question': reg_sec, 'answer': reg_ans };
+                        $.ajax({
+                            url: 'https://momlink.crc.nd.edu/~jonathan/current/register.php',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: post_information,
+                            complete: function (data) {
+                                update_login_table(data);
+                            }
+                        });
+                    } else {
+                        $ionicPopup.alert({ title: 'Please complete each field to continue' });
+                    }
+                    break;
+                case 3:
+                    // First time user
+                    // Still unhappy with this method....create a login script which gets rid of this need
+                    if (first_time_user !== "") {
+                        var post_information = { 'username': first_time_user };
+                        $.ajax({
+                            url: 'https://momlink.crc.nd.edu/~jonathan/current/first_time_user.php',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: post_information,
+                            success: function (data) {
+                                // Insert this information into local login table
+                                update_login_table(data);
+                                $ionicPopup.alert({ title: 'Login Information Retrieved To Phone' });
+                            }
+                        });
+                    } else {
+                        $ionicPopup.alert({ title: 'Please enter a username' });
+                    }
+                    break;
+                default:
+                    console.log("Improper Call");
+                    break;
+            }
+            //}
+
+            /*
+                Updating Retrives a json that looks like the following:
+    
+                {
+                    "referrals" : [
+                                        0 => { "success" : value, "message" : value }
+                                        1 => { information ... }
+                                        ...
+                                        n => { information ... }
+                                  ],
+                    "topics" : [ ... ],
+                    "messages" : [ ... ],
+                    "events" : [ ... ],
+                    "pnccs" : [ ... ]
+                }
+            */
+            // Helper Functions:
+            function update_all(data) {
+                // Expects a json file, cascades
+                console.log(data);
+                update_referrals(data['referrals']);
+                update_topics(data['topics']);
+                update_messages(data['messages']);
+                update_events(data['events']);
+                update_pnccs(data['pncc']);
+            }
+
+            function update_referrals(data) {
+                if (data[0]['success'] == 0) {
+                    // New information here, input into local database
+                    db.get('referrals').then(function (doc) {
+                        for (line in data) {
+                            if (!line.hasOwnProperty('success')) {
+                                db.post({
+                                    "encounter_code": line['encounter_code'],
+                                    "client_id": line['client_id'],
+                                    "pncc_id": line['pncc_id'],
+                                    "encounter_date": line['encoutner_date'],
+                                    "next_homevisit_date": line['next_homevisit_date'],
+                                    "assessment_id": line['assessment_id'],
+                                    "evaluation_code": line['evaluation_code'],
+                                    "meeting_type": line['meeting_type'],
+                                    "meeting_desc": line['meeting_desc'],
+                                    "babe_coupon": line['babe_coupon'],
+                                    "status": line['status'],
+                                    "referral_status": line['status'],
+                                    "referral_id": line['referral_id'],
+                                    "id": line['id'],
+                                    "rtype": line['rtype'],
+                                    'name': line['name'],
+                                    'address': line['address'],
+                                    'phone': line['phone'],
+                                    'phone2': line['phone2'],
+                                    'email': line['email'],
+                                    'url': line['url'],
+                                    'description': line['description'],
+                                    'hours': line['hours'],
+                                    'fax': line['fax'],
+                                    'county': line['county']
+                                });
+                            }
                         }
                     });
+                } else {
+                    $ionicPopup.alert({ title: data[0]['message'] });
                 }
             }
-        });
+            function update_topics(data) {
+                if (data[0]['success'] == 0) {
+                    // New information here, input into local database
+                    db.get('articles').then(function (doc) {
+                        for (line in data) {
+                            if (!line.hasOwnProperty('success')) {
+                                db.post({
+                                    "encounter_code": line['encounter_code'],
+                                    "encounter_date": line['encounter_date'],
+                                    "filename": line['filename'],
+                                    "id": line['id'],
+                                    "image": line['image'],
+                                    "meeting_desc": line['meeting_desc'],
+                                    "meeting_type": line['meeting_type'],
+                                    "path": line['path'],
+                                    "pncc_id": line['pncc_id'],
+                                    "status": line['status'],
+                                    "title": line['title'],
+                                    "topic": line['topic'],
+                                    "topic_id": line['topic_id'],
+                                    "topic_status": line['topic_status'],
+                                    "upload_date": line['upload_date'],
+                                    "uploader": line['uploader']
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    // Nothing new, or something went wrong, check data[0]['message'] for details
+                    $ionicPopup.alert({ title: data[0]['message'] });
+                }
+            }
+            function update_messages(data) {
+                if (data[0]['success'] == 0) {
+                    db.get('inbox').then(function (doc) {
+                        for (line in data) {
+                            if (!line.hasOwnProperty('success')) {
+                                db.post({
+                                    "content": line['content'],
+                                    "detail_type": line['detail_type'],
+                                    "excerpt": line['excerpt'],
+                                    "mdate": line['mdate'],
+                                    "method": line['method'],
+                                    "msgid": line['msgid'],
+                                    "sender": line['sender'],
+                                    "subject": line['subject']
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    $ionicPopup.alert({ title: data[0]['message'] });
+                }
+            }
+            function update_events(data) {
+                if (data[0]['success'] == 0) {
+                    // New information here, input into local database
+                    db.get('events').then(function (doc) {
+                        for (line in data) {
+                            if (!line.hasOwnProperty('success')) {
+                                db.post({
+                                    'agency': line['agency'],
+                                    'allDay': line['allDay'],
+                                    'description': line['description'],
+                                    'edate': line['edate'],
+                                    'end': line['end'],
+                                    'id': line['id'],
+                                    'start': line['start'],
+                                    'title': line['title'],
+                                    'url': line['url'],
+                                    'venue': line['venue']
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    // Nothing new, or something went wrong, check data[0]['message'] for details
+                    $ionicPopup.alert({ title: data[0]['message'] });
+                }
+            }
+            function update_pnccs(data) {
+                if (data[0]['success'] == 0) {
+                    // New information here, input into local database
+                    db.get('pncc').then(function (doc) {
+                        for (line in data) {
+                            if (!line.hasOwnProperty('success')) {
+                                db.post({
+                                    'about': line['about'],
+                                    'agency': line['agency'],
+                                    'email': line['email'],
+                                    'fax': line['fax'],
+                                    'first_name': line['first_name'],
+                                    'image_path': line['image_path'],
+                                    'last_name': line['last_name'],
+                                    'middle_name': line['middle_name'],
+                                    'office': line['office'],
+                                    'phone': line['phone']
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    // Nothing new, or something went wrong, check data[0]['message'] for details
+                    $ionicPopup.alert({ title: data[0]['message'] });
+                }
+            }
+            function update_login_table(data) {
+                db.get('login').then(function (doc) {
+                    db.put({
+                        "_id": "user_info",
+                        "login_code": data[1]['login_code'],
+                        "username": data[1]['username'],
+                        "password": data[1]['password'],
+                        "reset_code": data[1]['reset_code'],
+                        "answer": data[1]['answer'],
+                        "sec_question": data[1]['sec_question'],
+                        "client_id": data[1]['client_id'],
+                        "agency": data[1]['agency']
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
+                });
+            }
+        }
     }
+
     $scope.clientUpdates = function () {
         // Which fetches are repeatable.
         // All sends are repeatable.
@@ -1806,7 +2124,7 @@ angular.module('momlink.controllers', [])
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
             for (i in doc['questions']) {
-                questionsHtml += `<div class="item item-checkbox item-icon-right item-text-wrap" on-hold="deleteQuestion('` + doc['questions'][i] + `')">` + doc['questions'][i] + `<label class="checkbox"><input type="checkbox" name="Q" value="` + doc['questions'][i] + `"></label></div>`;
+                questionsHtml += `<div class="item item-checkbox item-icon-right item-text-wrap" on-hold="deleteQuestion('` + i + `')">` + doc['questions'][i] + `<label class="checkbox"><input type="checkbox" name="Q" value="` + doc['questions'][i] + `"></label></div>`;
             }
             $('#eventQuestions').html(questionsHtml);
             $compile($('#eventQuestions'))($scope);
@@ -1824,7 +2142,7 @@ angular.module('momlink.controllers', [])
                   onTap: function (e) {
                       var db = PouchDB('momlink');
                       db.get('events').then(function (doc) {
-                          doc['questions'].push($('#question').val())
+                          doc['questions'][moment().format('MM-DD-YYYYThh:mm:ssa')] = $('#question').val();
                           return db.put(doc);
                       }).then(function () {
                           $scope.renderEventQuestions();
@@ -1836,7 +2154,7 @@ angular.module('momlink.controllers', [])
             ]
         });
     };
-    $scope.deleteQuestion = function (question) {
+    $scope.deleteQuestion = function (index) {
         $ionicPopup.show({
             title: 'Are you sure you want to delete this question?',
             scope: $scope,
@@ -1847,12 +2165,8 @@ angular.module('momlink.controllers', [])
                   onTap: function (e) {
                       var db = PouchDB('momlink');
                       db.get('events').then(function (doc) {
-                          for (i in doc['questions']) {
-                              if (doc['questions'][i] === question) {
-                                  break;
-                              }
-                          }
-                          doc['questions'].splice(i, 1)
+                          //doc['questions'][index].remove();
+                          delete doc['questions'][index]
                           return db.put(doc);
                       }).then(function () {
                           $scope.renderEventQuestions();
@@ -2574,7 +2888,7 @@ angular.module('momlink.controllers', [])
                                             }, function (error) { console.log(error) });
                                         });
                                     }
-                                    //if network is available
+                                        //if network is available
                                     else {
                                         html += `<iframe id="frame" src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
                                         html += `</ion-modal-view>`
@@ -3025,7 +3339,7 @@ angular.module('momlink.controllers', [])
                 events = doc['events'];
             })
         }).then(function () {
-            $scope.toNewPage('survey.html', 'Survey')
+            $scope.toNewPage('survey.html', 'Surveys')
         })
     };
 })
