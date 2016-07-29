@@ -78,13 +78,13 @@ angular.module('momlink.controllers', [])
                             "questions": []
                         }
                     ],
-                    "questions": 
+                    "questions":
                         {
-                            '1':`How can I tell if the symptoms I'm having are normal?`,
-                            '2':`When should I call a doctor?`,
-                            '3':`Is there anything I should do to prepare?`
+                            '1': `How can I tell if the symptoms I'm having are normal?`,
+                            '2': `When should I call a doctor?`,
+                            '3': `Is there anything I should do to prepare?`
                         }
-                    });
+                });
             }
         });
         db.get('goals').catch(function (err) {
@@ -3789,20 +3789,19 @@ angular.module('momlink.controllers', [])
                                 }
                                 //sort pills in array by time
                                 todaysPills = sortTimes(todaysPills);
-                                console.log(todaysPills)
                                 //build string
                                 for (m in todaysPills) {
-                                    if (todaysPills[m][3] == null) {
+                                    if (todaysPills[m][5] == '' || todaysPills[m][5] == null) {
                                         hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('pill','` + todaysPills[m][0] + `')"><img src='../img/trackers/pill.png' >`;
                                     }
                                     else {
-                                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('pill','` + todaysPills[m][0] + `')"><img src='` + todaysPills[m][5] + `' >`;
+                                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('pill','` + todaysPills[m][0] + `')"><img src=` + todaysPills[m][5] + `>`;
                                     }
                                     hist += `<h2>` + todaysPills[m][1] + `</h2>`;
                                     hist += `<p>Take at ` + $scope.convert24to12(todaysPills[m][2]) + `</p>`;
                                     hist += `<p>Amount:  ` + todaysPills[m][3] + `</p>`;
                                     if (todaysPills[m][4] != '') {
-                                        hist += `<img src="'` + $scope.getPillMealImg(todaysPills[m][4]) + `'"></img>`;
+                                        hist += `<img src="` + $scope.getPillMealImg(todaysPills[m][4]) + `" style="max-height:25px;max-width:auto"></img>`;
                                     }
                                     hist += `</div>`;
                                 }
@@ -3927,13 +3926,13 @@ angular.module('momlink.controllers', [])
     $scope.getPillMealImg = function (type) {
         switch (type) {
             case 'withFood':
-                return '../img/pills/withFood.gif';
+                return '../img/pills/withFood.jpg';
             case 'withoutFood':
-                return '../img/pills/withoutFood.gif';
+                return '../img/pills/withoutFood.jpg';
             case 'beforeMeal':
-                return '../img/pills/beforeMeal.gif';
+                return '../img/pills/beforeMeal.jpg';
             case 'AfterMeal':
-                return '../img/pills/afterMeal.gif';
+                return '../img/pills/afterMeal.jpg';
         }
     };
     $scope.getActivityImg = function (type) {
