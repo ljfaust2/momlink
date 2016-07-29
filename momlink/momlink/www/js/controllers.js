@@ -1868,7 +1868,7 @@ angular.module('momlink.controllers', [])
                 template: '<div class="row" ng-controller="TrackCtrl">' +
                                '<div class="col text-center">' +
                                    '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>' +
                                    '<div class="row">' +
                                        '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
                                        '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
@@ -1876,7 +1876,7 @@ angular.module('momlink.controllers', [])
                                '</div>' +
                                '<div class="col text-center">' +
                                    '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;" /></div>' +
                                    '<div class="row">' +
                                        '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
                                        '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
@@ -1908,7 +1908,7 @@ angular.module('momlink.controllers', [])
                 template: '<div class="row" ng-controller="TrackCtrl">' +
                                '<div class="col text-center">' +
                                    '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + f1 + '" style="width:75px; height:100px;"/></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + f1 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>' +
                                    '<div class="row">' +
                                        '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
                                        '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
@@ -1916,7 +1916,7 @@ angular.module('momlink.controllers', [])
                                '</div>' +
                                '<div class="col text-center">' +
                                    '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + f2 + '" style="width:75px; height:100px;" /></div>' +
+                                   '<div class="col text-center"><img src="../img/handportions/' + f2 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;" /></div>' +
                                    '<div class="row">' +
                                        '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
                                        '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
@@ -1949,7 +1949,7 @@ angular.module('momlink.controllers', [])
             template: '<div class="row" ng-controller="TrackCtrl">' +
                            '<div class="col text-center">' +
                                '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                               '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="width:75px; height:100px;"/></div>' +
+                               '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>' +
                                '<div class="row">' +
                                    '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
                                    '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
@@ -1957,7 +1957,7 @@ angular.module('momlink.controllers', [])
                            '</div>' +
                            '<div class="col text-center">' +
                                '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                               '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="width:75px; height:100px;" /></div>' +
+                               '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;" /></div>' +
                                '<div class="row">' +
                                    '<div class="col text-center"><img type="button" src="../img/handportions/tanminus.PNG" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
                                    '<div class="col text-center"><img type="button" src="../img/handportions/tanplus.PNG" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
