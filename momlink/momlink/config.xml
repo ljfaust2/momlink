@@ -76,4 +76,5 @@
   <plugin name="cordova-plugin-x-socialsharing" version="5.1.1" src="https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin" />
   <plugin name="cordova-plugin-sms" version="1.0.5" src="https://github.com/floatinghotpot/cordova-plugin-sms" />
   <preference name="android-targetSdkVersion" value="22" />
+  <plugin name="cordova-plugin-tts" version="0.2.3" src="https://github.com/vilic/cordova-plugin-tts" />
 </widget>
