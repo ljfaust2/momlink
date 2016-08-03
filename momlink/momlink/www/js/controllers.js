@@ -2434,16 +2434,19 @@ The referral controller shows all referrals and option to schedule meetings with
             buttons: [
                 {
                     text: 'Yes', onTap: function (e) {
+                        $scope.clickTracker('readArticleBefore(yes)');
                         $ionicPopup.show({
                             title: 'Have you taken the quiz before?',
                             buttons: [
                                 {
                                     text: 'Yes', onTap: function (e) {
+                                        $scope.clickTracker('takenQuizBefore(yes)');
                                         $scope.renderArticle(type, id, category);
                                     }
                                 },
                                 {
                                     text: 'No', onTap: function (e) {
+                                        $scope.clickTracker('takenQuizBefore(no)');
                                         $scope.renderQuiz(type, id, category, 1)                                      
                                     }
                                 }
@@ -2455,6 +2458,7 @@ The referral controller shows all referrals and option to schedule meetings with
                 },
                 {
                     text: 'No', onTap: function (e) {
+                        $scope.clickTracker('readArticleBefore(no)');
                         $scope.renderQuiz(type, id, category, 1);
                     },
                     type: 'button-stable'
@@ -2598,8 +2602,9 @@ The referral controller shows all referrals and option to schedule meetings with
                 buttons: [
             {
                 text: 'Finish', onTap: function (e) {
-                    $scope.clickTracker('closeQuizResults');
+                    //$scope.clickTracker('closeQuizResults');
                     if (prequiz == 1) {
+                        $scope.clickTracker(`renderArticle(` + type + `,` + articleID + `,` + category + `)`);
                         $scope.renderArticle(type, articleID, category)
                     }
                 },
@@ -3419,6 +3424,7 @@ The referral controller shows all referrals and option to schedule meetings with
             text: 'Delete',
             type: 'button-assertive',
             onTap: function (e) {
+                $scope.clickTracker('deleteElement(confirm)');
                 var db = PouchDB('momlink');
                 db.get('track').then(function (doc) {
                     for (i in doc[category]) {
@@ -3451,7 +3457,12 @@ The referral controller shows all referrals and option to schedule meetings with
                 })
             }
         },
-        { text: 'Cancel' }
+        {
+            text: 'Cancel',
+            onTap: function (e) {
+                $scope.clickTracker('deleteElement(cancel)');
+            }
+        }
             ]
         });
         function resOnError(error) {
@@ -3927,6 +3938,7 @@ Handler for javascript clock used in addActivityTime page
         })
     };
     $scope.renderSurvey = function (eventID) {
+        $scope.clickTracker(`startSurvey`);
         var db = PouchDB('momlink');
         var html = '<div ng-controller="HeaderCtrl">';
         db.get('events').then(function (doc) {
