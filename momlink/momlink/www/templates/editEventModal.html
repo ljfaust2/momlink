@@ -3,12 +3,8 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();">Cancel</button>
         <h1 class="title" id="modalHeadline">Update Event</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="true" ng-controller="CalendarCtrl" ng-init="renderEventQuestions();pullEvent()">
+    <ion-content overflow-scroll="true" ng-controller="CalendarCtrl" ng-init="renderEventQuestions();pullEvent();">
         <div id="eventPart1" class="list">
-            <label class="item item-input">
-                <span class="input-label">Event Name</span>
-                <input id="title" type="text">
-            </label>
             <div id="type" class="item item-divider">Category (choose one of the following)</div>
             <div style="background-color:#dbdbdb">
                 <div class="row text-center">
@@ -24,6 +20,10 @@
                     <div class="col"></div>
                 </div>
             </div>
+            <label class="item item-input">
+                <span class="input-label">Event Name</span>
+                <input id="title" type="text">
+            </label>
             <label class="item item-input">
                 <span class="input-label"><i class="button-icon icon ion-calendar"></i>Date</span>
                 <input id="date" type="date">

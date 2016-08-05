@@ -1474,10 +1474,13 @@ across the app instead of just the calendar page
     /*
     Opens the modal for creating events
     */
-    $scope.createEvent = function (link, title) {
+    $scope.createEvent = function (link, title, date) {
         //scope variables are used to return to the proper page after the event is created
         $scope.returnLink = link;
         $scope.returnTitle = title;
+        if (date != null) {
+            $scope.date = date;
+        }
         $scope.modal = $ionicModal.fromTemplateUrl('eventModal.html', {
             scope: $scope,
             animation: 'slide-in-up'
@@ -1684,6 +1687,17 @@ across the app instead of just the calendar page
         });
     }
 
+    /*
+    If a date in calendar is clicked, the date field will be automatically populated
+    */
+    $scope.pullDate = function () {
+        if ($scope.date != 'null') {
+            var db = PouchDB('momlink');
+            db.get('events').then(function (doc) {
+                $('#date').val($scope.date);
+            });
+        }
+    }
 
     /*
     Updates db with new/changed data
@@ -1887,10 +1901,10 @@ across the app instead of just the calendar page
     $scope.speak = function (text) {
         document.addEventListener('deviceready', function () {
             TTS.speak(text, function () {
-                    console.log(text);
-                }, function (reason) {
-                    console.log(reason);
-                });
+                console.log(text);
+            }, function (reason) {
+                console.log(reason);
+            });
         }, false);
     }
 
@@ -2048,6 +2062,9 @@ and handles event questions
                 },
                 defaultView: 'basicDay',
                 events: doc['events'],
+                dayClick: function (date) {
+                    $scope.createEvent('calendar.html', 'Calendar', date.format())
+                },
                 eventRender: function (event, element) {
                     element.click(function () {
                         $scope.clickTracker(`viewEvent(` + event.id + ', calendar.html' + ', Calendar' + `)`);
@@ -2058,6 +2075,7 @@ and handles event questions
             })
         });
     };
+
 
 
     /*
@@ -2303,11 +2321,18 @@ The referral controller shows all referrals and option to schedule meetings with
 
 
 /*
-
+The education controller handles articles sent to the user by their pncc
+Allows user to download articles for offline use
+Articles are placed into two categories: shared and history, shared articles are 
+those recently given to user, shared articles are then moved to the history section after
+the articles quiz has been completed with a perfect score
 */
 .controller('EducationCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
     var timer;
     var sessionTime = 0;
+    /*
+    Renders categories based on the categories assigned to articles given to the user
+    */
     $scope.renderCategories = function (type) {
         var db = PouchDB('momlink');
         var html = '';
@@ -2338,7 +2363,7 @@ The referral controller shows all referrals and option to schedule meetings with
             for (i in categories) {
                 totalUnreadArticles += categories[i];
             }
-            //render categories
+            //build string
             html += '<div class="row has-header" style="padding-right:0;padding-left:0;padding-top:0">'
             if (type == 'shared') {
                 html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All');clickTracker('renderCategories(All)')" style="position:relative">
@@ -2373,6 +2398,11 @@ The referral controller shows all referrals and option to schedule meetings with
             $compile($('#' + type))($scope);
         })
     };
+
+
+    /*
+    Renders all articles under the selected category
+    */
     $scope.renderArticles = function (type, category) {
         var db = PouchDB('momlink');
         var html = '';
@@ -2414,6 +2444,11 @@ The referral controller shows all referrals and option to schedule meetings with
             $compile($('#' + type))($scope);
         });
     };
+
+
+    /*
+    Returns image based on article format (text, audio, video, etc.)
+    */
     $scope.getFormatImg = function (type) {
         switch (type) {
             case 'Website':
@@ -2428,6 +2463,11 @@ The referral controller shows all referrals and option to schedule meetings with
                 return '../img/formats/video.png';
         }
     };
+
+
+    /*
+    Checks whether the user has already read the article/taken the articles quiz
+    */
     $scope.openArticle = function (type, id, category) {
         $ionicPopup.show({
             title: 'Have you read this article before?',
@@ -2447,7 +2487,7 @@ The referral controller shows all referrals and option to schedule meetings with
                                 {
                                     text: 'No', onTap: function (e) {
                                         $scope.clickTracker('takenQuizBefore(no)');
-                                        $scope.renderQuiz(type, id, category, 1)                                      
+                                        $scope.renderQuiz(type, id, category, 1)
                                     }
                                 }
 
@@ -2466,6 +2506,11 @@ The referral controller shows all referrals and option to schedule meetings with
             ],
         });
     };
+
+
+    /*
+    Opens the selected article
+    */
     $scope.renderArticle = function (type, id, category) {
         var db = PouchDB('momlink');
         var html = '';
@@ -2518,6 +2563,13 @@ The referral controller shows all referrals and option to schedule meetings with
             }
         })
     }
+
+
+    /*
+    Opens the selected quiz
+    prequiz variable determines if the quiz is being taken prior to reading the article
+    If prequiz is set to 1 the article will be opened after the quiz has been taken
+    */
     $scope.renderQuiz = function (type, articleID, category, prequiz) {
         var db = PouchDB('momlink');
         var html = '<div ng-controller="HeaderCtrl">';
@@ -2570,6 +2622,11 @@ The referral controller shows all referrals and option to schedule meetings with
             });
         });
     };
+
+
+    /*
+    Grades the selected quiz, if a perfect score is achieved, the article is then moved to history
+    */
     $scope.gradeQuiz = function (type, articleID, category, prequiz) {
         var db = PouchDB('momlink');
         var score = 0;
@@ -2621,6 +2678,11 @@ The referral controller shows all referrals and option to schedule meetings with
             }
         })
     };
+
+
+    /*
+    Records the amount of time the user has spent reading the quiz
+    */
     $scope.recordTime = function (articleID) {
         //end timer
         clearInterval(timer);
@@ -2643,9 +2705,19 @@ The referral controller shows all referrals and option to schedule meetings with
             }
         });
     };
+
+
+    /*
+    Used in conjunction with record time, starts the timer
+    */
     $scope.startSessionTimer = function () {
         timer = setInterval(function () { sessionTime++; }, 1000);
     };
+
+
+    /*
+    Moves an article from the shared section to the history section
+    */
     $scope.moveToHistory = function (type, articleID, category) {
         var db = PouchDB('momlink');
         db.get('articles').then(function (doc) {
@@ -2666,15 +2738,29 @@ The referral controller shows all referrals and option to schedule meetings with
             $scope.renderArticles(type, category)
         })
     };
+
+
+    /*
+    Opens modal
+    */
     $scope.openModal = function () {
         $scope.modal.show();
     };
+
+
+    /*
+    Closes modal and removes it from memory
+    */
     $scope.closeModal = function () {
         $scope.modal.hide().then(function () {
             $scope.modal.remove();
         });
     };
 
+
+    /*
+
+    */
     var downloadSuccess = true;
     var deleteSuccess = true;
     var updateSuccess = true;
@@ -2705,6 +2791,10 @@ The referral controller shows all referrals and option to schedule meetings with
             $compile($('#Saved'))($scope);
         })
     };
+
+    /*
+    Closes modal and removes it from memory
+    */
     $scope.toggleChange = function (category, state) {
         if (state == true) {
             $scope.clickTracker('downloadArticles(' + category + ')');
