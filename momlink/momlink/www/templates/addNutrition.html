@@ -8,7 +8,7 @@
         <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:1px 1px 1px 0;">
             <div class="row no-padding">
                 <div class="col text-left no-padding" style="display:inline">
-                    <button class="button button-icon icon ion-information-circled" ng-click=""></button>
+                    <button class="button button-icon icon ion-information-circled" ng-click="servingInfo('../img/servingInfo/infoFruit.jpg')"></button>
                 </div>
                 <div class="col text-right no-padding" style="display:inline">
                     <button class="button button-icon icon ion-navicon-round" ng-click="renderNutritionHistory('fruits')"></button>
@@ -16,7 +16,7 @@
             </div>
             <div class="row no-padding">
                 <div class="col no-padding">
-                    <canvas id="fruits" width="150" height="150" ng-click="showFoodFluid('fruits', 'food-29.png','food-30.png','fruitVeg12.png','fruitVeg1.png','fluids12.png','fluids1.png')"
+                    <canvas id="fruits" width="150" height="150" ng-click="popupNutrition('popupFruit.html')"
                             style="background:url('../img/food/food-29.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
                 </div>
             </div>
@@ -26,7 +26,7 @@
         <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:1px 0 1px 1px;">
             <div class="row no-padding">
                 <div class="col text-left no-padding" style="display:inline">
-                    <button class="button button-icon icon ion-information-circled" ng-click=""></button>
+                    <button class="button button-icon icon ion-information-circled" ng-click="servingInfo('../img/servingInfo/infoVegetables.jpg')"></button>
                 </div>
                 <div class="col text-right no-padding" style="display:inline">
                     <button class="button button-icon icon ion-navicon-round" ng-click="renderNutritionHistory('vegetables')"></button>
@@ -34,7 +34,7 @@
             </div>
             <div class="row no-padding">
                 <div class="col no-padding">
-                    <canvas id="vegetables" width="150" height="150" ng-click="showFoodFluid('vegetables', 'food-28.png','food-31.png','fruitVeg12.png','fruitVeg1.png','fluids12.png','fluids1.png')"
+                    <canvas id="vegetables" width="150" height="150" ng-click="popupNutrition('popupVegetables.html')"
                             style="background:url('../img/food/food-28.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
                 </div>
             </div>
@@ -46,7 +46,7 @@
         <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 1px 1px 0;">
             <div class="row no-padding">
                 <div class="col text-left no-padding" style="display:inline">
-                    <button class="button button-icon icon ion-information-circled" ng-click=""></button>
+                    <button class="button button-icon icon ion-information-circled" ng-click="servingInfo('../img/servingInfo/infoProtein.jpg')"></button>
                 </div>
                 <div class="col text-right no-padding" style="display:inline">
                     <button class="button button-icon icon ion-navicon-round" ng-click="renderNutritionHistory('proteins')"></button>
@@ -54,7 +54,7 @@
             </div>
             <div class="row no-padding">
                 <div class="col no-padding">
-                    <canvas id="proteins" width="150" height="150" ng-click="showAmount('proteins', 'eat', 'protein12.png', 'protein1.png')"
+                    <canvas id="proteins" width="150" height="150" ng-click="popupNutrition('popupProteins.html')"
                             style="background:url('../img/food/food-35.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
                 </div>
             </div>
@@ -64,7 +64,7 @@
         <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 0 1px 1px;">
             <div class="row no-padding">
                 <div class="col text-left no-padding" style="display:inline">
-                    <button class="button button-icon icon ion-information-circled" ng-click=""></button>
+                    <button class="button button-icon icon ion-information-circled" ng-click="servingInfo('../img/servingInfo/infoGrains.jpg')"></button>
                 </div>
                 <div class="col text-right no-padding" style="display:inline">
                     <button class="button button-icon icon ion-navicon-round" ng-click="renderNutritionHistory('grains')"></button>
@@ -72,7 +72,7 @@
             </div>
             <div class="row no-padding">
                 <div class="col no-padding">
-                    <canvas id="grains" width="150" height="150" ng-click="showAmount('grains', 'eat', 'grains12.png', 'grains1.png')"
+                    <canvas id="grains" width="150" height="150" ng-click="popupNutrition('popupGrains.html')"
                             style="background:url('../img/food/grains.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
                 </div>
             </div>
@@ -84,7 +84,7 @@
         <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 1px 1px 0;">
             <div class="row no-padding">
                 <div class="col text-left no-padding" style="display:inline">
-                    <button class="button button-icon icon ion-information-circled" ng-click=""></button>
+                    <button class="button button-icon icon ion-information-circled" ng-click="servingInfo('../img/servingInfo/infoDairy.jpg')"></button>
                 </div>
                 <div class="col text-right no-padding" style="display:inline">
                     <button class="button button-icon icon ion-navicon-round" ng-click="renderNutritionHistory('dairy')"></button>
@@ -92,7 +92,7 @@
             </div>
             <div class="row no-padding">
                 <div class="col no-padding">
-                    <canvas id="dairy" width="150" height="150" ng-click="showFoodFluid('dairy', 'food-26.png','food-27.png','dairy12.png','dairy1.png','fluids12.png','fluids1.png')"
+                    <canvas id="dairy" width="150" height="150" ng-click="popupNutrition('popupDairy.html')"
                             style="background:url('../img/food/dairy.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
                 </div>
             </div>
@@ -101,16 +101,16 @@
         <!--FLUIDS-->
         <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 0 1px 1px;">
             <div class="row no-padding">
-                <div class="col text-left no-padding" style="display:inline">
-                    <button class="button button-icon icon ion-information-circled" ng-click=""></button>
-                </div>
+                <!--<div class="col text-left no-padding" style="display:inline">
+                    <button class="button button-icon icon ion-information-circled" ng-click="servingInfo('../img/servingInfo/infoFruit.jpg')"></button>
+                </div>-->
                 <div class="col text-right no-padding" style="display:inline">
                     <button class="button button-icon icon ion-navicon-round" ng-click="renderNutritionHistory('fluids')"></button>
                 </div>
             </div>
             <div class="row no-padding">
                 <div class="col no-padding">
-                    <canvas id="fluids" width="150" height="150" ng-click="showAmount('fluids', 'drink', 'fluids12.png', 'fluids1.png')"
+                    <canvas id="fluids" width="150" height="150" ng-click="popupNutrition('popupFluids.html')"
                             style="background:url('../img/food/food-34.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
                 </div>
             </div>
@@ -121,16 +121,16 @@
         <!--SWEETS-->
         <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 1px 1px 0;">
             <div class="row no-padding">
-                <div class="col text-left no-padding" style="display:inline">
-                    <button class="button button-icon icon ion-information-circled" ng-click=""></button>
-                </div>
+                <!--<div class="col text-left no-padding" style="display:inline">
+                    <button class="button button-icon icon ion-information-circled" ng-click="servingInfo()"></button>
+                </div>-->
                 <div class="col text-right no-padding" style="display:inline">
                     <button class="button button-icon icon ion-navicon-round" ng-click="renderNutritionHistory('sweets')"></button>
                 </div>
             </div>
             <div class="row no-padding">
                 <div class="col no-padding">
-                    <canvas id="sweets" width="150" height="150" ng-click="showAmount('sweets', 'eat', 'sweets12.png', 'sweets1.png')"
+                    <canvas id="sweets" width="150" height="150" ng-click="popupNutrition('popupSweets.html')"
                             style="background:url('../img/food/food-40.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
                 </div>
             </div>
@@ -140,7 +140,7 @@
         <div class="col no-padding text-center" style="border:solid #b5b5b5; border-width:0 0 1px 1px;">
             <div class="row no-padding">
                 <div class="col text-left no-padding" style="display:inline">
-                    <button class="button button-icon icon ion-information-circled" ng-click=""></button>
+                    <button class="button button-icon icon ion-information-circled" ng-click="servingInfo('../img/servingInfo/infoFatsOils.jpg')"></button>
                 </div>
                 <div class="col text-right no-padding" style="display:inline">
                     <button class="button button-icon icon ion-navicon-round" ng-click="renderNutritionHistory('fats/oils')"></button>
@@ -148,7 +148,7 @@
             </div>
             <div class="row no-padding">
                 <div class="col no-padding">
-                    <canvas id="fats/oils" width="150" height="150" ng-click="showAmount('fats/oils', 'eat', 'sweets12.png', 'sweets1.png')"
+                    <canvas id="fats/oils" width="150" height="150" ng-click="popupNutrition('popupFatsOils.html')"
                             style="background:url('../img/food/food-43.png'); background-size: contain; background-repeat: no-repeat;"></canvas>
                 </div>
             </div>

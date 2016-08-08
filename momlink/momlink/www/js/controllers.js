@@ -994,8 +994,8 @@ across the app instead of just the calendar page
                     articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
                     articleHtml += `<div class="col no-padding" align="left">`;
                     articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle]['description'] + `</span>`;
-                    articleHtml += `<button class="button button-small button-stable" ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `)">Read More</button>&nbsp;`;
-                    articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `)">Take Quiz</button>`;
+                    articleHtml += `<button class="button button-small button-stable" ng-click="openArticle('shared','` + String(articles[cycle]['id']) + `','` + articles[cycle]['category'] + `')">Read More</button>&nbsp;`;
+                    //articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `)">Take Quiz</button>`;
                     articleHtml += `</div></div>`;
                     $('#articlesHeader').fadeOut("slow", function () {
                         $('#articlesHeader').html(articleHtml);
@@ -1692,6 +1692,7 @@ across the app instead of just the calendar page
     */
     $scope.pullDate = function () {
         if ($scope.date != 'null') {
+            //jquery won't work unless the db call is wrapped around it, look into later
             var db = PouchDB('momlink');
             db.get('events').then(function (doc) {
                 $('#date').val($scope.date);
@@ -2414,9 +2415,8 @@ the articles quiz has been completed with a perfect score
                 article = sharedArticles[i]
                 if (article['category'] == category || category == 'All') {
                     html += `<div class="item item-thumbnail-left item-text-wrap">`;
-                    html += `<img ng-click="openArticle('` + type + `','` + article['id'] + `','` + category + `')" src="` + $scope.getFormatImg(article['format']) + `">`;
+                    html += `<img src="` + $scope.getFormatImg(article['format']) + `">`;
                     //bold if the article has not been read
-                    html += `<div ng-click="openArticle('` + type + `','` + article['id'] + `','` + category + `')">`;
                     if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
                     else { html += '<h2>' + article['title'] + '</h2>'; }
                     html += '<p>' + article['description'] + '</p>';
@@ -2429,12 +2429,13 @@ the articles quiz has been completed with a perfect score
                         }
                     }
                     html += '<p>Best Score: ' + bestScore + '</p>';
-                    html += '</div>';
                     if (type == 'shared') {
-                        html += `<button class="button button-small button-positive" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz</button>`;
+                        html += `<button class="button button-small button-positive" ng-click="openArticle('` + type + `','` + article['id'] + `','` + category + `')">Read Article <i class="ion-ios-book-outline"></i></button>&nbsp;`;
+                        html += `<button class="button button-small button-positive" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz <i class="ion-help"></i></button>`;
                     }
                     else {
-                        html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz</button>`;
+                        html += `<button class="button button-small button-positive" ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')">Read Article <i class="ion-ios-book-outline"></i></button>&nbsp;`;
+                        html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz <i class="ion-help"></i></button>`;
                     }
                     html += '</div>';
                 }
@@ -2572,6 +2573,7 @@ the articles quiz has been completed with a perfect score
     */
     $scope.renderQuiz = function (type, articleID, category, prequiz) {
         var db = PouchDB('momlink');
+        var title = 'Quiz';
         var html = '<div ng-controller="HeaderCtrl">';
         db.get('articles').then(function (doc) {
             sharedArticles = doc[type];
@@ -2597,9 +2599,12 @@ the articles quiz has been completed with a perfect score
                     }
                 }
             }
-            html += '</div>';
+            html += '</div>';     
+            if (prequiz == 1) {
+                title = 'Pre-Quiz';
+            }
             $ionicPopup.show({
-                title: 'Quiz',
+                title: title,
                 template: html,
                 buttons: [
             {
@@ -2647,8 +2652,12 @@ the articles quiz has been completed with a perfect score
                         }
                     }
                     finalScore = score + '/' + quiz.length;
-                    //also need to record answers selected
-                    article['quizHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = [finalScore, usersAnswers];
+                    //prequiz will either be 1 or undefined, set as 0 to indicate the quiz was not a prequiz
+                    if (prequiz != 1) {
+                        prequiz = 0;
+                    }
+                    //also need to record answers selected, prequiz value of 1 means the quiz was a prequiz
+                    article['quizHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = [finalScore, usersAnswers, prequiz];
                     return db.put(doc)
                 }
             }
@@ -3639,149 +3648,89 @@ the articles quiz has been completed with a perfect score
             draw(size / max);
         });
     };
-    $scope.showFoodFluid = function (category, food, fluid, hp1, hp2, f1, f2) {
-        $scope.choice = $ionicPopup.show({
-            template: '<div class="text-center">' +
-                        '<img src="../img/food/' + food + '" ng-click="showFoodAmount()" style="width:100px; height:100px" />' +
-                        '<img src="../img/food/' + fluid + '" ng-click="showFluidAmount()" style="width:100px; height:100px" />' +
-                      '</div>',
+    $scope.popupNutrition = function (template) {
+        first = $ionicPopup.show({
             title: 'What did you eat?',
-            scope: $scope
+            templateUrl: template,
+            buttons: [
+                {
+                    text: 'Cancel', onTap: function (e) { },
+                    type: 'button-stable',
+                    scope: $scope
+                }
+            ],
         });
-        $scope.showFoodAmount = function () {
-            ffAmountPopup = $ionicPopup.show({
-                template: '<div class="row" ng-controller="TrackCtrl">' +
-                               '<div class="col text-center">' +
-                                   '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>' +
-                                   '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                   '</div>' +
-                               '</div>' +
-                               '<div class="col text-center">' +
-                                   '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;" /></div>' +
-                                   '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                   '</div>' +
-                               '</div>' +
-                           '</div>',
-                title: 'How much?',
-                buttons: [
-                  {
-                      text: 'Save', onTap: function (e) {
-                          $scope.saveAmount(category, 'solid');
-                      },
-                      type: 'button-positive'
-                  },
-                  {
-                      text: 'Cancel', onTap: function (e) {
-                          $scope.clickTracker('cancelAmount(' + category + ')');
-                      },
-                      type: 'button-positive'
-                  }
-                ]
-            });
-            ffAmountPopup.then(function (res) {
-                $scope.choice.close();
-            });
-        };
-        $scope.showFluidAmount = function () {
-            ffAmountPopup = $ionicPopup.show({
-                template: '<div class="row" ng-controller="TrackCtrl">' +
-                               '<div class="col text-center">' +
-                                   '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + f1 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>' +
-                                   '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                   '</div>' +
-                               '</div>' +
-                               '<div class="col text-center">' +
-                                   '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                                   '<div class="col text-center"><img src="../img/handportions/' + f2 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;" /></div>' +
-                                   '<div class="row">' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                       '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                   '</div>' +
-                               '</div>' +
-                           '</div>',
-                title: 'How much?',
-                buttons: [
-                  {
-                      text: 'Save', onTap: function (e) {
-                          $scope.saveAmount(category, 'fluid');
-                      },
-                      type: 'button-positive'
-                  },
-                  {
-                      text: 'Cancel', onTap: function (e) {
-                          $scope.clickTracker('cancelAmount(' + category + ')');
-                      },
-                      type: 'button-positive'
-                  }
-                ]
-            });
-            ffAmountPopup.then(function (res) {
-                $scope.choice.close();
-            });
-        };
-    };
-    $scope.showAmount = function (category, type, hp1, hp2) {
+    }
+    $scope.showAmount = function (category, subcategory, halfServingImg, wholeServingImg, extraServingImg) {
+        //build template
+        amountHTML = `<div class="row" ng-controller="TrackCtrl">`;
+        amountHTML += `<div class="col text-left no-padding">`;
+        amountHTML += `<button class="button button-icon icon ion-information-circled" ng-click="servingInfo()"></button>`;
+        amountHTML += `</div>`;
+        amountHTML += `</div>`;
+        amountHTML += `<div class="row" ng-controller="TrackCtrl">`;
+        var servings = [[halfServingImg,'countHalf'], [wholeServingImg,'countWhole']];
+        for (i in servings) {
+            amountHTML += `<div class="col text-center">`;
+            amountHTML += `<div class="col text-right"><p id="` + servings[i][1] + `" style="font-size: 30px; line-height: 30px;">0</p></div>`;
+            amountHTML += `<div class="col text-center"><img src="` + servings[i][0] + `" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>`;
+            amountHTML += `<div class="row">`;
+            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'`+ servings[i][1] +`\')" style="width:30px;height:30px;"></div>`;
+            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'`+ servings[i][1] +`\')" style="width:30px;height:30px;"></div>`;
+            amountHTML += `</div>`;
+            amountHTML += `</div>`;
+        }
+        amountHTML += `</div>`;
+        if (extraServingImg != null) {
+            amountHTML += `<div class="row" ng-controller="TrackCtrl">`;
+            amountHTML += `<div class="col text-center">`;
+            amountHTML += `<div class="col text-right"><p id="countDouble" style="font-size: 30px; line-height: 30px;">0</p></div>`;
+            amountHTML += `<div class="col text-center"><img src="` + extraServingImg + `" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>`;
+            amountHTML += `<div class="row">`;
+            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'countDouble\')" style="width:30px;height:30px;"></div>`;
+            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'countDouble\')" style="width:30px;height:30px;"></div>`;
+            amountHTML += `</div>`;
+            amountHTML += `</div>`;
+            //spacing for 4th serving
+            amountHTML += `<div class="row"><div class="col"></div></div>`;
+        }
         $ionicPopup.show({
-            template: '<div class="row" ng-controller="TrackCtrl">' +
-                           '<div class="col text-center">' +
-                               '<div class="col text-right"><p id="count12" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                               '<div class="col text-center"><img src="../img/handportions/' + hp1 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>' +
-                               '<div class="row">' +
-                                   '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                                   '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'count12\')" style="width:30px;height:30px;"></div>' +
-                               '</div>' +
-                           '</div>' +
-                           '<div class="col text-center">' +
-                               '<div class="col text-right"><p id="count1" style="font-size: 30px; line-height: 30px;">0</p></div>' +
-                               '<div class="col text-center"><img src="../img/handportions/' + hp2 + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;" /></div>' +
-                               '<div class="row">' +
-                                   '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                                   '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'count1\')" style="width:30px;height:30px;"></div>' +
-                               '</div>' +
-                           '</div>' +
-                       '</div>',
-            title: 'How much did you ' + type + '?',
+            template: amountHTML,
+            title: 'How much?',
             buttons: [
               {
                   text: 'Save', onTap: function (e) {
-                      var consistency;
-                      if (category == 'fluids') {
-                          consistency = 'liquid';
-                      }
-                      else {
-                          consistency = 'solid';
-                      }
-                      $scope.saveAmount(category, consistency);
+                      $scope.saveAmount(category, subcategory);                     
                   },
                   type: 'button-positive'
               },
               {
-                  text: 'Cancel', onTap: function (e) { return 'Cancel'; },
+                  text: 'Cancel', onTap: function (e) {
+                      $scope.clickTracker('cancelAmount(' + category + ')');
+                  },
                   type: 'button-positive'
               }
-            ]
+            ],
+
         });
+        first.close();
     };
-    $scope.saveAmount = function (category, consistency) {
-        $scope.clickTracker('saveAmount(' + category + ',' + consistency + ')');
+    $scope.saveAmount = function (category, subcategory) {
+        $scope.clickTracker('saveAmount(' + category + ',' + subcategory + ')');
         var db = PouchDB('momlink');
         value = $('#count').html();
         db.get('nutrition').then(function (doc) {
+            var double = 0;
+            if ($('#countDouble').html() != null) {
+                double = parseInt($('#countDouble').html()) * 2;
+            }
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
                 "date": moment($scope.currentDate).format('MM/DD/YYYY'),
                 "time": moment().format('HH:mm:ss'),
-                "value": parseInt($('#count1').html()) + parseInt($('#count12').html()) / 2,
-                "consistency": consistency
+                "category": category,
+                "subcategory": subcategory,
+                "value": parseInt($('#countWhole').html()) + parseInt($('#countHalf').html()) / 2 + double
             };
             doc[category].push(element);
             return db.put(doc);
@@ -3823,10 +3772,9 @@ the articles quiz has been completed with a perfect score
                 var html = '';
                 for (i in doc[category]) {
                     if (moment($scope.currentDate).format('MM/DD/YYYY') == doc[category][i]["date"]) {
-                        html += `<center><div class="item" on-hold="deleteElement('` + category + `','` + doc[category][i]["id"] + `')">` + $scope.convert24to12(doc[category][i]["time"]) + `&nbsp; &nbsp; &nbsp; ` + doc[category][i]["value"] + `</div></center>`;
+                        html += `<center><div class="item" on-hold="deleteElement('` + category + `','` + doc[category][i]["id"] + `')">` + $scope.convert24to12(doc[category][i]["time"]) + `&nbsp; &nbsp; &nbsp; ` + doc[category][i]["value"] + ` servings</div></center>`;
                     }
                 }
-                console.log(html)
                 $('#nutritionHistory').html(html);
                 $compile($('#nutritionHistory'))($scope);
             })
@@ -3875,6 +3823,22 @@ the articles quiz has been completed with a perfect score
             ]
         });
     };
+    $scope.servingInfo = function (image) {
+        var template = `<ion-modal-view>`;
+        template += `<ion-header-bar align-title="middle" class="bar-positive">`;
+        template += `<button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>`;
+        template += `<h1 class="title" id="modalHeadline">Serving Size Information</h1>`;
+        template += `</ion-header-bar>`;
+        template += `<ion-content overflow-scroll="true">`;
+        template += `<img class="col no-padding" src="` + image + `" style="max-width=100%;max-height=auto%">`;
+        template += `</ion-content>`;
+        template += `</ion-modal-view>`;
+        $scope.modal = $ionicModal.fromTemplate(template, {
+            scope: $scope,
+            animation: 'slide-in-up'
+        })
+        $scope.modal.show();
+    }
 })
 
 
