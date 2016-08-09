@@ -3129,8 +3129,8 @@ the articles quiz has been completed with a perfect score
                         }
                         //add element
                         time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
-                        hist += `<div class="item item-thumbnail-left"><img src='` + img + `' >`
-                        hist += `<h2 style="display:inline">` + elements[i]["value"] + `</h2> <i class="icon ion-close-round" ng-click="deleteElement('` + type + `','` + elements[i]["id"] + `')" style="display:inline; color:red"></i>`;
+                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')"><img src='` + img + `' >`
+                        hist += `<h2 style="display:inline">` + elements[i]["value"] + `</h2> <i class="icon ion-trash-a" ng-click="deleteElement('` + type + `','` + elements[i]["id"] + `')" style="display:inline; color:red"></i>`;
                         hist += `<p>Time: ` + $scope.convert24to12(time) + `</p></div>`;
                     }
                 }
@@ -3833,6 +3833,7 @@ the articles quiz has been completed with a perfect score
         template += `</ion-header-bar>`;
         template += `<ion-content overflow-scroll="true">`;
         template += `<img class="col no-padding" src="` + image + `" style="max-width=100%;max-height=auto%">`;
+        //template += `<img class="col no-padding" src="../img/servingInfo/infoFruit.png" style="max-width=100%;max-height=auto">`;
         template += `</ion-content>`;
         template += `</ion-modal-view>`;
         $scope.modal = $ionicModal.fromTemplate(template, {
