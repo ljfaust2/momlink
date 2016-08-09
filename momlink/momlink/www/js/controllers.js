@@ -3586,11 +3586,11 @@ the articles quiz has been completed with a perfect score
             ctx.clearRect(0, 0, 1000, 1000);
         }
         //redraw circles
-        $scope.nutritionCircle('fruits', '5', '10');
+        $scope.nutritionCircle('fruits', '3', '10');
         $scope.nutritionCircle('vegetables', '5', '10');
-        $scope.nutritionCircle('proteins', '5', '10');
-        $scope.nutritionCircle('grains', '5', '10');
-        $scope.nutritionCircle('dairy', '5', '10');
+        $scope.nutritionCircle('proteins', '3', '10');
+        $scope.nutritionCircle('grains', '6', '10');
+        $scope.nutritionCircle('dairy', '3', '10');
         $scope.nutritionCircle('fluids', '5', '10');
         $scope.nutritionCircle('sweets', '5', '10');
         $scope.nutritionCircle('fats/oils', '5', '10');
@@ -3617,13 +3617,15 @@ the articles quiz has been completed with a perfect score
                 ctx.arc(bg.width / 2, bg.height / 2, 70, -(quart), ((circ) * current) - quart, false);
                 ctx.stroke();
             }
+            //draw star if min serving is reached
             if (size >= min && (id != 'sweets' && id != 'fats/oils')) {
                 image.src = '../img/food/star.png';
                 image.onload = function () {
                     ctx.drawImage(image, (bg.width / 2) / 2, (bg.height / 2) / 2, bg.width / 2, bg.height / 2);
                 }
             }
-            if (size == 100 && (id != 'sweets' && id != 'fats/oils')) {
+            //draw crown if max serving is reached
+            if (size >= max && (id != 'sweets' && id != 'fats/oils')) {
                 image.src = '../img/food/crown.png';
                 ctx.clearRect(0, 0, bg.width, bg.height);
                 image.onload = function () {
