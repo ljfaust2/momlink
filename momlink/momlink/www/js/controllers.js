@@ -262,7 +262,7 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "journal",
                     "notes": [],
-                    "visits": [
+                    /*"visits": [
                         {
                             "subject": "Subject 1",
                             "description": "Description 1...",
@@ -273,7 +273,7 @@ across the app instead of just the calendar page
                             "description": "Description 2...",
                             "date": "5/25/2016"
                         },
-                    ]
+                    ]*/
                 });
             }
         });
@@ -2027,12 +2027,17 @@ allows user to call/text/email them and render sms conversations
         html += '<div class="list has-header">';
         //loop through inbox sms, if empty, no messages to display
         SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
-            for (i in data.reverse()) {
-                if (data[i].type == 1) {
-                    html += '<div class="item item-text-wrap" style="color: #e6005c;">' + data[i].body + '</div>';
-                }
-                else {
-                    html += '<div class="item item-text-wrap" style="color: #0866c6;">' + data[i].body + '</div>';
+            if (data.reverse.length == 0) {
+                html += '<div class="col text-center" style="color:gray">No Messages to Show</div>';
+            }
+            else {
+                for (i in data.reverse()) {
+                    if (data[i].type == 1) {
+                        html += '<div class="item item-text-wrap" style="color: #e6005c;">' + data[i].body + '</div>';
+                    }
+                    else {
+                        html += '<div class="item item-text-wrap" style="color: #0866c6;">' + data[i].body + '</div>';
+                    }
                 }
             }
             html += '</div>';
@@ -2599,7 +2604,7 @@ the articles quiz has been completed with a perfect score
                     }
                 }
             }
-            html += '</div>';     
+            html += '</div>';
             if (prequiz == 1) {
                 title = 'Pre-Quiz';
             }
@@ -3663,22 +3668,22 @@ the articles quiz has been completed with a perfect score
             ],
         });
     }
-    $scope.showAmount = function (category, subcategory, halfServingImg, wholeServingImg, extraServingImg) {
+    $scope.showAmount = function (category, subcategory, servingInfoImg, halfServingImg, wholeServingImg, extraServingImg) {
         //build template
         amountHTML = `<div class="row" ng-controller="TrackCtrl">`;
-        amountHTML += `<div class="col text-left no-padding">`;
-        amountHTML += `<button class="button button-icon icon ion-information-circled" ng-click="servingInfo()"></button>`;
+        amountHTML += `<div class="col text-left no-padding" ng-controller="NutritionCtrl">`;
+        amountHTML += `<button class="button button-icon icon ion-information-circled" ng-click="servingPopup('` + servingInfoImg + `')"></button>`;
         amountHTML += `</div>`;
         amountHTML += `</div>`;
         amountHTML += `<div class="row" ng-controller="TrackCtrl">`;
-        var servings = [[halfServingImg,'countHalf'], [wholeServingImg,'countWhole']];
+        var servings = [[halfServingImg, 'countHalf'], [wholeServingImg, 'countWhole']];
         for (i in servings) {
             amountHTML += `<div class="col text-center">`;
             amountHTML += `<div class="col text-right"><p id="` + servings[i][1] + `" style="font-size: 30px; line-height: 30px;">0</p></div>`;
             amountHTML += `<div class="col text-center"><img src="` + servings[i][0] + `" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>`;
             amountHTML += `<div class="row">`;
-            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'`+ servings[i][1] +`\')" style="width:30px;height:30px;"></div>`;
-            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'`+ servings[i][1] +`\')" style="width:30px;height:30px;"></div>`;
+            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'` + servings[i][1] + `\')" style="width:30px;height:30px;"></div>`;
+            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'` + servings[i][1] + `\')" style="width:30px;height:30px;"></div>`;
             amountHTML += `</div>`;
             amountHTML += `</div>`;
         }
@@ -3702,7 +3707,7 @@ the articles quiz has been completed with a perfect score
             buttons: [
               {
                   text: 'Save', onTap: function (e) {
-                      $scope.saveAmount(category, subcategory);                     
+                      $scope.saveAmount(category, subcategory);
                   },
                   type: 'button-positive'
               },
@@ -3777,6 +3782,9 @@ the articles quiz has been completed with a perfect score
                         html += `<center><div class="item" on-hold="deleteElement('` + category + `','` + doc[category][i]["id"] + `')">` + $scope.convert24to12(doc[category][i]["time"]) + `&nbsp; &nbsp; &nbsp; ` + doc[category][i]["value"] + ` servings</div></center>`;
                     }
                 }
+                if (html == '') {
+                    html += '<div class="col text-center" style="color:gray">No History to Show</div>';
+                }
                 $('#nutritionHistory').html(html);
                 $compile($('#nutritionHistory'))($scope);
             })
@@ -3842,7 +3850,15 @@ the articles quiz has been completed with a perfect score
         })
         $scope.modal.show();
     }
+    $scope.servingPopup = function (image) {
+        var template = `<img class="col no-padding" src="` + image + `" style="max-width=100%;max-height=auto">`;
+        $ionicPopup.alert({
+            title: 'Serving Info',
+            template: template
+        });
+    }
 })
+
 
 
 /*
@@ -4533,7 +4549,7 @@ Handler for javascript clock used in addActivityTime page
             $scope.modal.remove();
         });
     };
-    $scope.showVisits = function () {
+    /*$scope.showVisits = function () {
         var db = PouchDB('momlink');
         var html = '';
         db.get('journal').then(function (doc) {
@@ -4550,7 +4566,7 @@ Handler for javascript clock used in addActivityTime page
             $('#pnccVisits').html(html);
             $compile($('#pnccVisits'))($scope);
         });
-    };
+    };*/
 })
 
 
