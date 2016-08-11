@@ -3860,7 +3860,6 @@ the articles quiz has been completed with a perfect score
 })
 
 
-
 /*
 Handler for javascript clock used in addActivityTime page
 */
