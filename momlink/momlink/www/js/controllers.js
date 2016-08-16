@@ -2424,23 +2424,30 @@ the articles quiz has been completed with a perfect score
                     //bold if the article has not been read
                     if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
                     else { html += '<h2>' + article['title'] + '</h2>'; }
-                    html += '<p>' + article['description'] + '</p>';
                     html += '<p>Shared: ' + article['dateShared'] + '</p>';
-                    var bestScore = 0;
-                    html += '<p>Quiz Attempts: ' + Object.keys(article['quizHistory']).length + '</p>';
-                    for (j in article['quizHistory']) {
-                        if (article['quizHistory'][j][0].substring(0, 1) > String(bestScore).substring(0, 1)) {
-                            bestScore = article['quizHistory'][j][0];
-                        }
-                    }
-                    html += '<p>Best Score: ' + bestScore + '</p>';
+                    html += '<p>' + article['description'] + '</p>';
+                    //read more/take quiz buttons
                     if (type == 'shared') {
-                        html += `<button class="button button-small button-positive" ng-click="openArticle('` + type + `','` + article['id'] + `','` + category + `')">Read Article <i class="ion-ios-book-outline"></i></button>&nbsp;`;
+                        html += `<button class="button button-small button-positive" ng-click="openArticle('` + type + `','` + article['id'] + `','` + category + `')">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;`;
+                    }
+                    else {
+                        html += `<button class="button button-small button-positive" ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;`;
+                    }
+                    if (type == 'shared') {
                         html += `<button class="button button-small button-positive" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz <i class="ion-help"></i></button>`;
                     }
                     else {
-                        html += `<button class="button button-small button-positive" ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')">Read Article <i class="ion-ios-book-outline"></i></button>&nbsp;`;
                         html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz <i class="ion-help"></i></button>`;
+                    }
+                    var bestScore = 0;
+                    if (Object.keys(article['quizHistory']).length > 0) {
+                        for (j in article['quizHistory']) {
+                            if (article['quizHistory'][j][0].substring(0, 1) > String(bestScore).substring(0, 1)) {
+                                bestScore = article['quizHistory'][j][0];
+                            }
+                        }
+                        html += '<p>Best Score: ' + bestScore + '</p>';
+                        html += '<p>Quiz Attempts: ' + Object.keys(article['quizHistory']).length + '</p>';
                     }
                     html += '</div>';
                 }
@@ -2530,7 +2537,8 @@ the articles quiz has been completed with a perfect score
                     html += `<button class="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">&nbsp;Close</button>`;
                     html += `<button class="button button-icon icon ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">&nbsp;Take Quiz</button>`;
                     html += `</div>`;
-                    html += `<div class="float-button-hasFooter"><span class="height-fix"><button class="button button-light button-rounded content" ng-click="readText()"><i class="icon ion-volume-medium" style="color: black !important;"></i></button></span></div>`;
+                    html += `<div class="float-button-hasFooter-topButton"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readText()"><i class="icon ion-volume-low"></i></button></span></div>`;
+                    html += `<div class="float-button-hasFooter"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readAll()"><i class="icon ion-volume-medium"></i></button></span></div>`;
                     //if category is set to local and network is not available then
                     //var networkState = navigator.connection.type;
                     articleCategory = String(article['category']).replace(/\s/g, '');
@@ -2944,6 +2952,15 @@ the articles quiz has been completed with a perfect score
             text = document.selection.createRange().text;
             $scope.speak(text);
         }*/
+    }
+
+    $scope.readAll = function () {
+        var text = "";
+        var iframe = document.getElementById("frame");
+        var text = iframe.contentWindow.document.body.innerHTML;
+        //need to filter out html tags
+        text = text.replace(/<.*?>/g, "");
+        $scope.speak(text);
     }
 })
 

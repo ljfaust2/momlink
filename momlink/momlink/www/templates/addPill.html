@@ -11,16 +11,16 @@
             <img src="../img/temp/camera.PNG" ng-click="takePillPhoto()" style="width:30px; height:25px;" />
         </div>
         <div class="list">
-            <label class="item item-input item-stacked-label">
-                <span class="input-label">Pill name</span>
+            <div class="item item-input row">
+                <i class="button-icon icon ion-checkmark-circled"></i>
                 <input id="pillName" type="text" placeholder="Pill name">
-            </label>
+            </div>
+            <div class="item item-input row">
+                <i class="button-icon icon ion-ios-medkit"></i>
+                <input id="dosage" type="number" placeholder="Dosage">
+            </div>
             <div class="item"><i class="button-icon icon ion-clock"></i><i class="button-icon icon ion-plus-round" ng-click="addTime()" style="color:#528ef4"></i></div>
             <div id="times"></div>
-            <label class="item item-input item-stacked-label">
-                <span class="input-label">Dosage</span>
-                <input id="dosage" type="number" placeholder="# of pills">
-            </label>
             <div id="type" class="item item-text-wrap item-divider">Restrictions (choose one of the following, if any)</div>
             <div id="meal" class="row text-center">
                 <div id="withFood" class="col" ng-click="selectHow('withFood')"><img src="../img/pills/withFood.jpg" style="max-width:100%;height:auto;vertical-align:middle">With Food</div>
