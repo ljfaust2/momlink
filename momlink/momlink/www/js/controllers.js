@@ -21,7 +21,7 @@ across the app instead of just the calendar page
                     "answer": "Yes",
                     "agency": "",
                     "sec_question": "?",
-                    "client_id": "08798a24b703fb7b9d5d231ab30008d3"
+                    "client_id": "5"
                 });
             }
         });
@@ -550,7 +550,7 @@ across the app instead of just the calendar page
             update_type:
                 1 => Update All
                 2 => Update Referrals Only
-                3 => Update Topics Only
+                3 => Update Education Only
                 4 => Update Messages Only
                 5 => Update Events Only
                 6 => Update PNCC Only
@@ -590,6 +590,7 @@ across the app instead of just the calendar page
 
         // TEMP SET CLIENT ID: 9999 FOR TESTING
         // UPDATE AGENCY ID AS WELL FROM DATABASE
+        // variables will be based on user table
         var client_id = 9999;
         var agency_id = 9999;
 
@@ -708,7 +709,8 @@ across the app instead of just the calendar page
                 update_events(data['events']);
                 update_pnccs(data['pncc']);
             }
-
+            //data is a json object, following functions move retrieved data from the server
+            //to the local database
             function update_referrals(data) {
                 if (data[0]['success'] == 0) {
                     // New information here, input into local database
@@ -1284,22 +1286,52 @@ across the app instead of just the calendar page
     Checks the username and password against those in the login table
     */
     $scope.login = function (user, pass) {
-        var db = PouchDB('momlink');
+        var db = PouchDB('momlink');     
         db.get('login').then(function (doc) {
-            if (user == doc['username'] && pass == doc['password']) {
-                //save username and password for autologin
-                window.localStorage.setItem('username', doc['username'])
-                window.localStorage.setItem('password', doc['password'])
-                window.location = "templates/main.html";
+            //check if first-time user
+            if (doc['client_id'] == "") {
+                //create all local databases
+                var post_information = { 'username': user, 'password': pass };
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/firstTimeLogin.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: post_information,
+                    success: function (data) {
+                        if (data[0]['success'] != 0) {
+                            doc['client_id'] = data[0]['client_id']
+                            doc['agency'] = data[0]['agency']
+                            doc['username'] = user
+                            doc['password'] = pass
+                            return db.put(doc).then(function (doc) {
+                                window.location = "templates/main.html";
+                            })
+                        }
+                        else {
+                            $ionicPopup.alert({
+                                title: 'Invalid Username/Password',
+                                subTitle: 'Usernames and passwords are case sensitive'
+                            });
+                        }
+                    }
+                });                
             }
             else {
-                var alertPopup = $ionicPopup.alert({
-                    title: 'Your username or password is incorrect'
-                });
+                if (user == doc['username'] && pass == doc['password']) {
+                    //save username and password for autologin
+                    window.localStorage.setItem('username', doc['username'])
+                    window.localStorage.setItem('password', doc['password'])
+                    window.location = "templates/main.html";
+                }
+                else {
+                    $ionicPopup.alert({
+                        title: 'Invalid Username/Password',
+                        subTitle: 'Usernames and passwords are case sensitive'
+                    });
+                }
             }
         });
     };
-
 
     /*
     Logs the user out and removes all local storage variables
