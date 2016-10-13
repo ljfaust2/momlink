@@ -18,10 +18,10 @@ across the app instead of just the calendar page
                     "username": "u",
                     "password": "p",
                     "reset_code": "595",
-                    "answer": "Yes",
+                    "answer": "",
                     "agency": "",
-                    "sec_question": "?",
-                    "client_id": "5"
+                    "sec_question": "",
+                    "client_id": "555"
                 });
             }
         });
@@ -131,11 +131,10 @@ across the app instead of just the calendar page
                     "bloodPressure": [],
                     "caffeine": [],
                     "cigarette": [],
-                    "nutrition": [],
                     "kicks": [],
                     'mood': [],
                     'pain': [],
-                    'pill': [],
+                    'pills': [],
                     'stress': [],
                     "weight": [],
                 });
@@ -344,6 +343,27 @@ across the app instead of just the calendar page
                 });
             }
         });
+        db.get('update').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "update",
+                    'activity': '',
+                    "babyHeartRate": '',
+                    "bloodGlucose": '',
+                    "bloodIron": '',
+                    "bloodPressure": '',
+                    "caffeine": '',
+                    "cigarette": '',
+                    "nutrition": '',
+                    "kicks": '',
+                    'mood': '',
+                    'pain': '',
+                    'pills': '',
+                    'stress': '',
+                    "weight": '',
+                });
+            }
+        });
         /*db.get('classes').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -536,346 +556,134 @@ across the app instead of just the calendar page
             }
         });*/
         //db.destroy();
+        window.localStorage.setItem('cid', '555')
     }
+    
+    $scope.testPHP = function () {
+        //need these to occurr in sync
+        $scope.uploadTrackers()
+    };
 
-
-    $scope.getInformation = function (which_script, update_type, reg_log, reg_pss, reg_pss, reg_sec, reg_ans, first_time_user) {
-        /*
-            which_script:
-                Determines which set of information is updated
-                1 => update
-                2 => register
-                3 => first_time_user
-
-            update_type:
-                1 => Update All
-                2 => Update Referrals Only
-                3 => Update Education Only
-                4 => Update Messages Only
-                5 => Update Events Only
-                6 => Update PNCC Only
-
-            reg_log:
-                if new registration, the login id of new user
-
-            reg_pss:
-                if new registration, the password of new user
-
-            reg_sec:
-                if new registration, the security question of the new user
-
-            reg_ans:
-                if new registration, the security question answer of the new user
-
-            first_time_user:
-                the username of the first time app user
-
-            The following is the default:
-                which_script = 1
-                update_type = 1
-                reg_log = ""
-                reg_pss = ""
-                reg_sec = ""
-                reg_ans = ""
-                first_time_user = ""
-        */
-        // Default Parameters
-        var which_script = typeof which_script !== 'undefined' ? which_script : 1;
-        var update_type = typeof update_type !== 'undefined' ? update_type : 1;
-        var reg_log = typeof reg_log !== 'undefined' ? reg_log : "";
-        var reg_pss = typeof reg_pss !== 'undefined' ? reg_pss : "";
-        var reg_sec = typeof reg_sec !== 'undefined' ? reg_sec : "";
-        var reg_ans = typeof reg_ans !== 'undefined' ? reg_ans : "";
-        var first_time_user = typeof first_time_user !== 'undefined' ? first_time_user : "";
-
-        // TEMP SET CLIENT ID: 9999 FOR TESTING
-        // UPDATE AGENCY ID AS WELL FROM DATABASE
-        // variables will be based on user table
-        var client_id = 9999;
-        var agency_id = 9999;
-
-        var db = PouchDB('momlink');
-
-        if (navigator.connection.type == Connection.NONE) {
-            $ionicPopup.alert({ title: 'No network connection' });
+    /*
+    Uploads tracking data
+    */
+    $scope.uploadTrackers = function () {
+        //each cell holds the table and php script
+        var tables = [['activity', 'Activity'], ['bloodGlucose', 'Track'], ['babyHeartRate', 'Track'], ['bloodIron', 'Track'],
+                      ['bloodPressure', 'BloodPressure'], ['caffeine', 'Track'], ['cigarette', 'Track'], ['kicks', 'Track'],
+                      ['mood', 'Track'], ['nutrition', 'Nutrition'], ['pain', 'Track'], ['pills', 'Pills'], ['stress', 'Track'], ['weight', 'Weight']];
+        var x = 0;
+        var loopTrackers = function (arr) {
+            uploadTracker(arr[x], function () {
+                x++;
+                if (x < arr.length) {
+                    loopTrackers(arr);
+                }
+            });
         }
-        else {
-            switch (which_script) {
-                case 1:
-                    // Update
-                    db.get('login').then(function (doc) {
-                        var post_information = { 'client_id': client_id, 'type': update_type, 'agency': agency_id };
-                        $.ajax({
-                            url: 'https://momlink.crc.nd.edu/~jonathan/current/update.php',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: post_information,
-                            complete: function (data) {
-                                data = JSON.parse(data['responseText']);
-                                switch (update_type) {
-                                    case 1:
-                                        update_all(data);
-                                        break;
-                                    case 2:
-                                        update_referrals(data['referrals']);
-                                        break;
-                                    case 3:
-                                        update_topics(data['topics']);
-                                        break;
-                                    case 4:
-                                        update_messages(data['messages']);
-                                        break;
-                                    case 5:
-                                        update_events(data['events']);
-                                        break;
-                                    case 6:
-                                        update_pncc(data['pncc']);
-                                        break;
+        function uploadTracker(table, callback) {
+            var db = PouchDB('momlink');
+            var recentID = '';
+            if (table[0] == 'nutrition') {
+                tableName = 'client_nutrition';
+            }
+            else {
+                tableName = table[0];
+            }
+            //check update table to get the last element sent to server
+            db.get('update').then(function (doc) {
+                recentID = doc[tableName];
+            }).then(function () {
+                //get new information since last update
+                uploadData = [];
+                docName = 'track';         
+                //need to pull from different database for nutrition
+                if (table[0] == 'nutrition') {
+                    docName = 'nutrition';
+                }
+                db.get(docName).then(function (doc) {
+                    if(docName != 'nutrition'){
+                        for (var i in doc[table[0]]) {
+                            if (recentID < doc[tableName][i]['id']) {
+                                uploadData.push(doc[tableName][i])
+                            }
+                        }
+                    }
+                    else {
+                        var nutritionType = ['fruits', 'vegetables', 'proteins', 'grains', 'dairy', 'fluids', 'sweets', 'fats/oils']
+                        for (var i in nutritionType) {
+                            for (var j in doc[nutritionType[i]]) {
+                                if (recentID < doc[nutritionType[i]][j]['id']) {
+                                    uploadData.push(doc[nutritionType[i]][j]);
                                 }
                             }
-                        });
-                    });
-                    break;
-                case 2:
-                    // New User Registration
-                    // TODO: Think more about this registration process...should there be some sort of output?
-                    // I still believe there should be a login script...
-                    //           On login, call the login script which will fetch the login information...
-                    //           The app will then auto call update...
-                    if (reg_log != "" && reg_pss != "" && reg_sec != "" && reg_ans != "") {
-                        var post_information = { 'username': reg_log, 'password': reg_pss, 'sec_question': reg_sec, 'answer': reg_ans };
-                        $.ajax({
-                            url: 'https://momlink.crc.nd.edu/~jonathan/current/register.php',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: post_information,
-                            complete: function (data) {
-                                update_login_table(data);
-                            }
-                        });
-                    } else {
-                        $ionicPopup.alert({ title: 'Please complete each field to continue' });
+                        }
                     }
-                    break;
-                case 3:
-                    // First time user
-                    // Still unhappy with this method....create a login script which gets rid of this need
-                    if (first_time_user !== "") {
-                        var post_information = { 'username': first_time_user };
+                }).then(function () {
+                    //send this to the sever
+                    if (uploadData.length > 0) {
+
+                        var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid'), 'table': tableName };
                         $.ajax({
-                            url: 'https://momlink.crc.nd.edu/~jonathan/current/first_time_user.php',
+                            url: 'https://momlink.crc.nd.edu/~jonathan/current/send' + table[1] + '.php',
                             type: 'POST',
                             dataType: 'json',
                             data: post_information,
                             success: function (data) {
-                                // Insert this information into local login table
-                                update_login_table(data);
-                                $ionicPopup.alert({ title: 'Login Information Retrieved To Phone' });
+                                if (data = true) {
+                                    console.log('tracking data successfully uploaded')
+                                    //run script to update record table
+                                    //upon success, get last element in uploadData and set it as entry in update table
+                                    db.get('update').then(function (doc) {
+                                        doc[tableName] = uploadData[uploadData.length - 1]['id'];
+                                        return db.put(doc);
+                                    }).then(function () {
+                                        var post_information = { 'success': '1', 'cid': window.localStorage.getItem('cid'), 'table': tableName };
+                                        $.ajax({
+                                            url: 'https://momlink.crc.nd.edu/~jonathan/current/updateRecords.php',
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            data: post_information,
+                                            success: function (data) {
+                                                callback();
+                                            }
+                                        });
+                                    })
+                                }
+                                else {
+                                    var post_information = { 'success': '0', 'cid': window.localStorage.getItem('cid'), 'table': tableName };
+                                    $.ajax({
+                                        url: 'https://momlink.crc.nd.edu/~jonathan/current/updateRecords.php',
+                                        type: 'POST',
+                                        dataType: 'json',
+                                        data: post_information,
+                                        success: function (data) {
+                                            callback();
+                                        }
+                                    });
+                                }
                             }
                         });
-                    } else {
-                        $ionicPopup.alert({ title: 'Please enter a username' });
                     }
-                    break;
-                default:
-                    console.log("Improper Call");
-                    break;
-            }
-            //}
-
-            /*
-                Updating Retrives a json that looks like the following:
-    
-                {
-                    "referrals" : [
-                                        0 => { "success" : value, "message" : value }
-                                        1 => { information ... }
-                                        ...
-                                        n => { information ... }
-                                  ],
-                    "topics" : [ ... ],
-                    "messages" : [ ... ],
-                    "events" : [ ... ],
-                    "pnccs" : [ ... ]
-                }
-            */
-            // Helper Functions:
-            function update_all(data) {
-                // Expects a json file, cascades
-                console.log(data);
-                update_referrals(data['referrals']);
-                update_topics(data['topics']);
-                update_messages(data['messages']);
-                update_events(data['events']);
-                update_pnccs(data['pncc']);
-            }
-            //data is a json object, following functions move retrieved data from the server
-            //to the local database
-            function update_referrals(data) {
-                if (data[0]['success'] == 0) {
-                    // New information here, input into local database
-                    db.get('referrals').then(function (doc) {
-                        for (line in data) {
-                            if (!line.hasOwnProperty('success')) {
-                                db.post({
-                                    "encounter_code": line['encounter_code'],
-                                    "client_id": line['client_id'],
-                                    "pncc_id": line['pncc_id'],
-                                    "encounter_date": line['encoutner_date'],
-                                    "next_homevisit_date": line['next_homevisit_date'],
-                                    "assessment_id": line['assessment_id'],
-                                    "evaluation_code": line['evaluation_code'],
-                                    "meeting_type": line['meeting_type'],
-                                    "meeting_desc": line['meeting_desc'],
-                                    "babe_coupon": line['babe_coupon'],
-                                    "status": line['status'],
-                                    "referral_status": line['status'],
-                                    "referral_id": line['referral_id'],
-                                    "id": line['id'],
-                                    "rtype": line['rtype'],
-                                    'name': line['name'],
-                                    'address': line['address'],
-                                    'phone': line['phone'],
-                                    'phone2': line['phone2'],
-                                    'email': line['email'],
-                                    'url': line['url'],
-                                    'description': line['description'],
-                                    'hours': line['hours'],
-                                    'fax': line['fax'],
-                                    'county': line['county']
-                                });
+                    else {
+                        console.log('info already up to date');
+                        var post_information = { 'success': '1', 'cid': window.localStorage.getItem('cid'), 'table': tableName };
+                        $.ajax({
+                            url: 'https://momlink.crc.nd.edu/~jonathan/current/updateRecords.php',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: post_information,
+                            success: function (data) {
+                                callback();
                             }
-                        }
-                    });
-                } else {
-                    $ionicPopup.alert({ title: data[0]['message'] });
-                }
-            }
-            function update_topics(data) {
-                if (data[0]['success'] == 0) {
-                    // New information here, input into local database
-                    db.get('articles').then(function (doc) {
-                        for (line in data) {
-                            if (!line.hasOwnProperty('success')) {
-                                db.post({
-                                    "encounter_code": line['encounter_code'],
-                                    "encounter_date": line['encounter_date'],
-                                    "filename": line['filename'],
-                                    "id": line['id'],
-                                    "image": line['image'],
-                                    "meeting_desc": line['meeting_desc'],
-                                    "meeting_type": line['meeting_type'],
-                                    "path": line['path'],
-                                    "pncc_id": line['pncc_id'],
-                                    "status": line['status'],
-                                    "title": line['title'],
-                                    "topic": line['topic'],
-                                    "topic_id": line['topic_id'],
-                                    "topic_status": line['topic_status'],
-                                    "upload_date": line['upload_date'],
-                                    "uploader": line['uploader']
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    // Nothing new, or something went wrong, check data[0]['message'] for details
-                    $ionicPopup.alert({ title: data[0]['message'] });
-                }
-            }
-            function update_messages(data) {
-                if (data[0]['success'] == 0) {
-                    db.get('inbox').then(function (doc) {
-                        for (line in data) {
-                            if (!line.hasOwnProperty('success')) {
-                                db.post({
-                                    "content": line['content'],
-                                    "detail_type": line['detail_type'],
-                                    "excerpt": line['excerpt'],
-                                    "mdate": line['mdate'],
-                                    "method": line['method'],
-                                    "msgid": line['msgid'],
-                                    "sender": line['sender'],
-                                    "subject": line['subject']
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    $ionicPopup.alert({ title: data[0]['message'] });
-                }
-            }
-            function update_events(data) {
-                if (data[0]['success'] == 0) {
-                    // New information here, input into local database
-                    db.get('events').then(function (doc) {
-                        for (line in data) {
-                            if (!line.hasOwnProperty('success')) {
-                                db.post({
-                                    'agency': line['agency'],
-                                    'allDay': line['allDay'],
-                                    'description': line['description'],
-                                    'edate': line['edate'],
-                                    'end': line['end'],
-                                    'id': line['id'],
-                                    'start': line['start'],
-                                    'title': line['title'],
-                                    'url': line['url'],
-                                    'venue': line['venue']
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    // Nothing new, or something went wrong, check data[0]['message'] for details
-                    $ionicPopup.alert({ title: data[0]['message'] });
-                }
-            }
-            function update_pnccs(data) {
-                if (data[0]['success'] == 0) {
-                    // New information here, input into local database
-                    db.get('pncc').then(function (doc) {
-                        for (line in data) {
-                            if (!line.hasOwnProperty('success')) {
-                                db.post({
-                                    'about': line['about'],
-                                    'agency': line['agency'],
-                                    'email': line['email'],
-                                    'fax': line['fax'],
-                                    'first_name': line['first_name'],
-                                    'image_path': line['image_path'],
-                                    'last_name': line['last_name'],
-                                    'middle_name': line['middle_name'],
-                                    'office': line['office'],
-                                    'phone': line['phone']
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    // Nothing new, or something went wrong, check data[0]['message'] for details
-                    $ionicPopup.alert({ title: data[0]['message'] });
-                }
-            }
-            function update_login_table(data) {
-                db.get('login').then(function (doc) {
-                    db.put({
-                        "_id": "user_info",
-                        "login_code": data[1]['login_code'],
-                        "username": data[1]['username'],
-                        "password": data[1]['password'],
-                        "reset_code": data[1]['reset_code'],
-                        "answer": data[1]['answer'],
-                        "sec_question": data[1]['sec_question'],
-                        "client_id": data[1]['client_id'],
-                        "agency": data[1]['agency']
-                    }).catch(function (err) {
-                        console.log(err);
-                    });
-                });
-            }
+                        });
+                    }
+                })
+            })
         }
-    }
+        loopTrackers(tables);
+    };
+
     /*$scope.clientUpdates = function () {
         // Which fetches are repeatable.
         // All sends are repeatable.
@@ -1286,7 +1094,7 @@ across the app instead of just the calendar page
     Checks the username and password against those in the login table
     */
     $scope.login = function (user, pass) {
-        var db = PouchDB('momlink');     
+        var db = PouchDB('momlink');
         db.get('login').then(function (doc) {
             //check if first-time user
             if (doc['client_id'] == "") {
@@ -1299,10 +1107,12 @@ across the app instead of just the calendar page
                     data: post_information,
                     success: function (data) {
                         if (data[0]['success'] != 0) {
-                            doc['client_id'] = data[0]['client_id']
-                            doc['agency'] = data[0]['agency']
+                            doc['client_id'] = data[1]['client_id']
+                            doc['agency'] = data[1]['agency']
+                            doc['sec_question'] = data[1]['sec_question']
                             doc['username'] = user
                             doc['password'] = pass
+                            window.localStorage.setItem('cid', data[1]['client_id'])
                             return db.put(doc).then(function (doc) {
                                 window.location = "templates/main.html";
                             })
@@ -1314,7 +1124,7 @@ across the app instead of just the calendar page
                             });
                         }
                     }
-                });                
+                });
             }
             else {
                 if (user == doc['username'] && pass == doc['password']) {
@@ -1348,6 +1158,80 @@ across the app instead of just the calendar page
         window.location = "../index.html";
     };
 
+    /*
+    Renders the users security question
+    */
+    $scope.renderSecQuestion = function () {
+        var db = PouchDB('momlink');
+        var html;
+        //check if any classes have been completed
+        db.get('login').then(function (doc) {
+            html = doc['sec_question']
+        }).then(function () {
+            $('#secQuestion').html(html);
+            $compile($('#secQuestion'))($scope);
+        });
+    }
+
+    /*
+    Checks security question answer
+    */
+    $scope.checkSecQuestion = function () {
+        var db = PouchDB('momlink');
+        var client_id = '';
+        var post_information;
+
+        db.get('login').then(function (doc) {
+            client_id = doc['client_id'];
+            ans = $('#secAnswer').val();
+            post_information = { 'ans': escape(ans), 'cid': escape(client_id) };
+        }).then(function () {
+            $.ajax({
+                url: 'https://momlink.crc.nd.edu/~jonathan/current/forgotPassword.php',
+                type: 'POST',
+                dataType: 'json',
+                data: post_information,
+                success: function (data) {
+                    if (data[0]['success'] != 0) {
+                        //success, allow local password to be rewritten
+                        console.log('success')
+                        $ionicPopup.show({
+                            template: '<input id="newpass" type="text">',
+                            title: 'Enter Your New Password',
+                            scope: $scope,
+                            buttons: [
+                              { text: 'Cancel' },
+                              {
+                                  text: '<b>Save</b>',
+                                  type: 'button-positive',
+                                  onTap: function (e) {
+                                      db.get('login').then(function (doc) {
+                                          doc['password'] = $('#newpass').val();
+                                          return db.put(doc);
+                                      }).then(function () {
+                                          var alertPopup = $ionicPopup.alert({
+                                              title: 'Password Updated Successfully',
+                                          });
+                                          alertPopup.then(function (res) {
+                                              window.location = "templates/main.html";
+                                          });
+                                      });
+                                  }
+                              }
+                            ]
+                        });
+                    }
+                    else {
+                        $ionicPopup.alert({
+                            title: 'Invalid Response',
+                            subTitle: 'That answer is incorret'
+                        });
+                    }
+                }
+            });
+
+        })
+    }
 
     /*
     History page is used by all trackers expect nutrtion, therefore, trackType
@@ -3036,7 +2920,7 @@ the articles quiz has been completed with a perfect score
         else if (el == 'addPill') {
             db.get('track').then(function (doc) {
                 var hist = '';
-                pills = doc['pill'];
+                pills = doc['pills'];
                 window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
                     dir.getDirectory('MomLink', { create: true, exclusive: false },
                     function (directory) {
@@ -3169,22 +3053,132 @@ the articles quiz has been completed with a perfect score
             }
             db.get('track').then(function (doc) {
                 var date = new Date($scope.currentDate);
-                date = ('0' + (date.getMonth() + 1)).slice(-2) + '/' + ('0' + date.getDate()).slice(-2) + '/' + date.getFullYear();
+                date = (date.getFullYear() + '/' + ('0' + (date.getMonth() + 1)).slice(-2)) + '/' + ('0' + date.getDate()).slice(-2);
                 var hist = '';
                 elements = doc[type]
                 for (var i in elements) {
                     if (date == elements[i]["date"]) {
+                        value = elements[i]["value"];
                         //get images
                         if (type == 'activity') {
-                            img = $scope.getActivityImg(elements[i]["act"]);
+                            img = $scope.getActivityImg(elements[i]["type"]);
                         }
                         if (type == 'mood') {
                             img = $scope.getMoodImg(elements[i]["value"]);
                         }
+                        //decode activity
+                        if (type == 'activity') {
+                            switch (value) {
+                                case '1':
+                                    value = 'Bike';
+                                    break;
+                                case '2':
+                                    value = 'Clean';
+                                    break;
+                                case '3':
+                                    value = 'Dance';
+                                    break;
+                                case '4':
+                                    value = 'Exercise';
+                                    break;
+                                case '5':
+                                    value = 'Run';
+                                    break;
+                                case '6':
+                                    value = 'Shop';
+                                    break;
+                                case '7':
+                                    value = 'Walk';
+                                    break;
+                                case '8':
+                                    value = 'Walk Dog';
+                                    break;
+                            }
+                        }
+                        //decode mood
+                        if (type == 'mood') {
+                            switch (value) {
+                                case '1':
+                                    value = 'Bored';
+                                    break;
+                                case '2':
+                                    value = 'Calm';
+                                    break;
+                                case '3':
+                                    value = 'Cheerful';
+                                    break;
+                                case '4':
+                                    value = 'Excited';
+                                    break;
+                                case '5':
+                                    value = 'Irritated';
+                                    break;
+                                case '6':
+                                    value = 'Neutral';
+                                    break;
+                                case '7':
+                                    value = 'Relaxed';
+                                    break;
+                                case '8':
+                                    value = 'Sad';
+                                    break;
+                                case '9':
+                                    value = 'Tense';
+                                    break;
+                            }
+                        }
+                        //decode stress
+                        if (type == 'stress') {
+                            switch (value) {
+                                case '1':
+                                    value = 'Family/Relationships';
+                                    break;
+                                case '2':
+                                    value = 'Housing';
+                                    break;
+                                case '3':
+                                    value = 'Finances';
+                                    break;
+                                case '4':
+                                    value = 'Domestic Violence';
+                                    break;
+                                case '5':
+                                    value = 'Material Needs';
+                                    break;
+                            }
+                        }
+                        //decode pain
+                        if (type == 'pain') {
+                            switch (value) {
+                                case '1':
+                                    value = 'No hurt';
+                                    break;
+                                case '2':
+                                    value = 'Hurts little bit';
+                                    break;
+                                case '3':
+                                    value = 'Hurts little more';
+                                    break;
+                                case '4':
+                                    value = 'Hurts even more';
+                                    break;
+                                case '5':
+                                    value = 'Hurts whole lot';
+                                    break;
+                                case '6':
+                                    value = 'Hurts worst';
+                                    break;
+                            }
+                        }
+                        //decode blood pressure
+                        if (type == 'bloodPressure') {
+                            value = elements[i]["systolic"] + "/" + elements[i]["diastolic"]
+                        }
+                        
                         //add element
                         time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
-                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')"><img src='` + img + `' >`
-                        hist += `<h2 style="display:inline">` + elements[i]["value"] + `</h2> <i class="icon ion-trash-a" ng-click="deleteElement('` + type + `','` + elements[i]["id"] + `')" style="display:inline; color:red"></i>`;
+                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')"><img src='` + img + `' >`;
+                        hist += `<h2 style="display:inline">` + value + `</h2> <i class="icon ion-trash-a" ng-click="deleteElement('` + type + `','` + elements[i]["id"] + `')" style="display:inline; color:red"></i>`;
                         hist += `<p>Time: ` + $scope.convert24to12(time) + `</p></div>`;
                     }
                 }
@@ -3214,43 +3208,43 @@ the articles quiz has been completed with a perfect score
     };
     $scope.getActivityImg = function (type) {
         switch (type) {
-            case 'Bike':
+            case '1':
                 return '../img/activities/bike.png';
-            case 'Clean':
+            case '2':
                 return '../img/activities/clean.png';
-            case 'Dance':
+            case '3':
                 return '../img/activities/dance.png';
-            case 'Exercise':
+            case '4':
                 return '../img/activities/exercise.png';
-            case 'Run':
+            case '5':
                 return '../img/activities/run.png';
-            case 'Shop':
+            case '6':
                 return '../img/activities/shop.png';
-            case 'Walk':
+            case '7':
                 return '../img/activities/walk.png';
-            case 'Walk Dog':
+            case '8':
                 return '../img/activities/walk_dog.png';
         }
     };
     $scope.getMoodImg = function (type) {
         switch (type) {
-            case 'Bored':
+            case '1':
                 return '../img/moods/bored.png';
-            case 'Calm':
+            case '2':
                 return '../img/moods/calm.png';
-            case 'Cheerful':
+            case '3':
                 return '../img/moods/cheerful.png';
-            case 'Excited':
+            case '4':
                 return '../img/moods/excited.png';
-            case 'Irritated':
+            case '5':
                 return '../img/moods/irritated.png';
-            case 'Neutral':
+            case '6':
                 return '../img/moods/neutral.png';
-            case 'Relaxed':
+            case '7':
                 return '../img/moods/relaxed.png';
-            case 'Sad':
+            case '8':
                 return '../img/moods/sad.png';
-            case 'Tense':
+            case '9':
                 return '../img/moods/tense.png';
         }
     };
@@ -3370,9 +3364,9 @@ the articles quiz has been completed with a perfect score
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('MM/DD/YYYY'),
+                "date": moment().format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
-                "act": $scope.selectAct,
+                "type": $scope.selectAct,
                 "value": value
             };
             doc['activity'].push(element);
@@ -3387,7 +3381,7 @@ the articles quiz has been completed with a perfect score
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('MM/DD/YYYY'),
+                "date": moment().format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "value": value
             };
@@ -3400,32 +3394,12 @@ the articles quiz has been completed with a perfect score
     $scope.submitPain = function (type) {
         var db = PouchDB('momlink');
         var type;
-        switch (document.getElementById('pain').value) {
-            case '1':
-                value = 'No hurt';
-                break;
-            case '2':
-                value = 'Hurts little bit';
-                break;
-            case '3':
-                value = 'Hurts little more';
-                break;
-            case '4':
-                value = 'Hurts even more';
-                break;
-            case '5':
-                value = 'Hurts whole lot';
-                break;
-            case '6':
-                value = 'Hurts worst';
-                break;
-        }
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('MM/DD/YYYY'),
+                "date": moment().format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
-                "value": value
+                "value": document.getElementById('pain').value
             };
             doc[type].push(element);
             return db.put(doc);
@@ -3438,9 +3412,10 @@ the articles quiz has been completed with a perfect score
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('MM/DD/YYYY'),
+                "date": moment().format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
-                "value": $('#count').html() + "/" + $('#count2').html()
+                "systolic": $('#count').html(),
+                "diastolic": $('#count2').html()
             };
             doc['bloodPressure'].push(element);
             return db.put(doc);
@@ -3453,7 +3428,7 @@ the articles quiz has been completed with a perfect score
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('MM/DD/YYYY'),
+                "date": moment().format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "value": parseInt($('#count12').html()) * (.5) + parseInt($('#count1').html())
             };
@@ -3468,7 +3443,7 @@ the articles quiz has been completed with a perfect score
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('MM/DD/YYYY'),
+                "date": moment().format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "value": value
             };
@@ -3515,7 +3490,7 @@ the articles quiz has been completed with a perfect score
             }*/
             var element = {
                 "id": id,
-                "date": moment().format('MM/DD/YYYY'),
+                "date": moment().format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "name": $('#pillName').val(),
                 "dosage": $('#dosage').val(),
@@ -3523,7 +3498,7 @@ the articles quiz has been completed with a perfect score
                 "timesTaken": $scope.pillTimes,
                 "daysTaken": daysTaken
             };
-            doc['pill'].push(element);
+            doc['pills'].push(element);
             return db.put(doc);
         }).then(function (doc) {
             $scope.toNewPage('history.html', 'History');
@@ -3655,7 +3630,7 @@ the articles quiz has been completed with a perfect score
         db.get('nutrition').then(function (doc) {
             //only count those where the day matches
             for (i in doc[id]) {
-                if (moment($scope.currentDate).format('MM/DD/YYYY') == doc[id][i]['date']) {
+                if (moment($scope.currentDate).format('YYYY/MM/DD') == doc[id][i]['date']) {
                     size += doc[id][i]['value'];
                 }
             }
@@ -3782,7 +3757,7 @@ the articles quiz has been completed with a perfect score
             }
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment($scope.currentDate).format('MM/DD/YYYY'),
+                "date": moment($scope.currentDate).format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "category": category,
                 "subcategory": subcategory,
@@ -3827,7 +3802,7 @@ the articles quiz has been completed with a perfect score
             db.get('nutrition').then(function (doc) {
                 var html = '';
                 for (i in doc[category]) {
-                    if (moment($scope.currentDate).format('MM/DD/YYYY') == doc[category][i]["date"]) {
+                    if (moment($scope.currentDate).format('YYYY/MM/DD') == doc[category][i]["date"]) {
                         html += `<center><div class="item" on-hold="deleteElement('` + category + `','` + doc[category][i]["id"] + `')">` + $scope.convert24to12(doc[category][i]["time"]) + `&nbsp; &nbsp; &nbsp; ` + doc[category][i]["value"] + ` servings</div></center>`;
                     }
                 }
