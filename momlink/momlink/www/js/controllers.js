@@ -561,11 +561,63 @@ across the app instead of just the calendar page
         window.localStorage.setItem('cid', '555')
     }
 
+    $scope.deleteClientEvents = function () {
+        var db = PouchDB('momlink');
+        var uploadEvents = [];
+        db.get('events').then(function (doc) {
+            //get all events where share = 0 AND upload = 1
+            for (i in doc['events']) {
+                if (doc['events'][i]['share'] == 0 && doc['events'][i]['upload'] == 1) {
+                    uploadEvents.push(doc['events'][i])
+                }
+            }
+            //need to convert dates before uploading
+            for (j in uploadEvents) {
+                uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
+                delete uploadEvents[j]['end'];
+                delete uploadEvents[j]['color'];
+                delete uploadEvents[j]['viewed'];
+                delete uploadEvents[j]['scheduledBy'];
+                delete uploadEvents[j]['questions'];
+            }
+
+        }).then(function () {
+            if (uploadEvents.length > 0) {
+                var post_information = {};
+                post_information.events = uploadEvents;
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/sendEvents.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: JSON.stringify(post_information) },
+                    success: function (data) {
+                        //for each event in events, update uploaded value to 1
+                        console.log(data)
+                        /*if (data == true) {
+                            db.get('events').then(function (doc) {
+                                for (k in uploadEvents) {
+                                    uploadEvents[k]['upload'] = '1';
+                                    for (m in doc['events']) {
+                                        if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
+                                            doc['events'][m]['upload'] = '1';
+                                            console.log('hit!')
+                                        }
+                                    }
+                                }
+                                return db.put(doc);
+                            });
+                        }*/
+                    }
+                });
+            }
+            else {
+                console.log('already up to date')
+            }
+        })
+    };
 
     $scope.testPHP = function () {
-        //need these to occurr in sync
-        //$scope.uploadTrackers()
-        //$scope.getGeneralEvents()
         var db = PouchDB('momlink');
         var uploadEvents = [];
         db.get('events').then(function (doc) {
@@ -576,26 +628,43 @@ across the app instead of just the calendar page
                 }
             }
             //need to convert dates before uploading
-            for (j in uploadEvents) {      
+            for (j in uploadEvents) {
                 uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
                 delete uploadEvents[j]['end'];
-                delete uploadEvents[j]['upload'];
                 delete uploadEvents[j]['color'];
                 delete uploadEvents[j]['viewed'];
                 delete uploadEvents[j]['scheduledBy'];
                 delete uploadEvents[j]['questions'];
             }
+
         }).then(function () {
             if (uploadEvents.length > 0) {
-                //console.log(post_information)
+                var post_information = {};
+                post_information.events = uploadEvents;
+                post_information.cid = window.localStorage.getItem('cid');
+                console.log(uploadEvents)
                 $.ajax({
                     url: 'https://momlink.crc.nd.edu/~jonathan/current/sendEvents.php',
                     type: 'POST',
                     dataType: 'json',
-                    data: { data: JSON.stringify(uploadEvents), cid: window.localStorage.getItem('cid') },
+                    data: { data: JSON.stringify(post_information) },
                     success: function (data) {
                         //for each event in events, update uploaded value to 1
                         console.log(data)
+                        /*if (data == true) {
+                            db.get('events').then(function (doc) {
+                                for (k in uploadEvents) {
+                                    uploadEvents[k]['upload'] = '1';
+                                    for (m in doc['events']) {
+                                        if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
+                                            doc['events'][m]['upload'] = '1';
+                                            console.log('hit!')
+                                        }
+                                    }
+                                }
+                                return db.put(doc);
+                            });
+                        }*/
                     }
                 });
             }
@@ -2142,7 +2211,6 @@ and handles event questions
                 }
             }
             if (doc['events'][i]['share'] == 1) {
-                console.log('what')
                 $("input[name=share]").prop('checked', true);
             }
         });
