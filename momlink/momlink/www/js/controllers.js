@@ -64,7 +64,7 @@ across the app instead of just the calendar page
                         {
                             "id": '06-20-2016T10:53:29am',
                             "title": 'Smoking Cessation Program',
-                            "category": 'Referral',
+                            "category": '1',
                             "day": '2016-07-27',
                             "start": '2016-07-27T10:11',
                             "end": '2016-07-27T14:11',
@@ -565,9 +565,9 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         var uploadEvents = [];
         db.get('events').then(function (doc) {
-            //get all events where share = 0 AND upload = 1
+            //get all events where share = 0 AND upload = 1 || upload = 2
             for (i in doc['events']) {
-                if (doc['events'][i]['share'] == 0 && doc['events'][i]['upload'] == 1) {
+                if (doc['events'][i]['share'] == 0 && (doc['events'][i]['upload'] == 1 || doc['events'][i]['upload'] == 2)) {
                     uploadEvents.push(doc['events'][i])
                 }
             }
@@ -587,27 +587,25 @@ across the app instead of just the calendar page
                 post_information.events = uploadEvents;
                 post_information.cid = window.localStorage.getItem('cid');
                 $.ajax({
-                    url: 'https://momlink.crc.nd.edu/~jonathan/current/sendEvents.php',
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/deleteEvents.php',
                     type: 'POST',
                     dataType: 'json',
                     data: { data: JSON.stringify(post_information) },
                     success: function (data) {
-                        //for each event in events, update uploaded value to 1
-                        console.log(data)
-                        /*if (data == true) {
+                        //for each event in events, update uploaded value to 0
+                        if (data == true) {
                             db.get('events').then(function (doc) {
                                 for (k in uploadEvents) {
                                     uploadEvents[k]['upload'] = '1';
                                     for (m in doc['events']) {
                                         if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
-                                            doc['events'][m]['upload'] = '1';
-                                            console.log('hit!')
+                                            doc['events'][m]['upload'] = '0';
                                         }
                                     }
                                 }
                                 return db.put(doc);
                             });
-                        }*/
+                        }
                     }
                 });
             }
@@ -617,13 +615,13 @@ across the app instead of just the calendar page
         })
     };
 
-    $scope.testPHP = function () {
+    $scope.updateClientEvents = function () {
         var db = PouchDB('momlink');
         var uploadEvents = [];
         db.get('events').then(function (doc) {
-            //get all events where share = 1 AND upload = 0
+            //get all events where share = 1 AND upload = 0 or 2 (2 means changes have been made that need to be sent)
             for (i in doc['events']) {
-                if (doc['events'][i]['share'] == 1 && doc['events'][i]['upload'] == 0) {
+                if (doc['events'][i]['share'] == 1 && (doc['events'][i]['upload'] == 0 || doc['events'][i]['upload'] == 2)) {
                     uploadEvents.push(doc['events'][i])
                 }
             }
@@ -642,7 +640,6 @@ across the app instead of just the calendar page
                 var post_information = {};
                 post_information.events = uploadEvents;
                 post_information.cid = window.localStorage.getItem('cid');
-                console.log(uploadEvents)
                 $.ajax({
                     url: 'https://momlink.crc.nd.edu/~jonathan/current/sendEvents.php',
                     type: 'POST',
@@ -650,21 +647,26 @@ across the app instead of just the calendar page
                     data: { data: JSON.stringify(post_information) },
                     success: function (data) {
                         //for each event in events, update uploaded value to 1
-                        console.log(data)
-                        /*if (data == true) {
+                        if (data.length > 0) {
                             db.get('events').then(function (doc) {
+                                for (k in uploadEvents) {
+                                    for (m in data) {
+                                        uploadEvents[k]['server_id'] = data[m]['unique_id'];
+                                    }
+                                }
+                                //set upload value so it is not reuploaded, set server id incase of modifications
                                 for (k in uploadEvents) {
                                     uploadEvents[k]['upload'] = '1';
                                     for (m in doc['events']) {
                                         if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
                                             doc['events'][m]['upload'] = '1';
-                                            console.log('hit!')
+                                            doc['events'][m]['server_id'] = uploadEvents[k]['server_id'];
                                         }
                                     }
                                 }
                                 return db.put(doc);
                             });
-                        }*/
+                        }
                     }
                 });
             }
@@ -857,7 +859,6 @@ across the app instead of just the calendar page
         });
     }*/
 
-
     /*
     Opens side menu navigation page
     */
@@ -929,19 +930,19 @@ across the app instead of just the calendar page
     */
     $scope.getEventImg = function (type) {
         switch (type) {
-            case 'OB Appt':
+            case '1':
                 return '../img/eventCategories/obAppt.png';
-            case 'Lab':
+            case '2':
                 return '../img/eventCategories/lab.png';
-            case 'Referral':
+            case '3':
                 return '../img/eventCategories/referral.png';
-            case 'PNCC':
+            case '4':
                 return '../img/eventCategories/pncc.png';
-            case 'Ultra':
+            case '5':
                 return '../img/eventCategories/ultra.png';
-            case 'Class':
+            case '6':
                 return '../img/eventCategories/class.png';
-            case 'Other':
+            case '7':
                 return '../img/mainIcons/momlink_icon-19.png';
         }
     };
@@ -1591,10 +1592,35 @@ across the app instead of just the calendar page
         db.get('events').then(function (doc) {
             var id = moment().format('MM-DD-YYYYThh:mm:ssa')
             $scope.eventID = id;
+            //code event category
+            var category;
+            switch ($("#type").val()) {
+                case 'OB Appt':
+                    category = '1';
+                    break;
+                case 'Lab':
+                    category = '2';
+                    break;
+                case 'Referral':
+                    category = '3';
+                    break;
+                case 'PNCC':
+                    category = '4';
+                    break;
+                case 'Ultra':
+                    category = '5';
+                    break;
+                case 'Class':
+                    category = '6';
+                    break;
+                case 'Other':
+                    category = '7';
+                    break;
+            }
             var event = {
                 "id": id,
                 "title": $('#title').val(),
-                "category": $("#type").val(),
+                "category": category,
                 "day": $('#date').val(),
                 "start": start,
                 "end": end,
@@ -1680,7 +1706,8 @@ across the app instead of just the calendar page
             var startTime = $scope.parseTime(doc['events'][i]['start']);
             var endTime = $scope.parseTime(doc['events'][i]['end']);
             //render template
-            templateHTML = '<p><b>' + doc['events'][i]['category'] + '</b></p>';
+            //decode category
+            templateHTML = '<p><b>' + $scope.decodeCategory(doc['events'][i]['category']) + '</b></p>';
             templateHTML += '<p><b>Date</b>: ' + date + '</p>';
             templateHTML += '<p><b>Start</b>: ' + $scope.convert24to12(startTime) + '</p>';
             templateHTML += '<p><b>End</b>: ' + $scope.convert24to12(endTime) + '</p>';
@@ -1769,8 +1796,9 @@ across the app instead of just the calendar page
                 }
             }
             $('#title').val(doc['events'][i]['title']);
-            $('#type').val(doc['events'][i]['category']);
-            document.getElementById(doc['events'][i]['category']).classList.add('activeBorder');
+            $('#type').val($scope.decodeCategory(doc['events'][i]['category']));
+            console.log()
+            document.getElementById($scope.decodeCategory(doc['events'][i]['category'])).classList.add('activeBorder');
             $('#date').val(doc['events'][i]['day']);
             $('#start').val($scope.parseTime(doc['events'][i]['start']));
             $('#end').val($scope.parseTime(doc['events'][i]['end']));
@@ -1825,8 +1853,33 @@ across the app instead of just the calendar page
                     break;
                 }
             }
+            //code event category
+            var category;
+            switch ($("#type").val()) {
+                case 'OB Appt':
+                    category = '1';
+                    break;
+                case 'Lab':
+                    category = '2';
+                    break;
+                case 'Referral':
+                    category = '3';
+                    break;
+                case 'PNCC':
+                    category = '4';
+                    break;
+                case 'Ultra':
+                    category = '5';
+                    break;
+                case 'Class':
+                    category = '6';
+                    break;
+                case 'Other':
+                    category = '7';
+                    break;
+            }
             doc['events'][i]['title'] = $('#title').val();
-            doc['events'][i]['category'] = $('#type').val();
+            doc['events'][i]['category'] = category;
             doc['events'][i]['day'] = $('#date').val();
             start = $('#date').val() + "T" + $('#start').val();
             end = $('#date').val() + "T" + $('#end').val();
@@ -1834,6 +1887,10 @@ across the app instead of just the calendar page
             doc['events'][i]['end'] = end;
             doc['events'][i]['venue'] = $('#venue').val();
             doc['events'][i]['share'] = share;
+            //signal to server that event has been modified
+            if (share == '1' && doc['events'][i]['upload'] == '1') {
+                doc['events'][i]['upload'] = '2';
+            }
             doc['events'][i]['description'] = $('#description').val();
             doc['events'][i]['questions'] = questions,
             doc['events'][i]['color'] = $scope.getColor($('#type').val());
@@ -2003,6 +2060,25 @@ across the app instead of just the calendar page
     $scope.parseTime = function (time) {
         time = String(time).substr(String(time).indexOf("T") + 1);
         return time;
+    }
+
+    $scope.decodeCategory = function (category) {
+        switch (category) {
+            case '1':
+                return 'OB Appt';
+            case '2':
+                return 'Lab';
+            case '3':
+                return 'Referral';
+            case '4':
+                return 'PNCC';
+            case '5':
+                return 'Ultra';
+            case '6':
+                return 'Class';
+            case '7':
+                return 'Other';
+        }
     }
 
 
