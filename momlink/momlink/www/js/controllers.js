@@ -70,6 +70,7 @@ across the app instead of just the calendar page
                             "end": '2016-07-27T14:11',
                             "venue": '',
                             "description": '',
+                            "share": '',
                             "color": 'red',
                             "scheduledBy": '0',
                             "viewed": '0',
@@ -361,6 +362,7 @@ across the app instead of just the calendar page
                     'pills': '',
                     'stress': '',
                     "weight": '',
+                    "eventsGeneral": '-1'
                 });
             }
         });
@@ -558,10 +560,106 @@ across the app instead of just the calendar page
         //db.destroy();
         window.localStorage.setItem('cid', '555')
     }
-    
+
+
     $scope.testPHP = function () {
         //need these to occurr in sync
-        $scope.uploadTrackers()
+        //$scope.uploadTrackers()
+        //$scope.getGeneralEvents()
+        var db = PouchDB('momlink');
+        var uploadEvents = [];
+        db.get('events').then(function (doc) {
+            //get all events where share = 1 AND upload = 0
+            for (i in doc['events']) {
+                if (doc['events'][i]['share'] == 1 && doc['events'][i]['upload'] == 0) {
+                    uploadEvents.push(doc['events'][i])
+                }
+            }
+            //need to convert dates before uploading
+            for (j in uploadEvents) {      
+                uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
+                delete uploadEvents[j]['end'];
+                delete uploadEvents[j]['upload'];
+                delete uploadEvents[j]['color'];
+                delete uploadEvents[j]['viewed'];
+                delete uploadEvents[j]['scheduledBy'];
+                delete uploadEvents[j]['questions'];
+            }
+        }).then(function () {
+            if (uploadEvents.length > 0) {
+                //console.log(post_information)
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/sendEvents.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: JSON.stringify(uploadEvents), cid: window.localStorage.getItem('cid') },
+                    success: function (data) {
+                        //for each event in events, update uploaded value to 1
+                        console.log(data)
+                    }
+                });
+            }
+            else {
+                console.log('already up to date')
+            }
+        })
+    };
+
+    /*
+    Pulls general events from pnccs
+    */
+    $scope.getGeneralEvents = function () {
+        var db = PouchDB('momlink');
+        var recentID = '';
+        db.get('update').then(function (doc) {
+            recentID = doc['eventsGeneral'];
+        }).then(function () {
+            //get new events since last update
+            var post_information = { 'recentID': recentID };
+            $.ajax({
+                url: 'https://momlink.crc.nd.edu/~jonathan/current/getEvents.php',
+                type: 'POST',
+                dataType: 'json',
+                data: post_information,
+                success: function (data) {
+                    if (data[0]['success'] == 1) {
+                        console.log('already up to date')
+                    }
+                    else {
+                        db.get('events').then(function (doc) {
+                            for (i in data) {
+                                var dateFormatted = moment(data[i]['edate']);
+                                dateFormatted = dateFormatted.format('YYYY-MM-DD');
+                                var event = {
+                                    "id": data[i]['id'],
+                                    "title": data[i]['title'],
+                                    "category": 'General',
+                                    "day": dateFormatted,
+                                    "start": dateFormatted + 'T' + data[i]['start'],
+                                    "end": dateFormatted + 'T' + data[i]['end'],
+                                    "venue": data[i]['venue'],
+                                    "description": data[i]['description'],
+                                    "questions": [],
+                                    "color": 'gray',
+                                    "viewed": '1',
+                                    "scheduledBy": '1'
+                                };
+                                doc['events'].push(event);
+                            }
+                            return db.put(doc).then(function () {
+                                db.get('update').then(function (doc) {
+                                    //update eventsGeneral cutoff with newest event
+                                    doc['eventsGeneral'] = data[data.length - 1]['id'];
+                                    return db.put(doc).then(function () {
+                                        //update records table
+                                    })
+                                })
+                            })
+                        });
+                    }
+                }
+            });
+        });
     };
 
     /*
@@ -596,13 +694,13 @@ across the app instead of just the calendar page
             }).then(function () {
                 //get new information since last update
                 uploadData = [];
-                docName = 'track';         
+                docName = 'track';
                 //need to pull from different database for nutrition
                 if (table[0] == 'nutrition') {
                     docName = 'nutrition';
                 }
                 db.get(docName).then(function (doc) {
-                    if(docName != 'nutrition'){
+                    if (docName != 'nutrition') {
                         for (var i in doc[table[0]]) {
                             if (recentID < doc[tableName][i]['id']) {
                                 uploadData.push(doc[tableName][i])
@@ -622,7 +720,6 @@ across the app instead of just the calendar page
                 }).then(function () {
                     //send this to the sever
                     if (uploadData.length > 0) {
-
                         var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid'), 'table': tableName };
                         $.ajax({
                             url: 'https://momlink.crc.nd.edu/~jonathan/current/send' + table[1] + '.php',
@@ -1414,6 +1511,10 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         start = $('#date').val() + "T" + $('#start').val();
         end = $('#date').val() + "T" + $('#end').val();
+        var share = 0;
+        if ($("input[name=share]:checked").val() == 1) {
+            share = 1;
+        }
         var questions = [];
         $("input[name=Q]:checked").each(function () {
             questions.push($(this).val())
@@ -1429,6 +1530,8 @@ across the app instead of just the calendar page
                 "start": start,
                 "end": end,
                 "venue": $('#venue').val(),
+                "share": share,
+                "upload": "0",
                 "description": $('#description').val(),
                 "questions": questions,
                 "color": $scope.getColor($('#type').val()),
@@ -1524,28 +1627,45 @@ across the app instead of just the calendar page
                     templateHTML += doc['events'][i]['questions'][j] + '<br>';
                 }
             }
-            //view event
-            var alertPopup = $ionicPopup.show({
-                title: doc['events'][i]['title'],
-                template: templateHTML,
-                buttons: [
-                    {
-                        text: 'Edit', onTap: function (e) {
-                            $scope.clickTracker('editEvent');
-                            $scope.editEvent(eventID);
-                            return 'Cancel';
+            //view event, do not allow editing if created by PNCC
+            if (doc['events'][i].scheduledBy > 0) {
+                $ionicPopup.show({
+                    title: doc['events'][i]['title'],
+                    template: templateHTML,
+                    buttons: [
+                      {
+                          text: 'Close', onTap: function (e) {
+                              $scope.clickTracker('closeEvent');
+                              return 'Cancel';
+                          },
+                          type: 'button-positive'
+                      }
+                    ],
+                });
+            }
+            else {
+                $ionicPopup.show({
+                    title: doc['events'][i]['title'],
+                    template: templateHTML,
+                    buttons: [
+                        {
+                            text: 'Edit', onTap: function (e) {
+                                $scope.clickTracker('editEvent');
+                                $scope.editEvent(eventID);
+                                return 'Cancel';
+                            },
+                            type: 'button-positive'
                         },
-                        type: 'button-positive'
-                    },
-                  {
-                      text: 'Close', onTap: function (e) {
-                          $scope.clickTracker('closeEvent');
-                          return 'Cancel';
-                      },
-                      type: 'button-positive'
-                  }
-                ],
-            });
+                      {
+                          text: 'Close', onTap: function (e) {
+                              $scope.clickTracker('closeEvent');
+                              return 'Cancel';
+                          },
+                          type: 'button-positive'
+                      }
+                    ],
+                });
+            }
             doc['events'][i]['viewed'] = '1';
             return db.put(doc);
         });
@@ -1621,6 +1741,10 @@ across the app instead of just the calendar page
     */
     $scope.updateEvent = function () {
         var db = PouchDB('momlink');
+        var share = 0;
+        if ($("input[name=share]:checked").val() == 1) {
+            share = 1;
+        }
         var questions = [];
         $("input[name=Q]:checked").each(function () {
             questions.push($(this).val())
@@ -1640,6 +1764,7 @@ across the app instead of just the calendar page
             doc['events'][i]['start'] = start;
             doc['events'][i]['end'] = end;
             doc['events'][i]['venue'] = $('#venue').val();
+            doc['events'][i]['share'] = share;
             doc['events'][i]['description'] = $('#description').val();
             doc['events'][i]['questions'] = questions,
             doc['events'][i]['color'] = $scope.getColor($('#type').val());
@@ -1999,7 +2124,6 @@ and handles event questions
     };
 
 
-
     /*
     Filter events between personal events and PNCC created events
     passing in 0 displays personal and 1 displays pncc
@@ -2009,6 +2133,20 @@ and handles event questions
         $('#calendar').fullCalendar('rerenderEvents');
     };
 
+    $scope.toggleShare = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === $scope.eventID) {
+                    break;
+                }
+            }
+            if (doc['events'][i]['share'] == 1) {
+                console.log('what')
+                $("input[name=share]").prop('checked', true);
+            }
+        });
+    };
 
     /*
     Displays all questions either initally present or user has added
@@ -3174,7 +3312,7 @@ the articles quiz has been completed with a perfect score
                         if (type == 'bloodPressure') {
                             value = elements[i]["systolic"] + "/" + elements[i]["diastolic"]
                         }
-                        
+
                         //add element
                         time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
                         hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')"><img src='` + img + `' >`;
