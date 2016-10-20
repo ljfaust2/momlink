@@ -74,13 +74,6 @@ across the app instead of just the calendar page
                             "color": 'red',
                             "scheduledBy": '0',
                             "viewed": '0',
-                            "survey":
-                                [
-                                ['Please rate your experience', ['Satisfactory', 'Unsatisfactory']],
-                                ['How likely are you to reccommend us to a friend?', ['Unlikely', 'Likely', 'Very Likely']]
-                                ],
-                            "dateSurveyGiven": '7/27/2016',
-                            "dateSurveyTaken": '',
                             "questions": []
                         }
                     ],
@@ -90,6 +83,26 @@ across the app instead of just the calendar page
                             '2': `When should I call a doctor?`,
                             '3': `Is there anything I should do to prepare?`
                         }
+                });
+            }
+        });
+        db.get('surveys').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "surveys",
+                    "surveys": [
+                        {
+                            "id": '909',
+                            "title": 'Follow-upTEST',
+                            "questions":
+                                {
+                                    'Please rate your experience': ['Satisfactory', 'Unsatisfactory'],
+                                    'How likely are you to reccommend us to a friend?': ['Unlikely', 'Likely', 'Very Likely']
+                                },
+                            "dateGiven": '10/19/2016',
+                            "dateTaken": '',
+                        }
+                    ]
                 });
             }
         });
@@ -161,7 +174,7 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "articles",
                     "shared": [
-                        {
+                        /*{
                             "id": "1",
                             "title": "Smoking During Pregnancy",
                             "description": "Smoking during pregnancy may increase the risk that a child could develop schizophrenia, new research suggests.",
@@ -250,10 +263,10 @@ across the app instead of just the calendar page
                                 ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
                                 ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
                                 ]
-                        }
+                        }*/
                     ],
                     "history": [
-                    ]
+                    ],
                 });
             }
         });
@@ -561,124 +574,23 @@ across the app instead of just the calendar page
         window.localStorage.setItem('cid', '555')
     }
 
-    $scope.deleteClientEvents = function () {
-        var db = PouchDB('momlink');
-        var uploadEvents = [];
-        db.get('events').then(function (doc) {
-            //get all events where share = 0 AND upload = 1 || upload = 2
-            for (i in doc['events']) {
-                if (doc['events'][i]['share'] == 0 && (doc['events'][i]['upload'] == 1 || doc['events'][i]['upload'] == 2)) {
-                    uploadEvents.push(doc['events'][i])
-                }
-            }
-            //need to convert dates before uploading
-            for (j in uploadEvents) {
-                uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
-                delete uploadEvents[j]['end'];
-                delete uploadEvents[j]['color'];
-                delete uploadEvents[j]['viewed'];
-                delete uploadEvents[j]['scheduledBy'];
-                delete uploadEvents[j]['questions'];
-            }
-
-        }).then(function () {
-            if (uploadEvents.length > 0) {
-                var post_information = {};
-                post_information.events = uploadEvents;
-                post_information.cid = window.localStorage.getItem('cid');
-                $.ajax({
-                    url: 'https://momlink.crc.nd.edu/~jonathan/current/deleteEvents.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: { data: JSON.stringify(post_information) },
-                    success: function (data) {
-                        //for each event in events, update uploaded value to 0
-                        if (data == true) {
-                            db.get('events').then(function (doc) {
-                                for (k in uploadEvents) {
-                                    uploadEvents[k]['upload'] = '1';
-                                    for (m in doc['events']) {
-                                        if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
-                                            doc['events'][m]['upload'] = '0';
-                                        }
-                                    }
-                                }
-                                return db.put(doc);
-                            });
-                        }
-                    }
-                });
-            }
-            else {
-                console.log('already up to date')
-            }
-        })
-    };
-
-    $scope.updateClientEvents = function () {
-        var db = PouchDB('momlink');
-        var uploadEvents = [];
-        db.get('events').then(function (doc) {
-            //get all events where share = 1 AND upload = 0 or 2 (2 means changes have been made that need to be sent)
-            for (i in doc['events']) {
-                if (doc['events'][i]['share'] == 1 && (doc['events'][i]['upload'] == 0 || doc['events'][i]['upload'] == 2)) {
-                    uploadEvents.push(doc['events'][i])
-                }
-            }
-            //need to convert dates before uploading
-            for (j in uploadEvents) {
-                uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
-                delete uploadEvents[j]['end'];
-                delete uploadEvents[j]['color'];
-                delete uploadEvents[j]['viewed'];
-                delete uploadEvents[j]['scheduledBy'];
-                delete uploadEvents[j]['questions'];
-            }
-
-        }).then(function () {
-            if (uploadEvents.length > 0) {
-                var post_information = {};
-                post_information.events = uploadEvents;
-                post_information.cid = window.localStorage.getItem('cid');
-                $.ajax({
-                    url: 'https://momlink.crc.nd.edu/~jonathan/current/sendEvents.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: { data: JSON.stringify(post_information) },
-                    success: function (data) {
-                        //for each event in events, update uploaded value to 1
-                        if (data.length > 0) {
-                            db.get('events').then(function (doc) {
-                                for (k in uploadEvents) {
-                                    for (m in data) {
-                                        uploadEvents[k]['server_id'] = data[m]['unique_id'];
-                                    }
-                                }
-                                //set upload value so it is not reuploaded, set server id incase of modifications
-                                for (k in uploadEvents) {
-                                    uploadEvents[k]['upload'] = '1';
-                                    for (m in doc['events']) {
-                                        if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
-                                            doc['events'][m]['upload'] = '1';
-                                            doc['events'][m]['server_id'] = uploadEvents[k]['server_id'];
-                                        }
-                                    }
-                                }
-                                return db.put(doc);
-                            });
-                        }
-                    }
-                });
-            }
-            else {
-                console.log('already up to date')
-            }
-        })
-    };
-
+    //PHP
     /*
-    Pulls general events from pnccs
+    Runs all php scripts
     */
+    $scope.update = function (){
+        //$scope.getGeneralEvents();
+        $scope.updateClientEvents();
+        $scope.deleteClientEvents();
+        $scope.getReferrals();
+        $scope.updateReferrals();
+        $scope.getArticles();
+        $scope.updateArticles();
+        $scope.getSurveys();
+        $scope.updateSurveys();
+        $scope.uploadTrackers();
+    };
+
     $scope.getGeneralEvents = function () {
         var db = PouchDB('momlink');
         var recentID = '';
@@ -692,6 +604,7 @@ across the app instead of just the calendar page
                 type: 'POST',
                 dataType: 'json',
                 data: post_information,
+                async:false,
                 success: function (data) {
                     if (data[0]['success'] == 1) {
                         console.log('already up to date')
@@ -731,11 +644,445 @@ across the app instead of just the calendar page
                 }
             });
         });
+        console.log('one');
     };
+    $scope.updateClientEvents = function () {
+        var db = PouchDB('momlink');
+        var uploadEvents = [];
+        db.get('events').then(function (doc) {
+            //get all events where share = 1 AND upload = 0 or 2 (2 means changes have been made that need to be sent)
+            for (i in doc['events']) {
+                if (doc['events'][i]['share'] == 1 && (doc['events'][i]['upload'] == 0 || doc['events'][i]['upload'] == 2)) {
+                    uploadEvents.push(doc['events'][i])
+                }
+            }
+            //need to convert dates before uploading
+            for (j in uploadEvents) {
+                uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
+                delete uploadEvents[j]['end'];
+                delete uploadEvents[j]['color'];
+                delete uploadEvents[j]['viewed'];
+                delete uploadEvents[j]['scheduledBy'];
+                delete uploadEvents[j]['questions'];
+            }
 
-    /*
-    Uploads tracking data
-    */
+        }).then(function () {
+            if (uploadEvents.length > 0) {
+                var post_information = {};
+                post_information.events = uploadEvents;
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updateEvents.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async:false,
+                    success: function (data) {
+                        //for each event in events, update uploaded value to 1
+                        if (data.length > 0) {
+                            db.get('events').then(function (doc) {
+                                for (k in uploadEvents) {
+                                    for (m in data) {
+                                        uploadEvents[k]['server_id'] = data[m]['unique_id'];
+                                    }
+                                }
+                                //set upload value so it is not reuploaded, set server id incase of modifications
+                                for (k in uploadEvents) {
+                                    uploadEvents[k]['upload'] = '1';
+                                    for (m in doc['events']) {
+                                        if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
+                                            doc['events'][m]['upload'] = '1';
+                                            doc['events'][m]['server_id'] = uploadEvents[k]['server_id'];
+                                        }
+                                    }
+                                }
+                                console.log('Events uploaded')
+                                return db.put(doc);
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('Events already up to date')
+            }
+        })
+        console.log('two');
+    };
+    $scope.deleteClientEvents = function () {
+        var db = PouchDB('momlink');
+        var uploadEvents = [];
+        db.get('events').then(function (doc) {
+            //get all events where share = 0 AND upload = 1 || upload = 2
+            for (i in doc['events']) {
+                if (doc['events'][i]['share'] == 0 && (doc['events'][i]['upload'] == 1 || doc['events'][i]['upload'] == 2)) {
+                    uploadEvents.push(doc['events'][i])
+                }
+            }
+            //need to convert dates before uploading
+            for (j in uploadEvents) {
+                uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
+                delete uploadEvents[j]['end'];
+                delete uploadEvents[j]['color'];
+                delete uploadEvents[j]['viewed'];
+                delete uploadEvents[j]['scheduledBy'];
+                delete uploadEvents[j]['questions'];
+            }
+
+        }).then(function () {
+            if (uploadEvents.length > 0) {
+                var post_information = {};
+                post_information.events = uploadEvents;
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/deleteEvents.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: JSON.stringify(post_information) },
+                    async: false,
+                    success: function (data) {
+                        //for each event in events, update uploaded value to 0
+                        if (data == true) {
+                            db.get('events').then(function (doc) {
+                                for (k in uploadEvents) {
+                                    uploadEvents[k]['upload'] = '1';
+                                    for (m in doc['events']) {
+                                        if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
+                                            doc['events'][m]['upload'] = '0';
+                                        }
+                                    }
+                                }
+                                console.log('Events deleted')
+                                return db.put(doc);
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('No events to delete')
+            }
+        })
+        console.log('three');
+    };
+    $scope.getReferrals = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getReferrals.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                if (data.length > 0) {
+                    db.get('referrals').then(function (doc) {
+                        for (i in data) {
+                            //check if referral is already in local db
+                            var isUnique = true;
+                            for (j in doc['referrals']) {
+                                if (data[i]['id'] == doc['referrals'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                var referral = {
+                                    "id": data[i]['id'],
+                                    "name": data[i]['name'],
+                                    "address": data[i]['address'],
+                                    "phone": data[i]['phone'],
+                                    "email": data[i]['email'],
+                                    "date": moment().format('MM/DD/YYYY'),
+                                    "meeting": '',
+                                    "upload": '0',
+                                    "referral_status": '0',
+                                };
+                                doc['referrals'].push(referral);
+                            }
+                        }
+                        console.log('Referrals downloaded')
+                        return db.put(doc);
+                    });
+                }
+                else {
+                    console.log('No new referrals')
+                }
+            }
+        });
+        console.log('four');
+    };
+    $scope.updateReferrals = function () {
+        var db = PouchDB('momlink');
+        var uploadReferrals = [];
+        db.get('referrals').then(function (doc) {
+            //get all referrals where upload == 0 and referral_status == 1 (referrals not previously updated but have meetings scheduled)
+            for (i in doc['referrals']) {
+                if (doc['referrals'][i]['upload'] == 0 && doc['referrals'][i]['referral_status'] == 1) {
+                    uploadReferrals.push(doc['referrals'][i]['id'])
+                }
+            }
+        }).then(function () {
+            if (uploadReferrals.length > 0) {
+                var post_information = {};
+                post_information.referrals = uploadReferrals;
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updateReferrals.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: JSON.stringify(post_information) },
+                    async: false,
+                    success: function (data) {
+                        //for each referral updated, update uploaded value to 1
+                        if (data == true) {
+                            db.get('referrals').then(function (doc) {
+                                //set upload value so it is not reuploaded
+                                for (k in uploadReferrals) {
+                                    for (m in doc['referrals']) {
+                                        if (uploadReferrals[k] == doc['referrals'][m]['id']) {
+                                            doc['referrals'][m]['upload'] = '1';
+                                        }
+                                    }
+                                }
+                                console.log('Referrals updated')
+                                return db.put(doc);
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('Referrals already up to date')
+            }
+        })
+        console.log('five');
+    };
+    $scope.getArticles = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getArticles.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                if (data.length > 0) {
+                    db.get('articles').then(function (doc) {
+                        for (i in data) {
+                            //check if article is already in local db
+                            var isUnique = true;
+                            //check shared articles
+                            for (j in doc['shared']) {
+                                if (data[i]['id'] == doc['shared'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            //check history articles
+                            for (k in doc['history']) {
+                                if (data[i]['id'] == doc['history'][k]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                //makes quiz suitable for json parse
+                                data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
+                                var article = {
+                                    "id": data[i]['id'],
+                                    "title": data[i]['title'],
+                                    "category": data[i]['category'],
+                                    "description": data[i]['description'],
+                                    "content_text": data[i]['content_text'],
+                                    "content_obj": data[i]['content_obj'],
+                                    "dateShared": data[i]['date_shared'],
+                                    "lastRead": "",
+                                    "readHistory": {},
+                                    "quiz": JSON.parse(data[i]['quiz']),
+                                    "quizAttempts": '0',
+                                    "bestScore": '0',
+                                    "quizHistory": {},
+                                    "upload": '0',
+                                    "article_status": '0'
+                                };
+                                doc['shared'].push(article);
+                            }
+                        }
+                        console.log('Articles downloaded')
+                        return db.put(doc);
+                    });
+                }
+                else {
+                    console.log('No new articles')
+                }
+            }
+        });
+        console.log('six');
+    };
+    $scope.updateArticles = function () {
+        var db = PouchDB('momlink');
+        var uploadArticles = [];
+        db.get('articles').then(function (doc) {
+            //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
+            for (i in doc['shared']) {
+                if (doc['shared'][i]['upload'] == 0 && doc['shared'][i]['article_status'] == 1) {
+                    uploadArticles.push(doc['shared'][i])
+                }
+            }
+            //still get updates for articles moved to history
+            for (i in doc['history']) {
+                if (doc['history'][i]['upload'] == 0 && doc['history'][i]['article_status'] == 1) {
+                    uploadArticles.push(doc['history'][i])
+                }
+            }
+            //prune articles of uneccessary content before upload
+            for (j in uploadArticles) {
+                delete uploadArticles[j]['title'];
+                delete uploadArticles[j]['category'];
+                delete uploadArticles[j]['description'];
+                delete uploadArticles[j]['content_text'];
+                delete uploadArticles[j]['content_obj'];
+                delete uploadArticles[j]['dateShared'];
+                delete uploadArticles[j]['quiz'];
+                delete uploadArticles[j]['article_status'];
+                delete uploadArticles[j]['upload'];
+            }
+        }).then(function () {
+            if (uploadArticles.length > 0) {
+                var post_information = {};
+                post_information.articles = uploadArticles;
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updateArticles.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async: false,
+                    success: function (data) {
+                        //for each article updated, update uploaded value to 1
+                        if (data == true) {
+                            db.get('articles').then(function (doc) {
+                                //set upload value so it is not reuploaded and clean local read/quiz history 
+                                for (k in uploadArticles) {
+                                    for (m in doc['shared']) {
+                                        if (uploadArticles[k]['id'] == doc['shared'][m]['id']) {
+                                            doc['shared'][m]['upload'] = '1';
+                                            doc['shared'][m]['readHistory'] = {};
+                                            doc['shared'][m]['quizHistory'] = {};
+                                        }
+                                    }
+                                    for (n in doc['history']) {
+                                        if (uploadArticles[k]['id'] == doc['shared'][n]['id']) {
+                                            doc['history'][n]['upload'] = '1';
+                                            doc['history'][m]['readHistory'] = {};
+                                            doc['history'][m]['quizHistory'] = {};
+                                        }
+                                    }
+                                }
+                                console.log('Articles updated')
+                                return db.put(doc);
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('Articles already up to date')
+            }
+        })
+        console.log('seven');
+    };
+    $scope.getSurveys = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getSurveys.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                if (data.length > 0) {
+                    db.get('surveys').then(function (doc) {
+                        for (i in data) {
+                            //check if referral is already in local db
+                            var isUnique = true;
+                            for (j in doc['surveys']) {
+                                if (data[i]['id'] == doc['surveys'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                //makes content suitable for json parse
+                                data[i]['content'] = data[i]['content'].replace(/'/g, `"`);
+                                var survey = {
+                                    "id": data[i]['id'],
+                                    "title": data[i]['name'],
+                                    "questions": JSON.parse(data[i]['content']),
+                                    "dateGiven": data[i]['dateGiven'],
+                                    "dateTaken": '',
+                                    "upload": '0',
+                                    "survey_status": '0',
+                                };
+                                doc['surveys'].push(survey);
+                            }
+                        }
+                        console.log('Surveys downloaded')
+                        return db.put(doc);
+                    });
+                }
+                else {
+                    console.log('No new surveys')
+                }
+            }
+        });
+        console.log('eight');
+    };
+    $scope.updateSurveys = function () {
+        var db = PouchDB('momlink');
+        var uploadSurveys = [];
+        db.get('surveys').then(function (doc) {
+            //get all referrals where upload == 0 and survey_status == 1 (surveys not previously updated but have been completed)
+            for (i in doc['surveys']) {
+                if (doc['surveys'][i]['upload'] == 0 && doc['surveys'][i]['survey_status'] == 1) {
+                    uploadSurveys.push(doc['surveys'][i])
+                }
+            }
+        }).then(function () {
+            if (uploadSurveys.length > 0) {
+                var post_information = {};
+                post_information.surveys = uploadSurveys;
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updateSurveys.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async: false,
+                    success: function (data) {
+                        //for each survey updated, update uploaded value to 1
+                        if (data == true) {
+                            db.get('surveys').then(function (doc) {
+                                //set upload value so it is not reuploaded
+                                for (k in uploadSurveys) {
+                                    for (m in doc['surveys']) {
+                                        if (uploadSurveys[k]['id'] == doc['surveys'][m]['id']) {
+                                            doc['surveys'][m]['upload'] = '1';
+                                        }
+                                    }
+                                }
+                                console.log('Surveys updated')
+                                return db.put(doc);
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('Surveys already up to date')
+            }
+        })
+        console.log('nine');
+    };
     $scope.uploadTrackers = function () {
         //each cell holds the table and php script
         var tables = [['activity', 'Activity'], ['bloodGlucose', 'Track'], ['babyHeartRate', 'Track'], ['bloodIron', 'Track'],
@@ -749,6 +1096,7 @@ across the app instead of just the calendar page
                     loopTrackers(arr);
                 }
             });
+            console.log('ten');
         }
         function uploadTracker(table, callback) {
             var db = PouchDB('momlink');
@@ -797,6 +1145,7 @@ across the app instead of just the calendar page
                             type: 'POST',
                             dataType: 'json',
                             data: post_information,
+                            async: false,
                             success: function (data) {
                                 if (data = true) {
                                     console.log('tracking data successfully uploaded')
@@ -834,13 +1183,14 @@ across the app instead of just the calendar page
                         });
                     }
                     else {
-                        console.log('info already up to date');
+                        console.log(table[0] + ' already up to date');
                         var post_information = { 'success': '1', 'cid': window.localStorage.getItem('cid'), 'table': tableName };
                         $.ajax({
                             url: 'https://momlink.crc.nd.edu/~jonathan/current/updateRecords.php',
                             type: 'POST',
                             dataType: 'json',
                             data: post_information,
+                            async: false,
                             success: function (data) {
                                 callback();
                             }
@@ -852,12 +1202,6 @@ across the app instead of just the calendar page
         loopTrackers(tables);
     };
 
-    /*$scope.clientUpdates = function () {
-        // Which fetches are repeatable.
-        // All sends are repeatable.
-        document.addEventListener("deviceready", function () {
-        });
-    }*/
 
     /*
     Opens side menu navigation page
@@ -956,7 +1300,7 @@ across the app instead of just the calendar page
         cycle = 0;
         db.get('articles').then(function (doc) {
             articles = doc['shared'];
-            if (articles == '') {
+            if (articles.length == 0) {
                 $('#articlesHeader').html('No New Articles');
                 $compile($('#articlesHeader'))($scope);
             }
@@ -1172,13 +1516,10 @@ across the app instead of just the calendar page
         var countReferrals = 0;
         var countEvents = 0;
         //Survey Badge, number of surveys not taken
-        db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                if (events[i]['survey'] != null) {
-                    if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
-                        countSurveys++;
-                    }
+        db.get('surveys').then(function (doc) {
+            for (i in doc['surveys']) {
+                if (doc['surveys'][i]['dateTaken'] == '') {
+                    countSurveys++;
                 }
             }
             if (countSurveys > 0) {
@@ -1647,6 +1988,7 @@ across the app instead of just the calendar page
                         }
                     }
                     doc['referrals'][i]['meeting'] = $scope.eventID;
+                    doc['referrals'][i]['referral_status'] = 1;
                     return db.put(doc);
                 }).then(function (doc) {
                     $scope.toNewPage('referrals.html', 'Referrals');
@@ -2637,16 +2979,8 @@ the articles quiz has been completed with a perfect score
                     else {
                         html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz <i class="ion-help"></i></button>`;
                     }
-                    var bestScore = 0;
-                    if (Object.keys(article['quizHistory']).length > 0) {
-                        for (j in article['quizHistory']) {
-                            if (article['quizHistory'][j][0].substring(0, 1) > String(bestScore).substring(0, 1)) {
-                                bestScore = article['quizHistory'][j][0];
-                            }
-                        }
-                        html += '<p>Best Score: ' + bestScore + '</p>';
-                        html += '<p>Quiz Attempts: ' + Object.keys(article['quizHistory']).length + '</p>';
-                    }
+                    html += '<p>Best Score: ' + article['bestScore'] + '</p>';
+                    html += '<p>Quiz Attempts: ' + article['quizAttempts'] + '</p>';
                     html += '</div>';
                 }
             }
@@ -2759,11 +3093,26 @@ the articles quiz has been completed with a perfect score
                     }
                         //if network is available
                     else {*/
-                    //html += `<iframe id="frame" src="` + article['link'] + `" style="width:100%; height: 100%;"></iframe>`;
-                    html += `<iframe id="frame" src="page.html" style="width:100%; height: 100%;"></iframe>`;
+
+                    //if content is a link
+                    if (article['content_text'].substring(0, 4) == 'http') {
+                        html += `<iframe id="frame" src="` + article['content_text'] + `" style="width:100%; height: 100%;"></iframe>`;
+                    }
+                    //if content is an object
+                    else if(article['content_text'] == '' && article['content_obj'] != ''){
+                        //handle blob object article['content_obj']
+                    }
+                    //content is a string
+                    else {
+                        html += `<div class="has-footer">`;
+                        html += `<p>`;
+                        html += article['content_text'];
+                        html += `</p>`;
+                        html += `</div>`;
+                    }                    
                     html += `</ion-modal-view>`;
                     //updated last time article was read
-                    article['lastRead'] = String(moment().format('MM-DD-YYYY'));
+                    article['lastRead'] = String(moment().format('YYYY-MM-DD'));
                     $scope.modal = $ionicModal.fromTemplate(html, {
                         scope: $scope,
                         animation: 'slide-in-up'
@@ -2775,7 +3124,6 @@ the articles quiz has been completed with a perfect score
             }
         })
     }
-
 
     /*
     Opens the selected quiz
@@ -2867,8 +3215,16 @@ the articles quiz has been completed with a perfect score
                     if (prequiz != 1) {
                         prequiz = 0;
                     }
+                    //check if new score is best score
+                    var bestScore = 0;
+                    if (parseInt(article['bestScore']) < score) {
+                        article['bestScore'] = String(score);
+                    }
                     //also need to record answers selected, prequiz value of 1 means the quiz was a prequiz
-                    article['quizHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = [finalScore, usersAnswers, prequiz];
+                    article['quizAttempts'] = String(parseInt(article['quizAttempts']) + 1)
+                    article['quizHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = [finalScore, usersAnswers, prequiz];
+                    article['article_status'] = '1';
+                    article['upload'] = '0';
                     return db.put(doc)
                 }
             }
@@ -2919,7 +3275,9 @@ the articles quiz has been completed with a perfect score
                         seconds = '0'.concat(seconds);
                     }
                     var finalSessionTime = minutes + ':' + seconds;
-                    article['readHistory'][String(moment().format('YYYY-MM-DDThh:mm:ssa'))] = finalSessionTime;
+                    article['readHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = finalSessionTime;
+                    article['article_status'] = '1';
+                    article['upload'] = '0';
                     return db.put(doc)
                 }
             }
@@ -4284,13 +4642,10 @@ Handler for javascript clock used in addActivityTime page
     $scope.renderSurveys = function () {
         var db = PouchDB('momlink');
         var html = '<div class="list">';
-        db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                if (events[i]['survey'] != null) {
-                    if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length < 3) {
-                        html += `<a class="item" ng-click="renderSurvey('` + events[i]['id'] + `')">` + events[i]['title'] + ` follow-up` + ' <p> Given on: ' + events[i]['dateSurveyGiven'] + `</p></a>`;
-                    }
+        db.get('surveys').then(function (doc) {
+            for (i in doc['surveys']) {
+                if (doc['surveys'][i]['dateTaken'] == '') {
+                    html += `<a class="item" ng-click="renderSurvey('` + doc['surveys'][i]['id'] + `')">` + doc['surveys'][i]['title'] + ' <p> Given on: ' + doc['surveys'][i]['dateGiven'] + `</p></a>`;
                 }
             }
             html += '</div>';
@@ -4301,13 +4656,10 @@ Handler for javascript clock used in addActivityTime page
     $scope.renderPastSurveys = function () {
         var db = PouchDB('momlink');
         var html = '<div class="list">';
-        db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                if (events[i]['survey'] != null) {
-                    if (moment(events[i]['end']) < moment() && events[i]['survey'].length > 0 && events[i]['survey'][0].length > 2) {
-                        html += `<a class="item" ng-click="">` + events[i]['title'] + ` follow-up` + ' <p> Taken on: ' + events[i]['dateSurveyTaken'] + `</p></a>`;
-                    }
+        db.get('surveys').then(function (doc) {
+            for (i in doc['surveys']) {
+                if (doc['surveys'][i]['dateTaken'] != '') {
+                    html += `<a class="item">` + doc['surveys'][i]['title'] + ' <p> Taken on: ' + doc['surveys'][i]['dateGiven'] + `</p></a>`;
                 }
             }
             html += '</div>';
@@ -4315,31 +4667,30 @@ Handler for javascript clock used in addActivityTime page
             $compile($('#history'))($scope);
         })
     };
-    $scope.renderSurvey = function (eventID) {
+    $scope.renderSurvey = function (surveyID) {
         $scope.clickTracker(`startSurvey`);
         var db = PouchDB('momlink');
         var html = '<div ng-controller="HeaderCtrl">';
-        db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                event = events[i]
-                if (event['id'] == eventID) {
-                    //get event's related survey
-                    survey = event['survey'];
-                    for (j in survey) {
-                        question = survey[j][0];
-                        answers = survey[j][1];
+        db.get('surveys').then(function (doc) {
+            for (i in doc['surveys']) {
+                //get survey
+                if (doc['surveys'][i]['id'] == surveyID) {
+                    var formID = 0;
+                    for (j in doc['surveys'][i]['questions']) {
+                        question = j;
+                        answers = doc['surveys'][i]['questions'][j];
                         //render question
                         html += `  <div class="item item-text-wrap item-icon-right item-divider">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
                         //render answers
-                        html += `<form id="` + String(j) + `">`;
+                        html += `<form id="` + String(formID) + `">`;
                         html += `<ion-list>`;
                         for (k = 0; k < answers.length; k++) {
-                            answer = survey[j][1][k];
-                            html += `<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio><button class="col icon ion-volume-medium" ng-click="speak('` + answer + `')"></button></div>`;
+                            answer = answers[k];
+                            html += `<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="` + String(formID) + `" value="` + String(answer) + `">` + answer + `</ion-radio><button class="col icon ion-volume-medium" ng-click="speak('` + answer + `')"></button></div>`;
                         }
                         html += `</ion-list>`;
                         html += `</form>`;
+                        formID++;
                     }
                 }
             }
@@ -4351,7 +4702,7 @@ Handler for javascript clock used in addActivityTime page
             {
                 text: 'Finish', onTap: function (e) {
                     $scope.clickTracker('finishSurvey');
-                    $scope.saveSurvey(eventID);
+                    $scope.saveSurvey(surveyID);
                     $ionicPopup.alert({
                         title: 'Your answers have been recorded. Thank You!',
                     });
@@ -4368,27 +4719,25 @@ Handler for javascript clock used in addActivityTime page
             });
         });
     };
-    $scope.saveSurvey = function (eventID) {
+    $scope.saveSurvey = function (surveyID) {
         var db = PouchDB('momlink');
-        db.get('events').then(function (doc) {
-            events = doc['events'];
-            for (i in events) {
-                event = events[i]
-                if (event['id'] == eventID) {
-                    for (j in event['survey']) {
-                        selectedAnswer = $(`input[name="` + String(j) + `"]:checked`, `#`.concat(j)).val();
-                        event['survey'][j].push(selectedAnswer);
+        db.get('surveys').then(function (doc) {
+            for (i in doc['surveys']) {
+                if (doc['surveys'][i]['id'] == surveyID) {
+                    var formID = 0;
+                    for (j in doc['surveys'][i]['questions']) {
+                        selectedAnswer = $(`input[name="` + String(formID) + `"]:checked`, `#`.concat(formID)).val();
+                        //prune all other answers != selectedAnswer
+                        doc['surveys'][i]['questions'][j] = selectedAnswer;
+                        doc['surveys'][i]['survey_status'] = '1';
+                        formID++;
                     }
-                    event['dateSurveyTaken'] = moment().format('MM/DD/YYYY');
+                    doc['surveys'][i]['dateTaken'] = moment().format('YYYY-MM-DD');
                     return db.put(doc)
                 }
             }
         }).then(function () {
-            var db = PouchDB('momlink');
-            db.get('events').then(function (doc) {
-                events = doc['events'];
-            })
-        }).then(function () {
+            $scope.renderSurveys();
             $scope.toNewPage('survey.html', 'Surveys')
         })
     };
