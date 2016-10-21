@@ -1,7 +1,8 @@
 ﻿<ion-pane>
     <ion-view>
-        <ion-content overflow-scroll="true" class="has-header">
-            <div class="row">
+        <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl" ng-init="showTrackers()">
+            <div id="trackers"></div>
+            <!---<div class="row">
                 <div class="col text-center">
                     <input type="image" src="../img/trackers/activity.png" ng-click="goToHistory('addActivity')" name="type" style="max-width:100%;height:auto;">
                     <p>Activity</p>
@@ -31,7 +32,7 @@
             </div>
             <div class="row">
                 <div class="col text-center">
-                    <input type="image" src="../img/trackers/cigarette.png" ng-click="goToHistory('addCigarette')" name="type" style="max-width:100%;height:auto;">
+                    <input type="image" src="../img/trackers/cigarettes.png" ng-click="goToHistory('addCigarettes')" name="type" style="max-width:100%;height:auto;">
                     <p>Cigarettes</p>
                 </div>
                 <div class="col text-center">
@@ -53,13 +54,13 @@
                     <p>Pain</p>
                 </div>
                 <div class="col text-center">
-                    <input type="image" src="../img/trackers/pill.png" ng-click="goToHistory('addPill')" name="type" style="max-width:100%;height:auto;">
+                    <input type="image" src="../img/trackers/pills.png" ng-click="goToHistory('addPill')" name="type" style="max-width:100%;height:auto;">
                     <p>Pills</p>
                 </div>
             </div>
             <div class="row">
                 <div class="col text-center">
-                    <input type="image" src="../img/trackers/stress.png" ng-click="goToHistory('addStress')" name="type" style="max-width:100%;height:auto;">
+                    <input type="image" src="../img/trackers/stressors.png" ng-click="goToHistory('addStress')" name="type" style="max-width:100%;height:auto;">
                     <p>Stressors</p>
                 </div>
                 <div class="col text-center">
@@ -68,7 +69,7 @@
                 </div>
                 <div class="col">
                 </div>
-            </div>
+            </div>-->
         </ion-content>
     </ion-view>
 </ion-pane>

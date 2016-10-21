@@ -379,6 +379,27 @@ across the app instead of just the calendar page
                 });
             }
         });
+        db.get('client_trackers').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "client_trackers",
+                    'activity': '1',
+                    "babyHeartRate": '1',
+                    "bloodGlucose": '1',
+                    "bloodIron": '1',
+                    "bloodPressure": '1',
+                    "caffeine": '1',
+                    "cigarettes": '1',
+                    "nutrition": '1',
+                    "kicks": '1',
+                    'mood': '1',
+                    'pain': '1',
+                    'pills': '1',
+                    'stressors': '1',
+                    "weight": '1',
+                });
+            }
+        });
         /*db.get('classes').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -588,9 +609,46 @@ across the app instead of just the calendar page
         $scope.updateArticles();
         $scope.getSurveys();
         $scope.updateSurveys();
+        $scope.retrieveClientTrackers();
         $scope.uploadTrackers();
     };
 
+    $scope.retrieveClientTrackers = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getClientTrackers.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                if (data.length > 0) {
+                    db.get('client_trackers').then(function (doc) {
+                        doc['activity'] = data[0]['activity'];
+                        doc['babyHeartRate'] = data[0]['babyHeartRate'];
+                        doc['bloodGlucose'] = data[0]['bloodGlucose'];
+                        doc['bloodIron'] = data[0]['bloodIron'];
+                        doc['bloodPressure'] = data[0]['bloodPressure'];
+                        doc['caffeine'] = data[0]['caffeine'];
+                        doc['cigarettes'] = data[0]['cigarettes'];
+                        doc['nutrition'] = data[0]['nutrition'];
+                        doc['kicks'] = data[0]['kicks'];
+                        doc['mood'] = data[0]['mood'];
+                        doc['pain'] = data[0]['pain'];
+                        doc['pills'] = data[0]['pills'];
+                        doc['stressors'] = data[0]['stressors'];
+                        doc['weight'] = data[0]['weight'];
+                        return db.put(doc);
+                    });
+                }
+                else {
+                    console.log('Could not access client_trackers')
+                }
+            }
+        });
+        console.log('client_trackers');
+    };
     $scope.getGeneralEvents = function () {
         var db = PouchDB('momlink');
         var recentID = '';
@@ -3525,6 +3583,38 @@ the articles quiz has been completed with a perfect score
 
 */
 .controller('TrackCtrl', function ($scope, $ionicModal, $ionicPopup, $compile) {
+    $scope.showTrackers = function () {
+        var db = PouchDB('momlink');
+        var html5 = '<div class="row">';
+        var col = 0;
+        db.get('client_trackers').then(function (doc) {
+            for (var i in doc) {
+                if (doc[i] == '1') {
+                    html5 += `<div class="col text-center">`;
+                    html5 += `<input type="image" src="../img/trackers/` + i + `.png" ng-click="goToHistory('add` + i + `')" name="type" style="max-width:100%;height:auto;">`;
+                    html5 += `<p>` + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + `</p>`;
+                    html5 += `</div>`;
+                    col++;
+                }
+                if (col % 3 == 0) {
+                    html5 += '</div>';
+                    html5 += '<div class="row">';
+                }
+            }
+            while (col % 3 != 0) {
+                html5 += `<div class="col text-center">`;
+                html5 += `</div>`;
+                col++;
+            }
+        }).then(function () {
+            html5 += '</div>'
+            $('#trackers').html(html5);
+            $compile($('#trackers'))($scope);
+        })
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+    }
     $scope.formatDate = function (d) {
         var selectedDate = moment(d).format('MMMM Do YYYY')
         today = moment().format('MMMM Do YYYY')
@@ -3591,7 +3681,7 @@ the articles quiz has been completed with a perfect score
                                 //build string
                                 for (m in todaysPills) {
                                     if (todaysPills[m][5] == '' || todaysPills[m][5] == null) {
-                                        hist += `<div class="item item-thumbnail-left"><img src='../img/trackers/pill.png' >`;
+                                        hist += `<div class="item item-thumbnail-left"><img src='../img/trackers/pills.png' >`;
                                     }
                                     else {
                                         hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('pill','` + todaysPills[m][0] + `')"><img src=` + todaysPills[m][5] + `>`;
@@ -3662,9 +3752,9 @@ the articles quiz has been completed with a perfect score
                     type = 'caffeine';
                     img = '../img/trackers/caffeine.png';
                     break;
-                case 'addCigarette':
+                case 'addCigarettes':
                     type = 'cigarette';
-                    img = '../img/trackers/cigarette.png';
+                    img = '../img/trackers/cigarettes.png';
                     break;
                 case 'addNutrition':
                     type = 'nutrition';
@@ -3684,7 +3774,7 @@ the articles quiz has been completed with a perfect score
                     break;
                 case 'addStress':
                     type = 'stress';
-                    img = '../img/trackers/stress.png';
+                    img = '../img/trackers/stressors.png';
                     break;
                 case 'addWeight':
                     type = 'weight';
