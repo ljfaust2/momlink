@@ -613,6 +613,17 @@ across the app instead of just the calendar page
         $scope.uploadTrackers();
     };
 
+    $scope.testPHP = function () {
+        when = new Date('2016', '9', '30', '19', '37');
+        console.log(when)
+        cordova.plugins.notification.local.schedule({
+            id: 1,
+            title: 'Scheduled with delay',
+            text: 'Test Message 1',
+            at: when
+        });
+    };
+
     $scope.retrieveClientTrackers = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
