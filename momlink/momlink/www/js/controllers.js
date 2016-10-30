@@ -349,14 +349,14 @@ across the app instead of just the calendar page
                 });
             }
         });
-        db.get('userData').catch(function (err) {
+        /*db.get('userData').catch(function (err) {
             if (err.status === 404) {
                 db.put({
                     "_id": "userData",
                     "userData": []
                 });
             }
-        });
+        });*/
         db.get('update').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -2503,7 +2503,7 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         db.allDocs({ include_docs: true }).then(function (res) {
             var docs = res.rows.map(function (row) { return row.doc; });
-            console.log(docs);
+            console.log(JSON.stringify(docs));
         }).catch(console.log.bind(console));
         /*db.get('userData').then(function (doc) {
             for (i in doc['userData']) {
@@ -3589,9 +3589,10 @@ the articles quiz has been completed with a perfect score
         var col = 0;
         db.get('client_trackers').then(function (doc) {
             for (var i in doc) {
+                console.log(i)
                 if (doc[i] == '1') {
                     html5 += `<div class="col text-center">`;
-                    html5 += `<input type="image" src="../img/trackers/` + i + `.png" ng-click="goToHistory('add` + i + `')" name="type" style="max-width:100%;height:auto;">`;
+                    html5 += `<input type="image" src="../img/trackers/` + i + `.png" ng-click="goToHistory('add` + capitalizeFirstLetter(i) + `')" name="type" style="max-width:100%;height:auto;">`;
                     html5 += `<p>` + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + `</p>`;
                     html5 += `</div>`;
                     col++;
