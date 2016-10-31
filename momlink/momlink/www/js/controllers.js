@@ -595,11 +595,22 @@ across the app instead of just the calendar page
         window.localStorage.setItem('cid', '555')
     }
 
+    $setReminder = function (title, time) {
+        time = new moment(time);
+        time = new Date(time);
+        console.log(time)
+        document.addEventListener("deviceready", function () {
+            cordova.plugins.notification.local.schedule({
+                title: title,
+                at: time
+            });
+        });
+    }
     //PHP
     /*
     Runs all php scripts
     */
-    $scope.update = function (){
+    $scope.update = function () {
         //$scope.getGeneralEvents();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
@@ -673,7 +684,7 @@ across the app instead of just the calendar page
                 type: 'POST',
                 dataType: 'json',
                 data: post_information,
-                async:false,
+                async: false,
                 success: function (data) {
                     if (data[0]['success'] == 1) {
                         console.log('already up to date')
@@ -745,7 +756,7 @@ across the app instead of just the calendar page
                     type: 'POST',
                     dataType: 'json',
                     data: { data: encodeURIComponent(JSON.stringify(post_information)) },
-                    async:false,
+                    async: false,
                     success: function (data) {
                         //for each event in events, update uploaded value to 1
                         if (data.length > 0) {
@@ -1999,6 +2010,17 @@ across the app instead of just the calendar page
         if ($("input[name=reminder]:checked").val() == 1) {
             reminder = 1;
         }
+        //set reminder
+        if (reminder == 1) {
+            zzz = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract(30, 'minutes').toDate()
+            console.log(zzz)
+            cordova.plugins.notification.local.schedule({
+                title: $('#title').val(),
+                at: zzz
+            });
+            //remind = new Date(start);
+            //$setReminder($('#title').val(), remind)
+        }
         var questions = [];
         $("input[name=Q]:checked").each(function () {
             questions.push($(this).val())
@@ -2051,15 +2073,6 @@ across the app instead of just the calendar page
             doc['events'].push(event);
             return db.put(doc);
         }).then(function (doc) {
-            //set reminder
-            if (reminder == 1) {
-                cordova.plugins.notification.local.schedule({
-                    id: id,
-                    title: $('#title').val() + ' Today',
-                    text: 'Your appointment is today at' + start,
-                    at: new Date(start)
-                });
-            }
             //if the event is for a referral, tie the referral to the event in the db
             referral = window.localStorage.getItem('referralID');
             if (referral != null) {
@@ -3203,18 +3216,18 @@ the articles quiz has been completed with a perfect score
                     if (article['content_text'].substring(0, 4) == 'http') {
                         html += `<iframe id="frame" src="` + article['content_text'] + `" style="width:100%; height: 100%;"></iframe>`;
                     }
-                    //if content is an object
-                    else if(article['content_text'] == '' && article['content_obj'] != ''){
+                        //if content is an object
+                    else if (article['content_text'] == '' && article['content_obj'] != '') {
                         //handle blob object article['content_obj']
                     }
-                    //content is a string
+                        //content is a string
                     else {
                         html += `<div class="has-footer">`;
                         html += `<p>`;
                         html += article['content_text'];
                         html += `</p>`;
                         html += `</div>`;
-                    }                    
+                    }
                     html += `</ion-modal-view>`;
                     //updated last time article was read
                     article['lastRead'] = String(moment().format('YYYY-MM-DD'));

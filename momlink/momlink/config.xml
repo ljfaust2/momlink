@@ -60,7 +60,6 @@
     <icon height="62" src="res/icons/wp8/ApplicationIcon.png" width="62" />
     <icon height="173" src="res/icons/wp8/Background.png" width="173" />
   </platform>
-  <plugin name="cordova-plugin-statusbar" version="2.1.3" />
   <plugin name="cordova-plugin-camera" version="2.1.1" />
   <plugin name="cordova-plugin-file" version="4.1.1" />
   <plugin name="cordova-plugin-network-information" version="1.2.1" />
@@ -77,7 +76,8 @@
   <plugin name="cordova-plugin-sms" version="1.0.5" src="https://github.com/floatinghotpot/cordova-plugin-sms" />
   <preference name="android-targetSdkVersion" value="22" />
   <plugin name="cordova-plugin-tts" version="0.2.3" src="https://github.com/vilic/cordova-plugin-tts" />
-  <plugin name="cordova-plugin-dialogs" version="1.2.1" />
-  <plugin name="phonegap-plugin-push" version="1.8.3" />
+  <plugin name="cordova-plugin-app-event" version="1.2.0" />
+  <plugin name="cordova-plugin-device" version="1.1.3" />
+  <plugin name="cordova-plugin-statusbar" version="2.1.3" />
   <plugin name="de.appplant.cordova.plugin.local-notification" version="0.8.4" src="https://github.com/katzer/cordova-plugin-local-notifications" />
 </widget>
