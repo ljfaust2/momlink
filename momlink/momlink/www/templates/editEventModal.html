@@ -3,7 +3,7 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
         <h1 class="title" id="modalHeadline">Update Event</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="true" ng-controller="CalendarCtrl" ng-init="renderEventQuestions();pullEvent();toggleShare();">
+    <ion-content overflow-scroll="true" ng-controller="CalendarCtrl" ng-init="renderEventQuestions();pullEvent();toggleShare();toggleReminder();">
         <div id="eventPart1" class="list">
             <div id="type" class="item item-divider">Category (choose one of the following)</div>
             <div style="background-color:#dbdbdb">
@@ -40,6 +40,7 @@
                 <span class="input-label"><i class="button-icon icon ion-location"></i>Location</span>
                 <input id="venue" type="text">
             </label>
+            <div class="item item-checkbox item-text-wrap"><i class="button-icon icon ion-ios-bell"></i>Add Reminder<label class="checkbox"><input type="checkbox" name="reminder" value="1"></label></div>
             <div class="item item-checkbox item-icon-right item-text-wrap">Share with PNCC<label class="checkbox"><input type="checkbox" name="share" value="1"></label></div>
             <div class="col text-center">
                 <input type="button" class="button button-block button-positive" value="NEXT" ng-click="goToEventPart2()">

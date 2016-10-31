@@ -1995,6 +1995,10 @@ across the app instead of just the calendar page
         if ($("input[name=share]:checked").val() == 1) {
             share = 1;
         }
+        var reminder = 0;
+        if ($("input[name=reminder]:checked").val() == 1) {
+            reminder = 1;
+        }
         var questions = [];
         $("input[name=Q]:checked").each(function () {
             questions.push($(this).val())
@@ -2036,6 +2040,7 @@ across the app instead of just the calendar page
                 "end": end,
                 "venue": $('#venue').val(),
                 "share": share,
+                "reminder": reminder,
                 "upload": "0",
                 "description": $('#description').val(),
                 "questions": questions,
@@ -2046,6 +2051,15 @@ across the app instead of just the calendar page
             doc['events'].push(event);
             return db.put(doc);
         }).then(function (doc) {
+            //set reminder
+            if (reminder == 1) {
+                cordova.plugins.notification.local.schedule({
+                    id: id,
+                    title: $('#title').val() + ' Today',
+                    text: 'Your appointment is today at' + start,
+                    at: new Date(start)
+                });
+            }
             //if the event is for a referral, tie the referral to the event in the db
             referral = window.localStorage.getItem('referralID');
             if (referral != null) {
@@ -2253,6 +2267,10 @@ across the app instead of just the calendar page
         if ($("input[name=share]:checked").val() == 1) {
             share = 1;
         }
+        var reminder = 0;
+        if ($("input[name=reminder]:checked").val() == 1) {
+            reminder = 1;
+        }
         var questions = [];
         $("input[name=Q]:checked").each(function () {
             questions.push($(this).val())
@@ -2298,6 +2316,7 @@ across the app instead of just the calendar page
             doc['events'][i]['end'] = end;
             doc['events'][i]['venue'] = $('#venue').val();
             doc['events'][i]['share'] = share;
+            doc['events'][i]['reminder'] = reminder;
             //signal to server that event has been modified
             if (share == '1' && doc['events'][i]['upload'] == '1') {
                 doc['events'][i]['upload'] = '2';
@@ -2307,6 +2326,9 @@ across the app instead of just the calendar page
             doc['events'][i]['color'] = $scope.getColor($('#type').val());
             return db.put(doc);
         }).then(function () {
+
+
+
             if ($scope.returnLink != '' && $scope.returnTitle != '') {
                 $scope.toNewPage($scope.returnLink, $scope.returnTitle)
                 delete $scope.returnLink;
@@ -2699,6 +2721,20 @@ and handles event questions
             }
             if (doc['events'][i]['share'] == 1) {
                 $("input[name=share]").prop('checked', true);
+            }
+        });
+    };
+
+    $scope.toggleReminder = function () {
+        var db = PouchDB('momlink');
+        db.get('events').then(function (doc) {
+            for (i in doc['events']) {
+                if (doc['events'][i]['id'] === $scope.eventID) {
+                    break;
+                }
+            }
+            if (doc['events'][i]['reminder'] == 1) {
+                $("input[name=reminder]").prop('checked', true);
             }
         });
     };
