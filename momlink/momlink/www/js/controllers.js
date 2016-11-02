@@ -625,13 +625,109 @@ across the app instead of just the calendar page
     };
 
     $scope.testPHP = function () {
-        when = new Date('2016', '9', '30', '19', '37');
-        console.log(when)
-        cordova.plugins.notification.local.schedule({
-            id: 1,
-            title: 'Scheduled with delay',
-            text: 'Test Message 1',
-            at: when
+        var db = PouchDB('momlink');
+        var downloads = [];
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getArticles.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                //console.log(data)
+                if (data.length > 0) {            
+                    //console.log(JSON.stringify(data))
+                    db.get('articles').then(function (doc) {
+                        for (i in data) {
+                            //check if article is already in local db
+                            var isUnique = true;
+                            //check shared articles
+                            for (j in doc['shared']) {
+                                if (data[i]['id'] == doc['shared'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            //check history articles
+                            for (k in doc['history']) {
+                                if (data[i]['id'] == doc['history'][k]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {                            
+                                //makes quiz suitable for json parse
+                                //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
+                                data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
+                                var article = {
+                                    "id": data[i]['id'],
+                                    "title": data[i]['title'],
+                                    "category": data[i]['category'],
+                                    "description": data[i]['description'],
+                                    "content_text": data[i]['path'],
+                                    "dateShared": data[i]['date_shared'],
+                                    "lastRead": "",
+                                    "readHistory": {},
+                                    "quiz": JSON.parse(data[i]['quiz']),
+                                    "quizAttempts": '0',
+                                    "bestScore": '0',
+                                    "quizHistory": {},
+                                    "upload": '0',
+                                    "article_status": '0'
+                                };
+                                //console.log(JSON.stringify(article))
+                                //doc['shared'].push(article);
+                                if (article["content_text"].substring(0, 2) == './') {
+                                    downloads.push(article);
+                                }
+                            }
+                        }
+                        console.log('Articles downloaded')
+                        //console.log(JSON.stringify(downloads))
+                        //return db.put(doc);
+                    }).then(function () {
+                        if (downloads.length > 0) {
+                            var filePath = String("https://momlink.crc.nd.edu/~var/www/html/MomLink-PNCC/" + downloads[0]['content_text'].slice(2,5000));
+                            var fileTransfer = new FileTransfer();
+                            var uri = encodeURI(filePath);
+                            console.log(uri)
+                            /*var fileURL = "///storage/emulated/0/DCIM/myFile";
+                            fileTransfer.download(
+                                uri,
+                                fileURL,
+                                function (entry) {
+                                    console.log("download complete: " + entry.toURL());
+                                },
+                                function (error) {
+                                    console.log("download error source " + error.source);
+                                    console.log("download error target " + error.target);
+                                    console.log("download error code" + error.code);
+                                },
+                                false,
+                                {
+                                    headers: {
+                                        "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+                                    }
+                                }
+                            );*/
+                            /*window.resolveLocalFileSystemURL(imageData, resolveOnSuccess, resOnError);
+                            //Callback function when the file system url has been resolved
+                            function resolveOnSuccess(entry) {
+                                fileName = week + name + ".jpg";
+                                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                                    dir.getDirectory('MomLink', { create: true, exclusive: false },
+                                    function (directory) {
+                                        console.log(fileName)
+                                        entry.moveTo(directory, fileName, successMove, resOnError);
+                                    }, resOnError);
+                                }, resOnError);
+                            }*/
+                        }
+                    })
+                }
+                else {
+                    console.log('No new articles')
+                }
+            }
         });
     };
 
@@ -939,6 +1035,7 @@ across the app instead of just the calendar page
     };
     $scope.getArticles = function () {
         var db = PouchDB('momlink');
+        //var downloads = [];
         var post_information = { 'cid': window.localStorage.getItem('cid') };
         $.ajax({
             url: 'https://momlink.crc.nd.edu/~jonathan/current/getArticles.php',
@@ -947,7 +1044,10 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
+                console.log(data)
                 if (data.length > 0) {
+
+                    //console.log(JSON.stringify(data))
                     db.get('articles').then(function (doc) {
                         for (i in data) {
                             //check if article is already in local db
@@ -966,14 +1066,14 @@ across the app instead of just the calendar page
                             }
                             if (isUnique == true) {
                                 //makes quiz suitable for json parse
-                                data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
+                                //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
+                                data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
                                 var article = {
                                     "id": data[i]['id'],
                                     "title": data[i]['title'],
                                     "category": data[i]['category'],
                                     "description": data[i]['description'],
-                                    "content_text": data[i]['content_text'],
-                                    "content_obj": data[i]['content_obj'],
+                                    "content_text": data[i]['path'],
                                     "dateShared": data[i]['date_shared'],
                                     "lastRead": "",
                                     "readHistory": {},
@@ -984,10 +1084,15 @@ across the app instead of just the calendar page
                                     "upload": '0',
                                     "article_status": '0'
                                 };
+                                console.log(JSON.stringify(article))
                                 doc['shared'].push(article);
+                                /*if (article["content_obj"] != '') {
+                                    downloads.push(article);
+                                }*/
                             }
                         }
                         console.log('Articles downloaded')
+                        //console.log(JSON.stringify(downloads))
                         return db.put(doc);
                     });
                 }
@@ -1167,7 +1272,7 @@ across the app instead of just the calendar page
         //each cell holds the table and php script
         var tables = [['activity', 'Activity'], ['bloodGlucose', 'Track'], ['babyHeartRate', 'Track'], ['bloodIron', 'Track'],
                       ['bloodPressure', 'BloodPressure'], ['caffeine', 'Track'], ['cigarette', 'Track'], ['kicks', 'Track'],
-                      ['mood', 'Track'], ['nutrition', 'Nutrition'], ['pain', 'Track'], ['pills', 'Pills'], ['stress', 'Track'], ['weight', 'Weight']];
+                      ['mood', 'Track'], ['nutrition', 'Nutrition'], ['pain', 'Track'], ['pills', 'Pills'], ['stress', 'Track'], ['weight', 'Track']];
         var x = 0;
         var loopTrackers = function (arr) {
             uploadTracker(arr[x], function () {
@@ -1176,16 +1281,17 @@ across the app instead of just the calendar page
                     loopTrackers(arr);
                 }
             });
-            console.log('ten');
         }
         function uploadTracker(table, callback) {
             var db = PouchDB('momlink');
             var recentID = '';
-            if (table[0] == 'nutrition') {
-                tableName = 'client_nutrition';
+            tableName = table[0];
+            serverTableName = tableName;
+            if (tableName == 'nutrition') {
+                serverTableName = 'client_nutrition';
             }
-            else {
-                tableName = table[0];
+            if (tableName == 'weight') {
+                serverTableName = 'client_weight';
             }
             //check update table to get the last element sent to server
             db.get('update').then(function (doc) {
@@ -1218,8 +1324,9 @@ across the app instead of just the calendar page
                     }
                 }).then(function () {
                     //send this to the sever
+                    console.log(JSON.stringify(uploadData))
                     if (uploadData.length > 0) {
-                        var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid'), 'table': tableName };
+                        var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid'), 'table': serverTableName };
                         $.ajax({
                             url: 'https://momlink.crc.nd.edu/~jonathan/current/send' + table[1] + '.php',
                             type: 'POST',
@@ -1235,7 +1342,7 @@ across the app instead of just the calendar page
                                         doc[tableName] = uploadData[uploadData.length - 1]['id'];
                                         return db.put(doc);
                                     }).then(function () {
-                                        var post_information = { 'success': '1', 'cid': window.localStorage.getItem('cid'), 'table': tableName };
+                                        var post_information = { 'success': '1', 'cid': window.localStorage.getItem('cid'), 'table': serverTableName };
                                         $.ajax({
                                             url: 'https://momlink.crc.nd.edu/~jonathan/current/updateRecords.php',
                                             type: 'POST',
@@ -2000,6 +2107,7 @@ across the app instead of just the calendar page
     */
     $scope.saveEvent = function () {
         var db = PouchDB('momlink');
+        var id = moment().format('MM-DD-YYYYThh:mm:ssa');
         start = $('#date').val() + "T" + $('#start').val();
         end = $('#date').val() + "T" + $('#end').val();
         var share = 0;
@@ -2012,21 +2120,20 @@ across the app instead of just the calendar page
         }
         //set reminder
         if (reminder == 1) {
-            zzz = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract(30, 'minutes').toDate()
-            console.log(zzz)
+            reminderTime = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract(30, 'minutes').toDate();
+            timerID = $scope.decodeReminder(id);
+            reminderTitle = String('Reminder: You have ' + $('#title').val() + 'Today at ' + $scope.convert24to12($scope.parseTime(start)));
             cordova.plugins.notification.local.schedule({
-                title: $('#title').val(),
-                at: zzz
+                id: timerID,
+                title: reminderTitle,
+                at: reminderTime
             });
-            //remind = new Date(start);
-            //$setReminder($('#title').val(), remind)
         }
         var questions = [];
         $("input[name=Q]:checked").each(function () {
             questions.push($(this).val())
         });
         db.get('events').then(function (doc) {
-            var id = moment().format('MM-DD-YYYYThh:mm:ssa')
             $scope.eventID = id;
             //code event category
             var category;
@@ -2276,6 +2383,8 @@ across the app instead of just the calendar page
     */
     $scope.updateEvent = function () {
         var db = PouchDB('momlink');
+        start = $('#date').val() + "T" + $('#start').val();
+        end = $('#date').val() + "T" + $('#end').val();
         var share = 0;
         if ($("input[name=share]:checked").val() == 1) {
             share = 1;
@@ -2283,6 +2392,26 @@ across the app instead of just the calendar page
         var reminder = 0;
         if ($("input[name=reminder]:checked").val() == 1) {
             reminder = 1;
+        }
+        //since we can't tell if the event already had a reminder, we need to cancel the previous
+        //reminder if it existed and schedule a new one
+        timerID = $scope.decodeReminder($scope.eventID);
+        if (reminder == 1) {
+            reminderTime = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract(30, 'minutes').toDate();
+            cordova.plugins.notification.local.cancel(timerID, function () {
+                // Notification was cancelled
+            });
+            cordova.plugins.notification.local.schedule({
+                id: timerID,
+                title: $('#title').val(),
+                at: reminderTime
+            });
+        }
+        //cancel reminder if it existed
+        if (reminder == 0) {
+            cordova.plugins.notification.local.cancel(timerID, function () {
+                // Notification was cancelled
+            });
         }
         var questions = [];
         $("input[name=Q]:checked").each(function () {
@@ -2323,8 +2452,7 @@ across the app instead of just the calendar page
             doc['events'][i]['title'] = $('#title').val();
             doc['events'][i]['category'] = category;
             doc['events'][i]['day'] = $('#date').val();
-            start = $('#date').val() + "T" + $('#start').val();
-            end = $('#date').val() + "T" + $('#end').val();
+
             doc['events'][i]['start'] = start;
             doc['events'][i]['end'] = end;
             doc['events'][i]['venue'] = $('#venue').val();
@@ -2339,9 +2467,6 @@ across the app instead of just the calendar page
             doc['events'][i]['color'] = $scope.getColor($('#type').val());
             return db.put(doc);
         }).then(function () {
-
-
-
             if ($scope.returnLink != '' && $scope.returnTitle != '') {
                 $scope.toNewPage($scope.returnLink, $scope.returnTitle)
                 delete $scope.returnLink;
@@ -2357,6 +2482,10 @@ across the app instead of just the calendar page
     */
     $scope.deleteEvent = function () {
         var db = PouchDB('momlink');
+        timerID = $scope.decodeReminder($scope.eventID);
+        cordova.plugins.notification.local.cancel(timerID, function () {
+            // Notification was cancelled
+        });
         db.get('events').then(function (doc) {
             //i = doc['events'].findIndex(function (e) { return e.id === $scope.eventID });
             for (i in doc['events']) {
@@ -2527,6 +2656,14 @@ across the app instead of just the calendar page
         }
     }
 
+    $scope.decodeReminder = function (str) {
+        str = str.replace(/:/gi, '');
+        str = str.replace(/-/gi, '');
+        str = str.replace(/T/gi, '');
+        str = str.replace(/am/gi, '');
+        str = str.replace(/pm/gi, '');
+        return str;
+    }
 
     /*
     Text to speech function using responsiveVoice.js
@@ -3649,7 +3786,6 @@ the articles quiz has been completed with a perfect score
         var col = 0;
         db.get('client_trackers').then(function (doc) {
             for (var i in doc) {
-                console.log(i)
                 if (doc[i] == '1') {
                     html5 += `<div class="col text-center">`;
                     html5 += `<input type="image" src="../img/trackers/` + i + `.png" ng-click="goToHistory('add` + capitalizeFirstLetter(i) + `')" name="type" style="max-width:100%;height:auto;">`;
