@@ -518,7 +518,7 @@ across the app instead of just the calendar page
     /*
     Runs all php scripts
     */
-    $scope.update = function () {
+    $scope.updateAll = function () {
         //$scope.getGeneralEvents();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
@@ -532,123 +532,33 @@ across the app instead of just the calendar page
         $scope.uploadTrackers();
     };
 
+    $scope.updateAllEvents = function () {
+        //$scope.getGeneralEvents();
+        $scope.updateClientEvents();
+        $scope.deleteClientEvents();
+        $scope.toNewPage('calendar.html', 'Calendar');
+    };
+
+    $scope.updateAllReferrals = function () {
+        $scope.getReferrals();
+        $scope.updateReferrals();
+        $scope.toNewPage('referrals.html', 'Referrals');
+    };
+
+    $scope.updateAllContent = function () {
+        $scope.getArticles();
+        $scope.updateArticles();
+        $scope.toNewPage('education.html', 'Education');
+    };
+
+    $scope.updateAllSurveys = function () {
+        $scope.getSurveys();
+        $scope.updateSurveys();
+        $scope.toNewPage('survey.html', 'Survey');
+    };
+
     $scope.testPHP = function () {
-        var db = PouchDB('momlink');
-        var downloads = [];
-        var post_information = { 'cid': window.localStorage.getItem('cid') };
-        $.ajax({
-            url: 'https://momlink.crc.nd.edu/~jonathan/current/getArticles.php',
-            type: 'POST',
-            dataType: 'json',
-            data: post_information,
-            async: false,
-            success: function (data) {
-                //console.log(data)
-                if (data.length > 0) {
-                    //console.log(JSON.stringify(data))
-                    db.get('articles').then(function (doc) {
-                        for (i in data) {
-                            //check if article is already in local db
-                            var isUnique = true;
-                            //check shared articles
-                            for (j in doc['shared']) {
-                                if (data[i]['id'] == doc['shared'][j]['id']) {
-                                    isUnique = false;
-                                }
-                            }
-                            //check history articles
-                            for (k in doc['history']) {
-                                if (data[i]['id'] == doc['history'][k]['id']) {
-                                    isUnique = false;
-                                }
-                            }
-                            if (isUnique == true) {
-                                //makes quiz suitable for json parse
-                                //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
-                                data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
-                                var article = {
-                                    "id": data[i]['id'],
-                                    "title": data[i]['title'],
-                                    "category": data[i]['category'],
-                                    "description": data[i]['description'],
-                                    "content_text": data[i]['path'],
-                                    "filename": data[i]['filename'],
-                                    "localPath": "",
-                                    "dateShared": data[i]['date_shared'],
-                                    "lastRead": "",
-                                    "readHistory": {},
-                                    "quiz": JSON.parse(data[i]['quiz']),
-                                    "quizAttempts": '0',
-                                    "bestScore": '0',
-                                    "quizHistory": {},
-                                    "upload": '0',
-                                    "article_status": '0'
-                                };
-                                //console.log(JSON.stringify(article))
-                                doc['shared'].push(article);
-                                if (article["content_text"].substring(0, 2) == './') {
-                                    downloads.push(article);
-                                }
-                            }
-                        }
-                        console.log('Articles downloaded')
-                        //console.log(JSON.stringify(downloads))
-                        return db.put(doc);
-                    }).then(function () {
-                        //console.log(downloads)
-                        if (downloads.length > 0) {
-                            /*
-                            //download link
-                            var downloadLink = String("https://momlink.crc.nd.edu/~var/www/html/MomLink-PNCC/" + downloads[0]['content_text'].slice(2,5000));
-                            var uri = encodeURI(downloadLink);
-                            //storage link
-                            var localPath = cordova.file.dataDirectory + downloads[0]['filename'];
-                            */
 
-
-                            //works
-                            var downloadLink = String("https://momlink.crc.nd.edu/~jonathan/articles/ProjectProposal.pdf");
-                            var uri = encodeURI(downloadLink);
-                            var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + "ProjectProposal.pdf";
-
-
-                            console.log(uri)
-                            console.log(localPath)
-                            var fileTransfer = new FileTransfer();
-                            fileTransfer.download(uri, localPath,
-                                function (entry) {
-                                    console.log("download complete: " + entry.toURL());
-                                    db.get('articles').then(function (doc) {
-                                        //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
-                                        for (i in doc['shared']) {
-                                            if (doc['shared'][i]['id'] == downloads[0]['id']) {
-                                                doc['shared'][i]['localPath'] = entry.toURL();
-                                                console.log(entry.toURL())
-                                            }
-                                        }
-                                        return db.put(doc);
-                                    })
-                                },
-                                function (error) {
-                                    console.log("download error source " + error.source);
-                                    console.log("download error target " + error.target);
-                                    console.log("download error code" + error.code);
-                                },
-                                false,
-                                {
-                                    headers: {
-                                        "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
-                                    }
-                                }
-                            );
-                        }
-                    })
-                }
-                else {
-                    console.log('No new articles')
-                }
-            }
-        });
     };
 
     $scope.retrieveClientTrackers = function () {
@@ -955,7 +865,7 @@ across the app instead of just the calendar page
     };
     $scope.getArticles = function () {
         var db = PouchDB('momlink');
-        //var downloads = [];
+        var downloads = [];
         var post_information = { 'cid': window.localStorage.getItem('cid') };
         $.ajax({
             url: 'https://momlink.crc.nd.edu/~jonathan/current/getArticles.php',
@@ -964,9 +874,8 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
-                console.log(data)
+                //console.log(data)
                 if (data.length > 0) {
-
                     //console.log(JSON.stringify(data))
                     db.get('articles').then(function (doc) {
                         for (i in data) {
@@ -994,6 +903,8 @@ across the app instead of just the calendar page
                                     "category": data[i]['category'],
                                     "description": data[i]['description'],
                                     "content_text": data[i]['path'],
+                                    "filename": data[i]['filename'],
+                                    "localPath": "",
                                     "dateShared": data[i]['date_shared'],
                                     "lastRead": "",
                                     "readHistory": {},
@@ -1004,24 +915,61 @@ across the app instead of just the calendar page
                                     "upload": '0',
                                     "article_status": '0'
                                 };
-                                console.log(JSON.stringify(article))
+                                //console.log(JSON.stringify(article))
                                 doc['shared'].push(article);
-                                /*if (article["content_obj"] != '') {
+                                if (article["content_text"].substring(0, 2) == './') {
                                     downloads.push(article);
-                                }*/
+                                }
                             }
                         }
                         console.log('Articles downloaded')
                         //console.log(JSON.stringify(downloads))
                         return db.put(doc);
-                    });
+                    }).then(function () {
+                        //console.log(downloads)
+                        if (downloads.length > 0) {
+                            for (k in downloads) {
+                                var downloadLink = String("https://momlink.crc.nd.edu/MomLink-PNCC/uploads/" + downloads[k]['filename']);
+                                var uri = encodeURI(downloadLink);
+                                var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + downloads[k]['filename'];
+                                console.log(uri)
+                                console.log(localPath)
+                                var fileTransfer = new FileTransfer();
+                                fileTransfer.download(uri, localPath,
+                                    function (entry) {
+                                        console.log("download complete: " + entry.toURL());
+                                        db.get('articles').then(function (doc) {
+                                            //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
+                                            for (i in doc['shared']) {
+                                                if (doc['shared'][i]['id'] == downloads[k]['id']) {
+                                                    doc['shared'][i]['localPath'] = entry.toURL();
+                                                    console.log(entry.toURL())
+                                                }
+                                            }
+                                            return db.put(doc);
+                                        })
+                                    },
+                                    function (error) {
+                                        console.log("download error source " + error.source);
+                                        console.log("download error target " + error.target);
+                                        console.log("download error code" + error.code);
+                                    },
+                                    false,
+                                    {
+                                        headers: {
+                                            "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                    })
                 }
                 else {
                     console.log('No new articles')
                 }
             }
         });
-        console.log('six');
     };
     $scope.updateArticles = function () {
         var db = PouchDB('momlink');
@@ -3279,7 +3227,7 @@ the articles quiz has been completed with a perfect score
                         return db.put(doc)
 
                     }
-                    /*else {
+                    else {
                         //if content is a link
                         if (article['content_text'].substring(0, 4) == 'http') {
                             html += `<iframe id="frame" src="` + article['content_text'] + `" style="width:100%; height: 100%;"></iframe>`;
@@ -3301,7 +3249,7 @@ the articles quiz has been completed with a perfect score
                         //updated last time article was read
                         article['lastRead'] = String(moment().format('YYYY-MM-DD'));
                         return db.put(doc)
-                    }*/
+                    }
                     //}
                 }
             }
@@ -3438,7 +3386,12 @@ the articles quiz has been completed with a perfect score
         })
     };
 
-
+    /*
+    Used in conjunction with record time, starts the timer
+    */
+    $scope.startSessionTimer = function () {
+        timer = setInterval(function () { sessionTime++; }, 1000);
+    };
     /*
     Records the amount of time the user has spent reading the quiz
     */
@@ -3468,12 +3421,7 @@ the articles quiz has been completed with a perfect score
     };
 
 
-    /*
-    Used in conjunction with record time, starts the timer
-    */
-    $scope.startSessionTimer = function () {
-        timer = setInterval(function () { sessionTime++; }, 1000);
-    };
+
 
 
     /*
