@@ -3220,12 +3220,20 @@ the articles quiz has been completed with a perfect score
 
                     //if content is an object
                     if (article["content_text"].substring(0, 2) == './') {
-                        console.log(article["localPath"]);
+                        document.addEventListener("pause", startFileTimer, false);
+                        document.addEventListener("resume", endFileTimer, false);
                         $scope.openFile(article["localPath"]);
-                        //updated last time article was read
-                        article['lastRead'] = String(moment().format('YYYY-MM-DD'));
-                        return db.put(doc)
-
+                        function startFileTimer() {
+                            $scope.startSessionTimer();
+                        }
+                        function endFileTimer() {
+                            $scope.recordTime(article['id']);
+                            document.removeEventListener("pause", startFileTimer, false);
+                            document.removeEventListener("resume", endFileTimer, false);
+                            //updated last time article was read
+                            article['lastRead'] = String(moment().format('YYYY-MM-DD'));
+                            return db.put(doc)
+                        }
                     }
                     else {
                         //if content is a link
@@ -3419,10 +3427,6 @@ the articles quiz has been completed with a perfect score
             }
         });
     };
-
-
-
-
 
     /*
     Moves an article from the shared section to the history section
