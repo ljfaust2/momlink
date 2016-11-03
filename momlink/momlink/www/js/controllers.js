@@ -15,13 +15,13 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "login",
                     "login_code": "6",
-                    "username": "u",
-                    "password": "p",
+                    "username": "",
+                    "password": "",
                     "reset_code": "595",
                     "answer": "",
                     "agency": "",
                     "sec_question": "",
-                    "client_id": "555"
+                    "client_id": ""
                 });
             }
         });
@@ -48,7 +48,7 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        { "name": "Danna Shanley", "email": "shanley@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc1.jpg" },
+                        //{ "name": "Danna Shanley", "email": "shanley@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc1.jpg" },
                         { "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "", "image": "../img/temp/pncc2.jpg" },
                         { "name": "Jane Marston", "email": "", "phone": "555-555-5555", "image": "../img/temp/pncc3.jpg" },
                         { "name": "Kendra Venne", "email": "", "phone": "", "image": "../img/temp/pncc4.jpg" }
@@ -61,7 +61,7 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "events",
                     "events": [
-                        {
+                        /*{
                             "id": '06-20-2016T10:53:29am',
                             "title": 'Smoking Cessation Program',
                             "category": '1',
@@ -75,7 +75,7 @@ across the app instead of just the calendar page
                             "scheduledBy": '0',
                             "viewed": '0',
                             "questions": []
-                        }
+                        }*/
                     ],
                     "questions":
                         {
@@ -91,7 +91,7 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "surveys",
                     "surveys": [
-                        {
+                        /*{
                             "id": '909',
                             "title": 'Follow-upTEST',
                             "questions":
@@ -101,7 +101,7 @@ across the app instead of just the calendar page
                                 },
                             "dateGiven": '10/19/2016',
                             "dateTaken": '',
-                        }
+                        }*/
                     ]
                 });
             }
@@ -191,78 +191,6 @@ across the app instead of just the calendar page
                                 ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
                                 ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
                                 ]
-                        },
-                        {
-                            "id": "2",
-                            "title": "BP Problems During Pregnancy, Heart Trouble Later?",
-                            "description": "Pregnant women who have blood pressure in the high-normal range may have an increased risk for metabolic syndrome after they give birth, a new study indicates.",
-                            "category": "Blood Pressure",
-                            "link": "http://www.webmd.com/baby/news/20160627/blood-pressure-problems-during-pregnancy-heart-trouble-later",
-                            "format": "Website",
-                            "dateShared": "6/28/2016",
-                            "lastRead": "",
-                            "readHistory": {},
-                            "quizHistory": {},
-                            "quiz":
-                                [
-                                ['Pregnant women with high blood pressure may have an increased risk for metabolic syndrome.', ['True', 'False'], '0'],
-                                ['The study found that women with high blood pressure were twice as likely to develop metabolic syndrome.', ['True', 'False'], '1'],
-                                ['Metabolic syndrome increases the risk of heart disease.', ['True', 'False'], '0']
-                                ]
-                        },
-                        {
-                            "id": "3",
-                            "title": "Folic Acid Now Added to Corn Masa Flour: FDA",
-                            "description": "Adding folic acid to corn masa flour could help reduce birth defects among Hispanic babies in the United States, the U.S. Food and Drug Administration says.",
-                            "category": "Diet",
-                            "link": "http://www.webmd.com/baby/news/20160617/folic-acid-now-added-to-corn-masa-flour-fda",
-                            "format": "Website",
-                            "dateShared": "",
-                            "lastRead": "",
-                            "readHistory": {},
-                            "quizHistory": {},
-                            "quiz":
-                                [
-                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
-                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
-                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
-                                ]
-                        },
-                        {
-                            "id": "4",
-                            "title": "Are Mom’s Diet Drinks Boosting Baby’s Weight?",
-                            "description": "Pregnant women who drink artificially sweetened drinks every day may be more likely to give birth to heavier babies who are then more likely to become overweight children, researchers report.",
-                            "category": "Diet",
-                            "link": "http://www.webmd.com/baby/news/20160509/artificial-sweeteners-during-pregnancy-may-make-for-heavier-infants",
-                            "format": "Website",
-                            "dateShared": "",
-                            "lastRead": "",
-                            "readHistory": {},
-                            "quizHistory": {},
-                            "quiz":
-                                [
-                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
-                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
-                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
-                                ]
-                        },
-                        {
-                            "id": "5",
-                            "title": "Lots of Fish in Pregnancy and Kids' Obesity Risk",
-                            "description": "Babies whose mothers eat high amounts of fish during pregnancy appear to be at raised risk for obesity in childhood, and pollutants in the fish may drive the effect, a new study finds.",
-                            "category": "Diet",
-                            "link": "http://www.webmd.com/baby/news/20160215/lots-of-fish-in-pregnancy-tied-to-higher-obesity-risk-in-kids",
-                            "format": "Website",
-                            "dateShared": "",
-                            "lastRead": "",
-                            "readHistory": {},
-                            "quizHistory": {},
-                            "quiz":
-                                [
-                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
-                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
-                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
-                                ]
                         }*/
                     ],
                     "history": [
@@ -324,26 +252,6 @@ across the app instead of just the calendar page
                             "date": "6/28/2016",
                             "meeting": "",
                             "img": "../img/referrals/mh.PNG"
-                        },
-                        {
-                            "id": "4",
-                            "name": "Karissa Morelock",
-                            "address": "South Bend, Indiana",
-                            "phone": "574-318-3412",
-                            "email": "morelock@gmail.com",
-                            "date": "6/25/2016",
-                            "meeting": "",
-                            "img": "../img/referrals/morelock.jpg"
-                        },
-                        {
-                            "id": "5",
-                            "name": "Andrew McMahon",
-                            "address": "Concord, Massachusetts",
-                            "phone": "555-555-5555",
-                            "email": "amitw@gmail.com",
-                            "date": "6/22/2016",
-                            "meeting": "",
-                            "img": "../img/referrals/amm.jpg"
                         },
                     ],
                 });
@@ -636,7 +544,7 @@ across the app instead of just the calendar page
             async: false,
             success: function (data) {
                 //console.log(data)
-                if (data.length > 0) {            
+                if (data.length > 0) {
                     //console.log(JSON.stringify(data))
                     db.get('articles').then(function (doc) {
                         for (i in data) {
@@ -654,7 +562,7 @@ across the app instead of just the calendar page
                                     isUnique = false;
                                 }
                             }
-                            if (isUnique == true) {                            
+                            if (isUnique == true) {
                                 //makes quiz suitable for json parse
                                 //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
                                 data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
@@ -664,6 +572,8 @@ across the app instead of just the calendar page
                                     "category": data[i]['category'],
                                     "description": data[i]['description'],
                                     "content_text": data[i]['path'],
+                                    "filename": data[i]['filename'],
+                                    "localPath": "",
                                     "dateShared": data[i]['date_shared'],
                                     "lastRead": "",
                                     "readHistory": {},
@@ -675,7 +585,7 @@ across the app instead of just the calendar page
                                     "article_status": '0'
                                 };
                                 //console.log(JSON.stringify(article))
-                                //doc['shared'].push(article);
+                                doc['shared'].push(article);
                                 if (article["content_text"].substring(0, 2) == './') {
                                     downloads.push(article);
                                 }
@@ -683,19 +593,45 @@ across the app instead of just the calendar page
                         }
                         console.log('Articles downloaded')
                         //console.log(JSON.stringify(downloads))
-                        //return db.put(doc);
+                        return db.put(doc);
                     }).then(function () {
+                        //console.log(downloads)
                         if (downloads.length > 0) {
-                            var filePath = String("https://momlink.crc.nd.edu/~var/www/html/MomLink-PNCC/" + downloads[0]['content_text'].slice(2,5000));
-                            var fileTransfer = new FileTransfer();
-                            var uri = encodeURI(filePath);
+                            /*
+                            //download link
+                            var downloadLink = String("https://momlink.crc.nd.edu/~var/www/html/MomLink-PNCC/" + downloads[0]['content_text'].slice(2,5000));
+                            var uri = encodeURI(downloadLink);
+                            //storage link
+                            var localPath = cordova.file.dataDirectory + downloads[0]['filename'];
+                            */
+
+
+                            /*var downloadLink = String("https://momlink.crc.nd.edu/~jonathan/articles/ProjectProposal.pdf");
+                            var uri = encodeURI(downloadLink);
+                            var localPath = cordova.file.dataDirectory + "ProjectProposal.pdf";*/
+
+                            
+                            //Works
+                            var downloadLink = String("http://developer.android.com/assets/images/home/ics-android.png" + downloads[0]['content_text'].slice(2, 5000));
+                            var uri = encodeURI(downloadLink);
+                            var localPath = cordova.file.dataDirectory + 'ics-android.png';
+
                             console.log(uri)
-                            /*var fileURL = "///storage/emulated/0/DCIM/myFile";
-                            fileTransfer.download(
-                                uri,
-                                fileURL,
+                            console.log(localPath)
+                            var fileTransfer = new FileTransfer();
+                            fileTransfer.download(uri, localPath,
                                 function (entry) {
                                     console.log("download complete: " + entry.toURL());
+                                    db.get('articles').then(function (doc) {
+                                        //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
+                                        for (i in doc['shared']) {
+                                            if (doc['shared'][i]['id'] == downloads[0]['id']) {
+                                                doc['shared'][i]['localPath'] = entry.toURL();
+                                                console.log(entry.toURL())
+                                            }
+                                        }
+                                        return db.put(doc);
+                                    })
                                 },
                                 function (error) {
                                     console.log("download error source " + error.source);
@@ -708,19 +644,7 @@ across the app instead of just the calendar page
                                         "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
                                     }
                                 }
-                            );*/
-                            /*window.resolveLocalFileSystemURL(imageData, resolveOnSuccess, resOnError);
-                            //Callback function when the file system url has been resolved
-                            function resolveOnSuccess(entry) {
-                                fileName = week + name + ".jpg";
-                                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
-                                    dir.getDirectory('MomLink', { create: true, exclusive: false },
-                                    function (directory) {
-                                        console.log(fileName)
-                                        entry.moveTo(directory, fileName, successMove, resOnError);
-                                    }, resOnError);
-                                }, resOnError);
-                            }*/
+                            );
                         }
                     })
                 }
@@ -1795,15 +1719,17 @@ across the app instead of just the calendar page
             if (doc['client_id'] == "") {
                 //create all local databases
                 var post_information = { 'username': user, 'password': pass };
+                console.log(JSON.stringify(post_information))
                 $.ajax({
                     url: 'https://momlink.crc.nd.edu/~jonathan/current/firstTimeLogin.php',
                     type: 'POST',
                     dataType: 'json',
                     data: post_information,
                     success: function (data) {
+                        console.log(JSON.stringify(data))
                         if (data[0]['success'] != 0) {
                             doc['client_id'] = data[1]['client_id']
-                            doc['agency'] = data[1]['agency']
+                            //doc['agency'] = data[1]['agency']
                             doc['sec_question'] = data[1]['sec_question']
                             doc['username'] = user
                             doc['password'] = pass
@@ -3354,8 +3280,23 @@ the articles quiz has been completed with a perfect score
                         html += `<iframe id="frame" src="` + article['content_text'] + `" style="width:100%; height: 100%;"></iframe>`;
                     }
                         //if content is an object
-                    else if (article['content_text'] == '' && article['content_obj'] != '') {
+                    else if (article["content_text"].substring(0, 2) == './') {
                         //handle blob object article['content_obj']
+                        console.log(article["localPath"])
+
+                        //method doesn't require file type
+                        /*var open = cordova.plugins.disusered.open;
+                        function success() {
+                            console.log('Success');
+                        }
+                        function error(code) {
+                            if (code === 1) {
+                                console.log('No file handler found');
+                            } else {
+                                console.log('Undefined error');
+                            }
+                        }
+                        open(article["localPath"], success, error);*/
                     }
                         //content is a string
                     else {
