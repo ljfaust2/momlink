@@ -15,13 +15,13 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "login",
                     "login_code": "6",
-                    "username": "",
-                    "password": "",
+                    "username": "u",
+                    "password": "p",
                     "reset_code": "595",
                     "answer": "",
                     "agency": "",
                     "sec_question": "",
-                    "client_id": ""
+                    "client_id": "555"
                 });
             }
         });
@@ -606,15 +606,11 @@ across the app instead of just the calendar page
                             */
 
 
-                            /*var downloadLink = String("https://momlink.crc.nd.edu/~jonathan/articles/ProjectProposal.pdf");
+                            //works
+                            var downloadLink = String("https://momlink.crc.nd.edu/~jonathan/articles/ProjectProposal.pdf");
                             var uri = encodeURI(downloadLink);
-                            var localPath = cordova.file.dataDirectory + "ProjectProposal.pdf";*/
+                            var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + "ProjectProposal.pdf";
 
-                            
-                            //Works
-                            var downloadLink = String("http://developer.android.com/assets/images/home/ics-android.png" + downloads[0]['content_text'].slice(2, 5000));
-                            var uri = encodeURI(downloadLink);
-                            var localPath = cordova.file.dataDirectory + 'ics-android.png';
 
                             console.log(uri)
                             console.log(localPath)
@@ -2604,7 +2600,6 @@ across the app instead of just the calendar page
         }, false);
     }
 
-
     /*
     Temporary function to see contents of db
     */
@@ -3275,46 +3270,38 @@ the articles quiz has been completed with a perfect score
                         //if network is available
                     else {*/
 
-                    //if content is a link
-                    if (article['content_text'].substring(0, 4) == 'http') {
-                        html += `<iframe id="frame" src="` + article['content_text'] + `" style="width:100%; height: 100%;"></iframe>`;
-                    }
-                        //if content is an object
-                    else if (article["content_text"].substring(0, 2) == './') {
-                        //handle blob object article['content_obj']
-                        console.log(article["localPath"])
+                    //if content is an object
+                    if (article["content_text"].substring(0, 2) == './') {
+                        console.log(article["localPath"]);
+                        $scope.openFile(article["localPath"]);
+                        //updated last time article was read
+                        article['lastRead'] = String(moment().format('YYYY-MM-DD'));
+                        return db.put(doc)
 
-                        //method doesn't require file type
-                        /*var open = cordova.plugins.disusered.open;
-                        function success() {
-                            console.log('Success');
-                        }
-                        function error(code) {
-                            if (code === 1) {
-                                console.log('No file handler found');
-                            } else {
-                                console.log('Undefined error');
-                            }
-                        }
-                        open(article["localPath"], success, error);*/
                     }
-                        //content is a string
-                    else {
-                        html += `<div class="has-footer">`;
-                        html += `<p>`;
-                        html += article['content_text'];
-                        html += `</p>`;
-                        html += `</div>`;
-                    }
-                    html += `</ion-modal-view>`;
-                    //updated last time article was read
-                    article['lastRead'] = String(moment().format('YYYY-MM-DD'));
-                    $scope.modal = $ionicModal.fromTemplate(html, {
-                        scope: $scope,
-                        animation: 'slide-in-up'
-                    });
-                    $scope.openModal();
-                    return db.put(doc)
+                    /*else {
+                        //if content is a link
+                        if (article['content_text'].substring(0, 4) == 'http') {
+                            html += `<iframe id="frame" src="` + article['content_text'] + `" style="width:100%; height: 100%;"></iframe>`;
+                        }
+                            //content is a string
+                        else {
+                            html += `<div class="has-footer">`;
+                            html += `<p>`;
+                            html += article['content_text'];
+                            html += `</p>`;
+                            html += `</div>`;
+                        }
+                        html += `</ion-modal-view>`;
+                        $scope.modal = $ionicModal.fromTemplate(html, {
+                            scope: $scope,
+                            animation: 'slide-in-up'
+                        });
+                        $scope.openModal();
+                        //updated last time article was read
+                        article['lastRead'] = String(moment().format('YYYY-MM-DD'));
+                        return db.put(doc)
+                    }*/
                     //}
                 }
             }
@@ -3531,6 +3518,20 @@ the articles quiz has been completed with a perfect score
         });
     };
 
+    $scope.openFile = function (file) {
+        var open = cordova.plugins.disusered.open;
+        function success() {
+            console.log('Success');
+        }
+        function error(code) {
+            if (code === 1) {
+                console.log('No file handler found');
+            } else {
+                console.log('Undefined error');
+            }
+        }
+        open(file, success, error);
+    }
 
     /*
 
@@ -5218,7 +5219,7 @@ Handler for javascript clock used in addActivityTime page
                         }
                         //get render weeks photos
                         for (j = 0; j < weeksPhotos.length; j++) {
-                            html += `<div class="col-33 photoJournalBorder"><image src="` + weeksPhotos[j] + `" ng-click="openFile('` + String(weeksPhotos[j]) + `','image/jpeg')" style="max-width:100%;height:auto%;">`
+                            html += `<div class="col-33 photoJournalBorder"><image src="` + weeksPhotos[j] + `" ng-click="openFile('` + String(weeksPhotos[j]) + `')" style="max-width:100%;height:auto%;">`
                             html += `<button class="button button-small button-full button-positive" ng-click="shareImage('` + weeksPhotos[j] + `')">SHARE</button></div>`;
                             if (colSpacer % 3 == 0) {
                                 html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
@@ -5247,8 +5248,19 @@ Handler for javascript clock used in addActivityTime page
     /*
     Opens a selected image in the photo gallery
     */
-    $scope.openFile = function (file, type) {
-        cordova.plugins.fileOpener2.open(file, type);
+    $scope.openFile = function (file) {
+        var open = cordova.plugins.disusered.open;
+        function success() {
+            console.log('Success');
+        }
+        function error(code) {
+            if (code === 1) {
+                console.log('No file handler found');
+            } else {
+                console.log('Undefined error');
+            }
+        }
+        open(file, success, error);
     }
 
 

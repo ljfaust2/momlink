@@ -71,7 +71,6 @@
   <plugin name="cordova-plugin-file-transfer" version="1.5.1" />
   <plugin name="cordova-open" version="1.0.9" src="https://github.com/disusered/cordova-open" />
   <plugin name="cordova-plugin-file-opener2" version="2.0.2" src="https://github.com/pwlin/cordova-plugin-file-opener2" />
-  <plugin name="cordova-plugin-file-opener2" version="2.0.2" src="https://github.com/pwlin/cordova-plugin-file-opener2" />
   <plugin name="cordova-plugin-x-socialsharing" version="5.1.1" src="https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin" />
   <plugin name="cordova-plugin-sms" version="1.0.5" src="https://github.com/floatinghotpot/cordova-plugin-sms" />
   <preference name="android-targetSdkVersion" value="22" />
