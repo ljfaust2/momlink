@@ -48,11 +48,10 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        //{ "name": "Danna Shanley", "email": "shanley@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc1.jpg" },
-                        { "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "", "image": "../img/temp/pncc2.jpg" },
-                        { "name": "Jane Marston", "email": "", "phone": "555-555-5555", "image": "../img/temp/pncc3.jpg" },
-                        { "name": "Kendra Venne", "email": "", "phone": "", "image": "../img/temp/pncc4.jpg" }
-                    ]
+                        { "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "555-555-5555", "image": "../img/temp/pncc2.jpg" }
+                    ],
+                    "pnccMessages": [],
+                    "clientMessages": []
                 });
             }
         });
@@ -283,6 +282,7 @@ across the app instead of just the calendar page
                     'pills': '',
                     'stress': '',
                     "weight": '',
+                    "clientMessages": '',
                     "eventsGeneral": '-1'
                 });
             }
@@ -520,6 +520,8 @@ across the app instead of just the calendar page
     */
     $scope.updateAll = function () {
         //$scope.getGeneralEvents();
+        $scope.getMessages();
+        $scope.uploadMessages();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
         $scope.getReferrals();
@@ -557,10 +559,92 @@ across the app instead of just the calendar page
         $scope.toNewPage('survey.html', 'Survey');
     };
 
-    $scope.testPHP = function () {
-
+    $scope.uploadMessages = function () {
+        //similar to upload trackers but for clientMessages table
+        var db = PouchDB('momlink');
+        var recentID = '';
+        //check update table to get the last element sent to server
+        db.get('update').then(function (doc) {
+            recentID = doc['clientMessages'];
+        }).then(function () {
+            //get new information since last update
+            uploadData = [];
+            db.get('inbox').then(function (doc) {
+                for (var i in doc['clientMessages']) {
+                    if (recentID < doc['clientMessages'][i]['id']) {
+                        uploadData.push(doc['clientMessages'][i])
+                    }
+                }
+            }).then(function () {
+                //send this to the sever
+                console.log(JSON.stringify(uploadData))
+                if (uploadData.length > 0) {
+                    var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid')};
+                    $.ajax({
+                        url: 'https://momlink.crc.nd.edu/~jonathan/current/sendMessages.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: post_information,
+                        async: false,
+                        success: function (data) {
+                            if (data = true) {
+                                console.log('message data successfully uploaded')
+                                //run script to update record table
+                                //upon success, get last element in uploadData and set it as entry in update table
+                                db.get('update').then(function (doc) {
+                                    doc['clientMessages'] = uploadData[uploadData.length - 1]['id'];
+                                    return db.put(doc);
+                                }).then(function () {
+                                    console.log('message data successfully updated')
+                                })
+                            }
+                        }
+                    });
+                }
+                else {
+                    console.log('messages already up to date');
+                }
+            })
+        })
     };
-
+    $scope.getMessages = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getMessages.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                console.log(JSON.stringify(data))
+                if (data.length > 0) {
+                    db.get('inbox').then(function (doc) {
+                        for (i in data) {
+                            //check if message is already in local db
+                            var isUnique = true;
+                            for (j in doc['pnccMessages']) {
+                                if (data[i]['id'] == doc['pnccMessages'][j]['id']) {
+                                    console.log('hit')
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                var message = {
+                                    "id": data[i]['id'],
+                                    "content": data[i]['content'],
+                                    "date": data[i]['mdate']
+                                };
+                                doc['pnccMessages'].push(message);
+                            }
+                        }
+                        console.log('Messages downloaded')
+                        return db.put(doc);
+                    });
+                }
+            }
+        });
+    };
     $scope.retrieveClientTrackers = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -905,7 +989,7 @@ across the app instead of just the calendar page
                                     "content_text": data[i]['path'],
                                     "filename": data[i]['filename'],
                                     "localPath": "",
-                                    "dateShared": data[i]['date_shared'],
+                                    "dateShared": data[i]['share_date'],
                                     "lastRead": "",
                                     "readHistory": {},
                                     "quiz": JSON.parse(data[i]['quiz']),
@@ -1951,6 +2035,153 @@ across the app instead of just the calendar page
         }
     };
 
+    $scope.newPNCCMessage = function (email, phone) {
+        if (email != '' && phone != '') {
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Call', onTap: function (e) {
+                            $scope.clickTracker('call');
+                            window.location.href = "tel://" + '1-' + phone;
+                            return 'call';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Text', onTap: function (e) {
+                            $scope.clickTracker('text');
+                            text();
+                            return 'text';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Email', onTap: function (e) {
+                            $scope.clickTracker('email');
+                            mail();
+                            return 'email';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'MomLink Message', onTap: function (e) {
+                            $scope.clickTracker('mmessage');
+                            momlinkMessage();
+                            return 'momlinkMessage';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            $scope.clickTracker('cancelMessage');
+                            return 'cancel';
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
+        }
+        else if (email == '' && phone != '') {
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Call', onTap: function (e) {
+                            $scope.clickTracker('call');
+                            window.location.href = "tel://" + '1-' + phone;
+                            return 'call';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Text', onTap: function (e) {
+                            $scope.clickTracker('text');
+                            text();
+                            return 'text';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'MomLink Message', onTap: function (e) {
+                            $scope.clickTracker('mmessage');
+                            momlinkMessage();
+                            return 'momlinkMessage';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            $scope.clickTracker('cancelMessage');
+                            return 'cancel';
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
+        }
+        else if (phone == '' && email != '') {
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Email', onTap: function (e) {
+                            $scope.clickTracker('email');
+                            mail();
+                            return 'email';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'MomLink Message', onTap: function (e) {
+                            $scope.clickTracker('mmessage');
+                            momlinkMessage();
+                            return 'momlinkMessage';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            $scope.clickTracker('cancelMessage');
+                            return 'cancel';
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
+        }
+        else {
+            //$scope.toNewPage(momlinkmessage)
+        }
+        function text() {
+            var message = '';
+            var options = {
+                android: {
+                    intent: 'INTENT'  // send SMS with the native android SMS messaging
+                    //intent: '' // send SMS without open any other app
+                }
+            };
+            sms.send(phone, message, options);
+        }
+        function mail() {
+            window.cordova.plugins.email.open({
+                to: [email],
+            }, console.log('Email Sent'), $scope)
+        }
+        function momlinkMessage() {
+            //open modal to create new message
+            $scope.modal = $ionicModal.fromTemplateUrl('messageModal.html', {
+                scope: $scope,
+                animation: 'slide-in-up'
+            }).then(function (modal) {
+                $scope.modal = modal;
+                $scope.modal.show();
+            })
+        }
+    };
 
     /*
     Opens the modal for creating events
@@ -2625,6 +2856,39 @@ allows user to call/text/email them and render sms conversations
         });
     };
 
+    $scope.renderPNCCConversation = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('inbox').then(function (doc) {
+            pncc = doc['pncc'][0];
+            name = pncc['name'];
+            phone = pncc['phone'];
+            email = pncc['email'];
+        }).then(function () {
+            html += `<div class="bar bar-header"><div class="title">` + name + `</div><button class ="button button-icon icon ion-email" ng-click="newPNCCMessage('` + email + `','` + phone + `')"></button></div>`
+            html += '<div class="list has-header">';
+            //loop through inbox sms, if empty, no messages to display
+            //will also need to display momlink messages
+            SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
+                if (data.reverse.length == 0) {
+                    html += '<div class="col text-center" style="color:gray">No Messages to Show</div>';
+                }
+                else {
+                    for (i in data.reverse()) {
+                        if (data[i].type == 1) {
+                            html += '<div class="item item-text-wrap" style="color: #e6005c;">' + data[i].body + '</div>';
+                        }
+                        else {
+                            html += '<div class="item item-text-wrap" style="color: #0866c6;">' + data[i].body + '</div>';
+                        }
+                    }
+                }
+                html += '</div>';
+                $("#pncc").html(html);
+                $compile($("#pncc"))($scope);
+            }, function (error) { console.log(error) });
+        });
+    };
 
     /*
     Pulls all pnncs and assocaited contact information
@@ -2652,7 +2916,6 @@ allows user to call/text/email them and render sms conversations
             $compile($("#pncc"))($scope);
         });
     };
-
 
     /*
     Displays sms conversation between user and contact
@@ -2683,6 +2946,22 @@ allows user to call/text/email them and render sms conversations
             $compile($("#".concat(type)))($scope);
         }, function (error) { console.log(error) });
     };
+
+    $scope.saveMessage = function (content) {
+        var db = PouchDB('momlink');
+        db.get('inbox').then(function (doc) {
+            var message = {
+                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                "date": moment().format('MM/DD/YYYY'),
+                "content": $('#messageContent').val()
+            };
+            doc['clientMessages'].push(message);
+            return db.put(doc);
+        }).then(function () {
+            $scope.toNewPage('inbox.html', 'Inbox')
+            $scope.closeModal();
+        });
+    }
 })
 
 
@@ -3084,7 +3363,7 @@ the articles quiz has been completed with a perfect score
                 article = sharedArticles[i]
                 if (article['category'] == category || category == 'All') {
                     html += `<div class="item item-thumbnail-left item-text-wrap">`;
-                    html += `<img src="` + $scope.getFormatImg(article['format']) + `">`;
+                    html += `<img src="` + $scope.getFormatImg(article['filename']) + `">`;
                     //bold if the article has not been read
                     if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
                     else { html += '<h2>' + article['title'] + '</h2>'; }
@@ -3119,16 +3398,21 @@ the articles quiz has been completed with a perfect score
     Returns image based on article format (text, audio, video, etc.)
     */
     $scope.getFormatImg = function (type) {
-        switch (type) {
-            case 'Website':
-                return '../img/formats/website.png';
-            case 'PDF':
+        if(type == 'Website'){
+            return '../img/formats/website.png';
+        }
+        switch (type.substr(type.length - 3)) {
+            case 'pdf':
                 return '../img/formats/pdf.png';
-            case 'Image':
+            case 'png':
                 return '../img/formats/image.png';
-            case 'Audio':
+            case 'iff':
+                return '../img/formats/image.png';
+            case 'mp3':
                 return '../img/formats/audio.png';
-            case 'Video':
+            case 'mp4':
+                return '../img/formats/video.png';
+            case '3gp':
                 return '../img/formats/video.png';
         }
     };
@@ -3334,6 +3618,7 @@ the articles quiz has been completed with a perfect score
         var db = PouchDB('momlink');
         var score = 0;
         var finalScore;
+        var maxScore;
         db.get('articles').then(function (doc) {
             var usersAnswers = [];
             sharedArticles = doc[type];
@@ -3349,7 +3634,8 @@ the articles quiz has been completed with a perfect score
                             score++;
                         }
                     }
-                    finalScore = score + '/' + quiz.length;
+                    finalScore = score;
+                    maxScore = quiz.length;
                     //prequiz will either be 1 or undefined, set as 0 to indicate the quiz was not a prequiz
                     if (prequiz != 1) {
                         prequiz = 0;
@@ -3361,7 +3647,7 @@ the articles quiz has been completed with a perfect score
                     }
                     //also need to record answers selected, prequiz value of 1 means the quiz was a prequiz
                     article['quizAttempts'] = String(parseInt(article['quizAttempts']) + 1)
-                    article['quizHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = [finalScore, usersAnswers, prequiz];
+                    article['quizHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = [finalScore, maxScore, usersAnswers, prequiz];
                     article['article_status'] = '1';
                     article['upload'] = '0';
                     return db.put(doc)
