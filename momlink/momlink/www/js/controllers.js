@@ -48,7 +48,7 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        { "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "555-555-5555", "image": "../img/temp/pncc2.jpg" }
+                        { "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc2.jpg" }
                     ],
                     "pnccMessages": [],
                     "clientMessages": []
@@ -283,7 +283,8 @@ across the app instead of just the calendar page
                     'stress': '',
                     "weight": '',
                     "clientMessages": '',
-                    "eventsGeneral": '-1'
+                    "eventsGeneral": '-1',
+                    "smsMessages": '0',
                 });
             }
         });
@@ -521,6 +522,7 @@ across the app instead of just the calendar page
     $scope.updateAll = function () {
         //$scope.getGeneralEvents();
         $scope.getMessages();
+        $scope.uploadSMSMessages();
         $scope.uploadMessages();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
@@ -579,7 +581,7 @@ across the app instead of just the calendar page
                 //send this to the sever
                 console.log(JSON.stringify(uploadData))
                 if (uploadData.length > 0) {
-                    var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid')};
+                    var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid') };
                     $.ajax({
                         url: 'https://momlink.crc.nd.edu/~jonathan/current/sendMessages.php',
                         type: 'POST',
@@ -607,6 +609,56 @@ across the app instead of just the calendar page
             })
         })
     };
+    $scope.uploadSMSMessages = function () {
+        var db = PouchDB('momlink');
+        var uploadData = [];
+        var recentID = '';
+        db.get('update').then(function (doc) {
+            recentID = doc['smsMessages'];
+        }).then(function () {
+            db.get('inbox').then(function (doc) {
+                pncc = doc['pncc'][0];
+                phone = pncc['phone'];
+            }).then(function () {
+                SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
+                    for (i in data) {
+                        if (parseInt(recentID) < parseInt(data[i]['_id'])) {
+                            data[i]['date'] = new moment(data[i]['date']).format('MM/DD/YYYY')
+                            uploadData.push(data[i])
+                        }
+                    }
+                })
+            }).then(function () {
+                //send this to the sever
+                if (uploadData.length > 0) {
+                    var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid') };
+                    $.ajax({
+                        url: 'https://momlink.crc.nd.edu/~jonathan/current/sendSMSMessages.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: post_information,
+                        async: false,
+                        success: function (data) {
+                            if (data = true) {
+                                console.log('sms message data successfully uploaded')
+                                //run script to update record table
+                                //upon success, get last element in uploadData and set it as entry in update table
+                                db.get('update').then(function (doc) {
+                                    doc['smsMessages'] = uploadData[0]['_id'];
+                                    return db.put(doc);
+                                }).then(function () {
+                                    console.log('sms message data successfully updated')
+                                })
+                            }
+                        }
+                    });
+                }
+                else {
+                    console.log('sms messages already up to date');
+                }
+            })
+        });
+    }
     $scope.getMessages = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -2825,9 +2877,9 @@ across the app instead of just the calendar page
 
 
 /*
-The inbox controller pulls referral and pncc contacts
-allows user to call/text/email them and render sms conversations
-*/
+    The inbox controller pulls referral and pncc contacts
+    allows user to call/text/email them and render sms conversations
+    */
 .controller('InboxCtrl', function ($scope, $compile, $ionicPopup) {
     /*
     Pulls all referrals and assocaited contact information
@@ -2870,22 +2922,24 @@ allows user to call/text/email them and render sms conversations
             //loop through inbox sms, if empty, no messages to display
             //will also need to display momlink messages
             SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
-                if (data.reverse.length == 0) {
+                console.log(JSON.stringify(data))
+                reverse = data.reverse();
+                if (reverse.length == 0) {
                     html += '<div class="col text-center" style="color:gray">No Messages to Show</div>';
                 }
                 else {
-                    for (i in data.reverse()) {
-                        if (data[i].type == 1) {
-                            html += '<div class="item item-text-wrap" style="color: #e6005c;">' + data[i].body + '</div>';
+                    for (i in reverse) {
+                        if (reverse[i]['type'] == 1) {
+                            html += '<div class="item item-text-wrap" style="color: #e6005c;">' + reverse[i].body + '</div>';
                         }
                         else {
-                            html += '<div class="item item-text-wrap" style="color: #0866c6;">' + data[i].body + '</div>';
+                            html += '<div class="item item-text-wrap" style="color: #0866c6;">' + reverse[i].body + '</div>';
                         }
                     }
                 }
                 html += '</div>';
-                $("#pncc").html(html);
-                $compile($("#pncc"))($scope);
+                $("#".concat('pncc')).html(html);
+                $compile($("#".concat('pncc')))($scope);
             }, function (error) { console.log(error) });
         });
     };
@@ -2928,6 +2982,7 @@ allows user to call/text/email them and render sms conversations
         html += '<div class="list has-header">';
         //loop through inbox sms, if empty, no messages to display
         SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
+            console.log(data)
             if (data.reverse.length == 0) {
                 html += '<div class="col text-center" style="color:gray">No Messages to Show</div>';
             }
@@ -3326,11 +3381,7 @@ the articles quiz has been completed with a perfect score
             for (i in categories) {
                 //add column
                 html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','` + i + `');clickTracker('renderCategories(` + i + `)')" style="position:relative">`;
-                var img;
-                if (i == 'Smoking') { img = '../img/articles/smoking.png' }
-                if (i == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
-                if (i == 'Diet') { img = '../img/articles/diet.png' }
-                html += `<image class="autoSize" src="` + img + `">`;
+                html += `<image class="autoSize" src="` + $scope.getCategoryImg(i) + `">`;
                 if (categories[i] > 0) {
                     html += '<span class="badge badge-positive topRightBadge">' + categories[i] + '</span>';
                 }
@@ -3398,13 +3449,17 @@ the articles quiz has been completed with a perfect score
     Returns image based on article format (text, audio, video, etc.)
     */
     $scope.getFormatImg = function (type) {
-        if(type == 'Website'){
+        if (type == 'Website') {
             return '../img/formats/website.png';
         }
         switch (type.substr(type.length - 3)) {
             case 'pdf':
                 return '../img/formats/pdf.png';
             case 'png':
+                return '../img/formats/image.png';
+            case 'jpg':
+                return '../img/formats/image.png';
+            case 'peg':
                 return '../img/formats/image.png';
             case 'iff':
                 return '../img/formats/image.png';
@@ -3414,6 +3469,68 @@ the articles quiz has been completed with a perfect score
                 return '../img/formats/video.png';
             case '3gp':
                 return '../img/formats/video.png';
+        }
+    };
+
+    /*
+    Returns image based on article category
+    */
+    $scope.getCategoryImg = function (type) {
+        switch (type) {
+            case 'Safe Sleep':
+                return '../img/topics/sleep_big.png';
+            case 'Safety':
+                return '../img/formats/baby-proof-home.png';
+            case 'HUGS':
+                return '../img/topics/HUGS.jpg';
+            case 'Nutrition':
+                return '../img/formats/Nutrition.png';
+            case 'First Time Moms':
+                return '../img/topics/firstimemoms.jpg';
+            case 'Parenting':
+                return '../img/formats/WCC_south bend.jpg';
+            case 'Abstinence':
+                return '../img/topics/abstinence.jpg';
+            case 'Anticipatory Guidance':
+                return '../img/formats/nesting.jpg';
+            case 'Breastfeeding':
+                return '../img/topics/breastfeeding.jpg';
+            case 'Child Abuse':
+                return '../img/topics/childabuse.jpg';
+            case 'Community Resources':
+                return '../img/topics/communityresources.jpeg';
+            case 'Coping Skills':
+                return '../img/topics/coping.jpg';
+            case 'Dental Health':
+                return '../img/topics/dentalhealth copy.jpg';
+            case 'Domestic Violence':
+                return '../img/topics/domesticviolence.jpg';
+            case 'HIV Risks':
+                return '../img/topics/hivrisk.png';
+            case 'Family Planning':
+                return '../img/topics/familyplanning.jpg';
+            case 'Financial Planning':
+                return '../img/topics/financialplanning.jpg';
+            case 'Drug Cessation':
+                return '../img/topics/drugcessation.jpg';
+            case 'General Advice':
+                return '../img/topics/unnamed-chunk-5-1.png';
+            case 'Prenatal Care':
+                return '../img/topics/prenatalcare.jpg';
+            case 'Prenatal Weight':
+                return '../img/topics/prenatalweight.jpg';
+            case 'Baby Growth':
+                return '../img/topics/babygrowth.png';
+            case 'Labor and Delivery':
+                return '../img/topics/labor-delivery.jpg';
+            case 'Managing Pregnancy Discomforts':
+                return '../img/topics/pregdiscomforts.jpg';
+            case 'Health Care':
+                return '../img/topics/healthcare.jpg';
+            case 'Infant Stimulation':
+                return '../img/topics/infantstimulation.jpg';
+            case 'Infant Feeding':
+                return '../img/topics/infantfeeding.jpg';
         }
     };
 
