@@ -48,9 +48,10 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        { "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc2.jpg" }
+                        { "id": "5", "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc2.jpg" }
                     ],
-                    "pnccMessages": [],
+                    "messages": [],
+                    "threads": [],
                     "clientMessages": []
                 });
             }
@@ -78,9 +79,9 @@ across the app instead of just the calendar page
                     ],
                     "questions":
                         {
-                            '1': `How can I tell if the symptoms I'm having are normal?`,
-                            '2': `When should I call a doctor?`,
-                            '3': `Is there anything I should do to prepare?`
+                            "1": "How can I tell if the symptoms I'm having are normal?",
+                            "2": "When should I call a doctor?",
+                            "3": "Is there anything I should do to prepare?"
                         }
                 });
             }
@@ -105,7 +106,7 @@ across the app instead of just the calendar page
                 });
             }
         });
-        db.get('goals').catch(function (err) {
+        /*db.get('goals').catch(function (err) {
             if (err.status === 404) {
                 db.put({
                     "_id": "goals",
@@ -132,7 +133,7 @@ across the app instead of just the calendar page
                     ]
                 });
             }
-        });
+        });*/
         db.get('track').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -504,6 +505,83 @@ across the app instead of just the calendar page
         window.localStorage.setItem('cid', '555')
     }
 
+    $scope.sendNewMessage = function (recipient) {
+        $ionicPopup.show({
+            template: '<div>Subject</div><input id="msgSubject" type="text"><br><div>Body</div><textarea id="msgContent" rows="4"></textarea>',
+            title: 'New Message',
+            scope: $scope,
+            buttons: [
+              { text: 'Cancel' },
+              {
+                  text: '<b>Send</b>',
+                  type: 'button-positive',
+                  onTap: function (e) {
+                      var message = {
+                          "date": moment().format('MM/DD/YYYY'),
+                          "subject": $('#msgSubject').val(),
+                          "pncc_id": recipient,
+                          "content": $('#msgContent').val(),
+                      };
+                      var post_information = { 'data': encodeURIComponent(JSON.stringify(message)), 'cid': window.localStorage.getItem('cid') };
+                      console.log(JSON.stringify(post_information))
+                      $.ajax({
+                          url: 'https://momlink.crc.nd.edu/~jonathan/current/sendNewMessage.php',
+                          type: 'POST',
+                          dataType: 'json',
+                          data: post_information,
+                          async: false,
+                          success: function (data) {
+                              console.log(JSON.stringify(data))
+                              if (data = true) {
+                                  console.log('message sent successfully')
+                              }
+                          }
+                      });
+
+                  }
+              }
+            ]
+        });
+    }
+    $scope.sendNewReply = function (recipient, msgID) {
+        $ionicPopup.show({
+            template: '<textarea id="msgContent" rows="4"></textarea>',
+            title: 'New Reply',
+            scope: $scope,
+            buttons: [
+              { text: 'Cancel' },
+              {
+                  text: '<b>Send</b>',
+                  type: 'button-positive',
+                  onTap: function (e) {
+                      var message = {
+                          "date": moment().format('MM/DD/YYYY'),
+                          "pncc_id": recipient,
+                          "content": $('#msgContent').val(),
+                          "msgid": msgID
+                      };
+                      var post_information = { 'data': encodeURIComponent(JSON.stringify(message)), 'cid': window.localStorage.getItem('cid') };
+                      console.log(JSON.stringify(post_information))
+                      $.ajax({
+                          url: 'https://momlink.crc.nd.edu/~jonathan/current/sendNewReply.php',
+                          type: 'POST',
+                          dataType: 'json',
+                          data: post_information,
+                          async: false,
+                          success: function (data) {
+                              console.log(JSON.stringify(data))
+                              if (data = true) {
+                                  console.log('message sent successfully')
+                              }
+                          }
+                      });
+
+                  }
+              }
+            ]
+        });
+    }
+
     $setReminder = function (title, time) {
         time = new moment(time);
         time = new Date(time);
@@ -520,10 +598,10 @@ across the app instead of just the calendar page
     Runs all php scripts
     */
     $scope.updateAll = function () {
-        //$scope.getGeneralEvents();
+        //$scope.getGeneralEvents();      
         $scope.getMessages();
-        $scope.uploadSMSMessages();
-        $scope.uploadMessages();
+        //$scope.uploadSMSMessages();
+        //$scope.uploadMessages();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
         $scope.getReferrals();
@@ -534,6 +612,7 @@ across the app instead of just the calendar page
         $scope.updateSurveys();
         $scope.retrieveClientTrackers();
         $scope.uploadTrackers();
+
     };
 
     $scope.updateAllEvents = function () {
@@ -561,7 +640,8 @@ across the app instead of just the calendar page
         $scope.toNewPage('survey.html', 'Survey');
     };
 
-    $scope.uploadMessages = function () {
+    //scrapped in favor of sendNewMesage and sendNewReply, may need later
+    /*$scope.uploadMessages = function () {
         //similar to upload trackers but for clientMessages table
         var db = PouchDB('momlink');
         var recentID = '';
@@ -608,7 +688,7 @@ across the app instead of just the calendar page
                 }
             })
         })
-    };
+    };*/
     $scope.uploadSMSMessages = function () {
         var db = PouchDB('momlink');
         var uploadData = [];
@@ -663,35 +743,82 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
         $.ajax({
-            url: 'https://momlink.crc.nd.edu/~jonathan/current/getMessages.php',
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getThreads.php',
             type: 'POST',
             dataType: 'json',
             data: post_information,
             async: false,
             success: function (data) {
-                console.log(JSON.stringify(data))
+                //console.log(JSON.stringify(data))
                 if (data.length > 0) {
                     db.get('inbox').then(function (doc) {
                         for (i in data) {
-                            //check if message is already in local db
                             var isUnique = true;
-                            for (j in doc['pnccMessages']) {
-                                if (data[i]['id'] == doc['pnccMessages'][j]['id']) {
+                            for (j in doc['threads']) {
+                                //if thread is already in the local db, update if new message has come in
+                                if (data[i]['id'] == doc['threads'][j]['id']) {
                                     console.log('hit')
+                                    if (data[i]['excerpt'] != doc['threads'][j]['excerpt']) {
+                                        doc['threads'][j]['excerpt'] = data[i]['excerpt'];
+                                        doc['threads'][j]['mdate'] = data[i]['date'];
+                                    }
                                     isUnique = false;
                                 }
                             }
                             if (isUnique == true) {
-                                var message = {
+                                var thread = {
                                     "id": data[i]['id'],
-                                    "content": data[i]['content'],
-                                    "date": data[i]['mdate']
+                                    "date": data[i]['mdate'],
+                                    "subject": data[i]['subject'],
+                                    "excerpt": data[i]['excerpt'],
+                                    "pncc_id": data[i]['pncc_id'],
+                                    "msgid": data[i]['msgid']
                                 };
-                                doc['pnccMessages'].push(message);
+                                doc['threads'].push(thread);
+                                console.log(JSON.stringify(doc['threads']))
                             }
                         }
-                        console.log('Messages downloaded')
-                        return db.put(doc);
+                        console.log('Threads downloaded')
+                        return db.put(doc).then(function () {
+                            $.ajax({
+                                url: 'https://momlink.crc.nd.edu/~jonathan/current/getMessages.php',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: post_information,
+                                async: false,
+                                success: function (data) {
+                                    console.log(JSON.stringify(data))
+                                    if (data.length > 0) {
+                                        db.get('inbox').then(function (doc) {
+                                            for (i in data) {
+                                                //check if message is already in local db
+                                                var isUnique = true;
+                                                for (j in doc['messages']) {
+                                                    if (data[i]['id'] == doc['messages'][j]['id']) {
+                                                        console.log('hit')
+                                                        isUnique = false;
+                                                    }
+                                                }
+                                                if (isUnique == true) {
+                                                    var message = {
+                                                        "id": data[i]['id'],
+                                                        "date": data[i]['mdate'],
+                                                        "sender": data[i]['sender'],
+                                                        "subject": data[i]['subject'],
+                                                        "content": data[i]['content'],
+                                                        "pncc_id": data[i]['pncc_id'],
+                                                        "msgid": data[i]['msgid'],
+                                                    };
+                                                    doc['messages'].push(message);
+                                                }
+                                            }
+                                            console.log('Messages downloaded')
+                                            return db.put(doc);
+                                        });
+                                    }
+                                }
+                            });
+                        })
                     });
                 }
             }
@@ -999,7 +1126,7 @@ across the app instead of just the calendar page
         })
         console.log('five');
     };
-    $scope.getArticles = function () {
+    $scope.testPHP = function () {
         var db = PouchDB('momlink');
         var downloads = [];
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -1010,9 +1137,7 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
-                //console.log(data)
                 if (data.length > 0) {
-                    //console.log(JSON.stringify(data))
                     db.get('articles').then(function (doc) {
                         for (i in data) {
                             //check if article is already in local db
@@ -1059,46 +1184,59 @@ across the app instead of just the calendar page
                             }
                         }
                         console.log('Articles downloaded')
-                        //console.log(JSON.stringify(downloads))
-                        return db.put(doc);
-                    }).then(function () {
-                        //console.log(downloads)
-                        if (downloads.length > 0) {
-                            for (k in downloads) {
-                                var downloadLink = String("https://momlink.crc.nd.edu/MomLink-PNCC/uploads/" + downloads[k]['filename']);
-                                var uri = encodeURI(downloadLink);
-                                var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + downloads[k]['filename'];
-                                console.log(uri)
-                                console.log(localPath)
-                                var fileTransfer = new FileTransfer();
-                                fileTransfer.download(uri, localPath,
-                                    function (entry) {
-                                        console.log("download complete: " + entry.toURL());
-                                        db.get('articles').then(function (doc) {
-                                            //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
-                                            for (i in doc['shared']) {
-                                                if (doc['shared'][i]['id'] == downloads[k]['id']) {
-                                                    doc['shared'][i]['localPath'] = entry.toURL();
-                                                    console.log(entry.toURL())
-                                                }
-                                            }
-                                            return db.put(doc);
-                                        })
-                                    },
-                                    function (error) {
-                                        console.log("download error source " + error.source);
-                                        console.log("download error target " + error.target);
-                                        console.log("download error code" + error.code);
-                                    },
-                                    false,
-                                    {
-                                        headers: {
-                                            "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+                        return db.put(doc).then(function () {
+                            //need this to run in a callback 
+                            if (downloads.length > 0) {
+                                var x = 0;
+                                var loopDownloads = function (arr) {
+                                    console.log(JSON.stringify(arr))
+                                    downloadFile(arr[x], function () {
+                                        x++;
+                                        if (x < arr.length) {
+                                            loopDownloads(arr);
                                         }
-                                    }
-                                );
+                                    });
+                                }
+                                function downloadFile(article, callback) {
+                                    console.log(JSON.stringify(article))
+                                    var downloadLink = String("https://momlink.crc.nd.edu/MomLink-PNCC/uploads/" + article['filename']);
+                                    var uri = encodeURI(downloadLink);
+                                    var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + article['filename'];
+                                    console.log(uri)
+                                    console.log(localPath)
+                                    var fileTransfer = new FileTransfer();
+                                    fileTransfer.download(uri, localPath,
+                                        function (entry) {
+                                            console.log("download complete: " + entry.toURL());
+                                            db.get('articles').then(function (doc) {
+                                                //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
+                                                for (i in doc['shared']) {
+                                                    if (doc['shared'][i]['id'] == article['id']) {
+                                                        doc['shared'][i]['localPath'] = entry.toURL();
+                                                        console.log(entry.toURL())
+                                                    }
+                                                }
+                                                return db.put(doc).then(function () {
+                                                    callback();
+                                                })
+                                            })
+                                        },
+                                        function (error) {
+                                            console.log("download error source " + error.source);
+                                            console.log("download error target " + error.target);
+                                            console.log("download error code" + error.code);
+                                        },
+                                        false,
+                                        {
+                                            headers: {
+                                                "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+                                            }
+                                        }
+                                    );
+                                }
+                                loopDownloads(downloads)
                             }
-                        }
+                        })
                     })
                 }
                 else {
@@ -1202,7 +1340,7 @@ across the app instead of just the calendar page
                             }
                             if (isUnique == true) {
                                 //makes content suitable for json parse
-                                data[i]['content'] = data[i]['content'].replace(/'/g, `"`);
+                                data[i]['content'] = data[i]['content'].replace(/'/g, '"');
                                 var survey = {
                                     "id": data[i]['id'],
                                     "title": data[i]['name'],
@@ -1435,10 +1573,10 @@ across the app instead of just the calendar page
             todaysEvents = sortTimes(todaysEvents)
             //build html string
             for (j in todaysEvents) {
-                html += `<div class="col">`;
+                html += '<div class="col">';
                 //todasEvents[j][0] is the time, [1] is the eventID, [2] is the event category
-                html += `<img src="` + $scope.getEventImg(todaysEvents[j][2]) + `" ng-click="viewEvent('` + todaysEvents[j][1] + `', 'home.html', 'Momlink')" style="height:60%;"><br>`;
-                html += $scope.convert24to12(todaysEvents[j][0]) + `</div>`;
+                html += '<img src="' + $scope.getEventImg(todaysEvents[j][2]) + '" ng-click="viewEvent(&quot;' + todaysEvents[j][1] + '&quot;, &quot;home.html&quot;, &quot;Momlink&quot;)" style="height:60%;"><br>';
+                html += $scope.convert24to12(todaysEvents[j][0]) + '</div>';
                 eventsToday = true;
             }
             html += '</div>';
@@ -1497,18 +1635,18 @@ across the app instead of just the calendar page
             }
             else {
                 renderHeaderArticle = function () {
-                    articleHtml = `<div class="row centerWhite" ng-controller="EducationCtrl">`;
+                    articleHtml = '<div class="row centerWhite" ng-controller="EducationCtrl">';
                     var img;
                     //these if statements will need to be changed depending on how article categories are implemented
                     if (articles[cycle]['category'] == 'Smoking') { img = '../img/articles/smoking.png' }
                     if (articles[cycle]['category'] == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
                     if (articles[cycle]['category'] == 'Diet') { img = '../img/articles/diet.png' }
-                    articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
-                    articleHtml += `<div class="col no-padding" align="left">`;
-                    articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle]['description'] + `</span>`;
-                    articleHtml += `<button class="button button-small button-stable" ng-click="openArticle('shared','` + String(articles[cycle]['id']) + `','` + articles[cycle]['category'] + `')">Read More</button>&nbsp;`;
+                    articleHtml += '<div class="col-15" align="left"><img src="' + img + '" style="height:60%;"></div>';
+                    articleHtml += '<div class="col no-padding" align="left">';
+                    articleHtml += '<span style="display: inline-block; max-height:75%; overflow:hidden">' + articles[cycle]['description'] + '</span>';
+                    articleHtml += '<button class="button button-small button-stable" ng-click="openArticle(&quot;shared&quot;,&quot;' + String(articles[cycle]['id']) + '&quot;,&quot;' + articles[cycle]['category'] + '&quot;)">Read More</button>&nbsp;';
                     //articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `)">Take Quiz</button>`;
-                    articleHtml += `</div></div>`;
+                    articleHtml += '</div></div>';
                     $('#articlesHeader').fadeOut("slow", function () {
                         $('#articlesHeader').html(articleHtml);
                         $compile($('#articlesHeader'))($scope);
@@ -1550,17 +1688,17 @@ across the app instead of just the calendar page
                 $compile($('#articlesHeader'))($scope);
             }
             else {
-                articleHtml = `<div class="row centerWhite" ng-controller="EducationCtrl">`;
+                articleHtml = '<div class="row centerWhite" ng-controller="EducationCtrl">';
                 var img;
                 if (articles[cycle1]['category'] == 'Smoking') { img = '../img/articles/smoking.png' }
                 if (articles[cycle1]['category'] == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
                 if (articles[cycle1]['category'] == 'Diet') { img = '../img/articles/diet.png' }
-                articleHtml += `<div class="col-15" align="left"><img src="` + img + `" style="height:60%;"></div>`;
-                articleHtml += `<div class="col no-padding" align="left">`;
-                articleHtml += `<span style="display: inline-block; max-height:75%; overflow:hidden">` + articles[cycle1]['description'] + `</span>`;
-                articleHtml += `<button class="button button-small button-stable" ng-click="renderArticle('shared',` + String(articles[cycle]['id']) + `)">Read More</button>&nbsp;`;
-                articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `)">Take Quiz</button>`;
-                articleHtml += `</div></div>`;
+                articleHtml += '<div class="col-15" align="left"><img src="' + img + '" style="height:60%;"></div>';
+                articleHtml += '<div class="col no-padding" align="left">';
+                articleHtml += '<span style="display: inline-block; max-height:75%; overflow:hidden">' + articles[cycle1]['description'] + '</span>';
+                articleHtml += '<button class="button button-small button-stable" ng-click="renderArticle(&quot;shared&quot;,' + String(articles[cycle]['id']) + ')">Read More</button>&nbsp;';
+                articleHtml += '<button class="button button-small button-stable" ng-click="renderQuiz(&quot;shared&quot;,' + String(articles[cycle]['id']) + ')">Take Quiz</button>';
+                articleHtml += '</div></div>';
                 $('#articlesHeader').html(articleHtml);
                 $compile($('#articlesHeader'))($scope);
             }
@@ -1714,7 +1852,7 @@ across the app instead of just the calendar page
                 }
             }
             if (countSurveys > 0) {
-                html = `<img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Survey')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countSurveys + `</span><p>Survey</p>`;
+                html = '<img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage(&quot;survey.html&quot;, &quot;Survey&quot;)" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">' + countSurveys + '</span><p>Survey</p>';
                 $('#survey').html(html);
                 $compile($('#survey'))($scope);
             }
@@ -1727,7 +1865,7 @@ across the app instead of just the calendar page
                     }
                 }
                 if (countArticles > 0) {
-                    html = `<img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countArticles + `</span><p>Education</p>`;
+                    html = '<img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage(&quot;education.html&quot;, &quot;Education&quot;)" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">' + countArticles + '</span><p>Education</p>';
                     $('#education').html(html);
                     $compile($('#education'))($scope);
                 }
@@ -1741,7 +1879,7 @@ across the app instead of just the calendar page
                     }
                 }
                 if (countReferrals > 0) {
-                    html = `<img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countReferrals + `</span><p>Referrals</p>`;
+                    html = '<img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage(&quot;referrals.html&quot;, &quot;Referrals&quot;)" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">' + countReferrals + '</span><p>Referrals</p>';
                     $('#referrals').html(html);
                     $compile($('#referrals'))($scope);
                 }
@@ -1755,7 +1893,7 @@ across the app instead of just the calendar page
                     }
                 }
                 if (countEvents > 0) {
-                    html = `<img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">` + countEvents + `</span><p>Calendar</p>`;
+                    html = '<img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage(&quot;calendar.html&quot;, &quot;Calendar&quot;)" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">' + countEvents + '</span><p>Calendar</p>';
                     $('#calendar').html(html);
                     $compile($('#calendar'))($scope);
                 }
@@ -2087,7 +2225,7 @@ across the app instead of just the calendar page
         }
     };
 
-    $scope.newPNCCMessage = function (email, phone) {
+    $scope.newPNCCMessage = function (recipient, email, phone) {
         if (email != '' && phone != '') {
             $ionicPopup.show({
                 title: 'Contact via',
@@ -2225,13 +2363,7 @@ across the app instead of just the calendar page
         }
         function momlinkMessage() {
             //open modal to create new message
-            $scope.modal = $ionicModal.fromTemplateUrl('messageModal.html', {
-                scope: $scope,
-                animation: 'slide-in-up'
-            }).then(function (modal) {
-                $scope.modal = modal;
-                $scope.modal.show();
-            })
+            $scope.sendNewMessage(recipient)
         }
     };
 
@@ -2891,8 +3023,8 @@ across the app instead of just the calendar page
             referrals = doc['referrals'];
             html += '<div class="list">';
             for (i in referrals) {
-                html += `<div class="item item-thumbnail-left" ng-click="renderConversation('referrals` + `','` + referrals[i]['name'] + `','` + referrals[i]['phone'] + `','` + referrals[i]['email'] + `')">`;
-                html += `<img src="` + referrals[i]['img'] + `">`;
+                html += '<div class="item item-thumbnail-left" ng-click="renderConversation(&quot;referrals' + '&quot;,&quot;' + referrals[i]['name'] + '&quot;,&quot;' + referrals[i]['phone'] + '&quot;,&quot;' + referrals[i]['email'] + '&quot;)">';
+                html += '<img src="' + referrals[i]['img'] + '">';
                 html += '<h2>' + referrals[i]['name'] + '</h2>';
                 if (referrals[i]['phone'] != '') {
                     html += '<p>' + referrals[i]['phone'] + '</p>';
@@ -2908,6 +3040,82 @@ across the app instead of just the calendar page
         });
     };
 
+    /*
+    Pulls all pnncs and assocaited contact information
+    */
+    $scope.showPNCCContacts = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('inbox').then(function (doc) {
+            pncc = doc['pncc'];
+            html += '<div class="list">';
+            for (i in pncc) {
+                html += '<div class="item item-thumbnail-left" ng-click="newPNCCMessage(&quot;' + pncc[i]['id'] + '&quot;,&quot;' + pncc[i]['email'] + '&quot;,&quot;' + pncc[i]['phone'] + '&quot;)">';
+                html += '<img src="' + pncc[i]['image'] + '">';
+                html += '<h2>' + pncc[i]['name'] + '</h2>';
+                if (pncc[i]['phone'] != '') {
+                    html += '<p>' + pncc[i]['phone'] + '</p>';
+                }
+                if (pncc[i]['email'] != '') {
+                    html += '<p>' + pncc[i]['email'] + '</p>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+            $("#threads").html(html);
+            $compile($("#threads"))($scope);
+        });
+    };
+
+    $scope.renderThreads = function () {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('inbox').then(function (doc) {
+            html += '<div class="bar bar-header"><div class="title"></div><button class ="button button-icon icon ion-person-add" ng-click="showPNCCContacts()"></button></div>'
+            html += '<div class="list has-header">';
+            console.log(JSON.stringify(doc['threads']))
+            if (doc['threads'].size == 0) {
+                html += '<div class="item item-text-wrap">No Threads to Show</div>';
+            }
+            else {
+                for (i in doc['threads']) {
+                    html += '<div class="item item-text-wrap" ng-click="renderThreadList(' + doc['threads'][i]['pncc_id'] + ',' + doc['threads'][i]['id'] + ')">';
+                    html += '<h2>' + doc['threads'][i]['pncc_id'] + ' - ' + doc['threads'][i]['subject'] + '</h2>';
+                    html += '<p>' + doc['threads'][i]['date'] + ' - ' + doc['threads'][i]['excerpt'] + '</p>';
+                    html += '</div>';
+                }
+            }
+            html += '</div>';
+            $("#".concat('threads')).html(html);
+            $compile($("#".concat('threads')))($scope);
+        });
+    };
+
+    $scope.renderThreadList = function (pncc_id, msgid) {
+        var db = PouchDB('momlink');
+        var html = '';
+        db.get('inbox').then(function (doc) {
+            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">' + pncc_id + '</div><button class ="button button-icon icon ion-email" ng-click="sendNewReply(&quot;' + pncc_id + '&quot;,&quot;' + msgid + '&quot;)"></button></div>'
+            html += '<div class="list has-header">';
+            //loop through inbox for all messages containing the thread id
+            for (i in doc['messages']) {
+                console.log(msgid)
+                console.log(JSON.stringify(doc['messages']))
+                if (doc['messages'][i]['msgid'] == msgid) {
+                    if (doc['messages'][i]['sender'] == 1) {
+                        html += '<div class="item item-text-wrap" style="color: #e6005c;">' + doc['messages'][i]['content'] + '</div>';
+                    }
+                    else {
+                        html += '<div class="item item-text-wrap" style="color: #0866c6;">' + doc['messages'][i]['content'] + '</div>';
+                    }                  
+                }
+            }
+            html += '</div>';
+            $("#".concat('threads')).html(html);
+            $compile($("#".concat('threads')))($scope);
+        });
+    };
+
     $scope.renderPNCCConversation = function () {
         var db = PouchDB('momlink');
         var html = '';
@@ -2917,7 +3125,7 @@ across the app instead of just the calendar page
             phone = pncc['phone'];
             email = pncc['email'];
         }).then(function () {
-            html += `<div class="bar bar-header"><div class="title">` + name + `</div><button class ="button button-icon icon ion-email" ng-click="newPNCCMessage('` + email + `','` + phone + `')"></button></div>`
+            html += '<div class="bar bar-header"><div class="title">' + name + '</div><button class ="button button-icon icon ion-email" ng-click="newPNCCMessage(&quot;' + email + '&quot;,&quot;' + phone + '&quot;)"></button></div>'
             html += '<div class="list has-header">';
             //loop through inbox sms, if empty, no messages to display
             //will also need to display momlink messages
@@ -2945,40 +3153,13 @@ across the app instead of just the calendar page
     };
 
     /*
-    Pulls all pnncs and assocaited contact information
-    */
-    $scope.showPNCCContacts = function () {
-        var db = PouchDB('momlink');
-        var html = '';
-        db.get('inbox').then(function (doc) {
-            pncc = doc['pncc'];
-            html += '<div class="list">';
-            for (i in pncc) {
-                html += `<div class="item item-thumbnail-left" ng-click="renderConversation('pncc'` + `,'` + pncc[i]['name'] + `','` + pncc[i]['phone'] + `','` + pncc[i]['email'] + `')">`;
-                html += `<img src="` + pncc[i]['image'] + `">`;
-                html += '<h2>' + pncc[i]['name'] + '</h2>';
-                if (pncc[i]['phone'] != '') {
-                    html += '<p>' + pncc[i]['phone'] + '</p>';
-                }
-                if (pncc[i]['email'] != '') {
-                    html += '<p>' + pncc[i]['email'] + '</p>';
-                }
-                html += '</div>';
-            }
-            html += '</div>';
-            $("#pncc").html(html);
-            $compile($("#pncc"))($scope);
-        });
-    };
-
-    /*
     Displays sms conversation between user and contact
     */
     $scope.renderConversation = function (type, name, phone, email) {
         var html = '';
         if (type == 'referrals') { show = 'showReferralContacts()'; }
         else { show = 'showPNCCContacts()'; }
-        html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="` + show + `"></button><div class="title">` + name + `</div><button class ="button button-icon icon ion-email" ng-click="newMessage('` + email + `','` + phone + `')"></button></div>`
+        html += '<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="' + show + '"></button><div class="title">' + name + '</div><button class ="button button-icon icon ion-email" ng-click="newMessage(&quot;' + email + '&quot;,&quot;' + phone + '&quot;)"></button></div>'
         html += '<div class="list has-header">';
         //loop through inbox sms, if empty, no messages to display
         SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
@@ -3002,7 +3183,7 @@ across the app instead of just the calendar page
         }, function (error) { console.log(error) });
     };
 
-    $scope.saveMessage = function (content) {
+    /*$scope.saveMessage = function (content) {
         var db = PouchDB('momlink');
         db.get('inbox').then(function (doc) {
             var message = {
@@ -3016,7 +3197,7 @@ across the app instead of just the calendar page
             $scope.toNewPage('inbox.html', 'Inbox')
             $scope.closeModal();
         });
-    }
+    }*/
 })
 
 
@@ -3045,7 +3226,7 @@ and handles event questions
                 },
                 eventRender: function (event, element) {
                     element.click(function () {
-                        $scope.clickTracker(`viewEvent(` + event.id + ', calendar.html' + ', Calendar' + `)`);
+                        $scope.clickTracker('viewEvent(' + event.id + ', calendar.html' + ', Calendar' + ')');
                         $scope.viewEvent(event.id, 'calendar.html', 'Calendar');
                     })
                     return ['all', event.scheduledBy].indexOf($('#filter').html()) >= 0
@@ -3100,7 +3281,7 @@ and handles event questions
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
             for (i in doc['questions']) {
-                questionsHtml += `<div class="item item-checkbox item-icon-right item-text-wrap" on-hold="deleteQuestion('` + i + `')">` + doc['questions'][i] + `<label class="checkbox"><input type="checkbox" name="Q" value="` + doc['questions'][i] + `"></label></div>`;
+                questionsHtml += '<div class="item item-checkbox item-icon-right item-text-wrap" on-hold="deleteQuestion(&quot;' + i + '&quot;)">' + doc['questions'][i] + '<label class="checkbox"><input type="checkbox" name="Q" value="' + doc['questions'][i] + '"></label></div>';
             }
             $('#eventQuestions').html(questionsHtml);
             $compile($('#eventQuestions'))($scope);
@@ -3113,7 +3294,7 @@ and handles event questions
     */
     $scope.addQuestion = function () {
         $ionicPopup.show({
-            template: `<input id="question" type="text">`,
+            template: '<input id="question" type="text">',
             title: 'Add question',
             scope: $scope,
             buttons: [
@@ -3229,8 +3410,8 @@ The referral controller shows all referrals and option to schedule meetings with
                     }
                     var today = moment().format('YYYY-MM-DD')
                     if ((type == 'recent' && (meetingTime == '' || moment(meetingTime) >= moment(today))) || (type == 'previous' && (moment(meetingTime) < moment(today)))) {
-                        html += `<a class="item item-thumbnail-left item-text-wrap" ng-click="schedule('` + referrals[i]['id'] + `')">`;
-                        html += `<img src="` + referrals[i]['img'] + `">`;
+                        html += '<a class="item item-thumbnail-left item-text-wrap" ng-click="schedule(&quot;' + referrals[i]['id'] + '&quot;)">';
+                        html += '<img src="' + referrals[i]['img'] + '">';
                         html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
                         html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
                         if (referrals[i]['address'] != '') {
@@ -3370,18 +3551,15 @@ the articles quiz has been completed with a perfect score
             //build string
             html += '<div class="row has-header" style="padding-right:0;padding-left:0;padding-top:0">'
             if (type == 'shared') {
-                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All');clickTracker('renderCategories(All)')" style="position:relative">
-                     <img class="autoSize" src="../img/articles/all.png">
-                     <span class ="badge badge-positive topRightBadge">` + totalUnreadArticles + `</span>All</div>`;
+                html += '<div class="col-33 text-center padding" ng-click="renderArticles(&quot;' + type + '&quot;,&quot;All&quot;);clickTracker(&quot;renderCategories(All)&quot;)" style="position:relative"><img class="autoSize" src="../img/articles/all.png"><span class ="badge badge-positive topRightBadge">' + totalUnreadArticles + '</span>All</div>';
             }
             else {
-                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','All');clickTracker('renderCategories(All)')" style="position:relative">
-                     <img class ="autoSize" src="../img/articles/all.png">All</div>`;
+                html += '<div class="col-33 text-center padding" ng-click="renderArticles(&quot;' + type + '&quot;,&quot;All&quot;);clickTracker(&quot;renderCategories(All)&quot;)" style="position:relative"><img class ="autoSize" src="../img/articles/all.png">All</div>';
             }
             for (i in categories) {
                 //add column
-                html += `<div class="col-33 text-center padding" ng-click="renderArticles('` + type + `','` + i + `');clickTracker('renderCategories(` + i + `)')" style="position:relative">`;
-                html += `<image class="autoSize" src="` + $scope.getCategoryImg(i) + `">`;
+                html += '<div class="col-33 text-center padding" ng-click="renderArticles(&quot;' + type + '&quot;,&quot;' + i + '&quot;);clickTracker(&quot;renderCategories(' + i + ')&quot;)" style="position:relative">';
+                html += '<image class="autoSize" src="' + $scope.getCategoryImg(i) + '">';
                 if (categories[i] > 0) {
                     html += '<span class="badge badge-positive topRightBadge">' + categories[i] + '</span>';
                 }
@@ -3389,7 +3567,7 @@ the articles quiz has been completed with a perfect score
                 html += '</div>';
                 //add row if 3 elements have been placed
                 if (colSpacer % 3 == 0) {
-                    html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
+                    html += '</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">';
                 }
                 colSpacer++;
             }
@@ -3408,13 +3586,13 @@ the articles quiz has been completed with a perfect score
         var html = '';
         db.get('articles').then(function (doc) {
             sharedArticles = doc[type];
-            html += `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderCategories('` + type + `')"></button><div class ="title">` + category + `</div></div>`
+            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderCategories(&quot;' + type + '&quot;)"></button><div class ="title">' + category + '</div></div>'
             html += '<div class="list has-header">';
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['category'] == category || category == 'All') {
-                    html += `<div class="item item-thumbnail-left item-text-wrap">`;
-                    html += `<img src="` + $scope.getFormatImg(article['filename']) + `">`;
+                    html += '<div class="item item-thumbnail-left item-text-wrap">';
+                    html += '<img src="' + $scope.getFormatImg(article['filename']) + '">';
                     //bold if the article has not been read
                     if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
                     else { html += '<h2>' + article['title'] + '</h2>'; }
@@ -3422,16 +3600,17 @@ the articles quiz has been completed with a perfect score
                     html += '<p>' + article['description'] + '</p>';
                     //read more/take quiz buttons
                     if (type == 'shared') {
-                        html += `<button class="button button-small button-positive" ng-click="openArticle('` + type + `','` + article['id'] + `','` + category + `')">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;`;
+                        //console.log('<button class="button button-small button-positive" ng-click="openArticle(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;')
+                        html += '<button class="button button-small button-positive" ng-click="openArticle(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;';
                     }
                     else {
-                        html += `<button class="button button-small button-positive" ng-click="renderArticle('` + type + `','` + article['id'] + `','` + category + `')">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;`;
+                        html += '<button class="button button-small button-positive" ng-click="renderArticle(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;';
                     }
                     if (type == 'shared') {
-                        html += `<button class="button button-small button-positive" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz <i class="ion-help"></i></button>`;
+                        html += '<button class="button button-small button-positive" ng-click="renderQuiz(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Take Quiz <i class="ion-help"></i></button>';
                     }
                     else {
-                        html += `<button class="button button-small button-stable" ng-click="renderQuiz('` + type + `','` + article['id'] + `','` + category + `')">Take Quiz <i class="ion-help"></i></button>`;
+                        html += '<button class="button button-small button-stable" ng-click="renderQuiz(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Take Quiz <i class="ion-help"></i></button>';
                     }
                     html += '<p>Best Score: ' + article['bestScore'] + '</p>';
                     html += '<p>Quiz Attempts: ' + article['quizAttempts'] + '</p>';
@@ -3589,13 +3768,13 @@ the articles quiz has been completed with a perfect score
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['id'] == id) {
-                    html += `<ion-modal-view>`;
-                    html += `<div class="bar bar-footer" ng-init="startSessionTimer()">`;
-                    html += `<button class="button button-icon icon ion-close-round" ng-click="recordTime('` + id + `'); renderArticles('` + type + `','` + category + `'); closeModal();">&nbsp;Close</button>`;
-                    html += `<button class="button button-icon icon ion-help" ng-click="recordTime('` + id + `'); closeModal(); renderQuiz('` + type + `','` + id + `','` + category + `');">&nbsp;Take Quiz</button>`;
-                    html += `</div>`;
-                    html += `<div class="float-button-hasFooter-topButton"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readText()"><i class="icon ion-volume-low"></i></button></span></div>`;
-                    html += `<div class="float-button-hasFooter"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readAll()"><i class="icon ion-volume-medium"></i></button></span></div>`;
+                    html += '<ion-modal-view>';
+                    html += '<div class="bar bar-footer" ng-init="startSessionTimer()">';
+                    html += '<button class="button button-icon icon ion-close-round" ng-click="recordTime(&quot;' + id + '&quot;); renderArticles(&quot;' + type + '&quot;,&quot;' + category + '&quot;); closeModal();">&nbsp;Close</button>';
+                    html += '<button class="button button-icon icon ion-help" ng-click="recordTime(&quot;' + id + '&quot;); closeModal(); renderQuiz(&quot;' + type + '&quot;,&quot;' + id + '&quot;,&quot;' + category + '&quot;);">&nbsp;Take Quiz</button>';
+                    html += '</div>';
+                    html += '<div class="float-button-hasFooter-topButton"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readText()"><i class="icon ion-volume-low"></i></button></span></div>';
+                    html += '<div class="float-button-hasFooter"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readAll()"><i class="icon ion-volume-medium"></i></button></span></div>';
                     //if category is set to local and network is not available then
                     //var networkState = navigator.connection.type;
                     articleCategory = String(article['category']).replace(/\s/g, '');
@@ -3623,6 +3802,8 @@ the articles quiz has been completed with a perfect score
                     if (article["content_text"].substring(0, 2) == './') {
                         document.addEventListener("pause", startFileTimer, false);
                         document.addEventListener("resume", endFileTimer, false);
+                        console.log(JSON.stringify(article))
+                        console.log(article["localPath"])
                         $scope.openFile(article["localPath"]);
                         function startFileTimer() {
                             $scope.startSessionTimer();
@@ -3639,17 +3820,17 @@ the articles quiz has been completed with a perfect score
                     else {
                         //if content is a link
                         if (article['content_text'].substring(0, 4) == 'http') {
-                            html += `<iframe id="frame" src="` + article['content_text'] + `" style="width:100%; height: 100%;"></iframe>`;
+                            html += '<iframe id="frame" src="' + article['content_text'] + '" style="width:100%; height: 100%;"></iframe>';
                         }
                             //content is a string
                         else {
-                            html += `<div class="has-footer">`;
-                            html += `<p>`;
+                            html += '<div class="has-footer">';
+                            html += '<p>';
                             html += article['content_text'];
-                            html += `</p>`;
-                            html += `</div>`;
+                            html += '</p>';
+                            html += '</div>';
                         }
-                        html += `</ion-modal-view>`;
+                        html += '</ion-modal-view>';
                         $scope.modal = $ionicModal.fromTemplate(html, {
                             scope: $scope,
                             animation: 'slide-in-up'
@@ -3685,16 +3866,16 @@ the articles quiz has been completed with a perfect score
                         question = quiz[j][0];
                         answers = quiz[j][1];
                         //render question
-                        html += `<div class="item item-text-wrap item-divider item-icon-right">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
+                        html += '<div class="item item-text-wrap item-divider item-icon-right">' + question + '<i class="icon ion-volume-medium" ng-click="speak(&quot;' + question + '&quot;)"></i></div>';
                         //render answers
-                        html += `<form id="` + String(j) + `">`
-                        html += `<ion-list>`
+                        html += '<form id="' + String(j) + '">'
+                        html += '<ion-list>'
                         for (k = 0; k < answers.length; k++) {
                             answer = quiz[j][1][k];
-                            html += `<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="` + String(j) + `" value="` + String(answer) + `">` + answer + `</ion-radio><button class="col icon ion-volume-medium" ng-click="speak('` + answer + `')"></button></div>`;
+                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(j) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
                         }
-                        html += `</ion-list>`
-                        html += `</form>`
+                        html += '</ion-list>'
+                        html += '</form>'
                     }
                 }
             }
@@ -3744,7 +3925,7 @@ the articles quiz has been completed with a perfect score
                 if (article['id'] == articleID) {
                     quiz = article['quiz'];
                     for (j in quiz) {
-                        selectedAnswer = $(`input[name="` + String(j) + `"]:checked`, `#`.concat(j)).val();
+                        selectedAnswer = $('input[name="' + String(j) + '"]:checked', '#'.concat(j)).val();
                         usersAnswers.push(selectedAnswer);
                         correctAnswer = quiz[j][1][quiz[j][2]];
                         if (selectedAnswer == correctAnswer) {
@@ -3779,7 +3960,7 @@ the articles quiz has been completed with a perfect score
                 text: 'Finish', onTap: function (e) {
                     //$scope.clickTracker('closeQuizResults');
                     if (prequiz == 1) {
-                        $scope.clickTracker(`renderArticle(` + type + `,` + articleID + `,` + category + `)`);
+                        $scope.clickTracker('renderArticle(' + type + ',' + articleID + ',' + category + ')');
                         $scope.renderArticle(type, articleID, category)
                     }
                 },
@@ -3908,14 +4089,14 @@ the articles quiz has been completed with a perfect score
             }
             for (i in categories) {
                 noSpaces = String(i).replace(/\s/g, '');
-                htmlSaved += `<div class="row item">`
-                htmlSaved += `<div class="col no-padding">`
-                htmlSaved += `<ion-toggle ng-model="` + noSpaces + `" ng-checked="` + localStorage.getItem(noSpaces) + `" ng-click="toggleChange('` + String(noSpaces) + `',` + noSpaces + `)" style="border:none">` + i + `</ion-toggle>`;
-                htmlSaved += `</div>`
-                htmlSaved += `<div class="col-10 no-padding">`
-                htmlSaved += `<a class="button button-icon icon ion-loop" ng-click="updateArticles('` + String(noSpaces) + `')"></a>`;
-                htmlSaved += `</div>`
-                htmlSaved += `</div>`
+                htmlSaved += '<div class="row item">'
+                htmlSaved += '<div class="col no-padding">'
+                htmlSaved += '<ion-toggle ng-model="' + noSpaces + '" ng-checked="' + localStorage.getItem(noSpaces) + '" ng-click="toggleChange(&quot;' + String(noSpaces) + '&quot;,' + noSpaces + ')" style="border:none">' + i + '</ion-toggle>';
+                htmlSaved += '</div>'
+                htmlSaved += '<div class="col-10 no-padding">'
+                htmlSaved += '<a class="button button-icon icon ion-loop" ng-click="updateArticles(&quot;' + String(noSpaces) + '&quot;)"></a>';
+                htmlSaved += '</div>'
+                htmlSaved += '</div>'
             }
             $('#Saved').html(htmlSaved);
             $compile($('#Saved'))($scope);
@@ -4084,10 +4265,10 @@ the articles quiz has been completed with a perfect score
         db.get('client_trackers').then(function (doc) {
             for (var i in doc) {
                 if (doc[i] == '1') {
-                    html5 += `<div class="col text-center">`;
-                    html5 += `<input type="image" src="../img/trackers/` + i + `.png" ng-click="goToHistory('add` + capitalizeFirstLetter(i) + `')" name="type" style="max-width:100%;height:auto;">`;
-                    html5 += `<p>` + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + `</p>`;
-                    html5 += `</div>`;
+                    html5 += '<div class="col text-center">';
+                    html5 += '<input type="image" src="../img/trackers/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;)" name="type" style="max-width:100%;height:auto;">';
+                    html5 += '<p>' + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + '</p>';
+                    html5 += '</div>';
                     col++;
                 }
                 if (col % 3 == 0) {
@@ -4096,8 +4277,8 @@ the articles quiz has been completed with a perfect score
                 }
             }
             while (col % 3 != 0) {
-                html5 += `<div class="col text-center">`;
-                html5 += `</div>`;
+                html5 += '<div class="col text-center">';
+                html5 += '</div>';
                 col++;
             }
         }).then(function () {
@@ -4175,24 +4356,24 @@ the articles quiz has been completed with a perfect score
                                 //build string
                                 for (m in todaysPills) {
                                     if (todaysPills[m][5] == '' || todaysPills[m][5] == null) {
-                                        hist += `<div class="item item-thumbnail-left"><img src='../img/trackers/pills.png' >`;
+                                        hist += '<div class="item item-thumbnail-left"><img src="../img/trackers/pills.png" >';
                                     }
                                     else {
-                                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('pill','` + todaysPills[m][0] + `')"><img src=` + todaysPills[m][5] + `>`;
+                                        hist += '<div class="item item-thumbnail-left" on-hold="deleteElement(&quot;pill&quot;,&quot;' + todaysPills[m][0] + '&quot;)"><img src=' + todaysPills[m][5] + '>';
                                     }
-                                    hist += `<h2 style="display:inline">` + todaysPills[m][1] + `</h2> <i class="icon ion-close-round" ng-click="deleteElement('pill','` + todaysPills[m][0] + `')" style="display:inline; color:red"></i>`;
-                                    hist += `<p>Take at ` + $scope.convert24to12(todaysPills[m][2]) + `</p>`;
-                                    hist += `<p>Amount:  ` + todaysPills[m][3] + `</p>`;
+                                    hist += '<h2 style="display:inline">' + todaysPills[m][1] + '</h2> <i class="icon ion-close-round" ng-click="deleteElement(&quot;pill&quot;,&quot;' + todaysPills[m][0] + '&quot;)" style="display:inline; color:red"></i>';
+                                    hist += '<p>Take at ' + $scope.convert24to12(todaysPills[m][2]) + '</p>';
+                                    hist += '<p>Amount:  ' + todaysPills[m][3] + '</p>';
                                     if (todaysPills[m][4] != '') {
-                                        hist += `<img src="` + $scope.getPillMealImg(todaysPills[m][4]) + `" style="max-height:25px;max-width:auto"></img>`;
+                                        hist += '<img src="' + $scope.getPillMealImg(todaysPills[m][4]) + '" style="max-height:25px;max-width:auto"></img>';
                                     }
-                                    hist += `</div>`;
+                                    hist += '</div>';
                                 }
                                 if (hist == '') {
-                                    hist += `<div class="row">`;
-                                    hist += `<div class="col text-center">`;
+                                    hist += '<div class="row">';
+                                    hist += '<div class="col text-center">';
                                     hist += 'No Pills Today';
-                                    hist += `</div></div>`;
+                                    hist += '</div></div>';
                                 }
                                 $('#history').html(hist);
                                 $compile($('#history'))($scope);
@@ -4401,17 +4582,17 @@ the articles quiz has been completed with a perfect score
 
                         //add element
                         time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
-                        hist += `<div class="item item-thumbnail-left" on-hold="deleteElement('` + type + `','` + elements[i]["id"] + `')"><img src='` + img + `' >`;
-                        hist += `<h2 style="display:inline">` + value + `</h2> <i class="icon ion-trash-a" ng-click="deleteElement('` + type + `','` + elements[i]["id"] + `')" style="display:inline; color:red"></i>`;
-                        hist += `<p>Time: ` + $scope.convert24to12(time) + `</p></div>`;
+                        hist += '<div class="item item-thumbnail-left" on-hold="deleteElement(&quot;' + type + '&quot;,&quot;' + elements[i]["id"] + '&quot;)"><img src=&quot;' + img + '&quot; >';
+                        hist += '<h2 style="display:inline">' + value + '</h2> <i class="icon ion-trash-a" ng-click="deleteElement(&quot;' + type + '&quot;,&quot;' + elements[i]["id"] + '&quot;)" style="display:inline; color:red"></i>';
+                        hist += '<p>Time: ' + $scope.convert24to12(time) + '</p></div>';
                     }
                 }
                 //if date has no values, then display default image
                 if (hist == '') {
-                    hist += `<div class="row">`;
-                    hist += `<div class="col text-center">`;
+                    hist += '<div class="row">';
+                    hist += '<div class="col text-center">';
                     hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
-                    hist += `</div></div>`;
+                    hist += '</div></div>';
                 }
                 $('#history').html(hist);
                 $compile($('#history'))($scope);
@@ -4733,7 +4914,7 @@ the articles quiz has been completed with a perfect score
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
             for (i in $scope.pillTimes) {
-                timesHtml += `<div class="item item-icon-right">` + $scope.convert24to12($scope.pillTimes[i]) + `<i class="button-icon icon ion-close-round" ng-click="deletePillTime('` + $scope.pillTimes[i] + `')" style="color:red"></i></div>`;
+                timesHtml += '<div class="item item-icon-right">' + $scope.convert24to12($scope.pillTimes[i]) + '<i class="button-icon icon ion-close-round" ng-click="deletePillTime(&quot;' + $scope.pillTimes[i] + '&quot;)" style="color:red"></i></div>';
             }
             $('#times').html(timesHtml);
             $compile($('#times'))($scope);
@@ -4742,7 +4923,7 @@ the articles quiz has been completed with a perfect score
     $scope.pillTimes = [];
     $scope.addTime = function () {
         $ionicPopup.show({
-            template: `<input id="time" type="time" value="00:00:00">`,
+            template: '<input id="time" type="time" value="00:00:00">',
             title: 'Add time to take pill',
             scope: $scope,
             buttons: [
@@ -4804,7 +4985,7 @@ the articles quiz has been completed with a perfect score
                             }, resOnError);
                         }, resOnError);
                     }
-                    $scope.clickTracker(`deleteElement('` + category + `')`)
+                    $scope.clickTracker('deleteElement(&quot;' + category + '&quot;)')
                     $scope.loadHistory();
                 })
             }
@@ -4918,36 +5099,36 @@ the articles quiz has been completed with a perfect score
     }
     $scope.showAmount = function (category, subcategory, servingInfoImg, halfServingImg, wholeServingImg, extraServingImg) {
         //build template
-        amountHTML = `<div class="row" ng-controller="TrackCtrl">`;
-        amountHTML += `<div class="col text-left no-padding" ng-controller="NutritionCtrl">`;
-        amountHTML += `<button class="button button-icon icon ion-information-circled" ng-click="servingPopup('` + servingInfoImg + `')"></button>`;
-        amountHTML += `</div>`;
-        amountHTML += `</div>`;
-        amountHTML += `<div class="row" ng-controller="TrackCtrl">`;
+        amountHTML = '<div class="row" ng-controller="TrackCtrl">';
+        amountHTML += '<div class="col text-left no-padding" ng-controller="NutritionCtrl">';
+        amountHTML += '<button class="button button-icon icon ion-information-circled" ng-click="servingPopup(&quot;' + servingInfoImg + '&quot;)"></button>';
+        amountHTML += '</div>';
+        amountHTML += '</div>';
+        amountHTML += '<div class="row" ng-controller="TrackCtrl">';
         var servings = [[halfServingImg, 'countHalf'], [wholeServingImg, 'countWhole']];
         for (i in servings) {
-            amountHTML += `<div class="col text-center">`;
-            amountHTML += `<div class="col text-right"><p id="` + servings[i][1] + `" style="font-size: 30px; line-height: 30px;">0</p></div>`;
-            amountHTML += `<div class="col text-center"><img src="` + servings[i][0] + `" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>`;
-            amountHTML += `<div class="row">`;
-            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'` + servings[i][1] + `\')" style="width:30px;height:30px;"></div>`;
-            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'` + servings[i][1] + `\')" style="width:30px;height:30px;"></div>`;
-            amountHTML += `</div>`;
-            amountHTML += `</div>`;
+            amountHTML += '<div class="col text-center">';
+            amountHTML += '<div class="col text-right"><p id="' + servings[i][1] + '" style="font-size: 30px; line-height: 30px;">0</p></div>';
+            amountHTML += '<div class="col text-center"><img src="' + servings[i][0] + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>';
+            amountHTML += '<div class="row">';
+            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\minus\&quot;,\&quot;' + servings[i][1] + '\&quot;)" style="width:30px;height:30px;"></div>';
+            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\&quot;plus\&quot;,\&quot;' + servings[i][1] + '\&quot;)" style="width:30px;height:30px;"></div>';
+            amountHTML += '</div>';
+            amountHTML += '</div>';
         }
-        amountHTML += `</div>`;
+        amountHTML += '</div>';
         if (extraServingImg != null) {
-            amountHTML += `<div class="row" ng-controller="TrackCtrl">`;
-            amountHTML += `<div class="col text-center">`;
-            amountHTML += `<div class="col text-right"><p id="countDouble" style="font-size: 30px; line-height: 30px;">0</p></div>`;
-            amountHTML += `<div class="col text-center"><img src="` + extraServingImg + `" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>`;
-            amountHTML += `<div class="row">`;
-            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\'minus\',\'countDouble\')" style="width:30px;height:30px;"></div>`;
-            amountHTML += `<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\'plus\',\'countDouble\')" style="width:30px;height:30px;"></div>`;
-            amountHTML += `</div>`;
-            amountHTML += `</div>`;
+            amountHTML += '<div class="row" ng-controller="TrackCtrl">';
+            amountHTML += '<div class="col text-center">';
+            amountHTML += '<div class="col text-right"><p id="countDouble" style="font-size: 30px; line-height: 30px;">0</p></div>';
+            amountHTML += '<div class="col text-center"><img src="' + extraServingImg + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>';
+            amountHTML += '<div class="row">';
+            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\&quot;minus\&quot;,\&quot;countDouble\&quot;)" style="width:30px;height:30px;"></div>';
+            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\&quot;plus\&quot;,\&quot;countDouble\&quot;)" style="width:30px;height:30px;"></div>';
+            amountHTML += '</div>';
+            amountHTML += '</div>';
             //spacing for 4th serving
-            amountHTML += `<div class="row"><div class="col"></div></div>`;
+            amountHTML += '<div class="row"><div class="col"></div></div>';
         }
         $ionicPopup.show({
             template: amountHTML,
@@ -5027,7 +5208,7 @@ the articles quiz has been completed with a perfect score
                 var html = '';
                 for (i in doc[category]) {
                     if (moment($scope.currentDate).format('YYYY/MM/DD') == doc[category][i]["date"]) {
-                        html += `<center><div class="item" on-hold="deleteElement('` + category + `','` + doc[category][i]["id"] + `')">` + $scope.convert24to12(doc[category][i]["time"]) + `&nbsp; &nbsp; &nbsp; ` + doc[category][i]["value"] + ` servings</div></center>`;
+                        html += '<center><div class="item" on-hold="deleteElement(&quot;' + category + '&quot;,&quot;' + doc[category][i]["id"] + '&quot;)">' + $scope.convert24to12(doc[category][i]["time"]) + '&nbsp; &nbsp; &nbsp; ' + doc[category][i]["value"] + ' servings</div></center>';
                     }
                 }
                 if (html == '') {
@@ -5068,7 +5249,7 @@ the articles quiz has been completed with a perfect score
                               var html = '';
                               for (i in doc[category]) {
                                   if (moment($scope.currentDate).format('MM/DD/YYYY') == doc[category][i]["date"]) {
-                                      html += `<center><div class="item" on-hold="deleteElement('` + doc[category] + `','` + doc[category][i]["id"] + `')">` + $scope.convert24to12(doc[category][i]["time"]) + `&nbsp; &nbsp; &nbsp; ` + doc[category][i]["value"] + `</div></center>`;
+                                      html += '<center><div class="item" on-hold="deleteElement(&quot;' + doc[category] + '&quot;,&quot;' + doc[category][i]["id"] + '&quot;)">' + $scope.convert24to12(doc[category][i]["time"]) + '&nbsp; &nbsp; &nbsp; ' + doc[category][i]["value"] + '</div></center>';
                                   }
                               }
                               $('#nutritionHistory').html(html);
@@ -5082,16 +5263,16 @@ the articles quiz has been completed with a perfect score
         });
     };
     $scope.servingInfo = function (image) {
-        var template = `<ion-modal-view>`;
-        template += `<ion-header-bar align-title="middle" class="bar-positive">`;
-        template += `<button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>`;
-        template += `<h1 class="title" id="modalHeadline">Serving Size Information</h1>`;
-        template += `</ion-header-bar>`;
-        template += `<ion-content overflow-scroll="true">`;
-        template += `<img class="col no-padding" src="` + image + `" style="max-width=100%;max-height=auto%">`;
+        var template = '<ion-modal-view>';
+        template += '<ion-header-bar align-title="middle" class="bar-positive">';
+        template += '<button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>';
+        template += '<h1 class="title" id="modalHeadline">Serving Size Information</h1>';
+        template += '</ion-header-bar>';
+        template += '<ion-content overflow-scroll="true">';
+        template += '<img class="col no-padding" src="' + image + '" style="max-width=100%;max-height=auto%">';
         //template += `<img class="col no-padding" src="../img/servingInfo/infoFruit.png" style="max-width=100%;max-height=auto">`;
-        template += `</ion-content>`;
-        template += `</ion-modal-view>`;
+        template += '</ion-content>';
+        template += '</ion-modal-view>';
         $scope.modal = $ionicModal.fromTemplate(template, {
             scope: $scope,
             animation: 'slide-in-up'
@@ -5099,7 +5280,7 @@ the articles quiz has been completed with a perfect score
         $scope.modal.show();
     }
     $scope.servingPopup = function (image) {
-        var template = `<img class="col no-padding" src="` + image + `" style="max-width=100%;max-height=auto">`;
+        var template = '<img class="col no-padding" src="' + image + '" style="max-width=100%;max-height=auto">';
         $ionicPopup.alert({
             title: 'Serving Info',
             template: template
@@ -5229,7 +5410,7 @@ Handler for javascript clock used in addActivityTime page
         db.get('surveys').then(function (doc) {
             for (i in doc['surveys']) {
                 if (doc['surveys'][i]['dateTaken'] == '') {
-                    html += `<a class="item" ng-click="renderSurvey('` + doc['surveys'][i]['id'] + `')">` + doc['surveys'][i]['title'] + ' <p> Given on: ' + doc['surveys'][i]['dateGiven'] + `</p></a>`;
+                    html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + ' <p> Given on: ' + doc['surveys'][i]['dateGiven'] + '</p></a>';
                 }
             }
             html += '</div>';
@@ -5243,7 +5424,7 @@ Handler for javascript clock used in addActivityTime page
         db.get('surveys').then(function (doc) {
             for (i in doc['surveys']) {
                 if (doc['surveys'][i]['dateTaken'] != '') {
-                    html += `<a class="item">` + doc['surveys'][i]['title'] + ' <p> Taken on: ' + doc['surveys'][i]['dateGiven'] + `</p></a>`;
+                    html += '<a class="item">' + doc['surveys'][i]['title'] + ' <p> Taken on: ' + doc['surveys'][i]['dateGiven'] + '</p></a>';
                 }
             }
             html += '</div>';
@@ -5252,7 +5433,7 @@ Handler for javascript clock used in addActivityTime page
         })
     };
     $scope.renderSurvey = function (surveyID) {
-        $scope.clickTracker(`startSurvey`);
+        $scope.clickTracker('startSurvey');
         var db = PouchDB('momlink');
         var html = '<div ng-controller="HeaderCtrl">';
         db.get('surveys').then(function (doc) {
@@ -5264,16 +5445,16 @@ Handler for javascript clock used in addActivityTime page
                         question = j;
                         answers = doc['surveys'][i]['questions'][j];
                         //render question
-                        html += `  <div class="item item-text-wrap item-icon-right item-divider">` + question + `<i class="icon ion-volume-medium" ng-click="speak('` + question + `')"></i></div>`;
+                        html += '  <div class="item item-text-wrap item-icon-right item-divider">' + question + '<i class="icon ion-volume-medium" ng-click="speak(&quot;' + question + '&quot;)"></i></div>';
                         //render answers
-                        html += `<form id="` + String(formID) + `">`;
-                        html += `<ion-list>`;
+                        html += '<form id="' + String(formID) + '">';
+                        html += '<ion-list>';
                         for (k = 0; k < answers.length; k++) {
                             answer = answers[k];
-                            html += `<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="` + String(formID) + `" value="` + String(answer) + `">` + answer + `</ion-radio><button class="col icon ion-volume-medium" ng-click="speak('` + answer + `')"></button></div>`;
+                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(formID) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
                         }
-                        html += `</ion-list>`;
-                        html += `</form>`;
+                        html += '</ion-list>';
+                        html += '</form>';
                         formID++;
                     }
                 }
@@ -5310,7 +5491,7 @@ Handler for javascript clock used in addActivityTime page
                 if (doc['surveys'][i]['id'] == surveyID) {
                     var formID = 0;
                     for (j in doc['surveys'][i]['questions']) {
-                        selectedAnswer = $(`input[name="` + String(formID) + `"]:checked`, `#`.concat(formID)).val();
+                        selectedAnswer = $('input[name="' + String(formID) + '"]:checked', '#'.concat(formID)).val();
                         //prune all other answers != selectedAnswer
                         doc['surveys'][i]['questions'][j] = selectedAnswer;
                         doc['surveys'][i]['survey_status'] = '1';
@@ -5379,19 +5560,19 @@ Handler for javascript clock used in addActivityTime page
                             for (i in doc['goals']) {
                                 //event has been completed
                                 if (doc['goals'][i]['completed'] == 'true') {
-                                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent('` + doc['goals'][i]['eventID'] + `','goals.html','Goals')" style="background-color: #528ef4; color:white;"><b>` + doc['goals'][i]['name'] + `<br><i class="icon ion-checkmark-round"></i></b></div>`;
+                                    html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent(&quot;' + doc['goals'][i]['eventID'] + '&quot;,&quot;goals.html&quot;,&quot;Goals&quot;)" style="background-color: #528ef4; color:white;"><b>' + doc['goals'][i]['name'] + '<br><i class="icon ion-checkmark-round"></i></b></div>';
                                 }
                                     //event has been registered
                                 else if (doc['goals'][i]['eventID'] != '' && doc['goals'][i]['eventID'] != null) {
-                                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent('` + doc['goals'][i]['eventID'] + `','goals.html','Goals')" style="background-color: #528ef4; color:white;"><b>` + doc['goals'][i]['name'] + `</b></div>`;
+                                    html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent(&quot;' + doc['goals'][i]['eventID'] + '&quot;,&quot;goals.html&quot;,&quot;Goals&quot;)" style="background-color: #528ef4; color:white;"><b>' + doc['goals'][i]['name'] + '</b></div>';
                                 }
                                     //event has not been started
                                 else {
                                     if (doc['goals'][i]['type'] == 'class') {
-                                        html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="viewClasses('` + doc['goals'][i]['name'] + `','` + doc['goals'][i]['id'] + `')"><b>` + doc['goals'][i]['name'] + `</b></div>`;
+                                        html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewClasses(&quot;' + doc['goals'][i]['name'] + '&quot;,&quot;' + doc['goals'][i]['id'] + '&quot;)"><b>' + doc['goals'][i]['name'] + '</b></div>';
                                     }
                                     if (doc['goals'][i]['type'] == 'meet') {
-                                        html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="setGoalID('` + doc['goals'][i]['id'] + `');createEvent('goals.html', 'Goals');"><b>` + doc['goals'][i]['name'] + `</b></div>`;
+                                        html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="setGoalID(&quot;' + doc['goals'][i]['id'] + '&quot;);createEvent(&quot;goals.html&quot;, &quot;Goals&quot;);"><b>' + doc['goals'][i]['name'] + '</b></div>';
                                     }
                                 }
                                 //3 items per column
@@ -5421,11 +5602,11 @@ Handler for javascript clock used in addActivityTime page
                 }
             }
             //pull class dates from goal
-            html = `<div class="list">`;
+            html = '<div class="list">';
             for (var j in doc['goals'][i]['classes']) {
-                html += `<div class="item item-button-right">` + j + `<button class="button button-small button-positive" ng-click="showInfo('` + id + `','` + name + `','` + doc['goals'][i]['classes'][j] + `','` + j + `')">View</button></div>`;
+                html += '<div class="item item-button-right">' + j + '<button class="button button-small button-positive" ng-click="showInfo(&quot;' + id + '&quot;,&quot;' + name + '&quot;,&quot;' + doc['goals'][i]['classes'][j] + '&quot;,&quot;' + j + '&quot;)">View</button></div>';
             }
-            html += `</div>`;
+            html += '</div>';
             //show dates
             $scope.choice = $ionicPopup.show({
                 template: html,
@@ -5438,11 +5619,11 @@ Handler for javascript clock used in addActivityTime page
     //show info for date
     $scope.showInfo = function (id, name, classInfo, date) {
         classInfo = classInfo.split(',');
-        html2 = `<div class="list">`;
-        html2 += `<div class="item">Venue: ` + classInfo[0] + `</div>`;
-        html2 += `<div class="item">Time: ` + classInfo[1] + ' - ' + classInfo[2] + `</div>`;
-        html2 += `<div class="item">Instructor: ` + classInfo[3] + `</div>`;
-        html2 += `</div>`;
+        html2 = '<div class="list">';
+        html2 += '<div class="item">Venue: ' + classInfo[0] + '</div>';
+        html2 += '<div class="item">Time: ' + classInfo[1] + ' - ' + classInfo[2] + '</div>';
+        html2 += '<div class="item">Instructor: ' + classInfo[3] + '</div>';
+        html2 += '</div>';
         infoPopup = $ionicPopup.show({
             template: html2,
             title: date,
@@ -5528,15 +5709,15 @@ Handler for javascript clock used in addActivityTime page
             html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">'
             do {
                 //display Date formats starting and ending dates for the week
-                displayDate = String(moment(displayStart).format('ddd MMM Do') + ` - ` + moment(displayStart.add(6, 'days')).format('ddd MMM Do'))
+                displayDate = String(moment(displayStart).format('ddd MMM Do') + ' - ' + moment(displayStart.add(6, 'days')).format('ddd MMM Do'))
                 displayStart.subtract(6, 'days');
                 //highlight the current week
                 if (displayStart <= today && displayStart.add(6, 'days') >= today) {
-                    html += `<div class="col-33 text-center padding activeWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
+                    html += '<div class="col-33 text-center padding activeWeek" ng-click="renderGallery(&quot;' + displayDate + '&quot;,' + weekCounter + ')"><b>Week:</b> ' + weekCounter + '<br>' + displayDate + '</div>';
                 }
                     //normal week
                 else {
-                    html += `<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery('` + displayDate + `',` + weekCounter + `)"><b>Week:</b> ` + weekCounter + `<br>` + displayDate + `</div>`;
+                    html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="renderGallery(&quot;' + displayDate + '&quot;,' + weekCounter + ')"><b>Week:</b> ' + weekCounter + '<br>' + displayDate + '</div>';
                 }
                 //3 dates per column
                 if (weekCounter % 3 == 0) {
@@ -5558,7 +5739,7 @@ Handler for javascript clock used in addActivityTime page
         var selectedWeek = 'Week' + String(week);
         var counter = 1;
         var colSpacer = 1;
-        html = `<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderPhotoJournal()"></button><div class ="title">` + displayDate + `</div></div>`;
+        html = '<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderPhotoJournal()"></button><div class ="title">' + displayDate + '</div></div>';
         html += '<div class="list has-header">';
         html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0;">';
         window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
@@ -5574,10 +5755,10 @@ Handler for javascript clock used in addActivityTime page
                         }
                         //get render weeks photos
                         for (j = 0; j < weeksPhotos.length; j++) {
-                            html += `<div class="col-33 photoJournalBorder"><image src="` + weeksPhotos[j] + `" ng-click="openFile('` + String(weeksPhotos[j]) + `')" style="max-width:100%;height:auto%;">`
-                            html += `<button class="button button-small button-full button-positive" ng-click="shareImage('` + weeksPhotos[j] + `')">SHARE</button></div>`;
+                            html += '<div class="col-33 photoJournalBorder"><image src="' + weeksPhotos[j] + '" ng-click="openFile(&quot;' + String(weeksPhotos[j]) + '&quot;)" style="max-width:100%;height:auto%;">'
+                            html += '<button class="button button-small button-full button-positive" ng-click="shareImage(&quot;' + weeksPhotos[j] + '&quot;)">SHARE</button></div>';
                             if (colSpacer % 3 == 0) {
-                                html += `</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">`;
+                                html += '</div><div class="row" style="padding-right:0; padding-left:0; padding-top:0">';
                             }
                             colSpacer++;
                             counter++;
@@ -5634,7 +5815,7 @@ Handler for javascript clock used in addActivityTime page
         db.get('journal').then(function (doc) {
             notes = doc['notes'];
             for (i in notes) {
-                html += `<a class="item" ng-click="editNote('` + notes[i]['id'] + `')">`;
+                html += '<a class="item" ng-click="editNote(&quot;' + notes[i]['id'] + '&quot;)">';
                 html += '<h2 style="display:inline">Note: ' + notes[i]['subject'] + '</h2> &nbsp;';
                 html += '<p style="display:inline">' + notes[i]['date'] + '</p>';
                 html += '<p>Personal Note</p>';
@@ -5645,7 +5826,7 @@ Handler for javascript clock used in addActivityTime page
             db.get('events').then(function (doc) {
                 for (i in doc['events']) {
                     if (doc['events'][i]['notes'] != '') {
-                        html += `<a class="item" ng-click="editEventNotes('` + doc['events'][i]['id'] + `')">`;
+                        html += '<a class="item" ng-click="editEventNotes(&quot;' + doc['events'][i]['id'] + '&quot;)">';
                         html += '<h2 style="display:inline">' + doc['events'][i]['title'] + '</h2> &nbsp;';
                         var year = String(doc['events'][i]['day']).substring(0, 4);
                         var month = String(doc['events'][i]['day']).substring(5, 7);
