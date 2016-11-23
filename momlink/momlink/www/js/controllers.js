@@ -1126,7 +1126,7 @@ across the app instead of just the calendar page
         })
         console.log('five');
     };
-    $scope.testPHP = function () {
+    $scope.getArticles = function () {
         var db = PouchDB('momlink');
         var downloads = [];
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -3073,14 +3073,19 @@ across the app instead of just the calendar page
         db.get('inbox').then(function (doc) {
             html += '<div class="bar bar-header"><div class="title"></div><button class ="button button-icon icon ion-person-add" ng-click="showPNCCContacts()"></button></div>'
             html += '<div class="list has-header">';
-            console.log(JSON.stringify(doc['threads']))
             if (doc['threads'].size == 0) {
                 html += '<div class="item item-text-wrap">No Threads to Show</div>';
             }
             else {
                 for (i in doc['threads']) {
+                    var pnccName = '';
+                    for (j in doc['pncc']) {
+                        if (doc['threads'][i]['pncc_id'] == doc['pncc'][j]['id']) {
+                            pnccName = doc['pncc'][j]['name'];
+                        }
+                    }
                     html += '<div class="item item-text-wrap" ng-click="renderThreadList(' + doc['threads'][i]['pncc_id'] + ',' + doc['threads'][i]['id'] + ')">';
-                    html += '<h2>' + doc['threads'][i]['pncc_id'] + ' - ' + doc['threads'][i]['subject'] + '</h2>';
+                    html += '<h2>' + pnccName + ' - ' + doc['threads'][i]['subject'] + '</h2>';
                     html += '<p>' + doc['threads'][i]['date'] + ' - ' + doc['threads'][i]['excerpt'] + '</p>';
                     html += '</div>';
                 }
@@ -3095,19 +3100,23 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         var html = '';
         db.get('inbox').then(function (doc) {
-            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">' + pncc_id + '</div><button class ="button button-icon icon ion-email" ng-click="sendNewReply(&quot;' + pncc_id + '&quot;,&quot;' + msgid + '&quot;)"></button></div>'
+            var pnccName = '';
+            for (j in doc['pncc']) {
+                if (pncc_id == doc['pncc'][j]['id']) {
+                    pnccName = doc['pncc'][j]['name'];
+                }
+            }
+            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">' + pnccName + '</div><button class ="button button-icon icon ion-email" ng-click="sendNewReply(&quot;' + pncc_id + '&quot;,&quot;' + msgid + '&quot;)"></button></div>'
             html += '<div class="list has-header">';
             //loop through inbox for all messages containing the thread id
             for (i in doc['messages']) {
-                console.log(msgid)
-                console.log(JSON.stringify(doc['messages']))
                 if (doc['messages'][i]['msgid'] == msgid) {
                     if (doc['messages'][i]['sender'] == 1) {
                         html += '<div class="item item-text-wrap" style="color: #e6005c;">' + doc['messages'][i]['content'] + '</div>';
                     }
                     else {
                         html += '<div class="item item-text-wrap" style="color: #0866c6;">' + doc['messages'][i]['content'] + '</div>';
-                    }                  
+                    }
                 }
             }
             html += '</div>';
