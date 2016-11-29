@@ -640,6 +640,12 @@ across the app instead of just the calendar page
         $scope.toNewPage('survey.html', 'Survey');
     };
 
+    $scope.updateInbox = function () {
+        $scope.getMessages();
+        $scope.uploadSMSMessages();
+        $scope.toNewPage('inbox.html', 'Inbox');
+    };
+
     //scrapped in favor of sendNewMesage and sendNewReply, may need later
     /*$scope.uploadMessages = function () {
         //similar to upload trackers but for clientMessages table
@@ -2363,7 +2369,16 @@ across the app instead of just the calendar page
         }
         function momlinkMessage() {
             //open modal to create new message
-            $scope.sendNewMessage(recipient)
+            var networkState = navigator.connection.type;
+            if (networkState == Connection.NONE) {
+                //alert must be connected to wifi
+                $ionicPopup.alert({
+                    title: 'Please Connect to WiFi to Send a Message.',
+                });
+            }
+            else {
+                $scope.sendNewMessage(recipient);
+            }
         }
     };
 
@@ -2979,7 +2994,6 @@ across the app instead of just the calendar page
         })*/
     }
 
-
     /*
     Temporary function for study, emails a log of user behavior
     */
@@ -3069,7 +3083,8 @@ across the app instead of just the calendar page
 
     $scope.renderThreads = function () {
         var db = PouchDB('momlink');
-        var html = '';
+        var allThreads = [];
+        var thread = [];
         db.get('inbox').then(function (doc) {
             html += '<div class="bar bar-header"><div class="title"></div><button class ="button button-icon icon ion-person-add" ng-click="showPNCCContacts()"></button></div>'
             html += '<div class="list has-header">';
@@ -3084,16 +3099,57 @@ across the app instead of just the calendar page
                             pnccName = doc['pncc'][j]['name'];
                         }
                     }
-                    html += '<div class="item item-text-wrap" ng-click="renderThreadList(' + doc['threads'][i]['pncc_id'] + ',' + doc['threads'][i]['id'] + ')">';
-                    html += '<h2>' + pnccName + ' - ' + doc['threads'][i]['subject'] + '</h2>';
-                    html += '<p>' + doc['threads'][i]['date'] + ' - ' + doc['threads'][i]['excerpt'] + '</p>';
+                    //add all MM conversations to a list
+                    thread = ['mm', doc['threads'][i]['pncc_id'], pnccName, doc['threads'][i]['id'], doc['threads'][i]['subject'], doc['threads'][i]['date'], doc['threads'][i]['excerpt']]
+                    allThreads.push(thread)
+                    thread = [];
+                }
+            }
+            for (k in doc['pncc']) {
+                //check if the pncc has listed their number
+                var phone = doc['pncc'][k]['phone'];
+                if (phone != '') {
+                    //check if they have an sms conversation going
+                    SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
+                        if (data.length != 0) {
+                            var d = moment.utc(data[0].date).format('MM/DD/YYYY');
+                            thread = ['sms', doc['pncc'][k]['id'], doc['pncc'][k]['name'], '', '', d, data[0].body]
+                            allThreads.push(thread)
+                            thread = [];
+                        }
+                    })
+                }
+            }
+        }).then(function () {
+            //sort by allThreads by date
+            allThreads.sort((function (index) {
+                return function (a, b) {
+                    return (a[index] === b[index] ? 0 : (a[index] > b[index] ? -1 : 1));
+                };
+            })(5));
+            //build thread string
+            var html = '';
+            //allThreads [sms/mm, pnccID, pnccName, threadID (if applicable), subject (if applicable), date, message]
+            for (t in allThreads) {
+                if (allThreads[t][0] == 'mm') {
+                    html += '<div class="item item-text-wrap" ng-click="renderThreadList(' + allThreads[t][1] + ',' + allThreads[t][3] + ')">';
+                    html += '<h2>' + allThreads[t][2] + ' - ' + allThreads[t][4] + '</h2>';
+                    html += '<p>' + allThreads[t][5] + ' - ' + allThreads[t][6] + '</p>';
+                    html += '</div>';
+                }
+                else if (allThreads[t][0] == 'sms') {
+                    //else handle as text messsage
+                    html += '<div class="item item-text-wrap" ng-click="renderPNCCConversation(' + allThreads[t][1] + ')">';
+                    //html += '<div class="item item-text-wrap" ng-click="">';
+                    html += '<h2>' + allThreads[t][2] + ' - Text Messages</h2>';
+                    html += '<p>' + allThreads[t][5] + ' - ' + allThreads[t][6] + '</p>';
                     html += '</div>';
                 }
             }
             html += '</div>';
             $("#".concat('threads')).html(html);
             $compile($("#".concat('threads')))($scope);
-        });
+        })
     };
 
     $scope.renderThreadList = function (pncc_id, msgid) {
@@ -3125,21 +3181,25 @@ across the app instead of just the calendar page
         });
     };
 
-    $scope.renderPNCCConversation = function () {
+    $scope.renderPNCCConversation = function (pncc_id) {
         var db = PouchDB('momlink');
         var html = '';
         db.get('inbox').then(function (doc) {
-            pncc = doc['pncc'][0];
+            for (i in doc['pncc']) {
+                if (doc['pncc'][i]['id'] === pncc_id) {
+                    break;
+                }
+            }
+            pncc = doc['pncc'][i];
             name = pncc['name'];
             phone = pncc['phone'];
             email = pncc['email'];
         }).then(function () {
-            html += '<div class="bar bar-header"><div class="title">' + name + '</div><button class ="button button-icon icon ion-email" ng-click="newPNCCMessage(&quot;' + email + '&quot;,&quot;' + phone + '&quot;)"></button></div>'
+            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">' + name + '</div><button class ="button button-icon icon ion-email" ng-click="newPNCCMessage(&quot;' + email + '&quot;,&quot;' + phone + '&quot;)"></button></div>'
             html += '<div class="list has-header">';
             //loop through inbox sms, if empty, no messages to display
             //will also need to display momlink messages
             SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
-                console.log(JSON.stringify(data))
                 reverse = data.reverse();
                 if (reverse.length == 0) {
                     html += '<div class="col text-center" style="color:gray">No Messages to Show</div>';
@@ -3150,13 +3210,14 @@ across the app instead of just the calendar page
                             html += '<div class="item item-text-wrap" style="color: #e6005c;">' + reverse[i].body + '</div>';
                         }
                         else {
-                            html += '<div class="item item-text-wrap" style="color: #0866c6;">' + reverse[i].body + '</div>';
+                            html += '<div class="item item-text-wrap" style="color: #0866c6;">' + data[i].body + '</div>';
                         }
                     }
                 }
                 html += '</div>';
-                $("#".concat('pncc')).html(html);
-                $compile($("#".concat('pncc')))($scope);
+                console.log(html)
+                $("#".concat('threads')).html(html);
+                $compile($("#".concat('threads')))($scope);
             }, function (error) { console.log(error) });
         });
     };
@@ -5013,6 +5074,20 @@ the articles quiz has been completed with a perfect score
             //}
         }
     };
+    $scope.renderKicks = function () {
+        console.log($scope.kicks)
+        if ($scope.kicks == null) {
+            //render default page
+            html = '<div class="row"><div class="col text-center">';
+            html += '<p>Start Timer</p>';
+            html += '</div></div>';
+            html += '<br /><div class="row padding"><div class="col text-center">';
+            html += '<img type="button" src="../img/temp/plus.png" id="plus" ng-click="" style="width:115px;height:115px;">';
+            html += '</div></div>';
+        }
+        $('#kicks').html(hist);
+        $compile($('#kicks'))($scope);
+    }
 })
 
 

@@ -7,6 +7,11 @@
                     <ion-content overflow-scroll="true" class="has-header" ng-init="renderThreads()">
                         <div id="threads"></div>
                     </ion-content>
+                    <div class="float-button-hasFooter">
+                        <span class="height-fix">
+                            <button class="button button-positive button-rounded content" ng-click="updateInbox()"><i class="icon ion-loop"></i></button>
+                        </span>
+                    </div>
                 </ion-view>
             </ion-tab>
             <ion-tab title="Referrals" icon-on="ion-ios-people" icon-off="ion-ios-people-outline">
