@@ -48,11 +48,11 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        { "id": "5", "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc2.jpg" }
+                        { "id": "5", "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc2.jpg", "smsID": "0" }
                     ],
                     "messages": [],
                     "threads": [],
-                    "clientMessages": []
+                    "clientMessages": [],
                 });
             }
         });
@@ -285,7 +285,6 @@ across the app instead of just the calendar page
                     "weight": '',
                     "clientMessages": '',
                     "eventsGeneral": '-1',
-                    "smsMessages": '0',
                 });
             }
         });
@@ -598,9 +597,9 @@ across the app instead of just the calendar page
     Runs all php scripts
     */
     $scope.updateAll = function () {
-        //$scope.getGeneralEvents();      
+        $scope.getPNCCs();
+        //$scope.getGeneralEvents();
         $scope.getMessages();
-        //$scope.uploadSMSMessages();
         //$scope.uploadMessages();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
@@ -612,7 +611,7 @@ across the app instead of just the calendar page
         $scope.updateSurveys();
         $scope.retrieveClientTrackers();
         $scope.uploadTrackers();
-
+        $scope.uploadSMSMessages();
     };
 
     $scope.updateAllEvents = function () {
@@ -641,8 +640,8 @@ across the app instead of just the calendar page
     };
 
     $scope.updateInbox = function () {
-        $scope.getMessages();
-        $scope.uploadSMSMessages();
+        $scope.getPNCCs();
+        $scope.getMessages();       
         $scope.toNewPage('inbox.html', 'Inbox');
     };
 
@@ -698,23 +697,28 @@ across the app instead of just the calendar page
     $scope.uploadSMSMessages = function () {
         var db = PouchDB('momlink');
         var uploadData = [];
-        var recentID = '';
-        db.get('update').then(function (doc) {
-            recentID = doc['smsMessages'];
-        }).then(function () {
-            db.get('inbox').then(function (doc) {
-                pncc = doc['pncc'][0];
+        var smsUpdates = {};
+        db.get('inbox').then(function (doc) {
+            for (i in doc['pncc']) {
+                pncc = doc['pncc'][i];
                 phone = pncc['phone'];
-            }).then(function () {
+                smsID = pncc['smsID'];
+                //change box to sent only
                 SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
-                    for (i in data) {
-                        if (parseInt(recentID) < parseInt(data[i]['_id'])) {
-                            data[i]['date'] = new moment(data[i]['date']).format('MM/DD/YYYY')
-                            uploadData.push(data[i])
+                    //if data.length > 0
+                    if (data != null && data.length != 0) {
+                        for (j in data) {
+                            if (parseInt(smsID) < parseInt(data[j]['_id'])) {
+                                data[j]['date'] = new moment(data[j]['date']).format('MM/DD/YYYY')
+                                data[j]['pncc_id'] = pncc['id']
+                                uploadData.push(data[j])
+                            }
                         }
+                        smsUpdates[pncc['id']] = data[0]['_id'];
                     }
                 })
-            }).then(function () {
+            }
+            return db.put(doc).then(function () {
                 //send this to the sever
                 if (uploadData.length > 0) {
                     var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid') };
@@ -728,9 +732,16 @@ across the app instead of just the calendar page
                             if (data = true) {
                                 console.log('sms message data successfully uploaded')
                                 //run script to update record table
-                                //upon success, get last element in uploadData and set it as entry in update table
-                                db.get('update').then(function (doc) {
-                                    doc['smsMessages'] = uploadData[0]['_id'];
+                                //upon success, get update smsIDs to avoid repeats
+                                db.get('inbox').then(function (doc) {
+                                    for (k in smsUpdates) {
+                                        //match pnccid to pncc in db
+                                        for (n in doc['pncc']) {
+                                            if (doc['pncc'][n]['id'] == k) {
+                                                doc['pncc'][n]['smsID'] = smsUpdates[k];
+                                            }
+                                        }
+                                    }
                                     return db.put(doc);
                                 }).then(function () {
                                     console.log('sms message data successfully updated')
@@ -742,7 +753,7 @@ across the app instead of just the calendar page
                 else {
                     console.log('sms messages already up to date');
                 }
-            })
+            });
         });
     }
     $scope.getMessages = function () {
@@ -827,6 +838,50 @@ across the app instead of just the calendar page
                         })
                     });
                 }
+            }
+        });
+    };
+    //uploadSMSMessages is called inside the getPNCCs function as it is dependent on pnccs in the db
+    $scope.getPNCCs = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getPNCCs.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                db.get('inbox').then(function (doc) {
+                    if (data.length > 0) {
+                        for (i in data) {
+                            //check if pncc is already in local db
+                            var isUnique = true;
+                            for (j in doc['pncc']) {
+                                if (data[i]['id'] == doc['pncc'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                var pncc = {
+                                    "id": data[i]['id'],
+                                    "name": data[i]['first_name'] + ' ' + data[i]['last_name'],
+                                    "phone": data[i]['phone'],
+                                    "email": data[i]['email'],
+                                    "smsID": 0,
+                                };
+                                doc['pncc'].push(pncc);
+                            }
+                        }
+                        console.log('PNCCs downloaded')
+                        return db.put(doc);
+                    }
+                    else {
+                        console.log('No new PNCCs')
+                    }
+                }).then(function () {
+                    $scope.uploadSMSMessages();
+                });
             }
         });
     };
@@ -3022,10 +3077,10 @@ across the app instead of just the calendar page
 })
 
 
-/*
-    The inbox controller pulls referral and pncc contacts
-    allows user to call/text/email them and render sms conversations
-    */
+    /*
+        The inbox controller pulls referral and pncc contacts
+        allows user to call/text/email them and render sms conversations
+        */
 .controller('InboxCtrl', function ($scope, $compile, $ionicPopup) {
     /*
     Pulls all referrals and assocaited contact information
@@ -3085,6 +3140,7 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         var allThreads = [];
         var thread = [];
+        var html = '';
         db.get('inbox').then(function (doc) {
             html += '<div class="bar bar-header"><div class="title"></div><button class ="button button-icon icon ion-person-add" ng-click="showPNCCContacts()"></button></div>'
             html += '<div class="list has-header">';
@@ -3128,7 +3184,6 @@ across the app instead of just the calendar page
                 };
             })(5));
             //build thread string
-            var html = '';
             //allThreads [sms/mm, pnccID, pnccName, threadID (if applicable), subject (if applicable), date, message]
             for (t in allThreads) {
                 if (allThreads[t][0] == 'mm') {
