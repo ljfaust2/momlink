@@ -48,7 +48,7 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "inbox",
                     "pncc": [
-                        { "id": "5", "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc2.jpg", "smsID": "0" }
+                        //{ "id": "5", "name": "Lydia Cady", "email": "cady@gmail.com", "phone": "920-655-1875", "image": "../img/temp/pncc2.jpg", "smsID": "0" }
                     ],
                     "messages": [],
                     "threads": [],
@@ -597,9 +597,8 @@ across the app instead of just the calendar page
     Runs all php scripts
     */
     $scope.updateAll = function () {
-        $scope.getPNCCs();
+        $scope.updateInbox();
         //$scope.getGeneralEvents();
-        $scope.getMessages();
         //$scope.uploadMessages();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
@@ -611,7 +610,7 @@ across the app instead of just the calendar page
         $scope.updateSurveys();
         $scope.retrieveClientTrackers();
         $scope.uploadTrackers();
-        $scope.uploadSMSMessages();
+
     };
 
     $scope.updateAllEvents = function () {
@@ -639,9 +638,8 @@ across the app instead of just the calendar page
         $scope.toNewPage('survey.html', 'Survey');
     };
 
-    $scope.updateInbox = function () {
-        $scope.getPNCCs();
-        $scope.getMessages();       
+    $scope.updateInboxButton = function () {
+        $scope.updateInbox();
         $scope.toNewPage('inbox.html', 'Inbox');
     };
 
@@ -694,6 +692,140 @@ across the app instead of just the calendar page
             })
         })
     };*/
+
+    //need to run these three functions asynchronously 
+    //getMessages is called inside the updateInbox function as it is dependent on pnccs in the db
+    //uploadSMSMessages is called inside the getMessages function
+    $scope.updateInbox = function () {
+        //get PNCCs
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getPNCCs.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                db.get('inbox').then(function (doc) {
+                    if (data.length > 0) {
+                        for (i in data) {
+                            //check if pncc is already in local db
+                            var isUnique = true;
+                            for (j in doc['pncc']) {
+                                if (data[i]['id'] == doc['pncc'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                var pncc = {
+                                    "id": data[i]['id'],
+                                    "name": data[i]['first_name'] + ' ' + data[i]['last_name'],
+                                    "phone": data[i]['phone'],
+                                    "email": data[i]['email'],
+                                    "smsID": 0,
+                                };
+                                doc['pncc'].push(pncc);
+                            }
+                        }
+                        console.log('PNCCs downloaded')
+                        return db.put(doc);
+                    }
+                    else {
+                        console.log('No new PNCCs')
+                    }
+                }).then(function () {
+                    $scope.getMessages();
+                });
+            }
+        });
+    };
+    $scope.getMessages = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getThreads.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                //console.log(JSON.stringify(data))
+                db.get('inbox').then(function (doc) {
+                    if (data.length > 0) {
+                        for (i in data) {
+                            var isUnique = true;
+                            for (j in doc['threads']) {
+                                //if thread is already in the local db, update if new message has come in
+                                if (data[i]['id'] == doc['threads'][j]['id']) {
+                                    if (data[i]['excerpt'] != doc['threads'][j]['excerpt']) {
+                                        doc['threads'][j]['excerpt'] = data[i]['excerpt'];
+                                        doc['threads'][j]['mdate'] = data[i]['date'];
+                                    }
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                var thread = {
+                                    "id": data[i]['id'],
+                                    "date": data[i]['mdate'],
+                                    "subject": data[i]['subject'],
+                                    "excerpt": data[i]['excerpt'],
+                                    "pncc_id": data[i]['pncc_id'],
+                                    "msgid": data[i]['msgid']
+                                };
+                                doc['threads'].push(thread);
+                            }
+                        }
+                        console.log('Threads downloaded')
+                        return db.put(doc).then(function () {
+                            $.ajax({
+                                url: 'https://momlink.crc.nd.edu/~jonathan/current/getMessages.php',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: post_information,
+                                async: false,
+                                success: function (data) {
+                                    db.get('inbox').then(function (doc) {
+                                        if (data.length > 0) {
+                                            for (i in data) {
+                                                //check if message is already in local db
+                                                var isUnique = true;
+                                                for (j in doc['messages']) {
+                                                    if (data[i]['id'] == doc['messages'][j]['id']) {
+                                                        isUnique = false;
+                                                    }
+                                                }
+                                                if (isUnique == true) {
+                                                    var message = {
+                                                        "id": data[i]['id'],
+                                                        "date": data[i]['mdate'],
+                                                        "sender": data[i]['sender'],
+                                                        "subject": data[i]['subject'],
+                                                        "content": data[i]['content'],
+                                                        "pncc_id": data[i]['pncc_id'],
+                                                        "msgid": data[i]['msgid'],
+                                                    };
+                                                    doc['messages'].push(message);
+                                                }
+                                            }
+                                            console.log('Messages downloaded')
+                                            return db.put(doc);
+                                        }
+                                    }).then(function () {
+                                        $scope.uploadSMSMessages();
+                                    });
+                                }
+                            });
+                        })
+                    }
+                    else {
+                        $scope.uploadSMSMessages();
+                    }
+                })
+            }
+        });
+    };
     $scope.uploadSMSMessages = function () {
         var db = PouchDB('momlink');
         var uploadData = [];
@@ -756,135 +888,7 @@ across the app instead of just the calendar page
             });
         });
     }
-    $scope.getMessages = function () {
-        var db = PouchDB('momlink');
-        var post_information = { 'cid': window.localStorage.getItem('cid') };
-        $.ajax({
-            url: 'https://momlink.crc.nd.edu/~jonathan/current/getThreads.php',
-            type: 'POST',
-            dataType: 'json',
-            data: post_information,
-            async: false,
-            success: function (data) {
-                //console.log(JSON.stringify(data))
-                if (data.length > 0) {
-                    db.get('inbox').then(function (doc) {
-                        for (i in data) {
-                            var isUnique = true;
-                            for (j in doc['threads']) {
-                                //if thread is already in the local db, update if new message has come in
-                                if (data[i]['id'] == doc['threads'][j]['id']) {
-                                    console.log('hit')
-                                    if (data[i]['excerpt'] != doc['threads'][j]['excerpt']) {
-                                        doc['threads'][j]['excerpt'] = data[i]['excerpt'];
-                                        doc['threads'][j]['mdate'] = data[i]['date'];
-                                    }
-                                    isUnique = false;
-                                }
-                            }
-                            if (isUnique == true) {
-                                var thread = {
-                                    "id": data[i]['id'],
-                                    "date": data[i]['mdate'],
-                                    "subject": data[i]['subject'],
-                                    "excerpt": data[i]['excerpt'],
-                                    "pncc_id": data[i]['pncc_id'],
-                                    "msgid": data[i]['msgid']
-                                };
-                                doc['threads'].push(thread);
-                                console.log(JSON.stringify(doc['threads']))
-                            }
-                        }
-                        console.log('Threads downloaded')
-                        return db.put(doc).then(function () {
-                            $.ajax({
-                                url: 'https://momlink.crc.nd.edu/~jonathan/current/getMessages.php',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: post_information,
-                                async: false,
-                                success: function (data) {
-                                    console.log(JSON.stringify(data))
-                                    if (data.length > 0) {
-                                        db.get('inbox').then(function (doc) {
-                                            for (i in data) {
-                                                //check if message is already in local db
-                                                var isUnique = true;
-                                                for (j in doc['messages']) {
-                                                    if (data[i]['id'] == doc['messages'][j]['id']) {
-                                                        console.log('hit')
-                                                        isUnique = false;
-                                                    }
-                                                }
-                                                if (isUnique == true) {
-                                                    var message = {
-                                                        "id": data[i]['id'],
-                                                        "date": data[i]['mdate'],
-                                                        "sender": data[i]['sender'],
-                                                        "subject": data[i]['subject'],
-                                                        "content": data[i]['content'],
-                                                        "pncc_id": data[i]['pncc_id'],
-                                                        "msgid": data[i]['msgid'],
-                                                    };
-                                                    doc['messages'].push(message);
-                                                }
-                                            }
-                                            console.log('Messages downloaded')
-                                            return db.put(doc);
-                                        });
-                                    }
-                                }
-                            });
-                        })
-                    });
-                }
-            }
-        });
-    };
-    //uploadSMSMessages is called inside the getPNCCs function as it is dependent on pnccs in the db
-    $scope.getPNCCs = function () {
-        var db = PouchDB('momlink');
-        var post_information = { 'cid': window.localStorage.getItem('cid') };
-        $.ajax({
-            url: 'https://momlink.crc.nd.edu/~jonathan/current/getPNCCs.php',
-            type: 'POST',
-            dataType: 'json',
-            data: post_information,
-            async: false,
-            success: function (data) {
-                db.get('inbox').then(function (doc) {
-                    if (data.length > 0) {
-                        for (i in data) {
-                            //check if pncc is already in local db
-                            var isUnique = true;
-                            for (j in doc['pncc']) {
-                                if (data[i]['id'] == doc['pncc'][j]['id']) {
-                                    isUnique = false;
-                                }
-                            }
-                            if (isUnique == true) {
-                                var pncc = {
-                                    "id": data[i]['id'],
-                                    "name": data[i]['first_name'] + ' ' + data[i]['last_name'],
-                                    "phone": data[i]['phone'],
-                                    "email": data[i]['email'],
-                                    "smsID": 0,
-                                };
-                                doc['pncc'].push(pncc);
-                            }
-                        }
-                        console.log('PNCCs downloaded')
-                        return db.put(doc);
-                    }
-                    else {
-                        console.log('No new PNCCs')
-                    }
-                }).then(function () {
-                    $scope.uploadSMSMessages();
-                });
-            }
-        });
-    };
+
     $scope.retrieveClientTrackers = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -2152,6 +2156,7 @@ across the app instead of just the calendar page
     */
     $scope.goToAddEvent = function () {
         window.localStorage.setItem('currentPage', $scope.trackType + ".html");
+        console.log($scope.trackType)
         $scope.modal = $ionicModal.fromTemplateUrl($scope.trackType + ".html", {
             scope: $scope,
             animation: 'slide-in-up'
@@ -3117,7 +3122,8 @@ across the app instead of just the calendar page
         var html = '';
         db.get('inbox').then(function (doc) {
             pncc = doc['pncc'];
-            html += '<div class="list">';
+            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">Contacts</div></div>'
+            html += '<div class="list has-header">';
             for (i in pncc) {
                 html += '<div class="item item-thumbnail-left" ng-click="newPNCCMessage(&quot;' + pncc[i]['id'] + '&quot;,&quot;' + pncc[i]['email'] + '&quot;,&quot;' + pncc[i]['phone'] + '&quot;)">';
                 html += '<img src="' + pncc[i]['image'] + '">';
@@ -3167,7 +3173,7 @@ across the app instead of just the calendar page
                 if (phone != '') {
                     //check if they have an sms conversation going
                     SMS.listSMS({ box: '', address: '+'.concat(phone), maxCount: 100000 }, function (data) {
-                        if (data.length != 0) {
+                        if (data.length > 0) {
                             var d = moment.utc(data[0].date).format('MM/DD/YYYY');
                             thread = ['sms', doc['pncc'][k]['id'], doc['pncc'][k]['name'], '', '', d, data[0].body]
                             allThreads.push(thread)
@@ -4392,6 +4398,7 @@ the articles quiz has been completed with a perfect score
                 if (doc[i] == '1') {
                     html5 += '<div class="col text-center">';
                     html5 += '<input type="image" src="../img/trackers/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;)" name="type" style="max-width:100%;height:auto;">';
+                    console.log(capitalizeFirstLetter(i))
                     html5 += '<p>' + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + '</p>';
                     html5 += '</div>';
                     col++;
@@ -4447,7 +4454,7 @@ the articles quiz has been completed with a perfect score
                 $scope.modal.show();
             })
         }
-        else if (el == 'addPill') {
+        else if (el == 'addPills') {
             db.get('track').then(function (doc) {
                 var hist = '';
                 pills = doc['pills'];
@@ -4484,9 +4491,9 @@ the articles quiz has been completed with a perfect score
                                         hist += '<div class="item item-thumbnail-left"><img src="../img/trackers/pills.png" >';
                                     }
                                     else {
-                                        hist += '<div class="item item-thumbnail-left" on-hold="deleteElement(&quot;pill&quot;,&quot;' + todaysPills[m][0] + '&quot;)"><img src=' + todaysPills[m][5] + '>';
+                                        hist += '<div class="item item-thumbnail-left" on-hold="deleteElement(&quot;pills&quot;,&quot;' + todaysPills[m][0] + '&quot;)"><img src=' + todaysPills[m][5] + '>';
                                     }
-                                    hist += '<h2 style="display:inline">' + todaysPills[m][1] + '</h2> <i class="icon ion-close-round" ng-click="deleteElement(&quot;pill&quot;,&quot;' + todaysPills[m][0] + '&quot;)" style="display:inline; color:red"></i>';
+                                    hist += '<h2 style="display:inline">' + todaysPills[m][1] + '</h2> <i class="icon ion-close-round" ng-click="deleteElement(&quot;pills&quot;,&quot;' + todaysPills[m][0] + '&quot;)" style="display:inline; color:red"></i>';
                                     hist += '<p>Take at ' + $scope.convert24to12(todaysPills[m][2]) + '</p>';
                                     hist += '<p>Amount:  ' + todaysPills[m][3] + '</p>';
                                     if (todaysPills[m][4] != '') {
@@ -4572,7 +4579,7 @@ the articles quiz has been completed with a perfect score
                     type = 'pain';
                     img = '../img/trackers/pain.png';
                     break;
-                case 'addStress':
+                case 'addStressors':
                     type = 'stress';
                     img = '../img/trackers/stressors.png';
                     break;
@@ -5085,6 +5092,7 @@ the articles quiz has been completed with a perfect score
                 $scope.clickTracker('deleteElement(confirm)');
                 var db = PouchDB('momlink');
                 db.get('track').then(function (doc) {
+                    console.log(category)
                     for (i in doc[category]) {
                         if (doc[category][i]['id'] === id) {
                             break;
