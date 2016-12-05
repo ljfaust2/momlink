@@ -612,37 +612,31 @@ across the app instead of just the calendar page
         $scope.uploadTrackers();
 
     };
-
     $scope.updateAllEvents = function () {
         //$scope.getGeneralEvents();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
         $scope.toNewPage('calendar.html', 'Calendar');
     };
-
     $scope.updateAllReferrals = function () {
         $scope.getReferrals();
         $scope.updateReferrals();
         $scope.toNewPage('referrals.html', 'Referrals');
     };
-
     $scope.updateAllContent = function () {
         $scope.getArticles();
         $scope.updateArticles();
         $scope.toNewPage('education.html', 'Education');
     };
-
     $scope.updateAllSurveys = function () {
         $scope.getSurveys();
         $scope.updateSurveys();
         $scope.toNewPage('survey.html', 'Survey');
     };
-
     $scope.updateInboxButton = function () {
         $scope.updateInbox();
         $scope.toNewPage('inbox.html', 'Inbox');
     };
-
     //scrapped in favor of sendNewMesage and sendNewReply, may need later
     /*$scope.uploadMessages = function () {
         //similar to upload trackers but for clientMessages table
@@ -692,7 +686,6 @@ across the app instead of just the calendar page
             })
         })
     };*/
-
     //need to run these three functions asynchronously 
     //getMessages is called inside the updateInbox function as it is dependent on pnccs in the db
     //uploadSMSMessages is called inside the getMessages function
@@ -1596,7 +1589,6 @@ across the app instead of just the calendar page
         loopTrackers(tables);
     };
 
-
     /*
     Opens side menu navigation page
     */
@@ -2156,16 +2148,113 @@ across the app instead of just the calendar page
     */
     $scope.goToAddEvent = function () {
         window.localStorage.setItem('currentPage', $scope.trackType + ".html");
-        console.log($scope.trackType)
+        console.log()
         $scope.modal = $ionicModal.fromTemplateUrl($scope.trackType + ".html", {
             scope: $scope,
             animation: 'slide-in-up'
         }).then(function (modal) {
             $scope.modal = modal;
             $scope.modal.show();
+            //add kicks loads dynamic content
+            if ($scope.trackType == 'addKicks') {
+                $scope.renderKicks()
+            }
         })
     };
-
+    $scope.renderKicks = function () {
+        var kcHtml = '';
+        if ($scope.kicks == null) {
+            //render default page
+            kcHtml += '<div class="row"><div class="col text-center">';
+            kcHtml += '<p>Start Timer</p>';
+            kcHtml += '</div></div>';
+            kcHtml += '<div class="row padding"><div class="col text-center">';
+            kcHtml += '<img type="button" src="../img/trackers/kicks.png" id="plus" ng-click="startKickCounter()" style="width:115px;height:115px;">';
+            kcHtml += '</div></div>';
+        }
+        if ($scope.kicks > 0) {
+            kcHtml += '<div class="row"><div class="col text-center">';
+            kcHtml += '<p id="kickCounter">' + String($scope.kicks + ' Kicks') + '</p>';
+            kcHtml += '</div></div>';
+            kcHtml += '<div class="row padding"><div class="col text-center">';
+            kcHtml += '<img type="button" src="../img/temp/plus.png" id="plus" ng-click="increaseKickCounter()" style="width:115px;height:115px;">';
+            kcHtml += '</div></div>';
+            //cancel
+            kcHtml += '<div class="row padding">';
+            kcHtml += '<div class="col text-center">';
+            kcHtml += '<input type="button" class="button button-block button-stable" value="CANCEL" ng-click="cancelKickCounter()">';
+            kcHtml += '</div>';
+            kcHtml += '</div>';
+        }
+        $('#kicks').html(kcHtml);
+        $compile($('#kicks'))($scope);
+    }
+    $scope.startKickCounter = function () {
+        var kcHtml = '';
+        $scope.kicksStart = new moment();
+        $scope.kicks = 1;
+        kcHtml += '<div class="row"><div class="col text-center">';
+        kcHtml += '<p id="kickCounter">1 Kick</p>';
+        kcHtml += '</div></div>';
+        kcHtml += '<div class="row padding"><div class="col text-center">';
+        kcHtml += '<img type="button" src="../img/temp/plus.png" id="plus" ng-click="increaseKickCounter()" style="width:115px;height:115px;">';
+        kcHtml += '</div></div>';
+        //cancel
+        kcHtml += '<div class="row padding">';
+        kcHtml += '<div class="col text-center">';
+        kcHtml += '<input type="button" class="button button-block button-stable" value="CANCEL" ng-click="cancelKickCounter()">';
+        kcHtml += '</div>';
+        kcHtml += '</div>';
+        $('#kicks').html(kcHtml);
+        $compile($('#kicks'))($scope);
+    }
+    $scope.increaseKickCounter = function () {
+        $scope.kicks++;
+        if ($scope.kicks == 10) {
+            var db = PouchDB('momlink');
+            $scope.kicksEnd = new moment();
+            difference = moment.duration(moment($scope.kicksEnd).diff(moment($scope.kicksStart)));
+            length = pad(difference.hours()) + ':' + pad(difference.minutes()) + ':' + pad(difference.seconds());
+            console.log(length)
+            function pad(n) {
+                return (n < 10) ? ("0" + n) : n;
+            }
+            db.get('track').then(function (doc) {
+                var element = {
+                    "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                    "date": moment($scope.kicksStart).format('YYYY/MM/DD'),
+                    "time": moment().format('HH:mm:ss'),
+                    "start": moment($scope.kicksStart).format('hh:mm:ssa'),
+                    "end": moment($scope.kicksEnd).format('hh:mm:ssa'),
+                    "value": length
+                };
+                doc['kicks'].push(element);
+                return db.put(doc).then(function () {
+                    $ionicPopup.alert({
+                        title: 'Kick Count Complete!',
+                    });
+                    $scope.toNewPage('history.html', 'History');
+                    $scope.closeModal();
+                })
+            });
+        }
+        else {
+            $('#kickCounter').html(String($scope.kicks + ' Kicks'));
+        }
+    }
+    $scope.cancelKickCounter = function () {
+        delete $scope.kicks;
+        var kcHtml = '';
+        //render default page
+        kcHtml += '<div class="row"><div class="col text-center">';
+        kcHtml += '<p>Start Timer</p>';
+        kcHtml += '</div></div>';
+        kcHtml += '<div class="row padding"><div class="col text-center">';
+        kcHtml += '<img type="button" src="../img/trackers/kicks.png" id="plus" ng-click="startKickCounter()" style="width:115px;height:115px;">';
+        kcHtml += '</div></div>';
+        $('#kicks').html(kcHtml);
+        $compile($('#kicks'))($scope);
+    }
 
     /*
     Tracking activities requires 2 pages: selecting the activity, and the amount of
@@ -2184,7 +2273,6 @@ across the app instead of just the calendar page
             }
         });
     };
-
 
     /*
     If the contact has provided their email address and phone number, 
@@ -3082,10 +3170,10 @@ across the app instead of just the calendar page
 })
 
 
-    /*
-        The inbox controller pulls referral and pncc contacts
-        allows user to call/text/email them and render sms conversations
-        */
+/*
+                The inbox controller pulls referral and pncc contacts
+                allows user to call/text/email them and render sms conversations
+                */
 .controller('InboxCtrl', function ($scope, $compile, $ionicPopup) {
     /*
     Pulls all referrals and assocaited contact information
@@ -3333,9 +3421,9 @@ across the app instead of just the calendar page
 
 
 /*
-The calendar controller implements fullCalendar.js to display events
-and handles event questions
-*/
+            The calendar controller implements fullCalendar.js to display events
+            and handles event questions
+            */
 .controller('CalendarCtrl', function ($scope, $ionicPopup, $compile) {
     /*
     Displays fullCalendar and attaches the viewEvent function to each event
@@ -3520,8 +3608,8 @@ and handles event questions
 
 
 /*
-The referral controller shows all referrals and option to schedule meetings with them
-*/
+            The referral controller shows all referrals and option to schedule meetings with them
+            */
 .controller('ReferralCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
     /*
     Populate all users referrals
@@ -3637,12 +3725,12 @@ The referral controller shows all referrals and option to schedule meetings with
 
 
 /*
-The education controller handles articles sent to the user by their pncc
-Allows user to download articles for offline use
-Articles are placed into two categories: shared and history, shared articles are 
-those recently given to user, shared articles are then moved to the history section after
-the articles quiz has been completed with a perfect score
-*/
+            The education controller handles articles sent to the user by their pncc
+            Allows user to download articles for offline use
+            Articles are placed into two categories: shared and history, shared articles are 
+            those recently given to user, shared articles are then moved to the history section after
+            the articles quiz has been completed with a perfect score
+            */
 .controller('EducationCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
     var timer;
     var sessionTime = 0;
@@ -4386,8 +4474,8 @@ the articles quiz has been completed with a perfect score
 
 
 /*
-
-*/
+            
+            */
 .controller('TrackCtrl', function ($scope, $ionicModal, $ionicPopup, $compile) {
     $scope.showTrackers = function () {
         var db = PouchDB('momlink');
@@ -4398,7 +4486,6 @@ the articles quiz has been completed with a perfect score
                 if (doc[i] == '1') {
                     html5 += '<div class="col text-center">';
                     html5 += '<input type="image" src="../img/trackers/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;)" name="type" style="max-width:100%;height:auto;">';
-                    console.log(capitalizeFirstLetter(i))
                     html5 += '<p>' + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + '</p>';
                     html5 += '</div>';
                     col++;
@@ -4594,6 +4681,8 @@ the articles quiz has been completed with a perfect score
                 var hist = '';
                 elements = doc[type]
                 for (var i in elements) {
+                    console.log(date)
+                    console.log(elements[i]["date"])
                     if (date == elements[i]["date"]) {
                         value = elements[i]["value"];
                         //get images
@@ -4714,7 +4803,7 @@ the articles quiz has been completed with a perfect score
 
                         //add element
                         time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
-                        hist += '<div class="item item-thumbnail-left" on-hold="deleteElement(&quot;' + type + '&quot;,&quot;' + elements[i]["id"] + '&quot;)"><img src=&quot;' + img + '&quot; >';
+                        hist += '<div class="item item-thumbnail-left" on-hold="deleteElement(&quot;' + type + '&quot;,&quot;' + elements[i]["id"] + '&quot;)"><img src="' + img + '">';
                         hist += '<h2 style="display:inline">' + value + '</h2> <i class="icon ion-trash-a" ng-click="deleteElement(&quot;' + type + '&quot;,&quot;' + elements[i]["id"] + '&quot;)" style="display:inline; color:red"></i>';
                         hist += '<p>Time: ' + $scope.convert24to12(time) + '</p></div>';
                     }
@@ -4766,23 +4855,23 @@ the articles quiz has been completed with a perfect score
     $scope.getMoodImg = function (type) {
         switch (type) {
             case '1':
-                return '../img/moods/bored.png';
+                return '../img/moods/1.png';
             case '2':
-                return '../img/moods/calm.png';
+                return '../img/moods/2.png';
             case '3':
-                return '../img/moods/cheerful.png';
+                return '../img/moods/3.png';
             case '4':
-                return '../img/moods/excited.png';
+                return '../img/moods/4.png';
             case '5':
-                return '../img/moods/irritated.png';
+                return '../img/moods/5.png';
             case '6':
-                return '../img/moods/neutral.png';
+                return '../img/moods/6.png';
             case '7':
-                return '../img/moods/relaxed.png';
+                return '../img/moods/7.png';
             case '8':
-                return '../img/moods/sad.png';
+                return '../img/moods/8.png';
             case '9':
-                return '../img/moods/tense.png';
+                return '../img/moods/9.png';
         }
     };
     /*$scope.getPainImg = function () {
@@ -5137,26 +5226,12 @@ the articles quiz has been completed with a perfect score
             //}
         }
     };
-    $scope.renderKicks = function () {
-        console.log($scope.kicks)
-        if ($scope.kicks == null) {
-            //render default page
-            html = '<div class="row"><div class="col text-center">';
-            html += '<p>Start Timer</p>';
-            html += '</div></div>';
-            html += '<br /><div class="row padding"><div class="col text-center">';
-            html += '<img type="button" src="../img/temp/plus.png" id="plus" ng-click="" style="width:115px;height:115px;">';
-            html += '</div></div>';
-        }
-        $('#kicks').html(hist);
-        $compile($('#kicks'))($scope);
-    }
 })
 
 
 /*
-
-*/
+            
+            */
 .controller('NutritionCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.refreshNutritionPage = function () {
         //clean canvases
@@ -5257,9 +5332,10 @@ the articles quiz has been completed with a perfect score
             amountHTML += '<div class="col text-center">';
             amountHTML += '<div class="col text-right"><p id="' + servings[i][1] + '" style="font-size: 30px; line-height: 30px;">0</p></div>';
             amountHTML += '<div class="col text-center"><img src="' + servings[i][0] + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>';
+            console.log(servings[i][0])
             amountHTML += '<div class="row">';
-            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\minus\&quot;,\&quot;' + servings[i][1] + '\&quot;)" style="width:30px;height:30px;"></div>';
-            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\&quot;plus\&quot;,\&quot;' + servings[i][1] + '\&quot;)" style="width:30px;height:30px;"></div>';
+            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\&quot;\minus\&quot;,\&quot;' + servings[i][1] + '\&quot;)" style="width:30px;height:30px;"></div>';
+            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\&quot;\plus\&quot;,\&quot;' + servings[i][1] + '\&quot;)" style="width:30px;height:30px;"></div>';
             amountHTML += '</div>';
             amountHTML += '</div>';
         }
@@ -5437,8 +5513,8 @@ the articles quiz has been completed with a perfect score
 
 
 /*
-Handler for javascript clock used in addActivityTime page
-*/
+            Handler for javascript clock used in addActivityTime page
+            */
 .controller('ClockCtrl', function () {
     function Clock(IN_szContainerID, IN_objOptions) {
         this.init();
@@ -5547,9 +5623,6 @@ Handler for javascript clock used in addActivityTime page
 })
 
 
-/*
-
-*/
 .controller('SurveyCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.renderSurveys = function () {
         var db = PouchDB('momlink');
@@ -5657,8 +5730,8 @@ Handler for javascript clock used in addActivityTime page
 
 
 /*
-
-*/
+            
+            */
 .controller('GoalsCtrl', function ($scope, $compile, $ionicPopup) {
     $scope.renderGoalsGrid = function () {
         goals = [];
@@ -5830,8 +5903,8 @@ Handler for javascript clock used in addActivityTime page
 
 
 /*
-
-*/
+            
+            */
 .controller('JournalCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.renderPhotoJournal = function () {
         var start;
@@ -6148,8 +6221,8 @@ Handler for javascript clock used in addActivityTime page
 
 
 /*
-
-*/
+            
+            */
 .controller('ProfileCtrl', function ($scope) {
     $scope.updateProfile = function () {
         var db = PouchDB('momlink');
@@ -6220,8 +6293,8 @@ Handler for javascript clock used in addActivityTime page
 
 
 /*
-
-*/
+            
+            */
 .controller('CameraCtrl', function ($scope) {
     var pictureSource;
     var destinationType; // sets the format of returned value
@@ -6316,8 +6389,8 @@ Handler for javascript clock used in addActivityTime page
 
 
 /*
-Handler for popOver features
-*/
+            Handler for popOver features
+            */
 .controller('PopOverCtrl', function ($scope, $ionicPopover) {
     $ionicPopover.fromTemplateUrl('popover.html', {
         scope: $scope
