@@ -4,7 +4,7 @@ The header controller handles login, navigation, splash screen, back button, eve
 Event functions are handled by the HeaderCtrl since they are used
 across the app instead of just the calendar page
 */
-.controller('HeaderCtrl', function ($scope, $ionicSideMenuDelegate, $ionicPopup, $ionicModal, $location, $document, $compile) {
+.controller('HeaderCtrl', function ($scope, $ionicSideMenuDelegate, $ionicPopup, $ionicModal, $location, $document, $interval, $compile) {
     /*
     Creates all necessary tables on first login
     */
@@ -1683,28 +1683,35 @@ across the app instead of just the calendar page
     /*
     Displays unread articles in the slider of the home page
     */
+    var cycleHandler;
     $scope.renderArticlesHeader = function () {
+        //if function is already running, stop the previous instance before starting a new one
+        if (angular.isDefined(cycleHandler)) {
+            console.log('check')
+            $interval.cancel(cycleHandler)
+            cycleHandler = undefined;
+        }
         var db = PouchDB('momlink');
         cycle = 0;
         db.get('articles').then(function (doc) {
             articles = doc['shared'];
             if (articles.length == 0) {
-                $('#articlesHeader').html('No New Articles');
+                html = '<div class="row; centerVH;"><br>No New Articles</div>';
+                $('#articlesHeader').html(html);
                 $compile($('#articlesHeader'))($scope);
             }
             else {
                 renderHeaderArticle = function () {
                     articleHtml = '<div class="row centerWhite" ng-controller="EducationCtrl">';
-                    var img;
-                    //these if statements will need to be changed depending on how article categories are implemented
-                    if (articles[cycle]['category'] == 'Smoking') { img = '../img/articles/smoking.png' }
-                    if (articles[cycle]['category'] == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
-                    if (articles[cycle]['category'] == 'Diet') { img = '../img/articles/diet.png' }
+                    var img = $scope.getCategoryImg(articles[cycle]['category']);
                     articleHtml += '<div class="col-15" align="left"><img src="' + img + '" style="height:60%;"></div>';
                     articleHtml += '<div class="col no-padding" align="left">';
-                    articleHtml += '<span style="display: inline-block; max-height:75%; overflow:hidden">' + articles[cycle]['description'] + '</span>';
+                    articleHtml += '<p>' + articles[cycle]['title'] + '</p>'
+                    if (articles[cycle]['description'] != '' && articles[cycle]['description'] != null) {
+                        articleHtml += '<span style="display: inline-block; max-height:75%; overflow:hidden">' + articles[cycle]['description'] + '</span>';
+                        articleHtml += '<br/>'
+                    }
                     articleHtml += '<button class="button button-small button-stable" ng-click="openArticle(&quot;shared&quot;,&quot;' + String(articles[cycle]['id']) + '&quot;,&quot;' + articles[cycle]['category'] + '&quot;)">Read More</button>&nbsp;';
-                    //articleHtml += `<button class="button button-small button-stable" ng-click="renderQuiz('shared',` + String(articles[cycle]['id']) + `)">Take Quiz</button>`;
                     articleHtml += '</div></div>';
                     $('#articlesHeader').fadeOut("slow", function () {
                         $('#articlesHeader').html(articleHtml);
@@ -1720,48 +1727,79 @@ across the app instead of just the calendar page
                     }
                 }
                 renderHeaderArticle();
-                //once this function is started it will run infinitely, swapping out the displayed article every 9 seconds 
-                (function cycleTodaysEvents(i) {
+
+                cycleHandler = $interval(function () {
+                    renderHeaderArticle();
+                    console.log('hit')
+                }, 9000);
+                
+                //once this function is started it will run continously, swapping out the displayed article every 9 seconds 
+                /*(function cycleTodaysEvents(i) {
                     setTimeout(function () {
                         renderHeaderArticle();
                         if (--i) cycleTodaysEvents(i);
                     }, 9000)
-                })(Number.POSITIVE_INFINITY);
+                })(Number.POSITIVE_INFINITY);*/
             }
         })
     };
-
-
-    /*
-    Renders an article in the header independent of the renderArticlesHeader function,
-    added to fix a bug where renderArticleHeader would leave the header empty when the
-    user returned to the home page.
-    */
-    $scope.resetArticleHeader = function () {
-        var db = PouchDB('momlink');
-        cycle1 = 0;
-        db.get('articles').then(function (doc) {
-            articles = doc['shared'];
-            if (articles == '') {
-                $('#articlesHeader').html('No New Articles');
-                $compile($('#articlesHeader'))($scope);
-            }
-            else {
-                articleHtml = '<div class="row centerWhite" ng-controller="EducationCtrl">';
-                var img;
-                if (articles[cycle1]['category'] == 'Smoking') { img = '../img/articles/smoking.png' }
-                if (articles[cycle1]['category'] == 'Blood Pressure') { img = '../img/articles/bloodpressure.png' }
-                if (articles[cycle1]['category'] == 'Diet') { img = '../img/articles/diet.png' }
-                articleHtml += '<div class="col-15" align="left"><img src="' + img + '" style="height:60%;"></div>';
-                articleHtml += '<div class="col no-padding" align="left">';
-                articleHtml += '<span style="display: inline-block; max-height:75%; overflow:hidden">' + articles[cycle1]['description'] + '</span>';
-                articleHtml += '<button class="button button-small button-stable" ng-click="renderArticle(&quot;shared&quot;,' + String(articles[cycle]['id']) + ')">Read More</button>&nbsp;';
-                articleHtml += '<button class="button button-small button-stable" ng-click="renderQuiz(&quot;shared&quot;,' + String(articles[cycle]['id']) + ')">Take Quiz</button>';
-                articleHtml += '</div></div>';
-                $('#articlesHeader').html(articleHtml);
-                $compile($('#articlesHeader'))($scope);
-            }
-        })
+    $scope.getCategoryImg = function (type) {
+        switch (type) {
+            case 'Safe Sleep':
+                return '../img/topics/sleep_big.png';
+            case 'Safety':
+                return '../img/formats/baby-proof-home.png';
+            case 'HUGS':
+                return '../img/topics/HUGS.jpg';
+            case 'Nutrition':
+                return '../img/formats/Nutrition.png';
+            case 'First Time Moms':
+                return '../img/topics/firstimemoms.jpg';
+            case 'Parenting':
+                return '../img/formats/WCC_south bend.jpg';
+            case 'Abstinence':
+                return '../img/topics/abstinence.jpg';
+            case 'Anticipatory Guidance':
+                return '../img/formats/nesting.jpg';
+            case 'Breastfeeding':
+                return '../img/topics/breastfeeding.jpg';
+            case 'Child Abuse':
+                return '../img/topics/childabuse.jpg';
+            case 'Community Resources':
+                return '../img/topics/communityresources.jpeg';
+            case 'Coping Skills':
+                return '../img/topics/coping.jpg';
+            case 'Dental Health':
+                return '../img/topics/dentalhealth copy.jpg';
+            case 'Domestic Violence':
+                return '../img/topics/domesticviolence.jpg';
+            case 'HIV Risks':
+                return '../img/topics/hivrisk.png';
+            case 'Family Planning':
+                return '../img/topics/familyplanning.jpg';
+            case 'Financial Planning':
+                return '../img/topics/financialplanning.jpg';
+            case 'Drug Cessation':
+                return '../img/topics/drugcessation.jpg';
+            case 'General Advice':
+                return '../img/topics/unnamed-chunk-5-1.png';
+            case 'Prenatal Care':
+                return '../img/topics/prenatalcare.jpg';
+            case 'Prenatal Weight':
+                return '../img/topics/prenatalweight.jpg';
+            case 'Baby Growth':
+                return '../img/topics/babygrowth.png';
+            case 'Labor and Delivery':
+                return '../img/topics/labor-delivery.jpg';
+            case 'Managing Pregnancy Discomforts':
+                return '../img/topics/pregdiscomforts.jpg';
+            case 'Health Care':
+                return '../img/topics/healthcare.jpg';
+            case 'Infant Stimulation':
+                return '../img/topics/infantstimulation.jpg';
+            case 'Infant Feeding':
+                return '../img/topics/infantfeeding.jpg';
+        }
     };
 
 
@@ -2219,7 +2257,6 @@ across the app instead of just the calendar page
             $scope.kicksEnd = new moment();
             difference = moment.duration(moment($scope.kicksEnd).diff(moment($scope.kicksStart)));
             length = pad(difference.hours()) + ':' + pad(difference.minutes()) + ':' + pad(difference.seconds());
-            console.log(length)
             function pad(n) {
                 return (n < 10) ? ("0" + n) : n;
             }
