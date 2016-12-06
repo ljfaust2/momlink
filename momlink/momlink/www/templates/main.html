@@ -59,8 +59,9 @@
                                     <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Surveys')" style="max-width:100%; height:auto;vertical-align:middle"><p>Survey</p></div>
                                 </div>
                                 <button ng-click="inspectDB()">Show DB</button>
-                                <button ng-click="testPHP(5, 130)">Test PHP</button>
+                                <button ng-click="">Test PHP</button>
                                 <button ng-click="sendLog()">Finish Tasks</button>
+                                <div id="progressBar" ng-init="renderProgressBar()"></div>
                             </center>
                         </ion-content>
                     </ion-view>

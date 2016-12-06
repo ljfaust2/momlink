@@ -33,8 +33,8 @@ across the app instead of just the calendar page
                     "name": "",
                     "email": "",
                     "age": "",
-                    "startDate": "5/20/2016",
-                    "deliveryDate": "",
+                    "startDate": "11/6/2016",
+                    "deliveryDate": "8/12/2017",
                     "aboutMe": "",
                     "doctorsName": "",
                     "doctorsEmail": "",
@@ -578,6 +578,34 @@ across the app instead of just the calendar page
                   }
               }
             ]
+        });
+    }
+
+    $scope.renderProgressBar = function () {
+        var db = new PouchDB('momlink')
+        var pbHtml = '';
+        db.get('profile').then(function (doc) {
+            if (doc['deliveryDate'] != '' && doc['startDate'] != '') {
+                duration = moment.duration(moment(doc['deliveryDate']).diff(moment(doc['startDate']))).asDays();
+                difference = moment.duration(moment().diff(moment(doc['startDate']))).asDays();
+                var progress = (difference / duration) * 100;
+                pbHtml += '<div id="pbShell" class="pbShell">';
+                pbHtml += '<div id="pbBar" class="pbBar"></div>';
+                pbHtml += '</div>';
+                $('#progressBar').html(pbHtml);
+                var elem = document.getElementById("pbBar");
+                var width = 1;
+                var id = setInterval(frame, 10);
+                function frame() {
+                    if (width >= progress) {
+                        clearInterval(id);
+                    } else {
+                        width++;
+                        elem.style.width = width + '%';
+                    }
+                }
+                //$compile($('#progressBar'))($scope);
+            }
         });
     }
 
@@ -1730,16 +1758,7 @@ across the app instead of just the calendar page
 
                 cycleHandler = $interval(function () {
                     renderHeaderArticle();
-                    console.log('hit')
                 }, 9000);
-                
-                //once this function is started it will run continously, swapping out the displayed article every 9 seconds 
-                /*(function cycleTodaysEvents(i) {
-                    setTimeout(function () {
-                        renderHeaderArticle();
-                        if (--i) cycleTodaysEvents(i);
-                    }, 9000)
-                })(Number.POSITIVE_INFINITY);*/
             }
         })
     };
