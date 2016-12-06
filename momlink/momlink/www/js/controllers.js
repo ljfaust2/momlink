@@ -1471,7 +1471,7 @@ across the app instead of just the calendar page
     $scope.uploadTrackers = function () {
         //each cell holds the table and php script
         var tables = [['activity', 'Activity'], ['bloodGlucose', 'Track'], ['babyHeartRate', 'Track'], ['bloodIron', 'Track'],
-                      ['bloodPressure', 'BloodPressure'], ['caffeine', 'Track'], ['cigarette', 'Track'], ['kicks', 'Track'],
+                      ['bloodPressure', 'BloodPressure'], ['caffeine', 'Track'], ['cigarette', 'Track'], ['kicks', 'Kicks'],
                       ['mood', 'Track'], ['nutrition', 'Nutrition'], ['pain', 'Track'], ['pills', 'Pills'], ['stress', 'Track'], ['weight', 'Track']];
         var x = 0;
         var loopTrackers = function (arr) {
@@ -1527,6 +1527,8 @@ across the app instead of just the calendar page
                     console.log(JSON.stringify(uploadData))
                     if (uploadData.length > 0) {
                         var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid'), 'table': serverTableName };
+                        console.log(JSON.stringify(post_information))
+                        console.log(table[1])
                         $.ajax({
                             url: 'https://momlink.crc.nd.edu/~jonathan/current/send' + table[1] + '.php',
                             type: 'POST',
@@ -2166,7 +2168,7 @@ across the app instead of just the calendar page
         if ($scope.kicks == null) {
             //render default page
             kcHtml += '<div class="row"><div class="col text-center">';
-            kcHtml += '<p>Start Timer</p>';
+            kcHtml += '<p class="trackingText">Start Timer</p>';
             kcHtml += '</div></div>';
             kcHtml += '<div class="row padding"><div class="col text-center">';
             kcHtml += '<img type="button" src="../img/trackers/kicks.png" id="plus" ng-click="startKickCounter()" style="width:115px;height:115px;">';
@@ -2174,7 +2176,7 @@ across the app instead of just the calendar page
         }
         if ($scope.kicks > 0) {
             kcHtml += '<div class="row"><div class="col text-center">';
-            kcHtml += '<p id="kickCounter">' + String($scope.kicks + ' Kicks') + '</p>';
+            kcHtml += '<p id="kickCounter" class="trackingText">' + String($scope.kicks + ' Kicks') + '</p>';
             kcHtml += '</div></div>';
             kcHtml += '<div class="row padding"><div class="col text-center">';
             kcHtml += '<img type="button" src="../img/temp/plus.png" id="plus" ng-click="increaseKickCounter()" style="width:115px;height:115px;">';
@@ -2190,11 +2192,12 @@ across the app instead of just the calendar page
         $compile($('#kicks'))($scope);
     }
     $scope.startKickCounter = function () {
+        navigator.vibrate(100);
         var kcHtml = '';
         $scope.kicksStart = new moment();
         $scope.kicks = 1;
         kcHtml += '<div class="row"><div class="col text-center">';
-        kcHtml += '<p id="kickCounter">1 Kick</p>';
+        kcHtml += '<p id="kickCounter" class="trackingText">1 Kick</p>';
         kcHtml += '</div></div>';
         kcHtml += '<div class="row padding"><div class="col text-center">';
         kcHtml += '<img type="button" src="../img/temp/plus.png" id="plus" ng-click="increaseKickCounter()" style="width:115px;height:115px;">';
@@ -2209,6 +2212,7 @@ across the app instead of just the calendar page
         $compile($('#kicks'))($scope);
     }
     $scope.increaseKickCounter = function () {
+        navigator.vibrate(100);
         $scope.kicks++;
         if ($scope.kicks == 10) {
             var db = PouchDB('momlink');
@@ -2224,12 +2228,15 @@ across the app instead of just the calendar page
                     "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
                     "date": moment($scope.kicksStart).format('YYYY/MM/DD'),
                     "time": moment().format('HH:mm:ss'),
-                    "start": moment($scope.kicksStart).format('hh:mm:ssa'),
-                    "end": moment($scope.kicksEnd).format('hh:mm:ssa'),
+                    "start": moment($scope.kicksStart).format('HH:mm:ss'),
+                    "end": moment($scope.kicksEnd).format('HH:mm:ss'),
                     "value": length
                 };
                 doc['kicks'].push(element);
                 return db.put(doc).then(function () {
+                    delete $scope.kicks;
+                    delete $scope.kicksStart;
+                    delete $scope.kicksEnd;
                     $ionicPopup.alert({
                         title: 'Kick Count Complete!',
                     });
@@ -2244,10 +2251,11 @@ across the app instead of just the calendar page
     }
     $scope.cancelKickCounter = function () {
         delete $scope.kicks;
+        delete $scope.kicksStart;
         var kcHtml = '';
         //render default page
         kcHtml += '<div class="row"><div class="col text-center">';
-        kcHtml += '<p>Start Timer</p>';
+        kcHtml += '<p class="trackingText">Start Timer</p>';
         kcHtml += '</div></div>';
         kcHtml += '<div class="row padding"><div class="col text-center">';
         kcHtml += '<img type="button" src="../img/trackers/kicks.png" id="plus" ng-click="startKickCounter()" style="width:115px;height:115px;">';
