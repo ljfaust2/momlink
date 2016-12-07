@@ -34,7 +34,7 @@ across the app instead of just the calendar page
                     "email": "",
                     "age": "",
                     "startDate": "11/6/2016",
-                    "deliveryDate": "8/12/2017",
+                    "deliveryDate": "",
                     "aboutMe": "",
                     "doctorsName": "",
                     "doctorsEmail": "",
@@ -586,27 +586,22 @@ across the app instead of just the calendar page
         var pbHtml = '';
         db.get('profile').then(function (doc) {
             if (doc['deliveryDate'] != '' && doc['startDate'] != '') {
-                duration = moment.duration(moment(doc['deliveryDate']).diff(moment(doc['startDate']))).asDays();
-                difference = moment.duration(moment().diff(moment(doc['startDate']))).asDays();
-                var progress = (difference / duration) * 100;
-                pbHtml += '<div id="pbShell" class="pbShell">';
-                pbHtml += '<div id="pbBar" class="pbBar"></div>';
-                pbHtml += '</div>';
-                $('#progressBar').html(pbHtml);
-                var elem = document.getElementById("pbBar");
-                var width = 1;
-                var id = setInterval(frame, 10);
-                function frame() {
-                    if (width >= progress) {
-                        clearInterval(id);
-                    } else {
-                        width++;
-                        elem.style.width = width + '%';
-                    }
+                difference = moment.duration(moment().diff(moment(doc['startDate']))).asMonths();
+                month = parseInt(difference) + 1;
+                if (month > 9) {
+                    pbHtml += ' <img src="../img/stages/postpartum.png" width="100%"> ';
                 }
+                else {
+                    pbHtml += ' <img src="../img/stages/month' + month + '.png" width="100%"> ';
+                }
+                $('#progressBar').html(pbHtml);
                 //$compile($('#progressBar'))($scope);
             }
         });
+    }
+
+    $scope.testPHP = function () {
+        console.log()
     }
 
     $setReminder = function (title, time) {
@@ -2068,7 +2063,7 @@ across the app instead of just the calendar page
                             doc['username'] = user
                             doc['password'] = pass
                             window.localStorage.setItem('cid', data[1]['client_id'])
-                            return db.put(doc).then(function (doc) {
+                            return db.put(doc).then(function () {
                                 window.location = "templates/main.html";
                             })
                         }
@@ -4136,7 +4131,6 @@ across the app instead of just the calendar page
     */
     $scope.renderQuiz = function (type, articleID, category, prequiz) {
         var db = PouchDB('momlink');
-        var title = 'Quiz';
         var html = '<div ng-controller="HeaderCtrl">';
         db.get('articles').then(function (doc) {
             sharedArticles = doc[type];
@@ -4164,30 +4158,63 @@ across the app instead of just the calendar page
             }
             html += '</div>';
             if (prequiz == 1) {
-                title = 'Pre-Quiz';
-            }
-            $ionicPopup.show({
-                title: title,
-                template: html,
-                buttons: [
-            {
-                text: 'Grade', onTap: function (e) {
-                    //score the quiz
-                    $scope.clickTracker('finishQuiz');
-                    $scope.gradeQuiz(type, articleID, category, prequiz);
+                $ionicPopup.show({
+                    title: 'The following is a pratice quiz taken before reading the article.',
+                    buttons: [
+                        {
+                            text: 'OK', onTap: function (e) {
+                                $ionicPopup.show({
+                                    title: 'Pre-Quiz',
+                                    template: html,
+                                    buttons: [
+                                {
+                                    text: 'Grade', onTap: function (e) {
+                                        //score the quiz
+                                        $scope.clickTracker('finishQuiz');
+                                        $scope.gradeQuiz(type, articleID, category, prequiz);
 
-                },
-                type: 'button-positive'
-            },
-            {
-                text: 'Cancel', onTap: function (e) {
-                    $scope.clickTracker('cancelQuiz');
-                    return 'Close';
-                },
-                type: 'button-stable'
+                                    },
+                                    type: 'button-positive'
+                                },
+                                {
+                                    text: 'Cancel', onTap: function (e) {
+                                        $scope.clickTracker('cancelQuiz');
+                                        return 'Close';
+                                    },
+                                    type: 'button-stable'
+                                }
+                                    ],
+                                });
+                            },
+                            type: 'button-positive'
+                        }
+                    ],
+                });
             }
-                ],
-            });
+            else {
+                $ionicPopup.show({
+                    title: 'Quiz',
+                    template: html,
+                    buttons: [
+                {
+                    text: 'Grade', onTap: function (e) {
+                        //score the quiz
+                        $scope.clickTracker('finishQuiz');
+                        $scope.gradeQuiz(type, articleID, category, prequiz);
+
+                    },
+                    type: 'button-positive'
+                },
+                {
+                    text: 'Cancel', onTap: function (e) {
+                        $scope.clickTracker('cancelQuiz');
+                        return 'Close';
+                    },
+                    type: 'button-stable'
+                }
+                    ],
+                });
+            }
         });
     };
 
@@ -4745,18 +4772,19 @@ across the app instead of just the calendar page
                 var hist = '';
                 elements = doc[type]
                 for (var i in elements) {
-                    console.log(date)
-                    console.log(elements[i]["date"])
                     if (date == elements[i]["date"]) {
                         value = elements[i]["value"];
                         //get images
+                        if (type == 'stress') {
+                            img = $scope.getStressImg(elements[i]["value"]);
+                        }
                         if (type == 'activity') {
                             img = $scope.getActivityImg(elements[i]["type"]);
                         }
                         if (type == 'mood') {
                             img = $scope.getMoodImg(elements[i]["value"]);
                         }
-                        //decode activity
+                        //decode numeric values
                         if (type == 'activity') {
                             switch (value) {
                                 case '1':
@@ -4785,7 +4813,6 @@ across the app instead of just the calendar page
                                     break;
                             }
                         }
-                        //decode mood
                         if (type == 'mood') {
                             switch (value) {
                                 case '1':
@@ -4817,7 +4844,6 @@ across the app instead of just the calendar page
                                     break;
                             }
                         }
-                        //decode stress
                         if (type == 'stress') {
                             switch (value) {
                                 case '1':
@@ -4837,7 +4863,6 @@ across the app instead of just the calendar page
                                     break;
                             }
                         }
-                        //decode pain
                         if (type == 'pain') {
                             switch (value) {
                                 case '1':
@@ -4860,15 +4885,14 @@ across the app instead of just the calendar page
                                     break;
                             }
                         }
-                        //decode blood pressure
                         if (type == 'bloodPressure') {
                             value = elements[i]["systolic"] + "/" + elements[i]["diastolic"]
                         }
-
                         //add element
                         time = elements[i]["time"].substring(0, elements[i]["time"].length - 3);
                         hist += '<div class="item item-thumbnail-left" on-hold="deleteElement(&quot;' + type + '&quot;,&quot;' + elements[i]["id"] + '&quot;)"><img src="' + img + '">';
-                        hist += '<h2 style="display:inline">' + value + '</h2> <i class="icon ion-trash-a" ng-click="deleteElement(&quot;' + type + '&quot;,&quot;' + elements[i]["id"] + '&quot;)" style="display:inline; color:red"></i>';
+                        hist += '<h2 style="display:inline">' + value + '</h2>';
+                        //<i class="icon ion-trash-a" ng-click="deleteElement(&quot;' + type + '&quot;,&quot;' + elements[i]["id"] + '&quot;)" style="display:inline; color:red"></i>
                         hist += '<p>Time: ' + $scope.convert24to12(time) + '</p></div>';
                     }
                 }
@@ -4891,9 +4915,9 @@ across the app instead of just the calendar page
             case 'withoutFood':
                 return '../img/pills/withoutFood.jpg';
             case 'beforeMeal':
-                return '../img/pills/beforeMeal.jpg';
+                return '../img/pills/beforeMeal.png';
             case 'afterMeal':
-                return '../img/pills/afterMeal.jpg';
+                return '../img/pills/afterMeal.png';
         }
     };
     $scope.getActivityImg = function (type) {
@@ -4936,6 +4960,20 @@ across the app instead of just the calendar page
                 return '../img/moods/8.png';
             case '9':
                 return '../img/moods/9.png';
+        }
+    };
+    $scope.getStressImg = function (type) {
+        switch (type) {
+            case '1':
+                return '../img/stressors/family.png';
+            case '2':
+                return '../img/stressors/housing.png';
+            case '3':
+                return '../img/stressors/finances.png';
+            case '4':
+                return '../img/stressors/domestic.png';
+            case '5':
+                return '../img/stressors/material.png';
         }
     };
     /*$scope.getPainImg = function () {
@@ -4999,12 +5037,46 @@ across the app instead of just the calendar page
     $scope.plusMinus = function (pm, id) {
         var countEl = $("#" + id).html();
         if (pm == 'plus') {
-            countEl++;
+            countEl = parseFloat(countEl) + 1;
             $("#" + id).html(countEl);
         }
-        if (pm == 'minus' && countEl > 0) {
-            countEl--;
+        if (pm == 'minus' && parseFloat(countEl) > 0) {
+            if (parseFloat(countEl) == 0.5) {
+                countEl = 0;
+                $("#" + id).html(countEl);
+            }
+            else {
+                countEl = parseFloat(countEl) - 1;
+                $("#" + id).html(countEl);
+            }
+        }
+    }
+    $scope.plusMinusHalf = function (pm, id) {
+        var countEl = $("#" + id).html();
+        if (pm == 'plus') {
+            countEl = parseFloat(countEl) + .5;
             $("#" + id).html(countEl);
+        }
+        if (pm == 'minus' && parseFloat(countEl) > 0) {
+            countEl = parseFloat(countEl) - .5;
+            $("#" + id).html(countEl);
+        }
+    }
+    $scope.plusMinusTwo = function (pm, id) {
+        var countEl = $("#" + id).html();
+        if (pm == 'plus') {
+            countEl = parseFloat(countEl) + 2;
+            $("#" + id).html(countEl);
+        }
+        if (pm == 'minus' && parseFloat(countEl) > 0) {
+            if (parseFloat(countEl) <= 1.5) {
+                countEl = 0;
+                $("#" + id).html(countEl);
+            }
+            else {
+                countEl = parseFloat(countEl) - 2;
+                $("#" + id).html(countEl);
+            }
         }
     }
     $scope.clear = function (id, num) {
@@ -5233,6 +5305,9 @@ across the app instead of just the calendar page
         }
         $scope.renderPillTimes();
     };
+    $scope.pillRestrictionsDropDown = function () {
+        $('#meal').css('display', '')
+    };
     $scope.deleteElement = function (category, id) {
         $ionicPopup.show({
             title: 'Are you sure you want to delete this?',
@@ -5245,7 +5320,6 @@ across the app instead of just the calendar page
                 $scope.clickTracker('deleteElement(confirm)');
                 var db = PouchDB('momlink');
                 db.get('track').then(function (doc) {
-                    console.log(category)
                     for (i in doc[category]) {
                         if (doc[category][i]['id'] === id) {
                             break;
@@ -5390,16 +5464,24 @@ across the app instead of just the calendar page
         amountHTML += '<button class="button button-icon icon ion-information-circled" ng-click="servingPopup(&quot;' + servingInfoImg + '&quot;)"></button>';
         amountHTML += '</div>';
         amountHTML += '</div>';
+        amountHTML += '<div class="row" ng-controller="TrackCtrl"><div class="col"><div class="col text-center">';
+        amountHTML += '<div class="col text-right"><p id="count" style="font-size: 30px; line-height: 30px; display: inline-block;">0</p><p style="font-size: 30px; line-height: 30px; display: inline-block;">&nbsp;Serving(s)</p></div>';
+        amountHTML += '</div></div></div>';
         amountHTML += '<div class="row" ng-controller="TrackCtrl">';
         var servings = [[halfServingImg, 'countHalf'], [wholeServingImg, 'countWhole']];
         for (i in servings) {
             amountHTML += '<div class="col text-center">';
-            amountHTML += '<div class="col text-right"><p id="' + servings[i][1] + '" style="font-size: 30px; line-height: 30px;">0</p></div>';
             amountHTML += '<div class="col text-center"><img src="' + servings[i][0] + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>';
             console.log(servings[i][0])
             amountHTML += '<div class="row">';
-            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\&quot;\minus\&quot;,\&quot;' + servings[i][1] + '\&quot;)" style="width:30px;height:30px;"></div>';
-            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\&quot;\plus\&quot;,\&quot;' + servings[i][1] + '\&quot;)" style="width:30px;height:30px;"></div>';
+            if (servings[i][1] == 'countHalf') {
+                amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinusHalf(\&quot;\minus\&quot;,\&quot;count\&quot;)" style="width:30px;height:30px;"></div>';
+                amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinusHalf(\&quot;\plus\&quot;,\&quot;count\&quot;)" style="width:30px;height:30px;"></div>';
+            }
+            if (servings[i][1] == 'countWhole') {
+                amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\&quot;\minus\&quot;,\&quot;count\&quot;)" style="width:30px;height:30px;"></div>';
+                amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\&quot;\plus\&quot;,\&quot;count\&quot;)" style="width:30px;height:30px;"></div>';
+            }
             amountHTML += '</div>';
             amountHTML += '</div>';
         }
@@ -5407,11 +5489,10 @@ across the app instead of just the calendar page
         if (extraServingImg != null) {
             amountHTML += '<div class="row" ng-controller="TrackCtrl">';
             amountHTML += '<div class="col text-center">';
-            amountHTML += '<div class="col text-right"><p id="countDouble" style="font-size: 30px; line-height: 30px;">0</p></div>';
             amountHTML += '<div class="col text-center"><img src="' + extraServingImg + '" style="display:block; max-width:100px; max-height:100px; width:auto; height:auto;"/></div>';
             amountHTML += '<div class="row">';
-            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinus(\&quot;minus\&quot;,\&quot;countDouble\&quot;)" style="width:30px;height:30px;"></div>';
-            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinus(\&quot;plus\&quot;,\&quot;countDouble\&quot;)" style="width:30px;height:30px;"></div>';
+            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/minus.png" id="minus" ng-click="plusMinusTwo(\&quot;minus\&quot;,\&quot;count\&quot;)" style="width:30px;height:30px;"></div>';
+            amountHTML += '<div class="col text-center"><img type="button" src="../img/temp/plus.png" id="minus" ng-click="plusMinusTwo(\&quot;plus\&quot;,\&quot;count\&quot;)" style="width:30px;height:30px;"></div>';
             amountHTML += '</div>';
             amountHTML += '</div>';
             //spacing for 4th serving
@@ -5453,7 +5534,7 @@ across the app instead of just the calendar page
                 "time": moment().format('HH:mm:ss'),
                 "category": category,
                 "subcategory": subcategory,
-                "value": parseInt($('#countWhole').html()) + parseInt($('#countHalf').html()) / 2 + double
+                "value": value
             };
             doc[category].push(element);
             return db.put(doc);
@@ -6312,14 +6393,15 @@ across the app instead of just the calendar page
             function resOnError(error) {
                 console.log(error.code);
             }
-            doc['name'] = $('#name').val(),
-            doc['email'] = $('#email').val(),
-            doc['age'] = $('#age').val(),
-            doc['deliveryDate'] = $('#delivery').val(),
-            doc['aboutMe'] = $('#about').val(),
-            doc['doctorsName'] = $('#dName').val(),
-            doc['doctorsEmail'] = $('#dEmail').val(),
-            doc['doctorsPhone'] = $('#dNumber').val()
+            doc['name'] = $('#name').val();
+            doc['email'] = $('#email').val();
+            doc['age'] = $('#age').val();
+            doc['deliveryDate'] = $('#delivery').val();
+            doc['startDate'] = moment(moment($('#delivery').val()).subtract(9, 'months')).format('YYYY-MM-DD');
+            doc['aboutMe'] = $('#about').val();
+            doc['doctorsName'] = $('#dName').val();
+            doc['doctorsEmail'] = $('#dEmail').val();
+            doc['doctorsPhone'] = $('#dNumber').val();
             return db.put(doc).then(function (doc) {
                 $scope.toNewPage('home.html', 'Momlink');
             });
