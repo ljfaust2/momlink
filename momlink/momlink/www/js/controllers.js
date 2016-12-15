@@ -33,7 +33,7 @@ across the app instead of just the calendar page
                     "name": "",
                     "email": "",
                     "age": "",
-                    "startDate": "11/6/2016",
+                    "startDate": "",
                     "deliveryDate": "",
                     "aboutMe": "",
                     "doctorsName": "",
@@ -145,6 +145,7 @@ across the app instead of just the calendar page
                     "bloodPressure": [],
                     "caffeine": [],
                     "cigarette": [],
+                    "conditions": [],
                     "kicks": [],
                     'mood': [],
                     'pain': [],
@@ -276,6 +277,7 @@ across the app instead of just the calendar page
                     "bloodPressure": '',
                     "caffeine": '',
                     "cigarette": '',
+                    "conditions": '',
                     "nutrition": '',
                     "kicks": '',
                     'mood': '',
@@ -299,6 +301,7 @@ across the app instead of just the calendar page
                     "bloodPressure": '1',
                     "caffeine": '1',
                     "cigarettes": '1',
+                    "conditions": '1',
                     "nutrition": '1',
                     "kicks": '1',
                     'mood': '1',
@@ -589,10 +592,10 @@ across the app instead of just the calendar page
                 difference = moment.duration(moment().diff(moment(doc['startDate']))).asMonths();
                 month = parseInt(difference) + 1;
                 if (month > 9) {
-                    pbHtml += ' <img src="../img/stages/postpartum.png" width="100%"> ';
+                    pbHtml += ' <img src="../img/stages/postpartum.png" width="100%" style="max-width:100%; height:auto;vertical-align:middle"> ';
                 }
                 else {
-                    pbHtml += ' <img src="../img/stages/month' + month + '.png" width="100%"> ';
+                    pbHtml += ' <img src="../img/stages/month' + month + '.png" width="100%" style="max-width:100%; height:auto;vertical-align:middle"> ';
                 }
                 $('#progressBar').html(pbHtml);
                 //$compile($('#progressBar'))($scope);
@@ -716,6 +719,7 @@ across the app instead of just the calendar page
         //get PNCCs
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
+        console.log(JSON.stringify(post_information))
         $.ajax({
             url: 'https://momlink.crc.nd.edu/~jonathan/current/getPNCCs.php',
             type: 'POST',
@@ -1494,7 +1498,7 @@ across the app instead of just the calendar page
     $scope.uploadTrackers = function () {
         //each cell holds the table and php script
         var tables = [['activity', 'Activity'], ['bloodGlucose', 'Track'], ['babyHeartRate', 'Track'], ['bloodIron', 'Track'],
-                      ['bloodPressure', 'BloodPressure'], ['caffeine', 'Track'], ['cigarette', 'Track'], ['kicks', 'Kicks'],
+                      ['bloodPressure', 'BloodPressure'], ['caffeine', 'Track'], ['cigarette', 'Track'], ['conditions', 'Track'], ['kicks', 'Kicks'],
                       ['mood', 'Track'], ['nutrition', 'Nutrition'], ['pain', 'Track'], ['pills', 'Pills'], ['stress', 'Track'], ['weight', 'Track']];
         var x = 0;
         var loopTrackers = function (arr) {
@@ -2060,9 +2064,11 @@ across the app instead of just the calendar page
                             doc['client_id'] = data[1]['client_id']
                             //doc['agency'] = data[1]['agency']
                             doc['sec_question'] = data[1]['sec_question']
-                            doc['username'] = user
-                            doc['password'] = pass
+                            doc['username'] = user;
+                            doc['password'] = pass;
                             window.localStorage.setItem('cid', data[1]['client_id'])
+                            window.localStorage.setItem('username', user)
+                            window.localStorage.setItem('password', pass)
                             return db.put(doc).then(function () {
                                 window.location = "templates/main.html";
                             })
@@ -4153,6 +4159,18 @@ across the app instead of just the calendar page
                         }
                         html += '</ion-list>'
                         html += '</form>'
+                        //render follow-up
+                        html += '<div class="item item-text-wrap item-divider item-icon-right">Please indicate how certain you are about the correctness of your response<i class="icon ion-volume-medium" ng-click="speak(&quot;Please indicate how certain you are about the correctness of your response&quot;)"></i></div>';
+                        //render follow-up answers
+                        /* html += '<form id="' + 'F' + String(j) + '">'
+                         html += '<ion-list>'
+                         responses = ['Highly uncertain', 'Uncertain', 'Somewhat uncertain', 'Neutral', 'Somewhat certain', 'Certain', 'Highly certain']
+                         for (m in responses) {
+                             answer = responses[m];
+                             html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(m) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                         }
+                         html += '</ion-list>'
+                         html += '</form>'*/
                     }
                 }
             }
@@ -4740,6 +4758,10 @@ across the app instead of just the calendar page
                 case 'addCigarettes':
                     type = 'cigarette';
                     img = '../img/trackers/cigarettes.png';
+                    break;
+                case 'addConditions':
+                    type = 'conditions';
+                    img = '';
                     break;
                 case 'addNutrition':
                     type = 'nutrition';
@@ -5364,12 +5386,63 @@ across the app instead of just the calendar page
             //}
         }
     };
+    $scope.submitConditions = function () {
+        var array = [];
+        for (i in $scope.condition) {
+            if ($scope.condition[i] == true) {
+                array.push(i);
+            }
+        }
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            for (j in array) {
+                var element = {
+                    "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
+                    "date": moment().format('YYYY/MM/DD'),
+                    "time": moment().format('HH:mm:ss'),
+                    "value": array[j]
+                };
+                doc['conditions'].push(element);
+            }
+            return db.put(doc);
+        }).then(function (doc) {
+            $scope.toNewPage('history.html', 'History');
+        });
+    }
+    /*$scope.populateConditions = function () {
+        var date = new Date($scope.currentDate);
+        date = (date.getFullYear() + '/' + ('0' + (date.getMonth() + 1)).slice(-2)) + '/' + ('0' + date.getDate()).slice(-2);
+        var hist = [];
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            elements = doc['condition'];
+            //get all condtions today that are already marked
+            for (var i in elements) {
+                if (date == elements[i]["date"]) {
+                    hist.push(elements[i]["value"]);
+                }
+            }
+            console.log(JSON.stringify(hist))
+        }).then(function () {
+            conditions = ['headache', 'fever', 'coughing']
+            var html = '';
+            for (var j in conditions) {
+                if ($.inArray(conditions[j], hist) != -1) {
+                    html += '<ion-checkbox ng-model="condition.' + conditions[j] + '" ng-checked="true">' + conditions[j] + '</ion-checkbox>';
+                }
+                else {
+                    html += '<ion-checkbox ng-model="condition.' + conditions[j] + '">' + conditions[j] + '</ion-checkbox>';
+                }
+            }
+            $('#conditions').html(html);
+            $compile($('#conditions'))($scope);
+        })
+    }*/
 })
 
-
 /*
-            
-            */
+                
+                */
 .controller('NutritionCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.refreshNutritionPage = function () {
         //clean canvases
@@ -5658,8 +5731,8 @@ across the app instead of just the calendar page
 
 
 /*
-            Handler for javascript clock used in addActivityTime page
-            */
+                Handler for javascript clock used in addActivityTime page
+                */
 .controller('ClockCtrl', function () {
     function Clock(IN_szContainerID, IN_objOptions) {
         this.init();
@@ -5766,6 +5839,7 @@ across the app instead of just the calendar page
         objClock = new Clock('CLOCK_HOLDER');
     });
 })
+
 
 
 .controller('SurveyCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
@@ -5875,8 +5949,8 @@ across the app instead of just the calendar page
 
 
 /*
-            
-            */
+                
+                */
 .controller('GoalsCtrl', function ($scope, $compile, $ionicPopup) {
     $scope.renderGoalsGrid = function () {
         goals = [];
@@ -6048,8 +6122,8 @@ across the app instead of just the calendar page
 
 
 /*
-            
-            */
+                
+                */
 .controller('JournalCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.renderPhotoJournal = function () {
         var start;
@@ -6366,8 +6440,8 @@ across the app instead of just the calendar page
 
 
 /*
-            
-            */
+                
+                */
 .controller('ProfileCtrl', function ($scope) {
     $scope.updateProfile = function () {
         var db = PouchDB('momlink');
@@ -6439,8 +6513,8 @@ across the app instead of just the calendar page
 
 
 /*
-            
-            */
+                
+                */
 .controller('CameraCtrl', function ($scope) {
     var pictureSource;
     var destinationType; // sets the format of returned value
@@ -6535,8 +6609,8 @@ across the app instead of just the calendar page
 
 
 /*
-            Handler for popOver features
-            */
+                Handler for popOver features
+                */
 .controller('PopOverCtrl', function ($scope, $ionicPopover) {
     $ionicPopover.fromTemplateUrl('popover.html', {
         scope: $scope

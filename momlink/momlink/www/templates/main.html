@@ -38,7 +38,7 @@
                         <h2 class="title" id="todaysDate"></h2>
                     </ion-subheader-bar>
                     <ion-view>
-                        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderBadges();">
+                        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderBadges();" style="background-color: black;background: linear-gradient(#ffffff 50%, #f9f9f9 50%); background-size: 100% 5%; background-repeat: repeat-y;">
                             <ion-slides style="height:30%; background-color:deeppink;">
                                 <ion-slide-page>
                                     <div id="appointmentsHeader" class="centerWhite"></div>
@@ -47,7 +47,7 @@
                                     <div id="articlesHeader" class="centerWhite"></div>
                                 </ion-slide-page>
                             </ion-slides>
-                            <center style="background-color: black;background: linear-gradient(#ffffff 50%, #f9f9f9 50%); background-size: 100% 5%; background-repeat: repeat-y;">
+                            <center>
                                 <div class="row">
                                     <div id="inbox" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="max-width:100%;height:auto;vertical-align:middle"><p>Inbox</p></div>
                                     <div id="calendar" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="max-width:100%;height:auto;vertical-align:middle"><p>Calendar</p></div>
@@ -58,9 +58,9 @@
                                     <div class="col"><img src="../img/mainIcons/track.png" ng-click="toNewPage('track.html', 'Track')" style="max-width:100%; height:auto;vertical-align:middle"><p>Track</p></div>
                                     <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Surveys')" style="max-width:100%; height:auto;vertical-align:middle"><p>Survey</p></div>
                                 </div>
-                                <!--<button ng-click="inspectDB()">Show DB</button>
+                                <button ng-click="inspectDB()">Show DB</button>
                                 <button ng-click="testPHP()">Test PHP</button>
-                                <button ng-click="sendLog()">Finish Tasks</button>-->
+                                <button ng-click="sendLog()">Finish Tasks</button>
                                 <div id="progressBar" ng-init="renderProgressBar()"></div>
                             </center>
                         </ion-content>
