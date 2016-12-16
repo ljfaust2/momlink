@@ -4154,23 +4154,26 @@ across the app instead of just the calendar page
                         html += '<form id="' + String(j) + '">'
                         html += '<ion-list>'
                         for (k = 0; k < answers.length; k++) {
-                            answer = quiz[j][1][k];
-                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(j) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                            answer = quiz[j][1][k][0];
+                            answerID = quiz[j][1][k][1];
+                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(j) + '" value="' + String(answerID) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
                         }
                         html += '</ion-list>'
                         html += '</form>'
                         //render follow-up
                         html += '<div class="item item-text-wrap item-divider item-icon-right">Please indicate how certain you are about the correctness of your response<i class="icon ion-volume-medium" ng-click="speak(&quot;Please indicate how certain you are about the correctness of your response&quot;)"></i></div>';
                         //render follow-up answers
-                        /* html += '<form id="' + 'F' + String(j) + '">'
+                         html += '<form id="C' + String(j) + '">'
                          html += '<ion-list>'
                          responses = ['Highly uncertain', 'Uncertain', 'Somewhat uncertain', 'Neutral', 'Somewhat certain', 'Certain', 'Highly certain']
                          for (m in responses) {
                              answer = responses[m];
-                             html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(m) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                             console.log('C' + String(j))
+                             console.log(String(answer))
+                             html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="C' + String(j) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
                          }
                          html += '</ion-list>'
-                         html += '</form>'*/
+                         html += '</form>'
                     }
                 }
             }
@@ -4254,10 +4257,14 @@ across the app instead of just the calendar page
                     quiz = article['quiz'];
                     for (j in quiz) {
                         selectedAnswer = $('input[name="' + String(j) + '"]:checked', '#'.concat(j)).val();
-                        usersAnswers.push(selectedAnswer);
+                        confidenceAnswer = $('input[name="C' + String(j) + '"]:checked', '#C'.concat(j)).val();
                         correctAnswer = quiz[j][1][quiz[j][2]];
                         if (selectedAnswer == correctAnswer) {
+                            usersAnswers.push([selectedAnswer,1,confidenceAnswer]);
                             score++;
+                        }
+                        else {
+                            usersAnswers.push([selectedAnswer,0,confidenceAnswer]);
                         }
                     }
                     finalScore = score;
@@ -4692,9 +4699,7 @@ across the app instead of just the calendar page
                                     hist += '<h2 style="display:inline">' + todaysPills[m][1] + '</h2> <i class="icon ion-close-round" ng-click="deleteElement(&quot;pills&quot;,&quot;' + todaysPills[m][0] + '&quot;)" style="display:inline; color:red"></i>';
                                     hist += '<p>Take at ' + $scope.convert24to12(todaysPills[m][2]) + '</p>';
                                     hist += '<p>Amount:  ' + todaysPills[m][3] + '</p>';
-                                    if (todaysPills[m][4] != '') {
-                                        hist += '<img src="' + $scope.getPillMealImg(todaysPills[m][4]) + '" style="max-height:25px;max-width:auto"></img>';
-                                    }
+                                    hist += '<p>' + todaysPills[m][4] + '</p>';
                                     hist += '</div>';
                                 }
                                 if (hist == '') {
@@ -5278,7 +5283,7 @@ across the app instead of just the calendar page
                 "time": moment().format('HH:mm:ss'),
                 "name": $('#pillName').val(),
                 "dosage": $('#dosage').val(),
-                "meal": $('#meal').val(),
+                "meal": $scope.mealRestriction,
                 "timesTaken": $scope.pillTimes,
                 "daysTaken": daysTaken
             };
@@ -5329,6 +5334,13 @@ across the app instead of just the calendar page
     };
     $scope.pillRestrictionsDropDown = function () {
         $('#meal').css('display', '')
+        $('#mealYes').css('display', 'none')
+        $('#mealNo').css('display', '')
+    };
+    $scope.pillRestrictionsDropDownClose = function () {
+        $('#meal').css('display', 'none')
+        $('#mealYes').css('display', '')
+        $('#mealNo').css('display', 'none')
     };
     $scope.deleteElement = function (category, id) {
         $ionicPopup.show({

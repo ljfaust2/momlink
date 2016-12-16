@@ -5,10 +5,10 @@
     </ion-header-bar>
     <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl">
         <div class="col text-center padding-top">
-            <img id="pillImg" style="max-width:100%; max-height:100%;" />
+            <img id="pillImg" style="max-width:25%; max-height:100%;" />
         </div>
-        <div class="col padding-bottom text-left" ng-controller="CameraCtrl">
-            <img src="../img/temp/camera.PNG" ng-click="takePillPhoto()" style="width:30px; height:25px;" />Take Picture
+        <div class="col padding-bottom text-left" ng-controller="CameraCtrl" ng-click="takePillPhoto()">
+            <img src="../img/temp/camera.PNG" style="width:30px; height:25px;" />Take Picture
         </div>
         <div class="list">
             <div class="item item-input row">
@@ -34,22 +34,20 @@
             <!--if clicked then show-->
             <div class="item item-button-right">
                 Any meal restrictions?
-                <button class="button button-stable" ng-click="pillRestrictionsDropDown()">
-                    Yes
-                </button>
+                <button id="mealYes" class="button button-stable" ng-click="pillRestrictionsDropDown()">Yes</button>
+                <button id="mealNo" class="button button-stable" ng-click="pillRestrictionsDropDownClose()" style="display:none">Close</button>
             </div>
-            <!--<div id="type" class="item item-text-wrap item-divider">Restrictions (choose one of the following, if any)</div>-->
-            <div id="meal" class="row text-center" style="display:none">
-                <div id="withFood" class="col" ng-click="selectHow('withFood')"><img src="../img/pills/withFood.jpg" style="max-width:100%;height:auto;vertical-align:middle">With Food</div>
-                <div id="withoutFood" class="col" ng-click="selectHow('withoutFood')"><img src="../img/pills/withoutFood.jpg" style="max-width:100%;height:auto;vertical-align:middle">Without Food</div>
-                <div id="beforeMeal" class="col" ng-click="selectHow('beforeMeal')"><img src="../img/pills/beforeMeal.png" style="max-width:100%;height:auto;vertical-align:middle">Before Meal</div>
-                <div id="afterMeal" class="col" ng-click="selectHow('afterMeal')"><img src="../img/pills/afterMeal.png" style="max-width:100%;height:auto;vertical-align:middle">After Meal</div>
+            <div id="meal" class="list" style="display:none">
+                <ion-radio ng-model="mealRestriction" ng-value="'With Food'">With Food</ion-radio>
+                <ion-radio ng-model="mealRestriction" ng-value="'Without Food'">Without Food</ion-radio>
+                <ion-radio ng-model="mealRestriction" ng-value="'Before Meal'">Before Meal</ion-radio>
+                <ion-radio ng-model="mealRestriction" ng-value="'After Meal'">After Meal</ion-radio>
             </div>
-        </div>
-        <!--<ion-toggle id="notify" ng-model="notify" ><i class="button-icon icon ion-android-notifications-none"></i>Set Alert?</ion-toggle>-->
-        <div class="padding-left padding-right">
-            <input type="button" class="button button-block button-positive" value="ADD" ng-click="submitPill();closeModal();">
-            <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="closeModal();">
+            <!--<ion-toggle id="notify" ng-model="notify" ><i class="button-icon icon ion-android-notifications-none"></i>Set Alert?</ion-toggle>-->
+            <div class="padding-left padding-right">
+                <input type="button" class="button button-block button-positive" value="ADD" ng-click="submitPill();closeModal();">
+                <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="closeModal();">
+            </div>
         </div>
     </ion-content>
 </ion-modal-view>
