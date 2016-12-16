@@ -1,6 +1,11 @@
 ﻿<ion-pane>
+    <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-controller="TrackCtrl" ng-init="renderTrackSubheaderDate()">
+        <button class="button button-icon icon ion-arrow-left-a" ng-click="decreaseDate(); showTrackers();"></button>
+        <h2 class="title" id="todaysDate"></h2>
+        <button class="button button-icon icon ion-arrow-right-a" ng-click="increaseDate(); showTrackers();"></button>
+    </ion-subheader-bar>
     <ion-view>
-        <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl" ng-init="showTrackers()">
+        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-controller="TrackCtrl" ng-init="showTrackers()" on-swipe-left="increaseDate(); showTrackers();" on-swipe-right="decreaseDate(); showTrackers();">
             <div id="trackers"></div>
             <!---<div class="row">
                 <div class="col text-center">

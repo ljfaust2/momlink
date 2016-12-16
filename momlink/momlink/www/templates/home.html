@@ -12,23 +12,30 @@
                     <div id="articlesHeader" class="centerWhite"></div>
                 </ion-slide-page>
             </ion-slides>
-            <center>
-                <div class="row">
-                    <div id="inbox" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="max-width:100%;height:auto;vertical-align:middle"><p>Inbox</p></div>
-                    <div id="calendar" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="max-width:100%;height:auto;vertical-align:middle"><p>Calendar</p></div>
-                    <div id="referrals" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="max-width:100%;height:auto;vertical-align:middle"><p>Referrals</p></div>
-                </div>
-                <div class="row">
-                    <div id="education" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="max-width:100%; height:auto;vertical-align:middle"><p>Education</p></div>
-                    <div class="col"><img src="../img/mainIcons/track.png" ng-click="toNewPage('track.html', 'Track')" style="max-width:100%; height:auto;vertical-align:middle"><p>Track</p></div>
-                    <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Surveys')" style="max-width:100%; height:auto;vertical-align:middle"><p>Surveys</p></div>
-                    <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="toNewPage('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
-                </div>
-                <button ng-click="inspectDB()">Show DB</button>
-                <button ng-click="testPHP()">Test PHP</button>
-                <button ng-click="sendLog()">Finish Tasks</button>
-                <div id="progressBar" ng-init="renderProgressBar()"></div>
-            </center>
+            <div style="max-height:100%; width:auto">
+                <center>
+                    <div class="row">
+                        <div id="inbox" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="max-width:100%;height:auto;vertical-align:middle"><p>Inbox</p></div>
+                        <div id="calendar" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="max-width:100%;height:auto;vertical-align:middle"><p>Calendar</p></div>
+                        <div id="referrals" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-18.png" ng-click="toNewPage('referrals.html', 'Referrals')" style="max-width:100%;height:auto;vertical-align:middle"><p>Referrals</p></div>
+                    </div>
+                    <div class="row">
+                        <div id="education" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-21.png" ng-click="toNewPage('education.html', 'Education')" style="max-width:100%; height:auto;vertical-align:middle"><p>Education</p></div>
+                        <div class="col"><img src="../img/mainIcons/track.png" ng-click="toNewPage('track.html', 'Track')" style="max-width:100%; height:auto;vertical-align:middle"><p>Track</p></div>
+                        <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('survey.html', 'Surveys')" style="max-width:100%; height:auto;vertical-align:middle"><p>Surveys</p></div>
+                        <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="toNewPage('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
+                    </div>
+                    <div class="row">
+                        <div class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="toNewPage('journal.html', 'Journal')" style="max-width:100%; height:auto;vertical-align:middle"><p>Journal</p></div>
+                        <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('goals.html', 'Goals')" style="max-width:100%; height:auto;vertical-align:middle"><p>Checklist</p></div>
+                        <div class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-23.png" ng-click="toNewPage('progress.html', 'Progress')" style="max-width:100%; height:auto;vertical-align:middle"><p>Baby's Progress</p></div>
+                    </div>
+                    <button ng-click="inspectDB()">Show DB</button>
+                    <button ng-click="testPHP()">Test PHP</button>
+                    <button ng-click="sendLog()">Finish Tasks</button>
+                    <div id="progressBar" ng-init="renderProgressBar()"></div>
+                </center>
+            </div>
         </ion-content>
     </ion-view>
 </ion-pane>

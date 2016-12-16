@@ -300,14 +300,14 @@ across the app instead of just the calendar page
                     "bloodIron": '1',
                     "bloodPressure": '1',
                     "caffeine": '1',
-                    "cigarettes": '1',
+                    "cigarette": '1',
                     "conditions": '1',
                     "nutrition": '1',
                     "kicks": '1',
                     'mood': '1',
                     'pain': '1',
                     'pills': '1',
-                    'stressors': '1',
+                    'stress': '1',
                     "weight": '1',
                 });
             }
@@ -927,13 +927,13 @@ across the app instead of just the calendar page
                         doc['bloodIron'] = data[0]['bloodIron'];
                         doc['bloodPressure'] = data[0]['bloodPressure'];
                         doc['caffeine'] = data[0]['caffeine'];
-                        doc['cigarettes'] = data[0]['cigarettes'];
+                        doc['cigarette'] = data[0]['cigarettes'];
                         doc['nutrition'] = data[0]['nutrition'];
                         doc['kicks'] = data[0]['kicks'];
                         doc['mood'] = data[0]['mood'];
                         doc['pain'] = data[0]['pain'];
                         doc['pills'] = data[0]['pills'];
-                        doc['stressors'] = data[0]['stressors'];
+                        doc['stress'] = data[0]['stressors'];
                         doc['weight'] = data[0]['weight'];
                         return db.put(doc);
                     });
@@ -1632,11 +1632,14 @@ across the app instead of just the calendar page
     $scope.renderSubheaderDate = function () {
         today = moment().format('MMMM Do YYYY');
         document.getElementById("todaysDate").innerHTML = "Today, " + today;
-        //used by history tracker when navigating past/future dates
         var date = new Date()
-        $scope.currentDate = date;
+        window.localStorage.setItem('currentDate',  date)
     };
 
+    $scope.renderTrackSubheaderDate = function () {
+        today = moment(window.localStorage.getItem('currentDate')).format('MMMM Do YYYY');
+        document.getElementById("todaysDate").innerHTML = today;
+    };
 
     /*
     Displays todays events in the slider of the home page
@@ -1754,7 +1757,6 @@ across the app instead of just the calendar page
                     }
                 }
                 renderHeaderArticle();
-
                 cycleHandler = $interval(function () {
                     renderHeaderArticle();
                 }, 9000);
@@ -4595,52 +4597,77 @@ across the app instead of just the calendar page
 .controller('TrackCtrl', function ($scope, $ionicModal, $ionicPopup, $compile) {
     $scope.showTrackers = function () {
         var db = PouchDB('momlink');
-        var html5 = '<div class="row">';
-        var col = 0;
-        db.get('client_trackers').then(function (doc) {
-            for (var i in doc) {
-                if (doc[i] == '1') {
+        var checked = [];
+        var date;
+        //db call to all trackers if tracking element shows up today, add to array
+        db.get('track').then(function (doc) {
+            date = new Date(window.localStorage.getItem('currentDate'));
+            date = (date.getFullYear() + '/' + ('0' + (date.getMonth() + 1)).slice(-2)) + '/' + ('0' + date.getDate()).slice(-2);
+            var hist = '';
+            for (j in doc) {
+                if (j != '_rev' && j != '_id') {
+                    elements = doc[j]
+                    for (var i in elements) {
+                        if (date == elements[i]["date"]) {
+                            checked.push(j)
+                            break;
+                        }
+                    }
+                }
+            }
+        }).then(function () {
+            var html5 = '<div class="row">';
+            var col = 0;
+            db.get('client_trackers').then(function (doc) {
+                for (var i in doc) {
+                    if (doc[i] == '1') {
+                        html5 += '<div class="col text-center">';
+                        if ($.inArray(i, checked) != -1) {
+                            html5 += '<input type="image" src="../img/trackersGray/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;)" name="type" style="max-width:100%;height:auto;">';
+                        }
+                        else{
+                            html5 += '<input type="image" src="../img/trackers/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;,&quot;' + date + '&quot;)" name="type" style="max-width:100%;height:auto;">';
+                        }
+                        html5 += '<p>' + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + '</p>';
+                        html5 += '</div>';
+                        col++;
+                    }
+                    if (col % 3 == 0) {
+                        html5 += '</div>';
+                        html5 += '<div class="row">';
+                    }
+                }
+                while (col % 3 != 0) {
                     html5 += '<div class="col text-center">';
-                    html5 += '<input type="image" src="../img/trackers/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;)" name="type" style="max-width:100%;height:auto;">';
-                    html5 += '<p>' + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + '</p>';
                     html5 += '</div>';
                     col++;
                 }
-                if (col % 3 == 0) {
-                    html5 += '</div>';
-                    html5 += '<div class="row">';
-                }
+            }).then(function () {
+                html5 += '</div>'
+                $('#trackers').html(html5);
+                $compile($('#trackers'))($scope);
+            })
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
             }
-            while (col % 3 != 0) {
-                html5 += '<div class="col text-center">';
-                html5 += '</div>';
-                col++;
-            }
-        }).then(function () {
-            html5 += '</div>'
-            $('#trackers').html(html5);
-            $compile($('#trackers'))($scope);
         })
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
     }
     $scope.formatDate = function (d) {
         var selectedDate = moment(d).format('MMMM Do YYYY')
         today = moment().format('MMMM Do YYYY')
-        $scope.currentDate = d;
+        window.localStorage.setItem('currentDate', d)
         if (selectedDate == today) {
             selectedDate = "Today, ".concat(selectedDate);
         }
         return selectedDate;
     };
     $scope.increaseDate = function () {
-        var d = new Date($scope.currentDate);
+        var d = new Date(window.localStorage.getItem('currentDate'));
         d.setDate(d.getDate() + 1)
         $('#todaysDate').html($scope.formatDate(d));
     };
     $scope.decreaseDate = function () {
-        var d = new Date($scope.currentDate);
+        var d = new Date(window.localStorage.getItem('currentDate'));
         d.setDate(d.getDate() - 1)
         $('#todaysDate').html($scope.formatDate(d));
     };
@@ -4668,7 +4695,7 @@ across the app instead of just the calendar page
                         var todaysPills = [];
                         for (var i in pills) {
                             for (j in pills[i]['daysTaken']) {
-                                if (String($scope.currentDate).substring(0, 3) == pills[i]['daysTaken'][j]) {
+                                if (String(window.localStorage.getItem('currentDate')).substring(0, 3) == pills[i]['daysTaken'][j]) {
                                     for (k in pills[i]["timesTaken"]) {
                                         time = pills[i]["timesTaken"][k];
                                         todaysPills.push([pills[i]['id'], pills[i]['name'], time, pills[i]['dosage'], pills[i]['meal']])
@@ -4760,9 +4787,9 @@ across the app instead of just the calendar page
                     type = 'caffeine';
                     img = '../img/trackers/caffeine.png';
                     break;
-                case 'addCigarettes':
+                case 'addCigarette':
                     type = 'cigarette';
-                    img = '../img/trackers/cigarettes.png';
+                    img = '../img/trackers/cigarette.png';
                     break;
                 case 'addConditions':
                     type = 'conditions';
@@ -4784,9 +4811,9 @@ across the app instead of just the calendar page
                     type = 'pain';
                     img = '../img/trackers/pain.png';
                     break;
-                case 'addStressors':
+                case 'addStress':
                     type = 'stress';
-                    img = '../img/trackers/stressors.png';
+                    img = '../img/trackers/stress.png';
                     break;
                 case 'addWeight':
                     type = 'weight';
@@ -4794,7 +4821,7 @@ across the app instead of just the calendar page
                     break;
             }
             db.get('track').then(function (doc) {
-                var date = new Date($scope.currentDate);
+                var date = new Date(window.localStorage.getItem('currentDate'));
                 date = (date.getFullYear() + '/' + ('0' + (date.getMonth() + 1)).slice(-2)) + '/' + ('0' + date.getDate()).slice(-2);
                 var hist = '';
                 elements = doc[type]
@@ -4925,10 +4952,18 @@ across the app instead of just the calendar page
                 }
                 //if date has no values, then display default image
                 if (hist == '') {
-                    hist += '<div class="row">';
-                    hist += '<div class="col text-center">';
-                    hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
-                    hist += '</div></div>';
+                    if (date == moment().format('YYYY/MM/DD')){
+                        hist += '<div class="row">';
+                        hist += '<div class="col text-center">';
+                        hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
+                        hist += '</div></div>';
+                    }
+                    else {
+                        hist += '<div class="row">';
+                        hist += '<div class="col text-center">';
+                        hist += '<p>No Records to Show</p>'
+                        hist += '</div></div>';
+                    }
                 }
                 $('#history').html(hist);
                 $compile($('#history'))($scope);
@@ -5452,6 +5487,7 @@ across the app instead of just the calendar page
     }*/
 })
 
+
 /*
                 
                 */
@@ -5480,7 +5516,7 @@ across the app instead of just the calendar page
         db.get('nutrition').then(function (doc) {
             //only count those where the day matches
             for (i in doc[id]) {
-                if (moment($scope.currentDate).format('YYYY/MM/DD') == doc[id][i]['date']) {
+                if (moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD') == doc[id][i]['date']) {
                     size += doc[id][i]['value'];
                 }
             }
@@ -5615,7 +5651,7 @@ across the app instead of just the calendar page
             }
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment($scope.currentDate).format('YYYY/MM/DD'),
+                "date": moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "category": category,
                 "subcategory": subcategory,
@@ -5633,19 +5669,19 @@ across the app instead of just the calendar page
     $scope.formatDate = function (d) {
         var selectedDate = moment(d).format('MMMM Do YYYY')
         today = moment().format('MMMM Do YYYY')
-        $scope.currentDate = d;
+        window.localStorage.setItem('currentDate', d);
         if (selectedDate == today) {
             selectedDate = "Today, ".concat(selectedDate);
         }
         return selectedDate;
     };
     $scope.increaseDate = function () {
-        var d = new Date($scope.currentDate);
+        var d = new Date(window.localStorage.getItem('currentDate'));
         d.setDate(d.getDate() + 1)
         $('#todaysDate').html($scope.formatDate(d));
     };
     $scope.decreaseDate = function () {
-        var d = new Date($scope.currentDate);
+        var d = new Date(window.localStorage.getItem('currentDate'));
         d.setDate(d.getDate() - 1)
         $('#todaysDate').html($scope.formatDate(d));
     };
@@ -5660,7 +5696,7 @@ across the app instead of just the calendar page
             db.get('nutrition').then(function (doc) {
                 var html = '';
                 for (i in doc[category]) {
-                    if (moment($scope.currentDate).format('YYYY/MM/DD') == doc[category][i]["date"]) {
+                    if (moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD') == doc[category][i]["date"]) {
                         html += '<center><div class="item" on-hold="deleteElement(&quot;' + category + '&quot;,&quot;' + doc[category][i]["id"] + '&quot;)">' + $scope.convert24to12(doc[category][i]["time"]) + '&nbsp; &nbsp; &nbsp; ' + doc[category][i]["value"] + ' servings</div></center>';
                     }
                 }
@@ -5701,7 +5737,7 @@ across the app instead of just the calendar page
                           db.get('nutrition').then(function (doc) {
                               var html = '';
                               for (i in doc[category]) {
-                                  if (moment($scope.currentDate).format('MM/DD/YYYY') == doc[category][i]["date"]) {
+                                  if (moment(window.localStorage.getItem('currentDate')).format('MM/DD/YYYY') == doc[category][i]["date"]) {
                                       html += '<center><div class="item" on-hold="deleteElement(&quot;' + doc[category] + '&quot;,&quot;' + doc[category][i]["id"] + '&quot;)">' + $scope.convert24to12(doc[category][i]["time"]) + '&nbsp; &nbsp; &nbsp; ' + doc[category][i]["value"] + '</div></center>';
                                   }
                               }
@@ -5851,7 +5887,6 @@ across the app instead of just the calendar page
         objClock = new Clock('CLOCK_HOLDER');
     });
 })
-
 
 
 .controller('SurveyCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
@@ -6610,6 +6645,7 @@ across the app instead of just the calendar page
         });
         onPhotoDataSuccess = function (imageData) {
             document.getElementById('pillImg').src = imageData;
+            $('#takePic').css('display', 'none')
         }
     }
     $scope.onFail = function (message) {
