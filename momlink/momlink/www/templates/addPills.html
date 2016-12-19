@@ -1,53 +1,9 @@
 ﻿<ion-modal-view>
     <ion-header-bar align-title="middle" class="bar-positive">
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
-        <h1 class="title" id="modalHeadline">New Pill</h1>
+        <h1 class="title" id="modalHeadline">Pills</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl">
-        <div class="col text-center padding-top">
-            <img id="pillImg" style="max-width:25%; max-height:100%;" />
-        </div>
-        <div class="col padding-bottom text-left" ng-controller="CameraCtrl" ng-click="takePillPhoto()">
-            <img src="../img/temp/camera.PNG" style="width:30px; height:25px;" /><span id="takePic">Take Picture</span>
-        </div>
-        <div class="list">
-            <div class="item item-input row">
-                <i class="button-icon icon ion-checkmark-circled"></i>
-                <input id="pillName" type="text" placeholder="Pill name">
-            </div>
-            <div class="item item-input row">
-                <i class="button-icon icon ion-ios-medkit"></i>
-                <input id="dosage" type="number" placeholder="Dosage">
-            </div>
-            <div class="item"><i class="button-icon icon ion-clock"></i><i class="button-icon icon ion-plus-round" ng-click="addTime()" style="color:#528ef4"></i></div>
-            <div id="times"></div>
-            <div id="type" class="item item-text-wrap item-divider">Select all days to take this pill</div>
-            <div class="row text-center">
-                <div id="Sun" class="col" ng-click="selectDay('Sun')"><img src="../img/pills/sun.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
-                <div id="Mon" class="col" ng-click="selectDay('Mon')"><img src="../img/pills/mon.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
-                <div id="Tue" class="col" ng-click="selectDay('Tue')"><img src="../img/pills/tue.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
-                <div id="Wed" class="col" ng-click="selectDay('Wed')"><img src="../img/pills/wed.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
-                <div id="Thu" class="col" ng-click="selectDay('Thu')"><img src="../img/pills/thu.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
-                <div id="Fri" class="col" ng-click="selectDay('Fri')"><img src="../img/pills/fri.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
-                <div id="Sat" class="col" ng-click="selectDay('Sat')"><img src="../img/pills/sat.jpg" style="max-width:100%;height:auto;vertical-align:middle"></div>
-            </div>
-            <!--if clicked then show-->
-            <div class="item item-button-right">
-                Any meal restrictions?
-                <button id="mealYes" class="button button-stable" ng-click="pillRestrictionsDropDown()">Yes</button>
-                <button id="mealNo" class="button button-stable" ng-click="pillRestrictionsDropDownClose()" style="display:none">Close</button>
-            </div>
-            <div id="meal" class="list" style="display:none">
-                <ion-radio ng-model="mealRestriction" ng-value="'With Food'">With Food</ion-radio>
-                <ion-radio ng-model="mealRestriction" ng-value="'Without Food'">Without Food</ion-radio>
-                <ion-radio ng-model="mealRestriction" ng-value="'Before Meal'">Before Meal</ion-radio>
-                <ion-radio ng-model="mealRestriction" ng-value="'After Meal'">After Meal</ion-radio>
-            </div>
-            <!--<ion-toggle id="notify" ng-model="notify" ><i class="button-icon icon ion-android-notifications-none"></i>Set Alert?</ion-toggle>-->
-            <div class="padding-left padding-right">
-                <input type="button" class="button button-block button-positive" value="ADD" ng-click="submitPill();closeModal();">
-                <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="closeModal();">
-            </div>
-        </div>
+    <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl" ng-init="renderPills()">
+       <div id="listPills"></div>
     </ion-content>
 </ion-modal-view>

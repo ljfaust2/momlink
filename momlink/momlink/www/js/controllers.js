@@ -1633,7 +1633,7 @@ across the app instead of just the calendar page
         today = moment().format('MMMM Do YYYY');
         document.getElementById("todaysDate").innerHTML = "Today, " + today;
         var date = new Date()
-        window.localStorage.setItem('currentDate',  date)
+        window.localStorage.setItem('currentDate', date)
     };
 
     $scope.renderTrackSubheaderDate = function () {
@@ -2337,6 +2337,29 @@ across the app instead of just the calendar page
             success: function (data) {
                 $('#activity').html(data);
                 $compile($('#activity'))($scope);
+            }
+        });
+    };
+
+    $scope.goToAddPill = function () {
+        window.localStorage.setItem('currentPage', 'addNewPill.html');
+        $.ajax({
+            url: 'addNewPill.html',
+            success: function (data) {
+                $('#listPills').html(data);
+                $compile($('#listPills'))($scope);
+            }
+        });
+    };
+
+    $scope.goToEditPill = function (pillID) {
+        $scope.pillID = pillID;
+        window.localStorage.setItem('currentPage', 'editPill.html');
+        $.ajax({
+            url: 'editPill.html',
+            success: function (data) {
+                $('#listPills').html(data);
+                $compile($('#listPills'))($scope);
             }
         });
     };
@@ -4165,17 +4188,17 @@ across the app instead of just the calendar page
                         //render follow-up
                         html += '<div class="item item-text-wrap item-divider item-icon-right">Please indicate how certain you are about the correctness of your response<i class="icon ion-volume-medium" ng-click="speak(&quot;Please indicate how certain you are about the correctness of your response&quot;)"></i></div>';
                         //render follow-up answers
-                         html += '<form id="C' + String(j) + '">'
-                         html += '<ion-list>'
-                         responses = ['Highly uncertain', 'Uncertain', 'Somewhat uncertain', 'Neutral', 'Somewhat certain', 'Certain', 'Highly certain']
-                         for (m in responses) {
-                             answer = responses[m];
-                             console.log('C' + String(j))
-                             console.log(String(answer))
-                             html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="C' + String(j) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
-                         }
-                         html += '</ion-list>'
-                         html += '</form>'
+                        html += '<form id="C' + String(j) + '">'
+                        html += '<ion-list>'
+                        responses = ['Highly uncertain', 'Uncertain', 'Somewhat uncertain', 'Neutral', 'Somewhat certain', 'Certain', 'Highly certain']
+                        for (m in responses) {
+                            answer = responses[m];
+                            console.log('C' + String(j))
+                            console.log(String(answer))
+                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="C' + String(j) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                        }
+                        html += '</ion-list>'
+                        html += '</form>'
                     }
                 }
             }
@@ -4262,11 +4285,11 @@ across the app instead of just the calendar page
                         confidenceAnswer = $('input[name="C' + String(j) + '"]:checked', '#C'.concat(j)).val();
                         correctAnswer = quiz[j][1][quiz[j][2]];
                         if (selectedAnswer == correctAnswer) {
-                            usersAnswers.push([selectedAnswer,1,confidenceAnswer]);
+                            usersAnswers.push([selectedAnswer, 1, confidenceAnswer]);
                             score++;
                         }
                         else {
-                            usersAnswers.push([selectedAnswer,0,confidenceAnswer]);
+                            usersAnswers.push([selectedAnswer, 0, confidenceAnswer]);
                         }
                     }
                     finalScore = score;
@@ -4625,7 +4648,7 @@ across the app instead of just the calendar page
                         if ($.inArray(i, checked) != -1) {
                             html5 += '<input type="image" src="../img/trackersGray/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;)" name="type" style="max-width:100%;height:auto;">';
                         }
-                        else{
+                        else {
                             html5 += '<input type="image" src="../img/trackers/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;,&quot;' + date + '&quot;)" name="type" style="max-width:100%;height:auto;">';
                         }
                         html5 += '<p>' + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + '</p>';
@@ -4952,7 +4975,7 @@ across the app instead of just the calendar page
                 }
                 //if date has no values, then display default image
                 if (hist == '') {
-                    if (date == moment().format('YYYY/MM/DD')){
+                    if (date == moment().format('YYYY/MM/DD')) {
                         hist += '<div class="row">';
                         hist += '<div class="col text-center">';
                         hist += '<img src="../img/temp/downArrow.png" style="height:auto;width:auto"/>'
@@ -5279,6 +5302,7 @@ across the app instead of just the calendar page
     }
     $scope.submitPill = function () {
         var db = PouchDB('momlink');
+        var imagePath;
         db.get('track').then(function (doc) {
             var id = moment().format('MM-DD-YYYYThhmmssa');
             var daysTaken = [];
@@ -5302,9 +5326,37 @@ across the app instead of just the calendar page
             }
             function successMove(entry) {
                 console.log(entry.toURL())
+                imagePath = entry.toURL();
+                var element = {
+                    "id": id,
+                    "date": moment().format('YYYY/MM/DD'),
+                    "time": moment().format('HH:mm:ss'),
+                    "name": $('#pillName').val(),
+                    "dosage": $('#dosage').val(),
+                    "meal": $scope.mealRestriction,
+                    "timesTaken": $scope.pillTimes,
+                    "daysTaken": daysTaken,
+                    "imagePath": imagePath
+                };
+                doc['pills'].push(element);
+                return db.put(doc);
+                console.log(imagePath)
             }
             function resOnError(error) {
                 console.log(error.code);
+                var element = {
+                    "id": id,
+                    "date": moment().format('YYYY/MM/DD'),
+                    "time": moment().format('HH:mm:ss'),
+                    "name": $('#pillName').val(),
+                    "dosage": $('#dosage').val(),
+                    "meal": $scope.mealRestriction,
+                    "timesTaken": $scope.pillTimes,
+                    "daysTaken": daysTaken,
+                    "imagePath": imagePath
+                };
+                doc['pills'].push(element);
+                return db.put(doc);
             }
             //add alert for pill
             /*if ($scope.notify == true) {
@@ -5312,20 +5364,130 @@ across the app instead of just the calendar page
 
                 }, false);
             }*/
-            var element = {
-                "id": id,
-                "date": moment().format('YYYY/MM/DD'),
-                "time": moment().format('HH:mm:ss'),
-                "name": $('#pillName').val(),
-                "dosage": $('#dosage').val(),
-                "meal": $scope.mealRestriction,
-                "timesTaken": $scope.pillTimes,
-                "daysTaken": daysTaken
-            };
-            doc['pills'].push(element);
-            return db.put(doc);
         }).then(function (doc) {
             $scope.toNewPage('history.html', 'History');
+        });
+    }
+    $scope.updatePill = function () {
+        var db = PouchDB('momlink');
+        var daysTaken = [];
+        var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var imagePath;
+            //get/save image
+            window.resolveLocalFileSystemURL(document.getElementById('pillImg').src, resolveOnSuccess, resOnError);
+            function resolveOnSuccess(entry) {
+                fileName = String($scope.pillID + ".jpg");
+                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                    dir.getDirectory('MomLink', { create: true, exclusive: false },
+                    function (directory) {
+                        console.log(directory)
+                        console.log(fileName)
+                        entry.moveTo(directory, fileName, successMove, resOnError);
+                    }, resOnError);
+                }, resOnError);
+            }
+            function successMove(entry) {
+                console.log(entry.toURL())
+                imagePath = entry.toURL();
+                updatePill();
+                console.log(imagePath)
+            }
+            function resOnError(error) {
+                console.log(error.code);
+                console.log("upload error source " + error.source);
+                console.log("upload error target " + error.target);
+                updatePill();
+                console.log('ERROR')
+            }
+            function updatePill() {
+                var i;
+                db.get('track').then(function (doc) {
+                    //get pill
+                    for (i in doc['pills']) {
+                        if (doc['pills'][i]['id'] === $scope.pillID) {
+                            break;
+                        }
+                    }
+                    //get days selected
+                    for (j in days) {
+                        if (document.getElementById(days[j]).classList.contains('activeBorder')) {
+                            daysTaken.push(days[j]);
+                        }
+                    }
+                    console.log(doc['pills'][i]['name'])
+                    doc['pills'][i]['name'] = $('#pillName').val();
+                    doc['pills'][i]['dosage'] = $('#dosage').val();
+                    doc['pills'][i]['meal'] = $scope.mealRestriction;
+                    doc['pills'][i]['timesTaken'] = $scope.pillTimes;
+                    doc['pills'][i]['daysTaken'] = daysTaken;
+                    if (imagePath != null) {
+                        doc['pills'][i]['imagePath'] = imagePath;
+                    }
+                    return db.put(doc);
+                }).then(function (doc) {
+                    $scope.toNewPage('history.html', 'History');
+                });
+            }
+    }
+    $scope.renderPills = function () {
+        var hist = '';
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            pills = doc['pills'];
+            //add pill
+            hist += '<div class="item item-icon-left" ng-click="goToAddPill()"><i class="icon ion-plus-round"></i>Add Pill</div>';
+            //build string
+            for (m in pills) {
+                if (pills[m]['imagePath'] == '' || pills[m]['imagePath'] == null) {
+                    hist += '<div class="item item-thumbnail-left" ng-click="goToEditPill(&quot;' + pills[m]['id'] + '&quot;)"><img src="../img/trackers/pills.png" >';
+                }
+                else {
+                    hist += '<div class="item item-thumbnail-left" ng-click="goToEditPill(&quot;' + pills[m]['id'] + '&quot;)" on-hold="deleteElement(&quot;pills&quot;,&quot;' + pills[m]['id'] + '&quot;)"><img src=' + pills[m]['imagePath'] + '>';
+                }
+                hist += '<h2 style="display:inline">' + pills[m]['name'] + '</h2>';
+                //hist += '<p>Take at ' + $scope.convert24to12(todaysPills[m][2]) + '</p>';
+                hist += '<p>Amount:  ' + pills[m]['dosage'] + '</p>';
+                if (pills[m]['meal'] != '' && pills[m]['meal'] != null) {
+                    hist += '<p>' + pills[m]['meal'] + '</p>';
+                }
+                hist += '</div>';
+            }
+            if (hist == '') {
+                hist += '<div class="row">';
+                hist += '<div class="col text-center">';
+                hist += 'No Pills Saved';
+                hist += '</div></div>';
+            }
+            $('#listPills').html(hist);
+            $compile($('#listPills'))($scope);
+        })
+
+    };
+    $scope.pullPill = function () {
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            for (i in doc['pills']) {
+                if (doc['pills'][i]['id'] === $scope.pillID) {
+                    break;
+                }
+            }
+            document.getElementById('pillImg').src = doc['pills'][i]['imagePath'];
+            $('#takePic').css('display', 'none')
+            $('#pillName').val(doc['pills'][i]['name']);
+            $('#dosage').val(doc['pills'][i]['dosage']);
+            //populate times
+            for (j in doc['pills'][i]['timesTaken']) {
+                $scope.pillTimes.push(doc['pills'][i]['timesTaken'][j]);
+            }
+            $scope.renderPillTimes()
+            //populate days taken
+            for (k in doc['pills'][i]['daysTaken']) {
+                $scope.selectDay(doc['pills'][i]['daysTaken'][k])
+            }
+            //meal restrictions
+            if (doc['pills'][i]['meal'] != '') {
+                $scope.mealRestriction = doc['pills'][i]['meal'];
+            }
         });
     }
     $scope.renderPillTimes = function () {
