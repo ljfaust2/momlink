@@ -150,6 +150,7 @@ across the app instead of just the calendar page
                     'mood': [],
                     'pain': [],
                     'pills': [],
+                    'pillHistory': {},
                     'stress': [],
                     "weight": [],
                 });
@@ -2199,7 +2200,11 @@ across the app instead of just the calendar page
         $scope.trackType = type;
         if (type == 'addNutrition') {
             $scope.toNewPage('addNutrition.html', 'Nutrition')
-        } else {
+        }
+        else if (type == 'addPills') {
+            $scope.toNewPage('history.html', "Today's Pills")
+        }
+        else {
             $scope.toNewPage('history.html', 'History')
         }
     };
@@ -4628,7 +4633,7 @@ across the app instead of just the calendar page
             date = (date.getFullYear() + '/' + ('0' + (date.getMonth() + 1)).slice(-2)) + '/' + ('0' + date.getDate()).slice(-2);
             var hist = '';
             for (j in doc) {
-                if (j != '_rev' && j != '_id') {
+                if (j != '_rev' && j != '_id' && j != 'pillHistory') {
                     elements = doc[j]
                     for (var i in elements) {
                         if (date == elements[i]["date"]) {
@@ -4708,65 +4713,76 @@ across the app instead of just the calendar page
             })
         }
         else if (el == 'addPills') {
+            var todaysPills = [];
+            var currentDate = moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD');
             db.get('track').then(function (doc) {
                 var hist = '';
                 pills = doc['pills'];
-                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
-                    dir.getDirectory('MomLink', { create: true, exclusive: false },
-                    function (directory) {
-                        //array containing arrays for each pill made up of [id, name, timeTaken, dosage, meal]
-                        var todaysPills = [];
-                        for (var i in pills) {
-                            for (j in pills[i]['daysTaken']) {
-                                if (String(window.localStorage.getItem('currentDate')).substring(0, 3) == pills[i]['daysTaken'][j]) {
-                                    for (k in pills[i]["timesTaken"]) {
-                                        time = pills[i]["timesTaken"][k];
-                                        todaysPills.push([pills[i]['id'], pills[i]['name'], time, pills[i]['dosage'], pills[i]['meal']])
-                                    }
-                                }
+                //get pills to display today
+                for (var i in pills) {
+                    for (j in pills[i]['daysTaken']) {
+                        if (String(window.localStorage.getItem('currentDate')).substring(0, 3) == pills[i]['daysTaken'][j]) {
+                            for (k in pills[i]["timesTaken"]) {
+                                time = pills[i]["timesTaken"][k];
+                                todaysPills.push([pills[i]['id'], pills[i]['name'], time, pills[i]['dosage'], pills[i]['meal'], pills[i]['imagePath']])
                             }
                         }
-                        //get picture for each pill
-                        directory.createReader().readEntries(
-                            function (entries) {
-                                for (k in todaysPills) {
-                                    for (l = 0; l < entries.length; l++) {
-                                        if (entries[l].name == todaysPills[k][0] + '.jpg') {
-                                            todaysPills[k].push(entries[l].toURL());
-                                        }
-                                    }
-                                }
-                                //sort pills in array by time
-                                todaysPills = sortTimes(todaysPills);
-                                //build string
-                                for (m in todaysPills) {
-                                    if (todaysPills[m][5] == '' || todaysPills[m][5] == null) {
-                                        hist += '<div class="item item-thumbnail-left"><img src="../img/trackers/pills.png" >';
-                                    }
-                                    else {
-                                        hist += '<div class="item item-thumbnail-left" on-hold="deleteElement(&quot;pills&quot;,&quot;' + todaysPills[m][0] + '&quot;)"><img src=' + todaysPills[m][5] + '>';
-                                    }
-                                    hist += '<h2 style="display:inline">' + todaysPills[m][1] + '</h2> <i class="icon ion-close-round" ng-click="deleteElement(&quot;pills&quot;,&quot;' + todaysPills[m][0] + '&quot;)" style="display:inline; color:red"></i>';
-                                    hist += '<p>Take at ' + $scope.convert24to12(todaysPills[m][2]) + '</p>';
-                                    hist += '<p>Amount:  ' + todaysPills[m][3] + '</p>';
-                                    hist += '<p>' + todaysPills[m][4] + '</p>';
-                                    hist += '</div>';
-                                }
-                                if (hist == '') {
-                                    hist += '<div class="row">';
-                                    hist += '<div class="col text-center">';
-                                    hist += 'No Pills Today';
-                                    hist += '</div></div>';
-                                }
-                                $('#history').html(hist);
-                                $compile($('#history'))($scope);
+                    }
+                }
+                for (var k in todaysPills) {
+                    if (doc['pillHistory'][currentDate] != undefined) {
+                        var pillTaken = false
+                        if ($.inArray(String(todaysPills[k][0] + todaysPills[k][2]), doc['pillHistory'][currentDate]) != -1) {
+                            pillTaken = true;
+                            todaysPills[k].push(pillTaken)
+                        }
+                        else {
+                            todaysPills[k].push(pillTaken)
+                        }
+                    }
+                    else {
+                        todaysPills[k].push(pillTaken)
+                    }
+                }
+                console.log(JSON.stringify(todaysPills))
+                if (todaysPills.length == 0) {
+                    hist += '<div class="row">';
+                    hist += '<div class="col text-center">';
+                    hist += 'No Pills Today';
+                    hist += '</div></div>';
+                }
+                else {
+                    //sort pills in array by time
+                    todaysPills = sortTimes(todaysPills);
+                    //build string
+                    //hist += '<div class="item item-divider">12am - 6am</div>';
+                    //hist += '<div class="item item-divider">6am - 12pm</div>';
+                    //hist += '<div class="item item-divider">12pm - 6pm</div>';
+                    //hist += '<div class="item item-divider">6pm - 12am</div>';
+                    for (m in todaysPills) {
+                        if (todaysPills[m][6] == true) {
+                            hist += '<div class="item item-thumbnail-left"><img src="../img/pills/checkmark.png" >';
+                        }
+                        else {
+                            hist += '<div class="item item-thumbnail-left" ng-click="pillTaken(&quot;' + todaysPills[m][0] + '&quot;,&quot;' + todaysPills[m][2] + '&quot;,&quot;' + window.localStorage.getItem('currentDate') + '&quot;)">';
+                            //check if image for pill exists
+                            if (todaysPills[m][5] == '' || todaysPills[m][5] == null) {
+                                hist += '<img src="../img/trackers/pills.png" >';
                             }
-                        );
-                    },
-                    resOnError);
-                },
-                resOnError);
-            })
+                            else {
+                                hist += '<img src=' + todaysPills[m][5] + '>';
+                            }
+                        }
+                        hist += '<h2 style="display:inline">' + todaysPills[m][1] + '</h2>';
+                        hist += '<p>Take at ' + $scope.convert24to12(todaysPills[m][2]) + '</p>';
+                        hist += '<p>Amount:  ' + todaysPills[m][3] + '</p>';
+                        hist += '<p>' + todaysPills[m][4] + '</p>';
+                        hist += '</div>';
+                    }
+                }
+                $('#history').html(hist);
+                $compile($('#history'))($scope);
+            });
             function sortTimes(array) {
                 return array.sort(function (a, b) {
                     if (parseInt(a[2].split(":")[0]) - parseInt(b[2].split(":")[0]) === 0) {
@@ -4775,11 +4791,6 @@ across the app instead of just the calendar page
                         return parseInt(a[2].split(":")[0]) - parseInt(b[2].split(":")[0]);
                     }
                 })
-            }
-            function resOnError(error) {
-                if (error.code != '1' && error.code != '5') {
-                    console.log(error.code);
-                }
             }
         }
         else {
@@ -4993,6 +5004,21 @@ across the app instead of just the calendar page
             })
         };
     }
+    $scope.pillTaken = function (id, time, date) {
+        date = moment(date).format('YYYY/MM/DD');
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            if (doc['pillHistory'][date] == undefined) {
+                doc['pillHistory'][date] = [String(id + time)]
+            }
+            else {
+                doc['pillHistory'][date].push(String(id + time))
+            }
+            return db.put(doc);
+        }).then(function () {
+            $scope.loadHistory();
+        })
+    };
     $scope.getPillMealImg = function (type) {
         switch (type) {
             case 'withFood':
@@ -5373,61 +5399,61 @@ across the app instead of just the calendar page
         var daysTaken = [];
         var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         var imagePath;
-            //get/save image
-            window.resolveLocalFileSystemURL(document.getElementById('pillImg').src, resolveOnSuccess, resOnError);
-            function resolveOnSuccess(entry) {
-                fileName = String($scope.pillID + ".jpg");
-                window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
-                    dir.getDirectory('MomLink', { create: true, exclusive: false },
-                    function (directory) {
-                        console.log(directory)
-                        console.log(fileName)
-                        entry.moveTo(directory, fileName, successMove, resOnError);
-                    }, resOnError);
+        //get/save image
+        window.resolveLocalFileSystemURL(document.getElementById('pillImg').src, resolveOnSuccess, resOnError);
+        function resolveOnSuccess(entry) {
+            fileName = String($scope.pillID + ".jpg");
+            window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
+                dir.getDirectory('MomLink', { create: true, exclusive: false },
+                function (directory) {
+                    console.log(directory)
+                    console.log(fileName)
+                    entry.moveTo(directory, fileName, successMove, resOnError);
                 }, resOnError);
-            }
-            function successMove(entry) {
-                console.log(entry.toURL())
-                imagePath = entry.toURL();
-                updatePill();
-                console.log(imagePath)
-            }
-            function resOnError(error) {
-                console.log(error.code);
-                console.log("upload error source " + error.source);
-                console.log("upload error target " + error.target);
-                updatePill();
-                console.log('ERROR')
-            }
-            function updatePill() {
-                var i;
-                db.get('track').then(function (doc) {
-                    //get pill
-                    for (i in doc['pills']) {
-                        if (doc['pills'][i]['id'] === $scope.pillID) {
-                            break;
-                        }
+            }, resOnError);
+        }
+        function successMove(entry) {
+            console.log(entry.toURL())
+            imagePath = entry.toURL();
+            updatePill();
+            console.log(imagePath)
+        }
+        function resOnError(error) {
+            console.log(error.code);
+            console.log("upload error source " + error.source);
+            console.log("upload error target " + error.target);
+            updatePill();
+            console.log('ERROR')
+        }
+        function updatePill() {
+            var i;
+            db.get('track').then(function (doc) {
+                //get pill
+                for (i in doc['pills']) {
+                    if (doc['pills'][i]['id'] === $scope.pillID) {
+                        break;
                     }
-                    //get days selected
-                    for (j in days) {
-                        if (document.getElementById(days[j]).classList.contains('activeBorder')) {
-                            daysTaken.push(days[j]);
-                        }
+                }
+                //get days selected
+                for (j in days) {
+                    if (document.getElementById(days[j]).classList.contains('activeBorder')) {
+                        daysTaken.push(days[j]);
                     }
-                    console.log(doc['pills'][i]['name'])
-                    doc['pills'][i]['name'] = $('#pillName').val();
-                    doc['pills'][i]['dosage'] = $('#dosage').val();
-                    doc['pills'][i]['meal'] = $scope.mealRestriction;
-                    doc['pills'][i]['timesTaken'] = $scope.pillTimes;
-                    doc['pills'][i]['daysTaken'] = daysTaken;
-                    if (imagePath != null) {
-                        doc['pills'][i]['imagePath'] = imagePath;
-                    }
-                    return db.put(doc);
-                }).then(function (doc) {
-                    $scope.toNewPage('history.html', 'History');
-                });
-            }
+                }
+                console.log(doc['pills'][i]['name'])
+                doc['pills'][i]['name'] = $('#pillName').val();
+                doc['pills'][i]['dosage'] = $('#dosage').val();
+                doc['pills'][i]['meal'] = $scope.mealRestriction;
+                doc['pills'][i]['timesTaken'] = $scope.pillTimes;
+                doc['pills'][i]['daysTaken'] = daysTaken;
+                if (imagePath != null) {
+                    doc['pills'][i]['imagePath'] = imagePath;
+                }
+                return db.put(doc);
+            }).then(function (doc) {
+                $scope.toNewPage('history.html', 'History');
+            });
+        }
     }
     $scope.renderPills = function () {
         var hist = '';
