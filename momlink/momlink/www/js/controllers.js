@@ -3171,6 +3171,51 @@ across the app instead of just the calendar page
         return time;
     }
 
+    $scope.progress = function () {
+        var db = PouchDB('momlink');
+        var week;
+        var html;
+        //get current week
+        db.get('profile').then(function (doc) {
+            if (doc['deliveryDate'] != '' && doc['startDate'] != '') {
+                difference = moment.duration(moment().diff(moment(doc['startDate']))).asWeeks();
+                week = parseInt(difference) + 1;
+                html = '<img src="../img/progress/week' + week + '.jpg" style="max-width:100%;height:auto;vertical-align:middle">';
+                week = 'Week ' + week;
+            }
+            else {
+                html = '<img src="../img/progress/week1.jpg" style="max-width:100%;height:auto;vertical-align:middle">';
+                week = 'Week 1';
+            }
+            $('#week').html(week);
+            $('#progress').html(html);
+            $compile($('#progress'))($scope);
+        });
+    }
+    $scope.navProgress = function (nav) {
+        var week = $("#week").html().slice(-2);
+        week = parseInt(week);
+        if (nav == '+') {
+            if (week > 40) {
+                week = 41;
+            }
+            else {
+                week++;
+            }
+        }
+        else {
+            if (week <= 1) {
+                week = 1;
+            }
+            else {
+                week--;
+            }
+        }
+        $('#week').html('Week ' + week);
+        var html = '<img src="../img/progress/week' + week + '.jpg" style="max-width:100%;height:auto;vertical-align:middle">';
+        $('#progress').html(html);
+        $compile($('#progress'))($scope);
+    }
 
     /*
     Returns the time parameter from a date such as 08/01/2016T10:23
@@ -4744,7 +4789,6 @@ across the app instead of just the calendar page
                         todaysPills[k].push(pillTaken)
                     }
                 }
-                console.log(JSON.stringify(todaysPills))
                 if (todaysPills.length == 0) {
                     hist += '<div class="row">';
                     hist += '<div class="col text-center">';
@@ -4755,13 +4799,27 @@ across the app instead of just the calendar page
                     //sort pills in array by time
                     todaysPills = sortTimes(todaysPills);
                     //build string
-                    //hist += '<div class="item item-divider">12am - 6am</div>';
-                    //hist += '<div class="item item-divider">6am - 12pm</div>';
-                    //hist += '<div class="item item-divider">12pm - 6pm</div>';
-                    //hist += '<div class="item item-divider">6pm - 12am</div>';
+                    var timeBorders = [['18:00', '6pm - 12am'], ['12:00', '12pm - 6pm'], ['06:00', '6am - 12pm'], ['00:00', '12am - 6am']]
                     for (m in todaysPills) {
+                        var t = timeBorders.length
+                        while (t--) {
+                            pillTime = moment(todaysPills[m][2], 'HH:mm')
+                            borderTime = moment(timeBorders[t][0], 'HH:mm')
+                            if (pillTime.isSameOrAfter(borderTime)) {
+                                hist += '<div class="item item-divider">' + timeBorders[t][1] + '</div>';
+                                timeBorders.splice(t, 1);
+                            }
+                        }
+                        pillTime = moment(String(currentDate + 'T' + todaysPills[m][2]), 'YYYY/MM/DDTHH:mm')
+                        console.log(String(currentDate + 'T' + todaysPills[m][2]))
+                        console.log(pillTime)
+                        console.log(JSON.stringify(pillTime))
+                        currentTime = moment();
                         if (todaysPills[m][6] == true) {
                             hist += '<div class="item item-thumbnail-left"><img src="../img/pills/checkmark.png" >';
+                        }
+                        else if (pillTime.isBefore(currentTime)) {
+                            hist += '<div class="item item-thumbnail-left"><img src="../img/pills/questionmark.PNG" >';
                         }
                         else {
                             hist += '<div class="item item-thumbnail-left" ng-click="pillTaken(&quot;' + todaysPills[m][0] + '&quot;,&quot;' + todaysPills[m][2] + '&quot;,&quot;' + window.localStorage.getItem('currentDate') + '&quot;)">';
@@ -4776,8 +4834,13 @@ across the app instead of just the calendar page
                         hist += '<h2 style="display:inline">' + todaysPills[m][1] + '</h2>';
                         hist += '<p>Take at ' + $scope.convert24to12(todaysPills[m][2]) + '</p>';
                         hist += '<p>Amount:  ' + todaysPills[m][3] + '</p>';
-                        hist += '<p>' + todaysPills[m][4] + '</p>';
+                        if (todaysPills[m][4] != undefined) {
+                            hist += '<p>' + todaysPills[m][4] + '</p>';
+                        }
                         hist += '</div>';
+                    }
+                    for (n in timeBorders) {
+                        hist += '<div class="item item-divider">' + timeBorders[n][1] + '</div>';
                     }
                 }
                 $('#history').html(hist);
@@ -5365,8 +5428,10 @@ across the app instead of just the calendar page
                     "imagePath": imagePath
                 };
                 doc['pills'].push(element);
-                return db.put(doc);
-                console.log(imagePath)
+                return db.put(doc).then(function (doc) {
+                    console.log(imagePath)
+                    $scope.toNewPage('history.html', 'History');
+                });
             }
             function resOnError(error) {
                 console.log(error.code);
@@ -5382,7 +5447,9 @@ across the app instead of just the calendar page
                     "imagePath": imagePath
                 };
                 doc['pills'].push(element);
-                return db.put(doc);
+                return db.put(doc).then(function (doc) {
+                    $scope.toNewPage('history.html', 'History');
+                });
             }
             //add alert for pill
             /*if ($scope.notify == true) {

@@ -1,0 +1,12 @@
+﻿<ion-pane>
+    <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="progress()">
+        <button class="button button-icon icon ion-arrow-left-a" ng-click="navProgress('-')"></button>
+        <h2 class="title" id="week"></h2>
+        <button class="button button-icon icon ion-arrow-right-a" ng-click="navProgress('+')"></button>
+    </ion-subheader-bar>
+    <ion-view overflow-scroll="true">
+        <ion-content class="has-header has-subheader padding" on-swipe-left="navProgress('+')" on-swipe-right="navProgress('-')">
+            <div id="progress"></div>
+        </ion-content>
+    </ion-view>
+</ion-pane>
