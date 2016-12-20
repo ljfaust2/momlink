@@ -40,7 +40,11 @@
                 <span class="input-label"><i class="button-icon icon ion-location"></i>Location</span>
                 <input id="venue" type="text">
             </label>
-            <div class="item item-checkbox item-text-wrap"><i class="button-icon icon ion-ios-bell"></i>Add Reminder<label class="checkbox"><input type="checkbox" name="reminder" value="1"></label></div>
+            <div class="item item-checkbox item-text-wrap" ng-click="toggleMinsBefore()"><i class="button-icon icon ion-ios-bell"></i>Add Reminder<label class="checkbox"><input type="checkbox" name="reminder" value="1"></label></div>
+            <div class="item item-input" id="minsBeforeDrop" style="display:none">
+                <input id="minsBefore" type="number" placeholder="30">
+                Minutes before &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </div>
             <div class="item item-checkbox item-icon-right item-text-wrap">Share with PNCC<label class="checkbox"><input type="checkbox" name="share" value="1"></label></div>
             <div class="col text-center">
                 <input type="button" class="button button-block button-positive" value="NEXT" ng-click="goToEventPart2()">

@@ -605,7 +605,16 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
-        console.log()
+        document.addEventListener("deviceready", function () {
+            var date = new Date();
+            cordova.plugins.notification.local.schedule({
+                id: 1,
+                title: "Message Title",
+                message: "Message Text",
+                firstAt: date,
+                every: 10,
+            })
+        })
     }
 
     $setReminder = function (title, time) {
@@ -2663,12 +2672,13 @@ across the app instead of just the calendar page
         }
         //set reminder
         if (reminder == 1) {
-            reminderTime = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract(30, 'minutes').toDate();
+            reminderTime = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract($('#minsBefore').val(), 'minutes').toDate();
             timerID = $scope.decodeReminder(id);
-            reminderTitle = String('Reminder: You have ' + $('#title').val() + 'Today at ' + $scope.convert24to12($scope.parseTime(start)));
+            reminderText = String('Today at ' + $scope.convert24to12($scope.parseTime(start)));
             cordova.plugins.notification.local.schedule({
                 id: timerID,
-                title: reminderTitle,
+                title: String($('#title').val()),
+                message: reminderText,
                 at: reminderTime
             });
         }
@@ -2679,6 +2689,7 @@ across the app instead of just the calendar page
         db.get('events').then(function (doc) {
             $scope.eventID = id;
             //code event category
+            console.log($('#minsBefore').val())
             var category;
             switch ($("#type").val()) {
                 case 'OB Appt':
@@ -2713,6 +2724,7 @@ across the app instead of just the calendar page
                 "venue": $('#venue').val(),
                 "share": share,
                 "reminder": reminder,
+                "minsBefore": $('#minsBefore').val(),
                 "upload": "0",
                 "description": $('#description').val(),
                 "questions": questions,
@@ -2885,13 +2897,13 @@ across the app instead of just the calendar page
             }
             $('#title').val(doc['events'][i]['title']);
             $('#type').val($scope.decodeCategory(doc['events'][i]['category']));
-            console.log()
             document.getElementById($scope.decodeCategory(doc['events'][i]['category'])).classList.add('activeBorder');
             $('#date').val(doc['events'][i]['day']);
             $('#start').val($scope.parseTime(doc['events'][i]['start']));
             $('#end').val($scope.parseTime(doc['events'][i]['end']));
             $('#venue').val(doc['events'][i]['venue']);
             $('#description').val(doc['events'][i]['description']);
+            $('#minsBefore').val(doc['events'][i]['minsBefore']);
             //populate all current questiions
             /*for (j in doc['events'][i]['questions']) {
                 console.log(doc['events'][i]['questions'][j])
@@ -2940,13 +2952,17 @@ across the app instead of just the calendar page
         //reminder if it existed and schedule a new one
         timerID = $scope.decodeReminder($scope.eventID);
         if (reminder == 1) {
-            reminderTime = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract(30, 'minutes').toDate();
+            reminderText = String('Today at ' + $scope.convert24to12($scope.parseTime(start)));
+            reminderTime = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract($('#minsBefore').val(), 'minutes').toDate();
+            //cancel previous event
             cordova.plugins.notification.local.cancel(timerID, function () {
                 // Notification was cancelled
             });
+            //set new event
             cordova.plugins.notification.local.schedule({
                 id: timerID,
-                title: $('#title').val(),
+                title: String($('#title').val()),
+                message: reminderText,
                 at: reminderTime
             });
         }
@@ -2995,12 +3011,12 @@ across the app instead of just the calendar page
             doc['events'][i]['title'] = $('#title').val();
             doc['events'][i]['category'] = category;
             doc['events'][i]['day'] = $('#date').val();
-
             doc['events'][i]['start'] = start;
             doc['events'][i]['end'] = end;
             doc['events'][i]['venue'] = $('#venue').val();
             doc['events'][i]['share'] = share;
             doc['events'][i]['reminder'] = reminder;
+            doc['events'][i]['minsBefore'] = $('#minsBefore').val();
             //signal to server that event has been modified
             if (share == '1' && doc['events'][i]['upload'] == '1') {
                 doc['events'][i]['upload'] = '2';
@@ -3107,6 +3123,16 @@ across the app instead of just the calendar page
         if (pass == true) {
             $('#eventPart1').css('display', 'none')
             $('#eventPart2').css('display', '')
+        }
+    };
+
+
+    $scope.toggleMinsBefore = function () {
+        if ($("#minsBeforeDrop").css('display') == 'none') {
+            $('#minsBeforeDrop').css('display', '')
+        }
+        else {
+            $('#minsBeforeDrop').css('display', 'none')
         }
     };
 
@@ -3628,6 +3654,7 @@ across the app instead of just the calendar page
             }
             if (doc['events'][i]['reminder'] == 1) {
                 $("input[name=reminder]").prop('checked', true);
+                $('#minsBeforeDrop').css('display', '')
             }
         });
     };
