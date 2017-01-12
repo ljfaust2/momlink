@@ -78,4 +78,5 @@
   <plugin name="de.appplant.cordova.plugin.local-notification" version="0.8.4" src="https://github.com/katzer/cordova-plugin-local-notifications" />
   <plugin name="cordova-plugin-sms" version="1.0.5" src="https://github.com/floatinghotpot/cordova-plugin-sms" />
   <plugin name="cordova-plugin-vibration" version="2.1.2" />
+  <plugin name="phonegap-plugin-push" version="2.0.0-rc2" />
 </widget>

@@ -607,13 +607,24 @@ across the app instead of just the calendar page
     $scope.testPHP = function () {
         document.addEventListener("deviceready", function () {
             var date = new Date();
-            cordova.plugins.notification.local.schedule({
-                id: 1,
-                title: "Message Title",
-                message: "Message Text",
-                firstAt: date,
-                every: 10,
-            })
+            var time = moment("2016-12-21T10:56", "YYYY-MM-DDTHH:mm:ssZ").toDate();
+            var time2 = moment("2016-12-21T11:00", "YYYY-MM-DDTHH:mm:ssZ").toDate();
+            var schedule = [
+                {
+                    id: 1,
+                    title: "Local Notification Example 1",
+                    text: "Multi Notification 1",
+                    at: time
+                },
+            {
+                id: 2,
+                title: "Local Notification Example 2",
+                text: "Multi Notification 2",
+                at: time2
+            }
+            ]
+            console.log(JSON.stringify(schedule))
+            cordova.plugins.notification.local.schedule(schedule);
         })
     }
 
@@ -791,6 +802,7 @@ across the app instead of just the calendar page
                                     if (data[i]['excerpt'] != doc['threads'][j]['excerpt']) {
                                         doc['threads'][j]['excerpt'] = data[i]['excerpt'];
                                         doc['threads'][j]['mdate'] = data[i]['date'];
+                                        doc['threads'][j]['read'] = 0;
                                     }
                                     isUnique = false;
                                 }
@@ -802,7 +814,8 @@ across the app instead of just the calendar page
                                     "subject": data[i]['subject'],
                                     "excerpt": data[i]['excerpt'],
                                     "pncc_id": data[i]['pncc_id'],
-                                    "msgid": data[i]['msgid']
+                                    "msgid": data[i]['msgid'],
+                                    "read": 0
                                 };
                                 doc['threads'].push(thread);
                             }
@@ -2672,13 +2685,15 @@ across the app instead of just the calendar page
         }
         //set reminder
         if (reminder == 1) {
+            console.log(start)
             reminderTime = moment(start, "YYYY-MM-DDTHH:mm:ssZ").subtract($('#minsBefore').val(), 'minutes').toDate();
+            console.log(reminderTime)
             timerID = $scope.decodeReminder(id);
             reminderText = String('Today at ' + $scope.convert24to12($scope.parseTime(start)));
             cordova.plugins.notification.local.schedule({
                 id: timerID,
                 title: String($('#title').val()),
-                message: reminderText,
+                text: reminderText,
                 at: reminderTime
             });
         }
@@ -2962,7 +2977,7 @@ across the app instead of just the calendar page
             cordova.plugins.notification.local.schedule({
                 id: timerID,
                 title: String($('#title').val()),
-                message: reminderText,
+                text: reminderText,
                 at: reminderTime
             });
         }
@@ -3300,6 +3315,7 @@ across the app instead of just the calendar page
         db.allDocs({ include_docs: true }).then(function (res) {
             var docs = res.rows.map(function (row) { return row.doc; });
             console.log(JSON.stringify(docs));
+            //console.log(docs);
         }).catch(console.log.bind(console));
         /*db.get('userData').then(function (doc) {
             for (i in doc['userData']) {
@@ -3416,7 +3432,7 @@ across the app instead of just the calendar page
                         }
                     }
                     //add all MM conversations to a list
-                    thread = ['mm', doc['threads'][i]['pncc_id'], pnccName, doc['threads'][i]['id'], doc['threads'][i]['subject'], doc['threads'][i]['date'], doc['threads'][i]['excerpt']]
+                    thread = ['mm', doc['threads'][i]['pncc_id'], pnccName, doc['threads'][i]['id'], doc['threads'][i]['subject'], doc['threads'][i]['date'], doc['threads'][i]['excerpt'], doc['threads'][i]['read']]
                     allThreads.push(thread)
                     thread = [];
                 }
@@ -3448,8 +3464,14 @@ across the app instead of just the calendar page
             for (t in allThreads) {
                 if (allThreads[t][0] == 'mm') {
                     html += '<div class="item item-text-wrap" ng-click="renderThreadList(' + allThreads[t][1] + ',' + allThreads[t][3] + ')">';
-                    html += '<h2>' + allThreads[t][2] + ' - ' + allThreads[t][4] + '</h2>';
-                    html += '<p>' + allThreads[t][5] + ' - ' + allThreads[t][6] + '</p>';
+                    if (allThreads[t][7] == 0) {
+                        html += '<h2><b>' + allThreads[t][2] + ' - ' + allThreads[t][4] + '</b></h2>';
+                        html += '<p><b>' + allThreads[t][5] + ' - ' + allThreads[t][6] + '</b></p>';
+                    }
+                    else {
+                        html += '<h2>' + allThreads[t][2] + ' - ' + allThreads[t][4] + '</h2>';
+                        html += '<p>' + allThreads[t][5] + ' - ' + allThreads[t][6] + '</p>';
+                    }
                     html += '</div>';
                 }
                 else if (allThreads[t][0] == 'sms') {
@@ -3489,10 +3511,15 @@ across the app instead of just the calendar page
                         html += '<div class="item item-text-wrap" style="color: #0866c6;">' + doc['messages'][i]['content'] + '</div>';
                     }
                 }
+                if (doc['threads'][i]['id'] == msgid) {
+                    doc['threads'][i]['read'] = 1;
+                }
             }
-            html += '</div>';
-            $("#".concat('threads')).html(html);
-            $compile($("#".concat('threads')))($scope);
+            return db.put(doc).then(function () {
+                html += '</div>';
+                $("#".concat('threads')).html(html);
+                $compile($("#".concat('threads')))($scope);
+            })
         });
     };
 
@@ -4838,9 +4865,6 @@ across the app instead of just the calendar page
                             }
                         }
                         pillTime = moment(String(currentDate + 'T' + todaysPills[m][2]), 'YYYY/MM/DDTHH:mm')
-                        console.log(String(currentDate + 'T' + todaysPills[m][2]))
-                        console.log(pillTime)
-                        console.log(JSON.stringify(pillTime))
                         currentTime = moment();
                         if (todaysPills[m][6] == true) {
                             hist += '<div class="item item-thumbnail-left"><img src="../img/pills/checkmark.png" >';
@@ -5423,10 +5447,17 @@ across the app instead of just the calendar page
             var id = moment().format('MM-DD-YYYYThhmmssa');
             var daysTaken = [];
             var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            var dayIds = ['7', '1', '2', '3', '4', '5', '6'];
             for (i in days) {
                 if (document.getElementById(days[i]).classList.contains('activeBorder')) {
                     daysTaken.push(days[i]);
                 }
+            }
+
+            //reminders
+            var reminder = 0;
+            if ($("input[name=reminder]:checked").val() == 1) {
+                reminder = 1;
             }
             //save image
             window.resolveLocalFileSystemURL(document.getElementById('pillImg').src, resolveOnSuccess, resOnError);
@@ -5435,13 +5466,11 @@ across the app instead of just the calendar page
                 window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (dir) {
                     dir.getDirectory('MomLink', { create: true, exclusive: false },
                     function (directory) {
-                        console.log(fileName)
                         entry.moveTo(directory, fileName, successMove, resOnError);
                     }, resOnError);
                 }, resOnError);
             }
             function successMove(entry) {
-                console.log(entry.toURL())
                 imagePath = entry.toURL();
                 var element = {
                     "id": id,
@@ -5452,16 +5481,18 @@ across the app instead of just the calendar page
                     "meal": $scope.mealRestriction,
                     "timesTaken": $scope.pillTimes,
                     "daysTaken": daysTaken,
+                    "reminder": reminder,
                     "imagePath": imagePath
                 };
                 doc['pills'].push(element);
                 return db.put(doc).then(function (doc) {
-                    console.log(imagePath)
+                    if (reminder == 1) {
+                        setAlerts();
+                    }
                     $scope.toNewPage('history.html', 'History');
                 });
             }
             function resOnError(error) {
-                console.log(error.code);
                 var element = {
                     "id": id,
                     "date": moment().format('YYYY/MM/DD'),
@@ -5471,12 +5502,87 @@ across the app instead of just the calendar page
                     "meal": $scope.mealRestriction,
                     "timesTaken": $scope.pillTimes,
                     "daysTaken": daysTaken,
+                    "reminder": reminder,
                     "imagePath": imagePath
                 };
                 doc['pills'].push(element);
                 return db.put(doc).then(function (doc) {
+                    if (reminder == 1) {
+                        setAlerts();
+                    }
                     $scope.toNewPage('history.html', 'History');
                 });
+            }
+            function setAlerts() {
+                var timerID = '';
+                var schedule = [];
+                var uniqueID = 0;
+                for (j in daysTaken) {
+                    //isn't the same as dayIds
+                    for (k in $scope.pillTimes) {
+                        //build reminderTime for each reminder based on days and times
+                        //reminderTime should be next closest instance based on weekday and time
+                        //check if day has already passed this week
+                        today = moment().isoWeekday();
+                        //week
+                        if (parseInt(today) == parseInt(decodeWeekday(daysTaken[j]))) {
+                            //weekday has already passed
+                            pillTime = moment($scope.pillTimes[k], 'HH:mm')
+                            if (pillTime.isBefore(moment())) {
+                                //same day missed time
+                                reminderTime = moment().add(7, 'days').isoWeekday(decodeWeekday(daysTaken[j])).format("YYYY-MM-DDT")
+                            }
+                            else {
+                                //same day time hasnt happened
+                                reminderTime = moment().isoWeekday(decodeWeekday(daysTaken[j])).format("YYYY-MM-DDT")
+                            }
+                        }
+                        else if (parseInt(today) > parseInt(decodeWeekday(daysTaken[j]))) {
+                            //weekday has passed
+                            reminderTime = moment().add(7, 'days').isoWeekday(decodeWeekday(daysTaken[j])).format("YYYY-MM-DDT")
+                        }
+                        else {
+                            //weekday has not happened
+                            reminderTime = moment().isoWeekday(decodeWeekday(daysTaken[j])).format("YYYY-MM-DDT")
+                        }
+                        reminderTime = reminderTime + String($scope.pillTimes[k]);
+                        //timerID = $scope.decodeReminder(String(id + uniqueID));
+                        timerID = uniqueID;
+                        uniqueID++;
+                        reminderTimeFinal = moment(reminderTime, "YYYY-MM-DDTHH:mm:ssZ").toDate();
+                        console.log(reminderTimeFinal)
+                        schedule.push({
+                            id: timerID,
+                            title: String($('#pillName').val()),
+                            text: 'Time to take your pill.',
+                            at: reminderTimeFinal,
+                            every: 'week',
+                        })
+                    }
+                }
+                //schedule all
+                document.addEventListener("deviceready", function () {
+                    console.log(JSON.stringify(schedule))
+                    cordova.plugins.notification.local.schedule(schedule);
+                })
+            }
+            function decodeWeekday(day) {
+                switch (day) {
+                    case 'Sun':
+                        return 7;
+                    case 'Mon':
+                        return 1;
+                    case 'Tue':
+                        return 2;
+                    case 'Wed':
+                        return 3;
+                    case 'Thu':
+                        return 4;
+                    case 'Fri':
+                        return 5;
+                    case 'Sat':
+                        return 6;
+                }
             }
             //add alert for pill
             /*if ($scope.notify == true) {
@@ -5492,6 +5598,10 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         var daysTaken = [];
         var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var reminder = 0;
+        if ($("input[name=reminder]:checked").val() == 1) {
+            reminder = 1;
+        }
         var imagePath;
         //get/save image
         window.resolveLocalFileSystemURL(document.getElementById('pillImg').src, resolveOnSuccess, resOnError);
@@ -5540,6 +5650,7 @@ across the app instead of just the calendar page
                 doc['pills'][i]['meal'] = $scope.mealRestriction;
                 doc['pills'][i]['timesTaken'] = $scope.pillTimes;
                 doc['pills'][i]['daysTaken'] = daysTaken;
+                doc['pills'][i]['reminder'] = reminder;
                 if (imagePath != null) {
                     doc['pills'][i]['imagePath'] = imagePath;
                 }
@@ -5610,6 +5721,19 @@ across the app instead of just the calendar page
             }
         });
     }
+    $scope.togglePillReminder = function () {
+        var db = PouchDB('momlink');
+        db.get('track').then(function (doc) {
+            for (i in doc['pills']) {
+                if (doc['pills'][i]['id'] === $scope.pillID) {
+                    break;
+                }
+            }
+            if (doc['pills'][i]['reminder'] == 1) {
+                $("input[name=reminder]").prop('checked', true);
+            }
+        });
+    };
     $scope.renderPillTimes = function () {
         var timesHtml = '';
         var db = PouchDB('momlink');

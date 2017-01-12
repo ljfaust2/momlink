@@ -37,7 +37,7 @@
         <ion-radio ng-model="mealRestriction" ng-value="'Before Meal'">Before Meal</ion-radio>
         <ion-radio ng-model="mealRestriction" ng-value="'After Meal'">After Meal</ion-radio>
     </div>
-    <!--<ion-toggle id="notify" ng-model="notify" ><i class="button-icon icon ion-android-notifications-none"></i>Set Alert?</ion-toggle>-->
+    <div class="item item-checkbox item-text-wrap"><i class="button-icon icon ion-ios-bell"></i>Add Reminder<label class="checkbox"><input type="checkbox" name="reminder" value="1"></label></div>
     <div class="padding-left padding-right">
         <input type="button" class="button button-block button-positive" value="ADD" ng-click="submitPill();closeModal();">
         <input type="button" class="button button-block button-assertive" value="CANCEL" ng-click="closeModal();">
