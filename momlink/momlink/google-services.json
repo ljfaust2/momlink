@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "436459531635",
+    "firebase_url": "https://momlink-3ed9b.firebaseio.com",
+    "project_id": "momlink-3ed9b",
+    "storage_bucket": "momlink-3ed9b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436459531635:android:3a5f31f5d48101f9",
+        "android_client_info": {
+          "package_name": "io.cordova.momlink"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "436459531635-4sngfj05f6i3ovm7uof2207ov6g6nri4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeBWQEq9vWzYr6AgWtYvX4rfGrh-OqZoo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

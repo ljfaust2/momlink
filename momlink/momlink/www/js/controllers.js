@@ -224,38 +224,7 @@ across the app instead of just the calendar page
             if (err.status === 404) {
                 db.put({
                     "_id": "referrals",
-                    "referrals": [
-                        {
-                            "id": "1",
-                            "name": "Active Health & Wellness Center",
-                            "address": "South Bend, Indiana",
-                            "phone": "877-826-7357",
-                            "email": "",
-                            "date": "7/5/2016",
-                            "meeting": "",
-                            "img": "../img/referrals/ahwc.png"
-                        },
-                        {
-                            "id": "2",
-                            "name": "Smoking Cessation Program",
-                            "address": "South Bend, Indiana",
-                            "phone": "574-647-6880",
-                            "email": "greene@gmail.com",
-                            "date": "7/1/2016",
-                            "meeting": "",
-                            "img": "../img/referrals/smokingCessation.PNG"
-                        },
-                        {
-                            "id": "3",
-                            "name": "Childbirth Center Classes",
-                            "address": "South Bend, Indiana",
-                            "phone": "574-647-3540",
-                            "email": "",
-                            "date": "6/28/2016",
-                            "meeting": "",
-                            "img": "../img/referrals/mh.PNG"
-                        },
-                    ],
+                    "referrals": [],
                 });
             }
         });
@@ -1152,7 +1121,8 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
-                if (data.length > 0) {
+                if (data.length > 0 && data[0]['id'] != null) {
+                    console.log(JSON.stringify(data[0]['id']))
                     db.get('referrals').then(function (doc) {
                         for (i in data) {
                             //check if referral is already in local db
@@ -1973,6 +1943,29 @@ across the app instead of just the calendar page
         });
     };
 
+    $scope.pushListener = function () {
+        console.log('FIRE')
+        document.addEventListener("deviceready", function () {
+            FCMPlugin.onNotification(function (data) {
+                //console.log(JSON.stringify(data))
+                if (data.wasTapped) {
+                    //Notification was received on device tray and tapped by the user.
+                    //console.log(JSON.stringify(data));
+                    $ionicPopup.alert({
+                        title: data.title,
+                        template: data.body
+                    });
+                } else {
+                    //Notification was received in foreground. Maybe the user needs to be notified.
+                    //console.log(JSON.stringify(data));
+                    $ionicPopup.alert({
+                        title: data.title,
+                        template: data.body
+                    });
+                }
+            });
+        });
+    };
 
     /*
     Renders badges (numerical notifications) on the homepage

@@ -182,7 +182,9 @@
             "id": "phonegap-plugin-push"
         },
         "is_top_level": true,
-        "variables": {}
+        "variables": {
+            "SENDER_ID": "436459531635"
+        }
     },
     "de.appplant.cordova.plugin.local-notification": {
         "source": {
@@ -213,6 +215,41 @@
         "source": {
             "type": "registry",
             "id": "cordova-plugin-vibration@~2.1.0"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-fcm": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/fechanique/cordova-plugin-fcm",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "com.google.playservices": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/MobileChromeApps/google-play-services.git",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-googleplayservices": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-googleplayservices"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-firebase": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/arnesson/cordova-plugin-firebase",
+            "subdir": "."
         },
         "is_top_level": true,
         "variables": {}
