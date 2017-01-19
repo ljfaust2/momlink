@@ -15,13 +15,14 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "login",
                     "login_code": "6",
-                    "username": "u",
-                    "password": "p",
+                    "username": "",
+                    "password": "",
                     "reset_code": "595",
                     "answer": "",
                     "agency": "",
                     "sec_question": "",
-                    "client_id": "555"
+                    "client_id": "",
+                    "token": ""
                 });
             }
         });
@@ -474,7 +475,7 @@ across the app instead of just the calendar page
             }
         });*/
         //db.destroy();
-        window.localStorage.setItem('cid', '555')
+        //window.localStorage.setItem('cid', '555')
     }
 
     $scope.sendNewMessage = function (recipient) {
@@ -702,9 +703,12 @@ across the app instead of just the calendar page
             })
         })
     };*/
-    //need to run these three functions asynchronously 
-    //getMessages is called inside the updateInbox function as it is dependent on pnccs in the db
-    //uploadSMSMessages is called inside the getMessages function
+
+    /*
+      need to run these three functions asynchronously 
+      getMessages is called inside the updateInbox function as it is dependent on pnccs in the db
+      uploadSMSMessages is called inside the getMessages function
+    */
     $scope.updateInbox = function () {
         //get PNCCs
         var db = PouchDB('momlink');
@@ -1944,7 +1948,6 @@ across the app instead of just the calendar page
     };
 
     $scope.pushListener = function () {
-        console.log('FIRE')
         document.addEventListener("deviceready", function () {
             FCMPlugin.onNotification(function (data) {
                 //console.log(JSON.stringify(data))
@@ -2068,37 +2071,49 @@ across the app instead of just the calendar page
         db.get('login').then(function (doc) {
             //check if first-time user
             if (doc['client_id'] == "") {
-                //create all local databases
-                var post_information = { 'username': user, 'password': pass };
-                console.log(JSON.stringify(post_information))
-                $.ajax({
-                    url: 'https://momlink.crc.nd.edu/~jonathan/current/firstTimeLogin.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: post_information,
-                    success: function (data) {
-                        console.log(JSON.stringify(data))
-                        if (data[0]['success'] != 0) {
-                            doc['client_id'] = data[1]['client_id']
-                            //doc['agency'] = data[1]['agency']
-                            doc['sec_question'] = data[1]['sec_question']
-                            doc['username'] = user;
-                            doc['password'] = pass;
-                            window.localStorage.setItem('cid', data[1]['client_id'])
-                            window.localStorage.setItem('username', user)
-                            window.localStorage.setItem('password', pass)
-                            return db.put(doc).then(function () {
-                                window.location = "templates/main.html";
-                            })
-                        }
-                        else {
-                            $ionicPopup.alert({
-                                title: 'Invalid Username/Password',
-                                subTitle: 'Usernames and passwords are case sensitive'
-                            });
-                        }
-                    }
+                //create all local databases here//
+                //get token for push notifications
+                document.addEventListener("deviceready", function () {
+                    FCMPlugin.getToken(function (token) {
+                        // save this server-side and use it to push notifications to this device
+                        var post_information = { 'username': user, 'password': pass, 'token': token };
+                        console.log(JSON.stringify(post_information))
+                        $.ajax({
+                            url: 'https://momlink.crc.nd.edu/~jonathan/current/firstTimeLogin.php',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: post_information,
+                            success: function (data) {
+                                console.log(JSON.stringify(data))
+                                if (data[0]['success'] != 0) {
+                                    doc['client_id'] = data[1]['client_id']
+                                    //doc['agency'] = data[1]['agency']
+                                    doc['sec_question'] = data[1]['sec_question']
+                                    doc['username'] = user;
+                                    doc['password'] = pass;
+                                    window.localStorage.setItem('cid', data[1]['client_id'])
+                                    window.localStorage.setItem('username', user)
+                                    window.localStorage.setItem('password', pass)
+                                    return db.put(doc).then(function () {
+                                        window.location = "templates/main.html";
+                                    })
+                                }
+                                else {
+                                    $ionicPopup.alert({
+                                        title: 'Invalid Username/Password',
+                                        subTitle: 'Usernames and passwords are case sensitive'
+                                    });
+                                }
+                            }
+                        });
+                    }, function (error) {
+                        $ionicPopup.alert({
+                            title: 'Error Generating FCM Token',
+                            subTitle: error
+                        });
+                    });
                 });
+
             }
             else {
                 if (user == doc['username'] && pass == doc['password']) {
