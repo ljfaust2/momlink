@@ -15,13 +15,13 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "login",
                     "login_code": "6",
-                    "username": "",
-                    "password": "",
+                    "username": "u",
+                    "password": "p",
                     "reset_code": "595",
                     "answer": "",
                     "agency": "",
                     "sec_question": "",
-                    "client_id": "",
+                    "client_id": "555",
                     "token": ""
                 });
             }
@@ -475,7 +475,7 @@ across the app instead of just the calendar page
             }
         });*/
         //db.destroy();
-        //window.localStorage.setItem('cid', '555')
+        window.localStorage.setItem('cid', '555')
     }
 
     $scope.sendNewMessage = function (recipient) {
@@ -1219,6 +1219,7 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
+                console.log(JSON.stringify(data))
                 if (data.length > 0) {
                     db.get('articles').then(function (doc) {
                         for (i in data) {
@@ -2113,7 +2114,6 @@ across the app instead of just the calendar page
                         });
                     });
                 });
-
             }
             else {
                 if (user == doc['username'] && pass == doc['password']) {
@@ -4396,12 +4396,13 @@ across the app instead of just the calendar page
                         selectedAnswer = $('input[name="' + String(j) + '"]:checked', '#'.concat(j)).val();
                         confidenceAnswer = $('input[name="C' + String(j) + '"]:checked', '#C'.concat(j)).val();
                         correctAnswer = quiz[j][1][quiz[j][2]];
+                        questionID = quiz[j][3];
                         if (selectedAnswer == correctAnswer) {
-                            usersAnswers.push([selectedAnswer, 1, confidenceAnswer]);
+                            usersAnswers.push([selectedAnswer, 1, confidenceAnswer, questionID]);
                             score++;
                         }
                         else {
-                            usersAnswers.push([selectedAnswer, 0, confidenceAnswer]);
+                            usersAnswers.push([selectedAnswer, 0, confidenceAnswer, questionID]);
                         }
                     }
                     finalScore = score;
