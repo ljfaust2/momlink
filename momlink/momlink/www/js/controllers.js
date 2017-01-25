@@ -261,6 +261,54 @@ across the app instead of just the calendar page
                 });
             }
         });
+        db.get('progress').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "progress",
+                    'Week 1': "Baby? What baby? This concept may be a little hard to wrap your head around, but even though you're technically in the first week of pregnancy, you're not quite expecting -- yet. Here's the deal: Because it's generally impossible to know the exact moment of conception, most healthcare providers count 40 weeks from the first day of your last menstrual period (LMP) to calculate your due date. According to this method, they date the beginning of 'pregnancy' from about two weeks before the sperm penetrates the egg -- which is where you are right now. Already spotted that pink line on a home pregnancy test? You're further along than you think, so skip ahead to Week 4. (Courtesy of www.parents.com)",
+                    'Week 2': "So far your baby doesn't exist, but this is the week you ovulate. Your ovary releases a ripened egg (ovum) into your fallopian tube, where it will patiently await the sperm that have survived the 6- to 8-inch trek through your cervix and uterus. While 75 to 900 million sperm embark on this journey, less than a thousand actually make it past your cervix -- and only one lucky swimmer will have the honor of penetrating the egg at the moment of conception. (Courtesy of www.parents.com)",
+                    'Week 3': "Amazingly, your child's sex and all of her inherited genetic characteristics -- such as eye color, hair color, skin, and body type -- have been set since the moment of conception. Your developing baby, now called a zygote, has 46 chromosomes -- 23 from you and 23 from your partner. These chromosomes help determine your baby's sex and traits such as eye and hair color, and, to some extent, personality and intelligence. After fertilization, the ball of cells, now an embryo, will wrap up its journey through the fallopian tube and burrow itself into the wall of your uterus for nourishment -- a process known as implantation. If you're having multiples, the deed has already been done. Fraternal twins occur when two separate eggs are fertilized by two different sperm and each baby has his own placenta and amniotic sac. If one fertilized egg splits and develops into two fetuses, the result is identical twins. They may share a placenta, but each baby usually has a separate amniotic sac. (Courtesy of www.parents.com)",
+                    'Week 4': "So what's going on in your womb this week? Your embryo may be minuscule, but trust us: Super-important developments are already under way. This week the embryo splits into two parts. One half will become the placenta, a special tissue that delivers must-have nutrients and oxygen to your baby throughout your entire pregnancy. In the other half, the embryo itself continues to grow, and a sheet of cells has just begun to create the neural tube, where your baby's brain, spinal cord and backbone will ultimately form. (Courtesy of www.parents.com)",
+                    'Week 5': "This week, your baby's ticker will start beating for the first time! (Neither you nor your doctor can hear it yet, but it may be possible to see the movement on an ultrasound.) And your little one has been really busy growing! The embryo now has three distinct layers: the outer ectoderm, which will form the nervous system, ears, eyes, inner ear and many connective tissues; the endoderm, or inner layer, which will grow into internal organs like the lungs, intestines and bladder; and the middle mesoderm, which will eventually make way for the heart and circulatory system. In the weeks to come, the mesoderm will also evolve into bones, muscles, kidneys and reproductive organs. (Courtesy of www.parents.com)",
+                    'Week 6': "By the end of this week your baby will have tripled in size! His heart is now beating with a regular rhythm. It's still too faint to be picked up by your doctor's stethoscope, but if you have an ultrasound at some point over the next few weeks it will probably be visible as a tiny, pulsing dot in the middle of his mini body. Fun fact: From now until birth, your child's heart will beat about 150 times a minute -- twice the average adult rate. Also this week, your baby's brain hemispheres are forming -- and brain waves can now be recorded. (Courtesy of www.parents.com)",
+                    'Week 7': "Your baby is already developing amazingly distinct facial features. Dark spots mark the areas where her eyes and nostrils will be, and a little mouth and ears are starting to form, too. Your baby's brain is also growing more complex; if you could take a peek, it would be clearly visible inside the transparent skull. In fact, nerve cells in your baby's brain are growing at an amazing rate -- 100,000 cells per minute! And she's started to move in small, jerky motions, although you won't feel these movements until about your fourth month of pregnancy. (Courtesy of www.parents.com)",
+                    'Week 8': "Your baby's growth spurt continues: In the last two weeks he has quadrupled in size. As he gets bigger, his delicate facial features are becoming more refined, with his ears, upper lip, and the teeny tip of his nose all clearly visible. His eyelids will also take shape for the first time this week and his heart is growing stronger by the day. (Courtesy of www.parents.com)",
+                    'Week 9': "Even though you still have to wait another eight weeks to find out if your new addition will be a boy or a girl, this week, your baby gets the goods she'll need to, well, make her own baby one day. That's right -- reproductive organs are beginning to form now, along with some other key organs, like the pancreas and gallbladder. At this point your baby has doubled in size and her head, which is about half the length of her entire body, is tucked down toward her chest. Her tiny fingers are growing longer, and the ends are slightly enlarged right now -- this is where those unique fingerprints will ultimately form. (Courtesy of www.parents.com)",
+                    'Week 10': "Up until now your baby was classified as an embryo, but by the end of this week he will be a fetus and lots of changes are on the way. Paddle-like, or webbed, hands and feet will now separate into fingers and toes, bones will begin to harden and his kidneys are now producing urine. Most impressive? At this point your baby's brain is developing at astounding rates -- nearly 250,000 neurons are forming every minute! The end of the embryonic stage also marks a turning point for development dangers -- your baby is much less susceptible to them now. (Courtesy of www.parents.com)",
+                    'Week 11': "Did you know your baby can breathe underwater? She's doing it right now. At weeks 10 and 11, the fetus will start to inhale and exhale small amounts of amniotic fluid, which helps your baby's lungs to grow and develop. Also this week, your baby's ears are scooting up to the sides of his head. Sure, your baby's head is still disproportionally large compared to the rest of his body, but this will even out as he continues to grow and develop in the womb. (Courtesy of www.parents.com)",
+                    'Week 12': "As your baby's muscles start to bulk up at this stage, he's getting busy stretching and kicking. When you put your hand on your belly, your baby will likely wiggle in response because his reflexes are starting to develop -- though it's too early to feel his movements. He'll also start to open and close his fingers, curl his toes, and jerk and kick his arms and legs. (Courtesy of www.parents.com)",
+                    'Week 13': "Your baby is constantly getting bigger and cuter, and his face is looking more human-like every day. His ears have moved up from his neck into place and his eyes -- which are looking more and more like your baby blues (or browns, or greens) -- have moved from the sides of the head to the front of the face. Up until now, his head has been outpacing his body, but now his body is growing faster. His legs still need to grow longer, but this week his arms will lengthen to be proportionate with his body, and he'll be able to stick his thumb in his mouth. Also by now, all of your baby's essential organs and systems have formed. (Courtesy of www.parents.com)",
+                    'Week 14': "The roof of your baby's tiny mouth is fully formed now, and her constant sucking reflexes are helping to create full, cherubic cheeks. If you're having a boy, the prostate is forming, and if you're having a girl, her ovaries are moving down into her pelvis. (Courtesy of www.parents.com)",
+                    'Week 15': "Lanugo, your baby's first ultrafine, downy hair, now covers his back, shoulders, ears, and forehead. It helps him retain body heat, but once he gains enough fat to do the job, this hair will fall off -- probably before birth. Facial expressions are your baby's newest trick -- he can frown, squint, grimace and wince. Don't worry -- he's just flexing his facial muscles, not indicating his mood. (Courtesy of www.parents.com)",
+                    'Week 16': "Your baby's delicate skeleton continues to harden from rubbery cartilage to bone. Even so, his bones will remain somewhat flexible for an easier trip through the birth canal. The umbilical cord has fully matured with one vein and two arteries that are protected by Wharton's jelly (a thick substance that makes the cord slippery so it can move freely around your baby). By the way, if you're having a girl, hundreds of thousands of eggs are forming in her ovaries this week -- your future grandchildren! (Courtesy of www.parents.com)",
+                    'Week 17': "Finally, your baby's arms, legs, and trunk have caught up to the size of his head. Baby starts plumping up this week, as body fat is deposited under his skin and sweat glands develop. Also worth noting: The placenta is almost as big as your baby. It provides vitamins, minerals, proteins, fats, and oxygen, along with removing waste and filtering carbon dioxide. (Courtesy of www.parents.com)",
+                    'Week 18': "Do you and your partner talk to your baby? Well, with the bones and nerves in her ears now developed enough to function, she can hear all sorts of sounds -- including blood coursing through the umbilical cord, your growling tummy, and your heartbeat. In fact, sudden or loud noises may startle her. Go ahead and sing, tell stories or play music for your baby now. Even though your baby doesn't understand what these sounds are now, eventually she'll recognize your voice better than any other. (Courtesy of www.parents.com)",
+                    'Week 19': "Vernix caseosa begins to coat the skin. The greasy, cheese-like white coating helps regulate body temperature and protects your baby's skin while it's submerged in amniotic fluid. By the time your baby is born, most of the vernix will be gone. Your baby's heartbeat is growing stronger now and it's about twice as fast as yours. (Courtesy of www.parents.com)",
+                    'Week 20': "Your baby is as happy as a clam in your womb, as his well-developed limbs continue to explore by curling, flexing, and kicking. And as his hair, nails and eyebrows continue to sprout, your fetus is looking remarkably more and more like Mom and Dad every day. (Courtesy of www.parents.com)",
+                    'Week 21': "Part of your baby's growth spurt at this point is likely because his stomach is now equipped to start absorbing energy-boosting nutrients from the amniotic fluid he's swallowing in there. Most of your baby's nourishment is still coming directly from the placenta, though. (Courtesy of www.parents.com)",
+                    'Week 22': "Your baby's previously see-through skin will now become opaque. However, it will remain wrinkly, red, and covered in vernix until more fat helps to fill it out. Also this week, he's fine-tuning his sense of touch (thanks to maturing brain cells and nerve endings). Your baby may experiment with these newfound skills by feeling his face or anything else he can get his hands on. This week, your baby's eyebrows start growing and hair will start sprouting on the scalp, but this varies -- your baby may grow a thick head of dark hair or he may enter the world bald. (Courtesy of www.parents.com)",
+                    'Week 23': "Billions of brain cells will develop in your baby's brain over the next couple of weeks. These will control all of your baby's movements and sensory, and basic life functions like breathing. Also around this time, some major changes are happening with your baby's lungs. Surfactant is being produced, a substance that enables the air sacs to inflate and the lungs to fully expand. Right now he's still breathing amniotic fluid, but when he's born he'll be ready for air. (Courtesy of www.parents.com)",
+                    'Week 24': "You might notice that your baby is very busy during the next few weeks. Right now she's small enough to have plenty of room to move and groove in your belly. She may even respond to your soothing voice or the rubbing of your belly by calming down, while loud sounds or a tap on your belly could cause her to become alert. Also, because the balance-controlling inner ear has developed, your baby can finally tell if she's upside down or right side up, so moving around takes on new meaning. (Courtesy of www.parents.com)",
+                    'Week 25': "Your baby's first bowel movement has been forming in the large intestine. The thick, dark poop is called meconium and it's typically excreted shortly after he's born. Occasionally babies pass this stool before they're born, which means it must be suctioned after birth to clear it from the lungs. (Courtesy of www.parents.com)",
+                    'Week 26': "Your baby has settled into a distinct sleep-wake pattern. You may notice that sometimes he's very active and kicking or punching, and other times he sleeps. If you're lucky, these patterns will mimic yours. (Courtesy of www.parents.com)",
+                    'Week 27': "Your baby has been hiccuping every once in a while for several weeks, and now you might actually feel these baby hiccups, which are triggered by the involuntary movements of his diaphragm. (In adults, this is followed by the quick closure of our vocal cords, which is what makes that familiar 'hic' sound.) But because your baby's trachea is filled with fluid instead of air, his fetal hiccups don't make a sound. They will make your belly jump though, which is fun to see and feel! (Courtesy of www.parents.com)",
+                    'Week 28': "Until now, your baby's eyelids have been fused shut, but this week he'll begin to open and close his eyes. What's more, his irises are now filled with pigment. Even if you could peek at the color of his peepers now, though, they might not stay that color, as a baby's eyes can change up until he's 6 months to 1 year old (especially if your little guy is born with baby blues). (Courtesy of www.parents.com)",
+                    'Week 29': "Your baby is getting stronger by the minute. This week, her pushes, kicks, and rolls will likely occur more frequently -- and forcefully. So don't be surprised if you feel an extra-strong karate chop or two! Around this time, the part of your baby's brain associated with intelligence and personality becomes far more complex. You can get to know your baby by paying attention to how she reacts to different foods, sounds, and lights. (Courtesy of www.parents.com)",
+                    'Week 30': "From this point on your baby will gain about a half pound each week. All that baby weight is for more than filling out his chubby cheeks. Now that all of his major body systems are in place and functioning, he needs padding to protect and insulate his organs. His built-up fat tissue will also help him regulate his body temperature after birth and provide the energy he needs. Because your baby is adding fat and growing bigger, you might find his movements become less frequent -- it's getting harder for him to maneuver. But if you're not feeling any jabs or the occasional kick, tell your health care provider. (Courtesy of www.parents.com)",
+                    'Week 31': "Your baby is gaining more weight than height at this point. Because she's too big to stretch out, she's now forced into the fetal position, which she'll stay in until birth. This this week also boasts some exciting reproductive developments. Having a boy? His testicles are moving through the groin on their way into the scrotum. And if you've got a girl in there, her clitoris is already relatively formed. (Courtesy of www.parents.com)",
+                    'Week 32': "While a teeny part of you might be thinking 'Get this kid outta here ASAP!' we bet the rest is sincerely hoping he'll stay in there a while longer. That said, you can breathe a sigh of relief for this week's important milestone. Almost all babies born at this stage or later survive and go on to have very healthy, normal lives. By this time all of his major organs are fully functioning except the lungs, which need just a bit more time to mature completely. (Courtesy of www.parents.com)",
+                    'Week 33': "Your baby doesn't have much elbow room these days -- and, happily, that's probably going to mean fewer elbow jabs to the ribs for you. Because space in your uterus is running out, your baby becomes less active at this point in the pregnancy. You may also notice that her movements are affected by your daily routine -- how much and when you eat, what position you are in and sounds from the world outside can all affect your baby's activity level. (Courtesy of www.parents.com)",
+                    'Week 34': "Your baby's preparing for his arrival in just a few short weeks! This week, the protective vernix caseosa (that cheese-like, white, waxy coating that's keeping his skin safe) begins to thicken, ensuring that his birthday suit stays smooth and well-moisturized during D-day. Your baby will likely arrive covered in the stuff, especially in the folds under his arms, behind his ears, and in the groin area. But it'll all be washed off very shortly after birth -- during his first-ever bath. (Courtesy of www.parents.com)",
+                    'Week 35': "At this point, your unborn baby should be positioned with her head facing down toward the cervix and vagina. About 97 percent of babies have adopted this position by this point; the rest remain in what's known as breech position -- when the butt or feet are in place to come out first. If your baby's among this minority, it does increase your odds of needing a C-section, but there's a good chance your healthcare provider can correct the problem by turning him around manually with pressure applied on your belly. Called an external version, this process has about a 65 percent success rate. (Courtesy of www.parents.com)",
+                    'Week 36': "Your baby is working hard to accumulate all the fat he can at this point, and that layer of fat has now rounded out his face. This build-up of fat -- about 15 percent of his total weight--will help him maintain his body temperature and give him a store of energy. His sucking muscles, which are quite powerful, have also finished developing now, and are ready for their first real feeding -- your baby's going to be hungry soon after he arrives. (Courtesy of www.parents.com)",
+                    'Week 37': "The umbilical cord begins passing antibodies to your baby in preparation for delivery. By stockpiling antibodies, your baby will be better prepared for the disease and germs he'll encounter outside the womb. Your baby's senses are also getting more time to hone their burgeoning skills. He can hear and recognize your voice. Once he's born you'll be able to see him turn his head in your direction when he hears you speak. He knows his mom! Along with his hearing, his eyesight is improving each day. His fingers are also becoming more coordinated. He can grasp his face or toes. And after birth he'll be able to grab onto your finger. (Courtesy of www.parents.com)",
+                    'Week 38': "Your baby's hanging out, enjoying her last few weeks of snuggly comfort in your womb. However, if she were born today, she would still be considered a full-term infant. Her brain -- in charge of complicated jobs like regulating breathing, digestion, and circulation -- is functioning better every day. Babies come to term anywhere between 38 and 42 weeks; your 40-week due date simply marks the midpoint of this period. (Courtesy of www.parents.com)",
+                    'Week 39': "By now your baby has likely reached his birth weight (typically between 6 and 9 pounds) and length (18 to 22 inches from head to toe). He's accumulated enough body fat to stay cozy after he's born, and your placenta continues to supply him with nutrients and antibodies that will help fend off illnesses. If you could sneak a peek at your baby's final moments before birth, you'd see that his head is down toward your pelvis (if he's not in the bottom-down or breech presentation, in which case your healthcare provider might suggest a cesarean section). Your baby's body will either be straight up and down, called longitudinal, or positioned at an angle, called oblique. Along with spying your baby's body position, if you could see his head, you'd notice that he's head-down and facing your spine, which is the most common position (called anterior presentation). But sometimes, babies present head-down but facing toward your abdomen. This is called occiput or cephalic posterior. Your baby might lean slightly to one side or the other, meaning that he is either 'right' or 'left' anterior, or 'right' or 'left' posterior. (Courtesy of www.parents.com)",
+                    'Week 40': "When your baby arrives, he will be evaluated and graded (zero to two points each) on the following factors: activity and muscle tone, pulse (heart rate), grimace response (medically known as 'reflex irritability'), appearance (skin coloration) and respiration (breathing rate and effort). This sum will determine the baby's Apgar score -- an initial measure of his health. Most healthy babies have an Apgar between seven and nine (few babies get a 10). (Courtesy of www.parents.com)",
+                    'Week 41': "As amazing as it is to meet your baby for the first time, don't be alarmed if she's not exactly, um, as good-looking as you imagined she would be. Those delivered vaginally tend to have temporarily misshapen heads and puffy eyes. And your baby will probably be coated with vernix caseosa, but most of it will be washed off during the first bath. It takes most newborns a few weeks to get that adorable, chubby-cheeked baby look down pat. (Courtesy of www.parents.com)",
+                });
+            }
+        });
         db.get('client_trackers').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -1954,14 +2002,12 @@ across the app instead of just the calendar page
                 //console.log(JSON.stringify(data))
                 if (data.wasTapped) {
                     //Notification was received on device tray and tapped by the user.
-                    //console.log(JSON.stringify(data));
                     $ionicPopup.alert({
                         title: data.title,
                         template: data.body
                     });
                 } else {
-                    //Notification was received in foreground. Maybe the user needs to be notified.
-                    //console.log(JSON.stringify(data));
+                    //Notification was received while the app was in the foreground.
                     $ionicPopup.alert({
                         title: data.title,
                         template: data.body
@@ -3224,24 +3270,38 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         var week;
         var html;
+        var deliveryDate, startDate = '';
         //get current week
         db.get('profile').then(function (doc) {
             if (doc['deliveryDate'] != '' && doc['startDate'] != '') {
-                difference = moment.duration(moment().diff(moment(doc['startDate']))).asWeeks();
-                week = parseInt(difference) + 1;
-                html = '<img src="../img/progress/week' + week + '.jpg" style="max-width:100%;height:auto;vertical-align:middle">';
-                week = 'Week ' + week;
+                deliveryDate = doc['deliveryDate'];
+                startDate = doc['startDate'];
             }
-            else {
-                html = '<img src="../img/progress/week1.jpg" style="max-width:100%;height:auto;vertical-align:middle">';
-                week = 'Week 1';
-            }
-            $('#week').html(week);
-            $('#progress').html(html);
-            $compile($('#progress'))($scope);
-        });
+        }).then(function () {
+            db.get('progress').then(function (doc) {
+                if (deliveryDate != '' && startDate != '') {
+                    text = doc['Week ' + week];
+                    console.log('Week ' + week)
+                    difference = moment.duration(moment().diff(moment(startDate))).asWeeks();
+                    week = parseInt(difference) + 1;
+                    html = '<img src="../img/progress/week' + week + '.jpg" style="max-width:50%;height:auto;padding:0.5em;" align="left" ng-click="imagePopup(&quot;../img/progress/week' + week + '.jpg&quot;)">';
+                    html += '<p>' + text + '</p>';
+                    week = 'Week ' + week;
+                }
+                else {
+                    html = '<img src="../img/progress/week1.jpg" style="max-width:50%;height:auto;padding:0.5em;" align="left" ng-click="imagePopup(&quot;../img/progress/week1.jpg&quot;)">';
+                    html += '<p>' + doc['Week 1'] + '</p>';
+                    console.log(html)
+                    week = 'Week 1';
+                }
+                $('#week').html(week);
+                $('#progress').html(html);
+                $compile($('#progress'))($scope);
+            })
+        })
     }
     $scope.navProgress = function (nav) {
+        var db = PouchDB('momlink');
         var week = $("#week").html().slice(-2);
         week = parseInt(week);
         if (nav == '+') {
@@ -3260,10 +3320,34 @@ across the app instead of just the calendar page
                 week--;
             }
         }
-        $('#week').html('Week ' + week);
-        var html = '<img src="../img/progress/week' + week + '.jpg" style="max-width:100%;height:auto;vertical-align:middle">';
-        $('#progress').html(html);
-        $compile($('#progress'))($scope);
+        db.get('progress').then(function (doc) {
+            text = doc['Week ' + week];
+            $('#week').html('Week ' + week);
+            var html = '<img src="../img/progress/week' + week + '.jpg" style="max-width:50%;height:auto;padding:0.5em;" align="left" ng-click="imagePopup(&quot;../img/progress/week' + week + '.jpg&quot;)">';
+            html += '<p>' + text + '</p>';
+            $('#progress').html(html);
+            $compile($('#progress'))($scope);
+        })
+
+    }
+
+    $scope.imagePopup = function (image) {
+        console.log(image)
+        var template = '<ion-modal-view>';
+        template += '<ion-header-bar align-title="middle" class="bar-positive">';
+        template += '<button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>';
+        //template += '<h1 class="title" id="modalHeadline">Serving Size Information</h1>';
+        template += '</ion-header-bar>';
+        template += '<ion-content overflow-scroll="true">';
+        template += '<img class="col no-padding" src="' + image + '" style="max-width=100%;max-height=auto%">';
+        //template += `<img class="col no-padding" src="../img/servingInfo/infoFruit.png" style="max-width=100%;max-height=auto">`;
+        template += '</ion-content>';
+        template += '</ion-modal-view>';
+        $scope.modal = $ionicModal.fromTemplate(template, {
+            scope: $scope,
+            animation: 'slide-in-up'
+        })
+        $scope.modal.show();
     }
 
     /*
