@@ -15,11 +15,13 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "login",
                     "login_code": "6",
-                    "username": "u",
-                    "password": "p",
+                    "username": "hello",
+                    "password": "world",
+                    "triage_level": "1",
                     "reset_code": "595",
                     "answer": "",
                     "agency": "",
+                    "pncc_id": "",
                     "sec_question": "",
                     "client_id": "555",
                     "token": ""
@@ -176,28 +178,69 @@ across the app instead of just the calendar page
             if (err.status === 404) {
                 db.put({
                     "_id": "articles",
-                    "shared": [
-                        /*{
-                            "id": "1",
-                            "title": "Smoking During Pregnancy",
-                            "description": "Smoking during pregnancy may increase the risk that a child could develop schizophrenia, new research suggests.",
-                            "category": "Smoking",
-                            "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
-                            "format": "Website",
-                            "dateShared": "6/28/2016",
-                            "lastRead": "",
-                            "readHistory": {},
-                            "quizHistory": {},
-                            "quiz":
-                                [
-                                ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
-                                ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
-                                ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
-                                ]
-                        }*/
+                    "categories": [
+                        ['19', 'Safe Sleep', 'baby_sleep_stomach.jpg'],
+                        ['20', 'Safety', 'baby-proof-home.png'],
+                        ['21', 'HUGS', 'HUGS.jpg'],
+                        ['22', 'Nutrition', 'Nutrition.png'],
+                        ['23', 'First Time Moms', 'firstimemoms.jpg'],
+                        ['24', 'Parenting', 'WCC_south%20bend.jpg'],
+                        ['45', 'Abstinence', 'abstinence.jpg'],
+                        ['46', 'Anticipatory Guidance', 'nesting.jpg'],
+                        ['47', 'Breast Feeding', 'breastfeeding.jpg'],
+                        ['48', 'Child Abuse', 'childabuse.jpg'],
+                        ['49', 'Community Resources', 'communityresources.jpeg'],
+                        ['50', 'Coping Skills', 'coping.jpg'],
+                        ['51', 'Dental Health', 'dentalhealth copy.jpg'],
+                        ['52', 'Domestic Violence', 'domesticviolence.jpg'],
+                        ['55', 'HIV Risks', 'hivrisk.png'],
+                        ['56', 'Family Planning', 'familyplanning.jpg'],
+                        ['57', 'Financial Planning', 'financialplanning.jpg'],
+                        ['58', 'Drug Cessation', 'drugcessation.jpg'],
+                        ['59', 'General Advice', 'unnamed-chunk-5-1.png'],
+                        ['60', 'Illness Care', ''],
+                        ['61', 'Normal Discomforts', ''],
+                        ['63', 'Prenatal Care', 'prenatalcare.jpg'],
+                        ['64', 'Prenatal Weight', 'prenatalweight.jpg'],
+                        ['65', 'Preterm Labor', ''],
+                        ['66', 'Parenting', ''],
+                        ['67', 'Postpartum Care', ''],
+                        ['68', 'Second-hand Smoke', 'secondhandsmoke.jpg'],
+                        ['69', 'Smoking Cessation', ''],
+                        ['70', 'STD Infection', ''],
+                        ['71', 'Vitamins', ''],
+                        ['72', 'Warning Signs', ''],
+                        ['73', 'Baby Growth', 'babygrowth.png'],
+                        ['74', 'Labor and Delivery', 'labor-delivery.jpg'],
+                        ['75', 'Managing Pregnancy Discomforts', 'pregdiscomforts.jpg'],
+                        ['76', 'Health Care', 'healthcare.jpg'],
+                        ['77', 'Alcohol', ''],
+                        ['78', 'Newborn Care', ''],
+                        ['79', 'Lessons Learned', ''],
+                        ['80', 'Infant Stimulation', 'infantstimulation.jpg'],
+                        ['81', 'Infant Feeding', 'infantfeeding.jpg'],
                     ],
-                    "history": [
-                    ],
+                    "articles": [],
+                    "shared": [],
+                    "history": [],
+                    /*{
+                        "id": "1",
+                        "title": "Smoking During Pregnancy",
+                        "description": "Smoking during pregnancy may increase the risk that a child could develop schizophrenia, new research suggests.",
+                        "category": "Smoking",
+                        "link": "http://www.webmd.com/baby/news/20160527/is-smoking-during-pregnancy-tied-to-offsprings-schizophrenia-risk",
+                        "format": "Website",
+                        "dateShared": "6/28/2016",
+                        "lastRead": "",
+                        "readHistory": {},
+                        "quizHistory": {},
+                        "quiz":
+                            [
+                            ['This is question 1', ['1First answer', '1Second Answer', '1Third Answer'], '0'],
+                            ['This is question 2', ['2First answer', '2Second Answer', '2Third Answer'], '1'],
+                            ['This is question 3', ['3First answer', '3Second Answer', '3Third Answer'], '2']
+                            ]
+                    }*/
                 });
             }
         });
@@ -256,8 +299,7 @@ across the app instead of just the calendar page
                     'pills': '',
                     'stress': '',
                     "weight": '',
-                    "clientMessages": '',
-                    "eventsGeneral": '-1',
+                    "clientMessages": ''
                 });
             }
         });
@@ -623,7 +665,8 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
-        document.addEventListener("deviceready", function () {
+        $scope.getEvents();
+        /*document.addEventListener("deviceready", function () {
             var date = new Date();
             var time = moment("2016-12-21T10:56", "YYYY-MM-DDTHH:mm:ssZ").toDate();
             var time2 = moment("2016-12-21T11:00", "YYYY-MM-DDTHH:mm:ssZ").toDate();
@@ -643,7 +686,7 @@ across the app instead of just the calendar page
             ]
             console.log(JSON.stringify(schedule))
             cordova.plugins.notification.local.schedule(schedule);
-        })
+        })*/
     }
 
     $setReminder = function (title, time) {
@@ -663,7 +706,7 @@ across the app instead of just the calendar page
     */
     $scope.updateAll = function () {
         $scope.updateInbox();
-        //$scope.getGeneralEvents();
+        $scope.getEvents();
         //$scope.uploadMessages();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
@@ -678,7 +721,7 @@ across the app instead of just the calendar page
 
     };
     $scope.updateAllEvents = function () {
-        //$scope.getGeneralEvents();
+        $scope.getEvents();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
         $scope.toNewPage('calendar.html', 'Calendar');
@@ -989,60 +1032,92 @@ across the app instead of just the calendar page
         });
         console.log('client_trackers');
     };
-    $scope.getGeneralEvents = function () {
+    $scope.getEvents = function () {
         var db = PouchDB('momlink');
         var recentID = '';
-        db.get('update').then(function (doc) {
-            recentID = doc['eventsGeneral'];
+        db.get('login').then(function (doc) {
+            triage_level = doc['triage_level'];
         }).then(function () {
-            //get new events since last update
-            var post_information = { 'recentID': recentID };
-            $.ajax({
-                url: 'https://momlink.crc.nd.edu/~jonathan/current/getEvents.php',
-                type: 'POST',
-                dataType: 'json',
-                data: post_information,
-                async: false,
-                success: function (data) {
-                    if (data[0]['success'] == 1) {
-                        console.log('already up to date')
-                    }
-                    else {
-                        db.get('events').then(function (doc) {
-                            for (i in data) {
-                                var dateFormatted = moment(data[i]['edate']);
-                                dateFormatted = dateFormatted.format('YYYY-MM-DD');
-                                var event = {
-                                    "id": data[i]['id'],
-                                    "title": data[i]['title'],
-                                    "category": 'General',
-                                    "day": dateFormatted,
-                                    "start": dateFormatted + 'T' + data[i]['start'],
-                                    "end": dateFormatted + 'T' + data[i]['end'],
-                                    "venue": data[i]['venue'],
-                                    "description": data[i]['description'],
-                                    "questions": [],
-                                    "color": 'gray',
-                                    "viewed": '1',
-                                    "scheduledBy": '1'
-                                };
-                                doc['events'].push(event);
+            db.get('events').then(function (doc) {
+                var post_information = { 'cid': window.localStorage.getItem('cid'), 'triage_level': triage_level };
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/getEventIDs.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: post_information,
+                    async: false,
+                    success: function (data) {
+                        dbIDs = []
+                        eventIDs = []
+                        //get ids in db
+                        for (j in doc['events']) {
+                            dbIDs.push(doc['events'][j]['id'])
+                        }
+                        //check if events are already in database
+                        for (i in data) {
+                            //if event is not in the db flag as one to be added
+                            if ($.inArray(data[i]['id'], dbIDs) == -1) {
+                                eventIDs.push(data[i]['id'])
                             }
-                            return db.put(doc).then(function () {
-                                db.get('update').then(function (doc) {
-                                    //update eventsGeneral cutoff with newest event
-                                    doc['eventsGeneral'] = data[data.length - 1]['id'];
-                                    return db.put(doc).then(function () {
-                                        //update records table
-                                    })
-                                })
-                            })
-                        });
+                        }
+                        if (eventIDs.length != 0) {
+                            var post_information2 = { 'ids': JSON.stringify(eventIDs) };
+                            $.ajax({
+                                url: 'https://momlink.crc.nd.edu/~jonathan/current/getEvents.php',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: post_information2,
+                                async: false,
+                                success: function (data) {
+                                    console.log(JSON.stringify(data))
+                                    db.get('events').then(function (doc) {
+                                        for (i in data) {
+                                            var dateFormatted = moment(data[i]['edate']);
+                                            dateFormatted = dateFormatted.format('YYYY-MM-DD');
+                                            //check that time is in the right format
+                                            if (data[i]['start'] != "" && (data[i]['start'].indexOf("AM") >= 0 || data[i]['start'].indexOf("am") >= 0 || data[i]['start'].indexOf("PM") >= 0 || data[i]['start'].indexOf("pm") >= 0)) {
+                                                var startTime = moment(data[i]['start'], ["h:mm A"]).format("HH:mm");
+                                            }
+                                            else {
+                                                var startTime = data[i]['start'];
+                                            }
+                                            if (data[i]['end'] != "" && (data[i]['end'].indexOf("AM") >= 0 || data[i]['end'].indexOf("am") >= 0 || data[i]['end'].indexOf("PM") >= 0 || data[i]['end'].indexOf("pm") >= 0)) {
+                                                var endTime = moment(data[i]['end'], ["h:mm A"]).format("HH:mm");
+                                            }
+                                            else {
+                                                var endTime = data[i]['end'];
+                                            }
+                                            var event = {
+                                                "id": data[i]['id'],
+                                                "title": data[i]['title'],
+                                                "category": data[i]['category'],
+                                                "day": dateFormatted,
+                                                "start": dateFormatted + 'T' + startTime,
+                                                "end": dateFormatted + 'T' + endTime,
+                                                "venue": data[i]['venue'],
+                                                "description": data[i]['description'],
+                                                "questions": [],
+                                                "color": $scope.getColor(data[i]['category']),
+                                                "viewed": '1',
+                                                "scheduledBy": '1'
+                                            };
+                                            doc['events'].push(event);
+                                        }
+                                        return db.put(doc).then(function () {
+                                            console.log('new events added')
+                                        })
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            console.log('shared events already up to date')
+                        }
                     }
-                }
-            });
+                });
+            })
+
         });
-        console.log('one');
     };
     $scope.updateClientEvents = function () {
         var db = PouchDB('momlink');
@@ -1054,10 +1129,11 @@ across the app instead of just the calendar page
                     uploadEvents.push(doc['events'][i])
                 }
             }
+            console.log(JSON.stringify(uploadEvents))
             //need to convert dates before uploading
             for (j in uploadEvents) {
                 uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
-                delete uploadEvents[j]['end'];
+                uploadEvents[j]['end'] = $scope.parseTime(uploadEvents[j]['end'])
                 delete uploadEvents[j]['color'];
                 delete uploadEvents[j]['viewed'];
                 delete uploadEvents[j]['scheduledBy'];
@@ -1076,36 +1152,39 @@ across the app instead of just the calendar page
                     data: { data: encodeURIComponent(JSON.stringify(post_information)) },
                     async: false,
                     success: function (data) {
+                        console.log('output')
+                        console.log(JSON.stringify(data))
                         //for each event in events, update uploaded value to 1
-                        if (data.length > 0) {
-                            db.get('events').then(function (doc) {
-                                for (k in uploadEvents) {
-                                    for (m in data) {
-                                        uploadEvents[k]['server_id'] = data[m]['unique_id'];
+                        db.get('events').then(function (doc) {
+                            index = 0;
+                            for (k in uploadEvents) {
+                                if (uploadEvents[k]['upload'] == 0) {
+                                    //console.log(data[m]['LAST_INSERT_ID()'])
+                                    //console.log(JSON.stringify(uploadEvents[k]['server_id']))
+                                    uploadEvents[k]['server_id'] = data[index]['LAST_INSERT_ID()'];
+                                    index++;
+                                }
+                            }
+                            //set upload value so it is not reuploaded, set server id in case of modifications
+                            for (k in uploadEvents) {
+                                uploadEvents[k]['upload'] = '1';
+                                for (m in doc['events']) {
+                                    if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
+                                        doc['events'][m]['upload'] = '1';
+                                        doc['events'][m]['server_id'] = uploadEvents[k]['server_id'];
                                     }
                                 }
-                                //set upload value so it is not reuploaded, set server id incase of modifications
-                                for (k in uploadEvents) {
-                                    uploadEvents[k]['upload'] = '1';
-                                    for (m in doc['events']) {
-                                        if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
-                                            doc['events'][m]['upload'] = '1';
-                                            doc['events'][m]['server_id'] = uploadEvents[k]['server_id'];
-                                        }
-                                    }
-                                }
-                                console.log('Events uploaded')
-                                return db.put(doc);
-                            });
-                        }
+                            }
+                            console.log('Events uploaded')
+                            return db.put(doc);
+                        });
                     }
                 });
             }
             else {
-                console.log('Events already up to date')
+                console.log('client events already up to date')
             }
         })
-        console.log('two');
     };
     $scope.deleteClientEvents = function () {
         var db = PouchDB('momlink');
@@ -1117,7 +1196,7 @@ across the app instead of just the calendar page
                     uploadEvents.push(doc['events'][i])
                 }
             }
-            //need to convert dates before uploading
+            console.log(JSON.stringify(uploadEvents))
             for (j in uploadEvents) {
                 uploadEvents[j]['start'] = $scope.parseTime(uploadEvents[j]['start'])
                 delete uploadEvents[j]['end'];
@@ -1161,7 +1240,6 @@ across the app instead of just the calendar page
                 console.log('No events to delete')
             }
         })
-        console.log('three');
     };
     $scope.getReferrals = function () {
         var db = PouchDB('momlink');
@@ -1193,8 +1271,8 @@ across the app instead of just the calendar page
                                     "email": data[i]['email'],
                                     "date": moment().format('MM/DD/YYYY'),
                                     "meeting": '',
-                                    "upload": '0',
-                                    "referral_status": '0',
+                                    "upload": '1',
+                                    "referral_status": '',
                                 };
                                 doc['referrals'].push(referral);
                             }
@@ -1208,7 +1286,6 @@ across the app instead of just the calendar page
                 }
             }
         });
-        console.log('four');
     };
     $scope.updateReferrals = function () {
         var db = PouchDB('momlink');
@@ -1216,9 +1293,18 @@ across the app instead of just the calendar page
         db.get('referrals').then(function (doc) {
             //get all referrals where upload == 0 and referral_status == 1 (referrals not previously updated but have meetings scheduled)
             for (i in doc['referrals']) {
-                if (doc['referrals'][i]['upload'] == 0 && doc['referrals'][i]['referral_status'] == 1) {
-                    uploadReferrals.push(doc['referrals'][i]['id'])
+                if (doc['referrals'][i]['upload'] == 0) {
+                    uploadReferrals.push(doc['referrals'][i])
                 }
+            }
+            //minimize data sent to sever
+            for (j in uploadReferrals) {
+                delete uploadReferrals[j]['name'];
+                delete uploadReferrals[j]['address'];
+                delete uploadReferrals[j]['phone'];
+                delete uploadReferrals[j]['date'];
+                delete uploadReferrals[j]['meeting'];
+                delete uploadReferrals[j]['upload'];
             }
         }).then(function () {
             if (uploadReferrals.length > 0) {
@@ -1229,16 +1315,17 @@ across the app instead of just the calendar page
                     url: 'https://momlink.crc.nd.edu/~jonathan/current/updateReferrals.php',
                     type: 'POST',
                     dataType: 'json',
-                    data: { data: JSON.stringify(post_information) },
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
                     async: false,
                     success: function (data) {
+                        console.log(JSON.stringify(data))
                         //for each referral updated, update uploaded value to 1
                         if (data == true) {
                             db.get('referrals').then(function (doc) {
                                 //set upload value so it is not reuploaded
                                 for (k in uploadReferrals) {
                                     for (m in doc['referrals']) {
-                                        if (uploadReferrals[k] == doc['referrals'][m]['id']) {
+                                        if (uploadReferrals[k]['id'] == doc['referrals'][m]['id']) {
                                             doc['referrals'][m]['upload'] = '1';
                                         }
                                     }
@@ -1254,7 +1341,6 @@ across the app instead of just the calendar page
                 console.log('Referrals already up to date')
             }
         })
-        console.log('five');
     };
     $scope.getArticles = function () {
         var db = PouchDB('momlink');
@@ -1271,46 +1357,46 @@ across the app instead of just the calendar page
                 if (data.length > 0) {
                     db.get('articles').then(function (doc) {
                         for (i in data) {
-                            //check if article is already in local db
-                            var isUnique = true;
-                            //check shared articles
-                            for (j in doc['shared']) {
-                                if (data[i]['id'] == doc['shared'][j]['id']) {
-                                    isUnique = false;
+                            //check if articleID is already in shared/history
+                            if ($.inArray(data[i]['id'], doc['shared']) == -1 && $.inArray(data[i]['id'], doc['history'])) {
+                                //check if article is already in local db
+                                var isUnique = true;
+                                for (j in doc['articles']) {
+                                    if (data[i]['id'] == doc['articles'][j]['id']) {
+                                        isUnique = false;
+                                    }
                                 }
-                            }
-                            //check history articles
-                            for (k in doc['history']) {
-                                if (data[i]['id'] == doc['history'][k]['id']) {
-                                    isUnique = false;
+                                if (isUnique == true) {
+                                    //makes quiz suitable for json parse
+                                    //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
+                                    data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
+                                    var article = {
+                                        "id": data[i]['id'],
+                                        "title": data[i]['title'],
+                                        "category": data[i]['category'],
+                                        "description": data[i]['description'],
+                                        "content_text": data[i]['path'],
+                                        "filename": data[i]['filename'],
+                                        "localPath": "",
+                                        "dateShared": data[i]['share_date'],
+                                        "lastRead": "",
+                                        "readHistory": {},
+                                        "quiz": JSON.parse(data[i]['quiz']),
+                                        "quizAttempts": '0',
+                                        "bestScore": '0',
+                                        "quizHistory": {},
+                                        "upload": '0',
+                                        "article_status": '0'
+                                    };
+                                    //console.log(JSON.stringify(article))
+                                    doc['articles'].push(article);
+                                    doc['shared'].push(data[i]['id']);
+                                    if (article["content_text"].substring(0, 2) == './') {
+                                        downloads.push(article);
+                                    }
                                 }
-                            }
-                            if (isUnique == true) {
-                                //makes quiz suitable for json parse
-                                //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
-                                data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
-                                var article = {
-                                    "id": data[i]['id'],
-                                    "title": data[i]['title'],
-                                    "category": data[i]['category'],
-                                    "description": data[i]['description'],
-                                    "content_text": data[i]['path'],
-                                    "filename": data[i]['filename'],
-                                    "localPath": "",
-                                    "dateShared": data[i]['share_date'],
-                                    "lastRead": "",
-                                    "readHistory": {},
-                                    "quiz": JSON.parse(data[i]['quiz']),
-                                    "quizAttempts": '0',
-                                    "bestScore": '0',
-                                    "quizHistory": {},
-                                    "upload": '0',
-                                    "article_status": '0'
-                                };
-                                //console.log(JSON.stringify(article))
-                                doc['shared'].push(article);
-                                if (article["content_text"].substring(0, 2) == './') {
-                                    downloads.push(article);
+                                else {
+                                    doc['shared'].push(data[i]['id']);
                                 }
                             }
                         }
@@ -1341,9 +1427,9 @@ across the app instead of just the calendar page
                                             console.log("download complete: " + entry.toURL());
                                             db.get('articles').then(function (doc) {
                                                 //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
-                                                for (i in doc['shared']) {
-                                                    if (doc['shared'][i]['id'] == article['id']) {
-                                                        doc['shared'][i]['localPath'] = entry.toURL();
+                                                for (i in doc['articles']) {
+                                                    if (doc['articles'][i]['id'] == article['id']) {
+                                                        doc['articles'][i]['localPath'] = entry.toURL();
                                                         console.log(entry.toURL())
                                                     }
                                                 }
@@ -1381,15 +1467,9 @@ across the app instead of just the calendar page
         var uploadArticles = [];
         db.get('articles').then(function (doc) {
             //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
-            for (i in doc['shared']) {
-                if (doc['shared'][i]['upload'] == 0 && doc['shared'][i]['article_status'] == 1) {
-                    uploadArticles.push(doc['shared'][i])
-                }
-            }
-            //still get updates for articles moved to history
-            for (i in doc['history']) {
-                if (doc['history'][i]['upload'] == 0 && doc['history'][i]['article_status'] == 1) {
-                    uploadArticles.push(doc['history'][i])
+            for (i in doc['articles']) {
+                if ((doc['articles'][i]['upload'] == 0 || doc['articles'][i]['upload'] == 2) && doc['articles'][i]['article_status'] == 1) {
+                    uploadArticles.push(doc['articles'][i])
                 }
             }
             //prune articles of uneccessary content before upload
@@ -1416,23 +1496,17 @@ across the app instead of just the calendar page
                     data: { data: encodeURIComponent(JSON.stringify(post_information)) },
                     async: false,
                     success: function (data) {
+                        console.log(JSON.stringify(data))
                         //for each article updated, update uploaded value to 1
                         if (data == true) {
                             db.get('articles').then(function (doc) {
                                 //set upload value so it is not reuploaded and clean local read/quiz history 
                                 for (k in uploadArticles) {
-                                    for (m in doc['shared']) {
-                                        if (uploadArticles[k]['id'] == doc['shared'][m]['id']) {
-                                            doc['shared'][m]['upload'] = '1';
-                                            doc['shared'][m]['readHistory'] = {};
-                                            doc['shared'][m]['quizHistory'] = {};
-                                        }
-                                    }
-                                    for (n in doc['history']) {
-                                        if (uploadArticles[k]['id'] == doc['shared'][n]['id']) {
-                                            doc['history'][n]['upload'] = '1';
-                                            doc['history'][m]['readHistory'] = {};
-                                            doc['history'][m]['quizHistory'] = {};
+                                    for (m in doc['articles']) {
+                                        if (uploadArticles[k]['id'] == doc['articles'][m]['id']) {
+                                            doc['articles'][m]['upload'] = '1';
+                                            doc['articles'][m]['readHistory'] = {};
+                                            doc['articles'][m]['quizHistory'] = {};
                                         }
                                     }
                                 }
@@ -1447,7 +1521,6 @@ across the app instead of just the calendar page
                 console.log('Articles already up to date')
             }
         })
-        console.log('seven');
     };
     $scope.getSurveys = function () {
         var db = PouchDB('momlink');
@@ -1670,7 +1743,6 @@ across the app instead of just the calendar page
     $scope.toggleRightSideMenu = function () {
         $ionicSideMenuDelegate.toggleRight();
     };
-
 
     /*
     Shows current date on the home page and history pages
@@ -2131,10 +2203,13 @@ across the app instead of just the calendar page
                             dataType: 'json',
                             data: post_information,
                             success: function (data) {
+                                console.log('HIT')
                                 console.log(JSON.stringify(data))
                                 if (data[0]['success'] != 0) {
                                     doc['client_id'] = data[1]['client_id']
-                                    //doc['agency'] = data[1]['agency']
+                                    doc['agency'] = data[1]['agency']
+                                    doc['pncc_id'] = data[1]['pncc_id']
+                                    doc['triage_level'] = data[1]['triage_level']
                                     doc['sec_question'] = data[1]['sec_question']
                                     doc['username'] = user;
                                     doc['password'] = pass;
@@ -2815,7 +2890,7 @@ across the app instead of just the calendar page
                         }
                     }
                     doc['referrals'][i]['meeting'] = $scope.eventID;
-                    doc['referrals'][i]['referral_status'] = 1;
+                    //doc['referrals'][i]['referral_status'] = 1;
                     return db.put(doc);
                 }).then(function (doc) {
                     $scope.toNewPage('referrals.html', 'Referrals');
@@ -2823,26 +2898,26 @@ across the app instead of just the calendar page
                     window.localStorage.removeItem('referralID')
                 });
             }
-            else if ($scope.returnTitle == 'Goals') {
-                //attach eventID to goal 
-                id = window.localStorage.getItem('goalID');
-                db.get('goals').then(function (doc) {
-                    for (i in doc['goals']) {
-                        if (doc['goals'][i]['id'] == id) {
-                            doc['goals'][i]['eventID'] = $scope.eventID;
-                            return db.put(doc);
+                /*else if ($scope.returnTitle == 'Goals') {
+                    //attach eventID to goal 
+                    id = window.localStorage.getItem('goalID');
+                    db.get('goals').then(function (doc) {
+                        for (i in doc['goals']) {
+                            if (doc['goals'][i]['id'] == id) {
+                                doc['goals'][i]['eventID'] = $scope.eventID;
+                                return db.put(doc);
+                            }
                         }
-                    }
-                }).then(function () {
-                    console.log(window.localStorage.getItem('goalID'))
-                    delete $scope.eventID;
-                    $scope.toNewPage($scope.returnLink, $scope.returnTitle)
-                    delete $scope.returnLink;
-                    delete $scope.returnTitle;
-                    $scope.closeModal();
-                    window.localStorage.removeItem('goalID')
-                })
-            }
+                    }).then(function () {
+                        console.log(window.localStorage.getItem('goalID'))
+                        delete $scope.eventID;
+                        $scope.toNewPage($scope.returnLink, $scope.returnTitle)
+                        delete $scope.returnLink;
+                        delete $scope.returnTitle;
+                        $scope.closeModal();
+                        window.localStorage.removeItem('goalID')
+                    })
+                }*/
             else {
                 $scope.toNewPage($scope.returnLink, $scope.returnTitle)
                 delete $scope.returnLink;
@@ -3135,27 +3210,158 @@ across the app instead of just the calendar page
                 }
                 return db.put(doc);
             }).then(function () {
-                db.get('goals').then(function (doc) {
-                    //i = doc['referrals'].findIndex(function (e) { return e.meeting === $scope.eventID });
-                    for (i in doc['goals']) {
-                        if (doc['goals'][i]['eventID'] == $scope.eventID) {
-                            doc['goals'][i]['eventID'] = '';
-                            break;
-                        }
-                    }
-                    return db.put(doc);
-                }).then(function () {
-                    if ($scope.returnLink != '' && $scope.returnTitle != '') {
-                        $scope.toNewPage($scope.returnLink, $scope.returnTitle)
-                        delete $scope.returnLink;
-                        delete $scope.returnTitle;
-                    }
-                    $scope.closeModal();
-                })
+                if ($scope.returnLink != '' && $scope.returnTitle != '') {
+                    $scope.toNewPage($scope.returnLink, $scope.returnTitle)
+                    delete $scope.returnLink;
+                    delete $scope.returnTitle;
+                }
+                $scope.closeModal();
             })
         })
     };
 
+    $scope.checkReferrals = function () {
+        var db = PouchDB('momlink');
+        var followups = []
+        //get referrals to check
+        db.get('referrals').then(function (doc) {
+            for (i in doc['referrals']) {
+                if (doc['referrals'][i]['referral_status'] == '') {
+                    followups.push(doc['referrals'][i])
+                }
+            }
+        }).then(function () {
+            var x = 0;
+            var loopReferrals = function (arr) {
+                console.log(JSON.stringify(arr))
+                checkReferral(arr[x], function () {
+                    x++;
+                    if (x < arr.length) {
+                        loopReferrals(arr);
+                    }
+                    else {
+                        console.log('finished!')
+                    }
+                });
+            }
+            function checkReferral(referral, callback) {
+                //meeting has been setup with referral
+                if (referral['meeting'] != '') {
+                    var meetDay = '';
+                    db.get('events').then(function (doc) {
+                        for (j in doc['events']) {
+                            if (doc['events'][j]['id'] == referral['meeting']) {
+                                meetDay = moment(doc['events'][j]['day']);
+                                break;
+                            }
+                        }
+                    })
+                    //check if event has passed
+                    if (meetDay < moment()) {
+                        //ask if they attended the event
+                        $ionicPopup.show({
+                            title: 'Did you meet with ' + referral['name'] + '?',
+                            scope: $scope,
+                            buttons: [
+                              {
+                                  text: 'Yes',
+                                  type: 'button-stable',
+                                  onTap: function (e) {
+                                      db.get('referrals').then(function (doc) {
+                                          for (k in doc['referrals']) {
+                                              if (doc['referrals'][k]['id'] == referral['id']) {
+                                                  console.log('hit')
+                                                  break;
+                                              }
+                                          }
+                                          console.log('continue')
+                                          console.log(doc['referrals'][k]['referral_status'])
+                                          console.log(doc['referrals'][k]['upload'])
+                                          doc['referrals'][k]['referral_status'] = '1'
+                                          doc['referrals'][k]['upload'] = '0'
+                                          return db.put(doc).then(function () {
+                                              callback();
+                                          })
+                                      })
+                                  }
+                              },
+                              {
+                                  text: 'No',
+                                  type: 'button-stable',
+                                  onTap: function (e) {
+                                      db.get('referrals').then(function (doc) {
+                                          for (k in doc['referrals']) {
+                                              if (doc['referrals'][k]['id'] == referral['id']) {
+                                                  console.log('hit')
+                                                  break;
+                                              }
+                                          }
+                                          console.log('continue')
+                                          console.log(doc['referrals'][k]['referral_status'])
+                                          console.log(doc['referrals'][k]['upload'])
+                                          doc['referrals'][k]['referral_status'] = '0'
+                                          doc['referrals'][k]['upload'] = '0'
+                                          return db.put(doc).then(function () {
+                                              callback();
+                                          })
+                                      })
+                                  }
+                              },
+                            ]
+                        });
+                    }
+                }
+                else {
+                    //check if 3 days have passed
+                    if (moment(referral['date']).diff(moment(), 'days') <= -3){
+                        $ionicPopup.show({
+                            title: 'Did you follow-up with ' + referral['name'] + '?',
+                            scope: $scope,
+                            buttons: [
+                              {
+                                  text: 'Yes',
+                                  type: 'button-stable',
+                                  onTap: function (e) {
+                                      db.get('referrals').then(function (doc) {
+                                          for (k in doc['referrals']) {
+                                              if (doc['referrals'][k]['id'] == referral['id']) {
+                                                  break;
+                                              }
+                                          }
+                                          doc['referrals'][k]['referral_status'] = '1'
+                                          doc['referrals'][k]['upload'] = '0'
+                                          return db.put(doc).then(function () {
+                                              callback();
+                                          })
+                                      })
+                                  }
+                              },
+                              {
+                                  text: 'No',
+                                  type: 'button-stable',
+                                  onTap: function (e) {
+                                      db.get('referrals').then(function (doc) {
+                                          for (k in doc['referrals']) {
+                                              if (doc['referrals'][k]['id'] == referral['id']) {
+                                                  break;
+                                              }
+                                          }
+                                          doc['referrals'][k]['referral_status'] = '0'
+                                          doc['referrals'][k]['upload'] = '0'
+                                          return db.put(doc).then(function () {
+                                              callback();
+                                          })
+                                      })
+                                  }
+                              },
+                            ]
+                        });
+                    }
+                }
+            }
+            loopReferrals(followups)
+        })
+    };
 
     /*
     Events are composed of two pages, hides second page and returns to first
@@ -3223,25 +3429,25 @@ across the app instead of just the calendar page
     */
     $scope.getColor = function (type) {
         switch (type) {
-            case 'OB Appt':
+            case '1':
                 type = 'blue';
                 return type;
-            case 'Referral':
+            case '3':
                 type = 'teal';
                 return type;
-            case 'Lab':
+            case '2':
                 type = 'red';
                 return type;
-            case 'PNCC':
+            case '4':
                 type = 'green';
                 return type;
-            case 'Ultra':
+            case '5':
                 type = 'orange';
                 return type;
-            case 'Class':
+            case '6':
                 type = 'purple';
                 return type;
-            case 'Other':
+            case '7':
                 type = 'black';
                 return type;
         }
@@ -3443,7 +3649,6 @@ across the app instead of just the calendar page
     }
 })
 
-
 /*
                 The inbox controller pulls referral and pncc contacts
                 allows user to call/text/email them and render sms conversations
@@ -3582,6 +3787,7 @@ across the app instead of just the calendar page
     };
 
     $scope.renderThreadList = function (pncc_id, msgid) {
+        console.log('lkajsldfjaslfkjsdlf')
         var db = PouchDB('momlink');
         var html = '';
         db.get('inbox').then(function (doc) {
@@ -3591,10 +3797,12 @@ across the app instead of just the calendar page
                     pnccName = doc['pncc'][j]['name'];
                 }
             }
+            console.log('step one')
             html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">' + pnccName + '</div><button class ="button button-icon icon ion-email" ng-click="sendNewReply(&quot;' + pncc_id + '&quot;,&quot;' + msgid + '&quot;)"></button></div>'
             html += '<div class="list has-header">';
             //loop through inbox for all messages containing the thread id
             for (i in doc['messages']) {
+                console.log('step two')
                 if (doc['messages'][i]['msgid'] == msgid) {
                     if (doc['messages'][i]['sender'] == 1) {
                         html += '<div class="item item-text-wrap" style="color: #e6005c;">' + doc['messages'][i]['content'] + '</div>';
@@ -3608,10 +3816,12 @@ across the app instead of just the calendar page
                 }
             }
             return db.put(doc).then(function () {
+                console.log('step three')
                 html += '</div>';
                 $("#".concat('threads')).html(html);
                 $compile($("#".concat('threads')))($scope);
             })
+            console.log('whutwhutwhut')
         });
     };
 
@@ -3916,7 +4126,7 @@ across the app instead of just the calendar page
                     var today = moment().format('YYYY-MM-DD')
                     if ((type == 'recent' && (meetingTime == '' || moment(meetingTime) >= moment(today))) || (type == 'previous' && (moment(meetingTime) < moment(today)))) {
                         html += '<a class="item item-thumbnail-left item-text-wrap" ng-click="schedule(&quot;' + referrals[i]['id'] + '&quot;)">';
-                        html += '<img src="' + referrals[i]['img'] + '">';
+                        html += '<img src="' + referrals[i]['img'] + '" ng-click="schedule(&quot;' + referrals[i]['id'] + '&quot;)">';
                         html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
                         html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
                         if (referrals[i]['address'] != '') {
@@ -3927,6 +4137,12 @@ across the app instead of just the calendar page
                         }
                         if (referrals[i]['email'] != '') {
                             html += '<p>Email: ' + referrals[i]['email'] + '</p>';
+                        }
+                        if (referrals[i]['referral_status'] == '1') {
+                            html += '<p style="display: inline-block;">Status: Followed-up</p>&nbsp;<button class="button button-small" ng-click="changeStatus(&quot;' + referrals[i]['id'] + '&quot;); $event.stopPropagation();" style="display: inline-block;">Change Status?</button>';
+                        }
+                        else {
+                            html += '<p style="display: inline-block;">Status: Have not followed-up</p>&nbsp;<button class="button button-small" ng-click="changeStatus(&quot;' + referrals[i]['id'] + '&quot;); $event.stopPropagation();" style="display: inline-block;">Change Status?</button>';
                         }
                         html += '</a>';
                     }
@@ -3940,6 +4156,25 @@ across the app instead of just the calendar page
         });
     };
 
+    $scope.changeStatus = function (id) {
+        var db = PouchDB('momlink');
+        db.get('referrals').then(function (doc) {
+            for (i in doc['referrals']) {
+                if (doc['referrals'][i]['id'] === id) { break; }
+            }
+            if (doc['referrals'][i]['referral_status'] == '1') {
+                doc['referrals'][i]['referral_status'] = '0'
+                doc['referrals'][i]['upload'] = '0'
+            }
+            else {
+                doc['referrals'][i]['referral_status'] = '1'
+                doc['referrals'][i]['upload'] = '0'
+            }
+            return db.put(doc).then(function () {
+                $scope.toNewPage('referrals.html', 'Referrals');
+            })
+        })
+    }
 
     /*
     Ask the user if they have already contacted/scheduled a meeting,
@@ -4028,45 +4263,55 @@ across the app instead of just the calendar page
         var html = '';
         var colSpacer = 2;
         var categories = {};
+        var categoryCounts = {};
+        var totalUnreadArticles = 0;
         db.get('articles').then(function (doc) {
-            //get all unique categories
-            sharedArticles = doc[type];
+            //get all article ids from shared or history
+            sharedArticleIds = doc[type];
             //generates a dictionary where keys are categories 
             //and values are the number of articles per category not read
-            for (i in sharedArticles) {
-                articleCategory = sharedArticles[i]['category'];
-                articleRead = sharedArticles[i]['lastRead'];
-                if (articleCategory in categories && articleRead == '') {
-                    categories[articleCategory]++;
-                }
-                else {
-                    if (articleRead == '') {
-                        categories[articleCategory] = 1;
+            for (i in sharedArticleIds) {
+                for (j in doc['articles']) {
+                    if (sharedArticleIds[i] == doc['articles'][j]['id']) {
+                        if (categories[doc['articles'][j]['category']] == null) {
+                            categories[doc['articles'][j]['category']] = [];
+                            categories[doc['articles'][j]['category']].push(doc['articles'][j]['id']);
+                        }
+                        else {
+                            categories[doc['articles'][j]['category']].push(doc['articles'][j]['id'])
+                        }
+                        if (doc['articles'][j]['lastRead'] == '') {
+                            if (categoryCounts[doc['articles'][j]['category']] == null) {
+                                categoryCounts[doc['articles'][j]['category']] = 1;
+                            }
+                            else {
+                                categoryCounts[doc['articles'][j]['category']]++;
+                            }
+                            totalUnreadArticles++;
+                        }
                     }
-                    else {
-                        categories[articleCategory] = 0;
-                    }
                 }
-            }
-            //get total unread artciles for 'ALL' category
-            var totalUnreadArticles = 0;
-            for (i in categories) {
-                totalUnreadArticles += categories[i];
             }
             //build string
             html += '<div class="row has-header" style="padding-right:0;padding-left:0;padding-top:0">'
-            if (type == 'shared') {
-                html += '<div class="col-33 text-center padding" ng-click="renderArticles(&quot;' + type + '&quot;,&quot;All&quot;);clickTracker(&quot;renderCategories(All)&quot;)" style="position:relative"><img class="autoSize" src="../img/articles/all.png"><span class ="badge badge-positive topRightBadge">' + totalUnreadArticles + '</span>All</div>';
+            html += '<div class="col-33 text-center padding" ng-click="renderArticleList(&quot;' + type + '&quot;,&quot;All&quot;);clickTracker(&quot;renderCategories(All)&quot;)" style="position:relative"><img class="autoSize" src="../img/articles/all.png">';
+            if (totalUnreadArticles > 0) {
+                html += '<span class ="badge badge-positive topRightBadge">' + totalUnreadArticles + '</span>All</div>';
             }
             else {
-                html += '<div class="col-33 text-center padding" ng-click="renderArticles(&quot;' + type + '&quot;,&quot;All&quot;);clickTracker(&quot;renderCategories(All)&quot;)" style="position:relative"><img class ="autoSize" src="../img/articles/all.png">All</div>';
+                html += 'All</div>';
             }
             for (i in categories) {
-                //add column
-                html += '<div class="col-33 text-center padding" ng-click="renderArticles(&quot;' + type + '&quot;,&quot;' + i + '&quot;);clickTracker(&quot;renderCategories(' + i + ')&quot;)" style="position:relative">';
-                html += '<image class="autoSize" src="' + $scope.getCategoryImg(i) + '">';
-                if (categories[i] > 0) {
-                    html += '<span class="badge badge-positive topRightBadge">' + categories[i] + '</span>';
+                //add column              
+                html += '<div class="col-33 text-center padding" ng-click="renderArticleList(&quot;' + type + '&quot;,&quot;' + i + '&quot;);clickTracker(&quot;renderCategories(' + i + ')&quot;)" style="position:relative">';
+                //get category img
+                for (k in doc['categories']) {
+                    if (i == doc['categories'][k][1]) {
+                        html += '<image class="autoSize" src="../img/topics/' + doc['categories'][k][2] + '">';
+                    }
+                }
+                if (categoryCounts[i] > 0) {
+                    html += '<span class="badge badge-positive topRightBadge">' + categoryCounts[i] + '</span>';
                 }
                 html += i;
                 html += '</div>';
@@ -4082,142 +4327,268 @@ across the app instead of just the calendar page
         })
     };
 
-
-    /*
-    Renders all articles under the selected category
-    */
-    $scope.renderArticles = function (type, category) {
+    $scope.renderArticleList = function (type, categoryName) {
+        //articles is an array of article ids
         var db = PouchDB('momlink');
+        var articleIDs = [];
         var html = '';
         db.get('articles').then(function (doc) {
-            sharedArticles = doc[type];
-            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-reply" ng-click="renderCategories(&quot;' + type + '&quot;)"></button><div class ="title">' + category + '</div></div>'
-            html += '<div class="list has-header">';
-            for (i in sharedArticles) {
-                article = sharedArticles[i]
-                if (article['category'] == category || category == 'All') {
-                    html += '<div class="item item-thumbnail-left item-text-wrap">';
+            if (type == 'shared' || type == 'history') {
+                html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderCategories(&quot;' + type + '&quot;)"></button><div class="title">' + categoryName + '</div></div>';
+                html += '<div class="list has-header">';
+                if (categoryName == 'All') {
+                    for (i in doc[type]) {
+                        for (j in doc['articles']) {
+                            if (doc[type][i] == doc['articles'][j]['id']) {
+                                displayArticle(doc['articles'][j])
+                            }
+                        }
+                    }
+                }
+                else {
+                    for (i in doc[type]) {
+                        for (j in doc['articles']) {
+                            if (doc[type][i] == doc['articles'][j]['id'] && categoryName == doc['articles'][j]['category']) {
+                                displayArticle(doc['articles'][j])
+                            }
+                        }
+                    }
+                }
+                html += '</div></div>';
+                $('#' + type).html(html);
+                $compile($('#' + type))($scope);
+            }
+            else {
+                html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderLibrary()"></button><div class="title">' + categoryName + '</div><button class ="button button-icon icon ion-loop" ng-click="updateArticles(&quot;' + categoryName + '&quot;)"></button></div>';
+                html += '<div class="list has-header">';
+                for (j in doc['articles']) {
+                    if (categoryName == doc['articles'][j]['category']) {
+                        displayArticle(doc['articles'][j])
+                    }
+                }
+                html += '</div></div>';
+                $('#' + type).html(html);
+                $compile($('#' + type))($scope);
+            }
+
+            function displayArticle(article) {
+                console.log(JSON.stringify(article))
+                html += '<div class="item item-thumbnail-left item-text-wrap">';
+                if (article['filename'] != null) {
                     html += '<img src="' + $scope.getFormatImg(article['filename']) + '">';
-                    //bold if the article has not been read
-                    if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
-                    else { html += '<h2>' + article['title'] + '</h2>'; }
-                    html += '<p>Shared: ' + article['dateShared'] + '</p>';
+                }
+                //bold if the article has not been read
+                if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
+                else { html += '<h2>' + article['title'] + '</h2>'; }
+                //html += '<p>Shared: ' + article['dateShared'] + '</p>';
+                if (article['description'] != null) {
                     html += '<p>' + article['description'] + '</p>';
-                    //read more/take quiz buttons
-                    if (type == 'shared') {
-                        //console.log('<button class="button button-small button-positive" ng-click="openArticle(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;')
-                        html += '<button class="button button-small button-positive" ng-click="openArticle(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;';
-                    }
-                    else {
-                        html += '<button class="button button-small button-positive" ng-click="renderArticle(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;';
-                    }
-                    if (type == 'shared') {
-                        html += '<button class="button button-small button-positive" ng-click="renderQuiz(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Take Quiz <i class="ion-help"></i></button>';
-                    }
-                    else {
-                        html += '<button class="button button-small button-stable" ng-click="renderQuiz(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + category + '&quot;)">Take Quiz <i class="ion-help"></i></button>';
-                    }
+                }
+                //read more/take quiz buttons
+                html += '<button class="button button-small button-positive" ng-click="openArticle(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + categoryName + '&quot;)">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;';
+                if (article['quiz'].length != 0) {
+                    html += '<button class="button button-small button-positive" ng-click="renderQuiz(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + categoryName + '&quot;)">Take Quiz <i class="ion-help"></i></button>';
                     html += '<p>Best Score: ' + article['bestScore'] + '</p>';
                     html += '<p>Quiz Attempts: ' + article['quizAttempts'] + '</p>';
-                    html += '</div>';
+                }
+                html += '</div>';
+            }
+        });
+    }
+
+    $scope.renderLibrary = function () {
+        var db = PouchDB('momlink');
+        var html5 = '<div class="row">';
+        var col = 0;
+        db.get('articles').then(function (doc) {
+            for (i in doc['categories']) {
+                html5 += '<div class="col text-center">';
+                html5 += '<input type="image" src="../img/topics/' + doc['categories'][i][2] + '"ng-click="categoryHandler(&quot;' + doc['categories'][i][0] + '&quot;,&quot;' + doc['categories'][i][1] + '&quot;)" style="max-width:100%;height:auto;">';
+                html5 += '<p>' + doc['categories'][i][1] + '</p>';
+                html5 += '</div>';
+                col++;
+                if (col % 3 == 0) {
+                    html5 += '</div>';
+                    html5 += '<div class="row">';
                 }
             }
-            html += '</div>';
-            $('#' + type).html(html);
-            $compile($('#' + type))($scope);
+            while (col % 3 != 0) {
+                html5 += '<div class="col text-center">';
+                html5 += '</div>';
+                col++;
+            }
+        }).then(function () {
+            html5 += '</div>'
+            $('#library').html(html5);
+            $compile($('#library'))($scope);
+        })
+    };
+
+    $scope.categoryHandler = function (categoryID, categoryName) {
+        var db = PouchDB('momlink');
+        var articles = [];
+        db.get('articles').then(function (doc) {
+            //get all articles for category
+            for (i in doc['articles']) {
+                if (doc['articles'][i]['category'] == categoryName) {
+                    articles.push(doc['articles'][i])
+                }
+            }
+            if (navigator.connection.type == Connection.NONE && articles.length == 0) {
+                //alert must be connected to wifi
+                $ionicPopup.alert({
+                    title: "Please connect to WiFi and try again.",
+                });
+            }
+            else if (navigator.connection.type != Connection.NONE && articles.length == 0) {
+                $ionicPopup.alert({
+                    title: "Would you like to download these articles?",
+                    buttons: [
+                          {
+                              text: '<b>Download</b>',
+                              type: 'button-positive',
+                              onTap: function () {
+                                  $scope.downloadCategory(categoryID, categoryName);
+                              }
+                          },
+                          {
+                              text: 'Cancel'
+                          },
+                    ]
+                });
+            }
+            else {
+                $scope.renderArticleList('library', categoryName)
+            }
+        })
+    };
+
+    $scope.downloadCategory = function (categoryID, categoryName) {
+        var db = PouchDB('momlink');
+        var downloads = [];
+        var post_information = { 'categoryID': categoryID };
+        console.log(JSON.stringify(post_information))
+        db.get('articles').then(function (doc) {
+            $.ajax({
+                url: 'https://momlink.crc.nd.edu/~jonathan/current/getCategoryArticles.php',
+                type: 'POST',
+                dataType: 'json',
+                data: post_information,
+                async: false,
+                success: function (data) {
+                    var downloads = [];
+                    console.log(JSON.stringify(data))
+                    if (data.length > 0) {
+                        for (i in data) {
+                            //check if article is already in local db
+                            var isUnique = true;
+                            for (j in doc['articles']) {
+                                if (data[i]['id'] == doc['articles'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                //makes quiz suitable for json parse
+                                //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
+                                data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
+                                var article = {
+                                    "id": data[i]['id'],
+                                    "title": data[i]['title'],
+                                    "category": categoryName,
+                                    "description": data[i]['description'],
+                                    "content_text": data[i]['path'],
+                                    "filename": data[i]['filename'],
+                                    "localPath": "",
+                                    "lastRead": "",
+                                    "readHistory": {},
+                                    "quiz": JSON.parse(data[i]['quiz']),
+                                    "quizAttempts": '0',
+                                    "bestScore": '0',
+                                    "quizHistory": {},
+                                    "upload": '0',
+                                    "article_status": '0'
+                                };
+                                //console.log(JSON.stringify(article))
+                                doc['articles'].push(article);
+                                if (article["content_text"].substring(0, 2) == './') {
+                                    downloads.push(article);
+                                }
+                            }
+                        }
+                        console.log('Articles downloaded')
+                        return db.put(doc).then(function () {
+                            //need this to run in a callback 
+                            if (downloads.length > 0) {
+                                var x = 0;
+                                var loopDownloads = function (arr) {
+                                    console.log(JSON.stringify(arr))
+                                    downloadFile(arr[x], function () {
+                                        x++;
+                                        if (x < arr.length) {
+                                            loopDownloads(arr);
+                                        }
+                                        else {
+                                            var articleIds = new Array();
+                                            console.log('hit')
+                                            for (k in doc['articles']) {
+                                                if (doc['articles'][k]['category'] == categoryName) {
+                                                    articleIds.push(doc['articles'][k]['id'])
+                                                }
+                                            }
+                                            console.log(articleIds)
+                                            $scope.renderArticleList('library', categoryName)
+                                            console.log('finished!')
+                                        }
+                                    });
+                                }
+                                function downloadFile(article, callback) {
+                                    console.log(JSON.stringify(article))
+                                    var downloadLink = String("https://momlink.crc.nd.edu/MomLink-PNCC/uploads/" + article['filename']);
+                                    var uri = encodeURI(downloadLink);
+                                    var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + article['filename'];
+                                    console.log(uri)
+                                    console.log(localPath)
+                                    var fileTransfer = new FileTransfer();
+                                    fileTransfer.download(uri, localPath,
+                                        function (entry) {
+                                            console.log("download complete: " + entry.toURL());
+                                            db.get('articles').then(function (doc) {
+                                                //get all articles where upload == 0 and articles_status == 1 (articles modified since last update)
+                                                for (i in doc['articles']) {
+                                                    if (doc['articles'][i]['id'] == article['id']) {
+                                                        doc['articles'][i]['localPath'] = entry.toURL();
+                                                        console.log(entry.toURL())
+                                                    }
+                                                }
+                                                return db.put(doc).then(function () {
+                                                    callback();
+                                                })
+                                            })
+                                        },
+                                        function (error) {
+                                            console.log("download error source " + error.source);
+                                            console.log("download error target " + error.target);
+                                            console.log("download error code" + error.code);
+                                        },
+                                        false,
+                                        {
+                                            headers: {
+                                                "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+                                            }
+                                        }
+                                    );
+                                }
+                                loopDownloads(downloads)
+                            }
+                        })
+                    }
+                    else {
+                        console.log('No new articles')
+                    }
+                }
+            });
         });
-    };
-
-
-    /*
-    Returns image based on article format (text, audio, video, etc.)
-    */
-    $scope.getFormatImg = function (type) {
-        if (type == 'Website') {
-            return '../img/formats/website.png';
-        }
-        switch (type.substr(type.length - 3)) {
-            case 'pdf':
-                return '../img/formats/pdf.png';
-            case 'png':
-                return '../img/formats/image.png';
-            case 'jpg':
-                return '../img/formats/image.png';
-            case 'peg':
-                return '../img/formats/image.png';
-            case 'iff':
-                return '../img/formats/image.png';
-            case 'mp3':
-                return '../img/formats/audio.png';
-            case 'mp4':
-                return '../img/formats/video.png';
-            case '3gp':
-                return '../img/formats/video.png';
-        }
-    };
-
-    /*
-    Returns image based on article category
-    */
-    $scope.getCategoryImg = function (type) {
-        switch (type) {
-            case 'Safe Sleep':
-                return '../img/topics/sleep_big.png';
-            case 'Safety':
-                return '../img/formats/baby-proof-home.png';
-            case 'HUGS':
-                return '../img/topics/HUGS.jpg';
-            case 'Nutrition':
-                return '../img/formats/Nutrition.png';
-            case 'First Time Moms':
-                return '../img/topics/firstimemoms.jpg';
-            case 'Parenting':
-                return '../img/formats/WCC_south bend.jpg';
-            case 'Abstinence':
-                return '../img/topics/abstinence.jpg';
-            case 'Anticipatory Guidance':
-                return '../img/formats/nesting.jpg';
-            case 'Breastfeeding':
-                return '../img/topics/breastfeeding.jpg';
-            case 'Child Abuse':
-                return '../img/topics/childabuse.jpg';
-            case 'Community Resources':
-                return '../img/topics/communityresources.jpeg';
-            case 'Coping Skills':
-                return '../img/topics/coping.jpg';
-            case 'Dental Health':
-                return '../img/topics/dentalhealth copy.jpg';
-            case 'Domestic Violence':
-                return '../img/topics/domesticviolence.jpg';
-            case 'HIV Risks':
-                return '../img/topics/hivrisk.png';
-            case 'Family Planning':
-                return '../img/topics/familyplanning.jpg';
-            case 'Financial Planning':
-                return '../img/topics/financialplanning.jpg';
-            case 'Drug Cessation':
-                return '../img/topics/drugcessation.jpg';
-            case 'General Advice':
-                return '../img/topics/unnamed-chunk-5-1.png';
-            case 'Prenatal Care':
-                return '../img/topics/prenatalcare.jpg';
-            case 'Prenatal Weight':
-                return '../img/topics/prenatalweight.jpg';
-            case 'Baby Growth':
-                return '../img/topics/babygrowth.png';
-            case 'Labor and Delivery':
-                return '../img/topics/labor-delivery.jpg';
-            case 'Managing Pregnancy Discomforts':
-                return '../img/topics/pregdiscomforts.jpg';
-            case 'Health Care':
-                return '../img/topics/healthcare.jpg';
-            case 'Infant Stimulation':
-                return '../img/topics/infantstimulation.jpg';
-            case 'Infant Feeding':
-                return '../img/topics/infantfeeding.jpg';
-        }
-    };
-
+    }
 
     /*
     Checks whether the user has already read the article/taken the articles quiz
@@ -4244,7 +4615,6 @@ across the app instead of just the calendar page
                                         $scope.renderQuiz(type, id, category, 1)
                                     }
                                 }
-
                             ]
                         })
                     },
@@ -4261,93 +4631,96 @@ across the app instead of just the calendar page
         });
     };
 
-
     /*
     Opens the selected article
     */
     $scope.renderArticle = function (type, id, category) {
         var db = PouchDB('momlink');
         var html = '';
+        var article;
         db.get('articles').then(function (doc) {
-            sharedArticles = doc[type];
+            sharedArticles = doc['articles'];
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['id'] == id) {
-                    html += '<ion-modal-view>';
-                    html += '<div class="bar bar-footer" ng-init="startSessionTimer()">';
-                    html += '<button class="button button-icon icon ion-close-round" ng-click="recordTime(&quot;' + id + '&quot;); renderArticles(&quot;' + type + '&quot;,&quot;' + category + '&quot;); closeModal();">&nbsp;Close</button>';
-                    html += '<button class="button button-icon icon ion-help" ng-click="recordTime(&quot;' + id + '&quot;); closeModal(); renderQuiz(&quot;' + type + '&quot;,&quot;' + id + '&quot;,&quot;' + category + '&quot;);">&nbsp;Take Quiz</button>';
-                    html += '</div>';
-                    html += '<div class="float-button-hasFooter-topButton"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readText()"><i class="icon ion-volume-low"></i></button></span></div>';
-                    html += '<div class="float-button-hasFooter"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readAll()"><i class="icon ion-volume-medium"></i></button></span></div>';
-                    //if category is set to local and network is not available then
-                    //var networkState = navigator.connection.type;
-                    articleCategory = String(article['category']).replace(/\s/g, '');
-                    /*if (window.localStorage.getItem(articleCategory) == 'true' && networkState == Connection.NONE) {
-                        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
-                            dir.getFile(id.concat('.html'), { create: false }, function (fileEntry) {
-                                console.log(fileEntry.toURL())
-                                html += `<iframe src="` + fileEntry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
-                                html += `</ion-modal-view>`
-                                //updated last time article was read
-                                article['lastRead'] = String(moment().format('MM-DD-YYYY'));
-                                $scope.modal = $ionicModal.fromTemplate(html, {
-                                    scope: $scope,
-                                    animation: 'slide-in-up'
-                                });
-                                $scope.openModal();
-                                return db.put(doc)
-                            }, function (error) { console.log(error) });
-                        });
-                    }
-                        //if network is available
-                    else {*/
-
-                    //if content is an object
-                    if (article["content_text"].substring(0, 2) == './') {
-                        document.addEventListener("pause", startFileTimer, false);
-                        document.addEventListener("resume", endFileTimer, false);
-                        console.log(JSON.stringify(article))
-                        console.log(article["localPath"])
-                        $scope.openFile(article["localPath"]);
-                        function startFileTimer() {
-                            $scope.startSessionTimer();
-                        }
-                        function endFileTimer() {
-                            $scope.recordTime(article['id']);
-                            document.removeEventListener("pause", startFileTimer, false);
-                            document.removeEventListener("resume", endFileTimer, false);
-                            //updated last time article was read
-                            article['lastRead'] = String(moment().format('YYYY-MM-DD'));
-                            return db.put(doc)
-                        }
-                    }
-                    else {
-                        //if content is a link
-                        if (article['content_text'].substring(0, 4) == 'http') {
-                            html += '<iframe id="frame" src="' + article['content_text'] + '" style="width:100%; height: 100%;"></iframe>';
-                        }
-                            //content is a string
-                        else {
-                            html += '<div class="has-footer">';
-                            html += '<p>';
-                            html += article['content_text'];
-                            html += '</p>';
-                            html += '</div>';
-                        }
-                        html += '</ion-modal-view>';
+                    break;
+                }
+            }
+            console.log(id)
+            console.log(JSON.stringify(article))
+            html += '<ion-modal-view>';
+            html += '<div class="bar bar-footer" ng-init="startSessionTimer()">';
+            html += '<button class="button button-icon icon ion-close-round" ng-click="recordTime(&quot;' + id + '&quot;); renderArticleList(&quot;' + type + '&quot;,&quot;' + category + '&quot;); closeModal();">&nbsp;Close</button>';
+            html += '<button class="button button-icon icon ion-help" ng-click="recordTime(&quot;' + id + '&quot;); closeModal(); renderQuiz(&quot;' + type + '&quot;,&quot;' + id + '&quot;,&quot;' + category + '&quot;);">&nbsp;Take Quiz</button>';
+            html += '</div>';
+            html += '<div class="float-button-hasFooter-topButton"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readText()"><i class="icon ion-volume-low"></i></button></span></div>';
+            html += '<div class="float-button-hasFooter"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="readAll()"><i class="icon ion-volume-medium"></i></button></span></div>';
+            //if category is set to local and network is not available then
+            //var networkState = navigator.connection.type;
+            articleCategory = String(article['category']).replace(/\s/g, '');
+            /*if (window.localStorage.getItem(articleCategory) == 'true' && networkState == Connection.NONE) {
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
+                    dir.getFile(id.concat('.html'), { create: false }, function (fileEntry) {
+                        console.log(fileEntry.toURL())
+                        html += `<iframe src="` + fileEntry.toURL() + `" style="width:100%; height: 100%;"></iframe>`;
+                        html += `</ion-modal-view>`
+                        //updated last time article was read
+                        article['lastRead'] = String(moment().format('MM-DD-YYYY'));
                         $scope.modal = $ionicModal.fromTemplate(html, {
                             scope: $scope,
                             animation: 'slide-in-up'
                         });
                         $scope.openModal();
-                        //updated last time article was read
-                        article['lastRead'] = String(moment().format('YYYY-MM-DD'));
                         return db.put(doc)
-                    }
-                    //}
+                    }, function (error) { console.log(error) });
+                });
+            }
+                //if network is available
+            else {*/
+
+            //if content is an object
+            if (article["content_text"].substring(0, 2) == './') {
+                document.addEventListener("pause", startFileTimer, false);
+                document.addEventListener("resume", endFileTimer, false);
+                console.log(JSON.stringify(article))
+                console.log(article["localPath"])
+                $scope.openFile(article["localPath"]);
+                function startFileTimer() {
+                    $scope.startSessionTimer();
+                }
+                function endFileTimer() {
+                    $scope.recordTime(id);
+                    document.removeEventListener("pause", startFileTimer, false);
+                    document.removeEventListener("resume", endFileTimer, false);
+                    //updated last time article was read
+                    article['lastRead'] = String(moment().format('YYYY-MM-DD'));
+                    return db.put(doc)
                 }
             }
+            else {
+                //if content is a link
+                if (article['content_text'].substring(0, 4) == 'http') {
+                    html += '<iframe id="frame" src="' + article['content_text'] + '" style="width:100%; height: 100%;"></iframe>';
+                }
+                    //content is a string
+                else {
+                    html += '<div class="has-footer">';
+                    html += '<p>';
+                    html += article['content_text'];
+                    html += '</p>';
+                    html += '</div>';
+                }
+                html += '</ion-modal-view>';
+                $scope.modal = $ionicModal.fromTemplate(html, {
+                    scope: $scope,
+                    animation: 'slide-in-up'
+                });
+                $scope.openModal();
+                //updated last time article was read
+                article['lastRead'] = String(moment().format('YYYY-MM-DD'));
+                return db.put(doc)
+            }
+
         })
     }
 
@@ -4360,7 +4733,7 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         var html = '<div ng-controller="HeaderCtrl">';
         db.get('articles').then(function (doc) {
-            sharedArticles = doc[type];
+            sharedArticles = doc['articles'];
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['id'] == articleID) {
@@ -4460,7 +4833,6 @@ across the app instead of just the calendar page
         });
     };
 
-
     /*
     Grades the selected quiz, if a perfect score is achieved, the article is then moved to history
     */
@@ -4471,7 +4843,7 @@ across the app instead of just the calendar page
         var maxScore;
         db.get('articles').then(function (doc) {
             var usersAnswers = [];
-            sharedArticles = doc[type];
+            sharedArticles = doc['articles'];
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['id'] == articleID) {
@@ -4527,12 +4899,115 @@ across the app instead of just the calendar page
             })
         }).then(function () {
             if (type == 'shared' && score == article['quiz'].length) {
-                $scope.moveToHistory(type, articleID, category);
+                //Moves an article from the shared section to the history section
+                db.get('articles').then(function (doc) {
+                    //remove article id from shared
+                    for (i in doc['shared']) {
+                        if (doc['shared'][i] == articleID) {
+                            article = doc['shared'][i];
+                            doc['shared'].splice(i, 1);
+                        }
+                    }
+                    //add article id to history
+                    doc['history'].push(articleID)
+                    return db.put(doc);
+                }).then(function () {
+                    $scope.renderArticleList(type, category)
+                })
             }
             else {
-                $scope.renderArticles(type, category)
+                $scope.renderArticleList(type, category)
             }
         })
+    };
+
+    /*
+    Returns image based on article format (text, audio, video, etc.)
+    */
+    $scope.getFormatImg = function (type) {
+        if (type == 'Website') {
+            return '../img/formats/website.png';
+        }
+        switch (type.substr(type.length - 3)) {
+            case 'pdf':
+                return '../img/formats/pdf.png';
+            case 'png':
+                return '../img/formats/image.png';
+            case 'jpg':
+                return '../img/formats/image.png';
+            case 'peg':
+                return '../img/formats/image.png';
+            case 'iff':
+                return '../img/formats/image.png';
+            case 'mp3':
+                return '../img/formats/audio.png';
+            case 'mp4':
+                return '../img/formats/video.png';
+            case '3gp':
+                return '../img/formats/video.png';
+        }
+    };
+
+    /*
+    Returns image based on article category
+    */
+    $scope.getCategoryImg = function (type) {
+        switch (type) {
+            case 'Safe Sleep':
+                return '../img/topics/sleep_big.png';
+            case 'Safety':
+                return '../img/formats/baby-proof-home.png';
+            case 'HUGS':
+                return '../img/topics/HUGS.jpg';
+            case 'Nutrition':
+                return '../img/formats/Nutrition.png';
+            case 'First Time Moms':
+                return '../img/topics/firstimemoms.jpg';
+            case 'Parenting':
+                return '../img/formats/WCC_south bend.jpg';
+            case 'Abstinence':
+                return '../img/topics/abstinence.jpg';
+            case 'Anticipatory Guidance':
+                return '../img/formats/nesting.jpg';
+            case 'Breastfeeding':
+                return '../img/topics/breastfeeding.jpg';
+            case 'Child Abuse':
+                return '../img/topics/childabuse.jpg';
+            case 'Community Resources':
+                return '../img/topics/communityresources.jpeg';
+            case 'Coping Skills':
+                return '../img/topics/coping.jpg';
+            case 'Dental Health':
+                return '../img/topics/dentalhealth copy.jpg';
+            case 'Domestic Violence':
+                return '../img/topics/domesticviolence.jpg';
+            case 'HIV Risks':
+                return '../img/topics/hivrisk.png';
+            case 'Family Planning':
+                return '../img/topics/familyplanning.jpg';
+            case 'Financial Planning':
+                return '../img/topics/financialplanning.jpg';
+            case 'Drug Cessation':
+                return '../img/topics/drugcessation.jpg';
+            case 'General Advice':
+                return '../img/topics/unnamed-chunk-5-1.png';
+            case 'Prenatal Care':
+                return '../img/topics/prenatalcare.jpg';
+            case 'Prenatal Weight':
+                return '../img/topics/prenatalweight.jpg';
+            case 'Baby Growth':
+                return '../img/topics/babygrowth.png';
+            case 'Labor and Delivery':
+                return '../img/topics/labor-delivery.jpg';
+            case 'Managing Pregnancy Discomforts':
+                return '../img/topics/pregdiscomforts.jpg';
+            case 'Health Care':
+                return '../img/topics/healthcare.jpg';
+            case 'Infant Stimulation':
+                return '../img/topics/infantstimulation.jpg';
+            case 'Infant Feeding':
+                return '../img/topics/infantfeeding.jpg';
+        }
     };
 
     /*
@@ -4541,6 +5016,7 @@ across the app instead of just the calendar page
     $scope.startSessionTimer = function () {
         timer = setInterval(function () { sessionTime++; }, 1000);
     };
+
     /*
     Records the amount of time the user has spent reading the quiz
     */
@@ -4549,7 +5025,7 @@ across the app instead of just the calendar page
         clearInterval(timer);
         var db = PouchDB('momlink');
         db.get('articles').then(function (doc) {
-            sharedArticles = doc['shared'];
+            sharedArticles = doc['articles'];
             for (i in sharedArticles) {
                 article = sharedArticles[i]
                 if (article['id'] == articleID) {
@@ -4570,37 +5046,11 @@ across the app instead of just the calendar page
     };
 
     /*
-    Moves an article from the shared section to the history section
-    */
-    $scope.moveToHistory = function (type, articleID, category) {
-        var db = PouchDB('momlink');
-        db.get('articles').then(function (doc) {
-            sharedArticles = doc['shared'];
-            for (i in sharedArticles) {
-                if (sharedArticles[i]['id'] == articleID) {
-                    article = sharedArticles[i];
-                    sharedArticles.splice(i, 1);
-                }
-            }
-            return db.put(doc);
-        }).then(function () {
-            db.get('articles').then(function (doc) {
-                doc['history'].push(article);
-                return db.put(doc)
-            })
-        }).then(function () {
-            $scope.renderArticles(type, category)
-        })
-    };
-
-
-    /*
     Opens modal
     */
     $scope.openModal = function () {
         $scope.modal.show();
     };
-
 
     /*
     Closes modal and removes it from memory
@@ -4612,6 +5062,7 @@ across the app instead of just the calendar page
     };
 
     $scope.openFile = function (file) {
+        console.log(JSON.stringify(file))
         var open = cordova.plugins.disusered.open;
         function success() {
             console.log('Success');
@@ -4626,122 +5077,20 @@ across the app instead of just the calendar page
         open(file, success, error);
     }
 
-    /*
-
-    */
-    var downloadSuccess = true;
-    var deleteSuccess = true;
-    var updateSuccess = true;
-    $scope.renderDownloadCategories = function () {
-        var db = PouchDB('momlink');
-        var htmlSaved = '';
-        var categories = {};
-        db.get('articles').then(function (doc) {
-            //get all unique categories
-            for (i in doc['shared']) {
-                categories[doc['shared'][i]['category']] = 0;
-            }
-            for (i in doc['history']) {
-                categories[doc['shared'][i]['category']] = 0;
-            }
-            for (i in categories) {
-                noSpaces = String(i).replace(/\s/g, '');
-                htmlSaved += '<div class="row item">'
-                htmlSaved += '<div class="col no-padding">'
-                htmlSaved += '<ion-toggle ng-model="' + noSpaces + '" ng-checked="' + localStorage.getItem(noSpaces) + '" ng-click="toggleChange(&quot;' + String(noSpaces) + '&quot;,' + noSpaces + ')" style="border:none">' + i + '</ion-toggle>';
-                htmlSaved += '</div>'
-                htmlSaved += '<div class="col-10 no-padding">'
-                htmlSaved += '<a class="button button-icon icon ion-loop" ng-click="updateArticles(&quot;' + String(noSpaces) + '&quot;)"></a>';
-                htmlSaved += '</div>'
-                htmlSaved += '</div>'
-            }
-            $('#Saved').html(htmlSaved);
-            $compile($('#Saved'))($scope);
-        })
-    };
-
-    /*
-    Closes modal and removes it from memory
-    */
-    $scope.toggleChange = function (category, state) {
-        if (state == true) {
-            $scope.clickTracker('downloadArticles(' + category + ')');
-            localStorage.setItem(category, true);
-            //download all articles for that category
-            document.addEventListener("deviceready", function () {
-                var db = PouchDB('momlink');
-                db.get('articles').then(function (doc) {
-                    for (i in doc['shared']) {
-                        articleCategory = String(doc['shared'][i]['category']).replace(/\s/g, '');
-                        if (articleCategory == category) {
-                            $scope.downloadArticle(doc['shared'][i]['link'], doc['shared'][i]['id']);
-                        }
-                    }
-                    for (i in doc['history']) {
-                        articleCategory = String(doc['history'][i]['category']).replace(/\s/g, '');
-                        if (articleCategory == category) {
-                            $scope.downloadArticle(doc['history'][i]['link'], doc['history'][i]['id']);
-                        }
-                    }
-                })
-            })
-        }
-        else {
-            $scope.clickTracker('deleteArticles(' + category + ')');
-            //delete all local articles for that category
-            localStorage.setItem(category, false);
-            document.addEventListener("deviceready", function () {
-                var db = PouchDB('momlink');
-                db.get('articles').then(function (doc) {
-                    //get all unique categories
-                    for (i in doc['shared']) {
-                        articleCategory = String(doc['shared'][i]['category']).replace(/\s/g, '');
-                        if (articleCategory == category) {
-                            $scope.deleteArticle(doc['shared'][i]['id']);
-                        }
-                    }
-                    for (i in doc['history']) {
-                        articleCategory = String(doc['history'][i]['category']).replace(/\s/g, '');
-                        if (articleCategory == category) {
-                            $scope.deleteArticle(doc['history'][i]['id']);
-                        }
-                    }
-                })
-            })
-        }
-    }
     $scope.updateArticles = function (category) {
-        $scope.clickTracker('updateArticles(' + category + ')');
-        if (localStorage.getItem(category) == 'true') {
-            var db = PouchDB('momlink');
-            db.get('articles').then(function (doc) {
-                /*for (i in doc['shared']) {
-                    articleCategory = String(doc['shared'][i]['category']).replace(/\s/g, '');
-                    if (articleCategory == category) {
-                        $scope.deleteArticle(doc['shared'][i]['id']);
-                    }
+        var db = PouchDB('momlink');
+        db.get('articles').then(function (doc) {
+            //get category id
+            for (i in doc['categories']) {
+                if (category == doc['categories'][i][1]) {
+                    categoryID = doc['categories'][i][0];
+                    break;
                 }
-                for (i in doc['history']) {
-                    articleCategory = String(doc['history'][i]['category']).replace(/\s/g, '');
-                    if (articleCategory == category) {
-                        $scope.deleteArticle(doc['history'][i]['id']);
-                    }
-                }*/
-                for (i in doc['shared']) {
-                    articleCategory = String(doc['shared'][i]['category']).replace(/\s/g, '');
-                    if (articleCategory == category) {
-                        $scope.downloadArticle(doc['shared'][i]['link'], doc['shared'][i]['id']);
-                    }
-                }
-                for (i in doc['history']) {
-                    articleCategory = String(doc['history'][i]['category']).replace(/\s/g, '');
-                    if (articleCategory == category) {
-                        $scope.downloadArticle(doc['history'][i]['link'], doc['history'][i]['id']);
-                    }
-                }
-            })
-        }
+            }
+            $scope.downloadCategory(categoryID, category)
+        })
     }
+
     $scope.downloadArticle = function (articleURL, articleID) {
         //The directory to store data
         var store = cordova.file.dataDirectory;
