@@ -4519,7 +4519,18 @@ across the app instead of just the calendar page
         var html5 = '<div class="row">';
         var col = 0;
         db.get('articles').then(function (doc) {
-            for (i in doc['categories']) {
+            //sort categories by ranking
+            function sortCategories(a, b) {
+                if (parseInt(a[3]) === parseInt(b[3])) {
+                    return 0;
+                }
+                else {
+                    return (parseInt(a[3]) < parseInt(b[3])) ? -1 : 1;
+                }
+            }
+
+            for (i in doc['categories'].sort(sortCategories)) {
+                console.log(doc['categories'][i][3])
                 html5 += '<div class="col text-center">';
                 html5 += '<input type="image" src="../img/topics/' + doc['categories'][i][2] + '"ng-click="categoryHandler(&quot;' + doc['categories'][i][0] + '&quot;,&quot;' + doc['categories'][i][1] + '&quot;)" style="max-width:100%;height:auto;">';
                 html5 += '<p>' + doc['categories'][i][1] + '</p>';
