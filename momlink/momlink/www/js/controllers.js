@@ -109,34 +109,14 @@ across the app instead of just the calendar page
                 });
             }
         });
-        /*db.get('goals').catch(function (err) {
+        db.get('careplan').catch(function (err) {
             if (err.status === 404) {
                 db.put({
-                    "_id": "goals",
-                    'goals': [
-                        {
-                            'id': '12345', 'name': 'Attend a Safety Class', 'type': 'class', 'classes': {
-                                '07/16/2016': ['Venue1', '12:00', '15:00', 'Instructor1'],
-                                '07/17/2016': ['Venue2', '12:00', '15:00', 'Instructor2'],
-                                '07/18/2016': ['Venue3', '12:00', '15:00', 'Instructor3'],
-                                '07/19/2016': ['Venue4', '12:00', '15:00', 'Instructor4']
-                            }, 'eventID': '', 'completed': 'false'
-                        },
-                        {
-                            'id': '12346', 'name': 'Attend a BABE Class', 'type': 'class', 'classes': {
-                                '07/27/2016': ['Venue1', '12:00', '15:00', 'Instructor 1'],
-                                '07/28/2016': ['Venue2', '12:00', '15:00', 'Instructor 2'],
-                                '07/29/2016': ['Venue3', '12:00', '15:00', 'Instructor 3'],
-                                '07/30/2016': ['Venue4', '12:00', '15:00', 'Instructor 4']
-                            }, 'eventID': '', 'completed': 'false'
-                        },
-                        {
-                            'id': '12347', 'name': 'Meet with a PNCC', 'type': 'meet', 'eventID': '', 'completed': 'false'
-                        }
-                    ]
+                    "_id": "careplan",
+                    'careplan': []
                 });
             }
-        });*/
+        });
         db.get('track').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -665,7 +645,8 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
-        $scope.getEvents();
+        $scope.getCareplan();
+        $scope.updateCareplan();
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
             var time = moment("2016-12-21T10:56", "YYYY-MM-DDTHH:mm:ssZ").toDate();
@@ -718,7 +699,8 @@ across the app instead of just the calendar page
         $scope.updateSurveys();
         $scope.retrieveClientTrackers();
         $scope.uploadTrackers();
-
+        $scope.getCareplan();
+        $scope.updateCareplan();
     };
     $scope.updateAllEvents = function () {
         $scope.getEvents();
@@ -740,6 +722,11 @@ across the app instead of just the calendar page
         $scope.getSurveys();
         $scope.updateSurveys();
         $scope.toNewPage('survey.html', 'Survey');
+    };
+    $scope.updateAllGoals = function () {
+        $scope.getCareplan();
+        $scope.updateCareplan();
+        $scope.toNewPage('careplan.html', 'Care Plan');
     };
     $scope.updateInboxButton = function () {
         $scope.updateInbox();
@@ -1736,6 +1723,93 @@ across the app instead of just the calendar page
         }
         loopTrackers(tables);
     };
+    $scope.getCareplan = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getCareplan.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                if (data.length > 0) {
+                    //&& data[0]['id'] != null
+                    //console.log(JSON.stringify(data[0]['id']))
+                    db.get('careplan').then(function (doc) {
+                        for (i in data) {
+                            //check if referral is already in local db
+                            var isUnique = true;
+                            for (j in doc['careplan']) {
+                                if (data[i]['record_id'] == doc['careplan'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                var referral = {
+                                    "id": data[i]['record_id'],
+                                    "goal": data[i]['goal'],
+                                    "status": data[i]['status'],
+                                    "upload": '1'
+                                };
+                                doc['careplan'].push(referral);
+                            }
+                        }
+                        console.log('Careplan downloaded')
+                        return db.put(doc);
+                    });
+                }
+                else {
+                    console.log('No new goals for careplan')
+                }
+            }
+        });
+    };
+    $scope.updateCareplan = function () {
+        var db = PouchDB('momlink');
+        var uploadGoals = [];
+        db.get('careplan').then(function (doc) {
+            for (i in doc['careplan']) {
+                if (doc['careplan'][i]['upload'] == 0) {
+                    uploadGoals.push(doc['careplan'][i])
+                }
+            }
+        }).then(function () {
+            if (uploadGoals.length > 0) {
+                var post_information = {};
+                post_information.goals = uploadGoals;
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updateCareplan.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async: false,
+                    success: function (data) {
+                        console.log(JSON.stringify(data))
+                        //for each goal updated, update uploaded value to 1
+                        if (data == true) {
+                            db.get('careplan').then(function (doc) {
+                                //set upload value so it is not reuploaded
+                                for (k in uploadGoals) {
+                                    for (m in doc['careplan']) {
+                                        if (uploadGoals[k]['id'] == doc['careplan'][m]['id']) {
+                                            doc['careplan'][m]['upload'] = '1';
+                                        }
+                                    }
+                                }
+                                console.log('Careplan updated')
+                                return db.put(doc);
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('Goals already up to date')
+            }
+        })
+    };
 
     /*
     Opens side menu navigation page
@@ -2171,7 +2245,6 @@ across the app instead of just the calendar page
         })
     };
 
-
     /*
     Removes the splash screen only after the main page has loaded
     */
@@ -2180,7 +2253,6 @@ across the app instead of just the calendar page
             navigator.splashscreen.hide()
         });
     };
-
 
     /*
     Checks the username and password against those in the login table
@@ -3313,7 +3385,7 @@ across the app instead of just the calendar page
                 }
                 else {
                     //check if 3 days have passed
-                    if (moment(referral['date']).diff(moment(), 'days') <= -3){
+                    if (moment(referral['date']).diff(moment(), 'days') <= -3) {
                         $ionicPopup.show({
                             title: 'Did you follow-up with ' + referral['name'] + '?',
                             scope: $scope,
@@ -6846,172 +6918,44 @@ across the app instead of just the calendar page
 /*
                 
                 */
-.controller('GoalsCtrl', function ($scope, $compile, $ionicPopup) {
-    $scope.renderGoalsGrid = function () {
-        goals = [];
+.controller('CarePlanCtrl', function ($scope, $compile, $ionicPopup) {
+    $scope.renderCareplan = function () {
         var db = PouchDB('momlink');
-        //check if any classes have been completed
-        db.get('goals').then(function (doc) {
-            for (i in doc['goals']) {
-                //check for any class related goals not yet completed
-                if ((doc['goals'][i]['type'] == 'class' || doc['goals'][i]['type'] == 'meet') && doc['goals'][i]['completed'] == 'false') {
-                    goals.push(doc['goals'][i])
+        var html = '<ion-list>';
+        db.get('careplan').then(function (doc) {
+            for (i in doc['careplan']) {
+                html += '<div class="item item-checkbox item-icon-right item-text-wrap" ng-click="updateGoal(&quot;' + doc['careplan'][i]['id'] + '&quot;)">' + doc['careplan'][i]['goal'] + '<label class="checkbox">';
+                if(doc['careplan'][i]['status'] == '1'){
+                    html += '<input type="checkbox" name="G" checked></label></div>'
+                }
+                else {
+                    html += '<input type="checkbox" name="G"></label></div>'
                 }
             }
         }).then(function () {
-            if (goals.length > 0) {
-                db.get('events').then(function (doc) {
-                    for (i in goals) {
-                        for (j in doc['events']) {
-                            //get the corresponding event
-                            if (doc['events'][j]['id'] == goals[i]['eventID']) {
-                                //check if the event has passed
-                                if (moment(doc['events'][j]['end']) < moment()) {
-                                    //if event has passed, change 'completed' to true
-                                    goals[i]['completed'] = 'true';
-                                }
-                            }
-                        }
-                    }
-                }).then(function () {
-                    //update db
-                    db.get('goals').then(function (doc) {
-                        for (i in goals) {
-                            for (j in doc['goals']) {
-                                if (doc['goals'][j]['id'] == goals[i]['id'] && goals[i]['completed'] == 'true') {
-                                    doc['goals'][j]['completed'] = 'true';
-                                }
-                            }
-                        }
-                        return db.put(doc);
-                    }).then(function () {
-                        //draw grid
-                        var counter = 1;
-                        //get start/end date
-                        db.get('goals').then(function (doc) {
-                            var html = '';
-                            html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">';
-                            for (i in doc['goals']) {
-                                //event has been completed
-                                if (doc['goals'][i]['completed'] == 'true') {
-                                    html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent(&quot;' + doc['goals'][i]['eventID'] + '&quot;,&quot;goals.html&quot;,&quot;Goals&quot;)" style="background-color: #528ef4; color:white;"><b>' + doc['goals'][i]['name'] + '<br><i class="icon ion-checkmark-round"></i></b></div>';
-                                }
-                                    //event has been registered
-                                else if (doc['goals'][i]['eventID'] != '' && doc['goals'][i]['eventID'] != null) {
-                                    html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent(&quot;' + doc['goals'][i]['eventID'] + '&quot;,&quot;goals.html&quot;,&quot;Goals&quot;)" style="background-color: #528ef4; color:white;"><b>' + doc['goals'][i]['name'] + '</b></div>';
-                                }
-                                    //event has not been started
-                                else {
-                                    if (doc['goals'][i]['type'] == 'class') {
-                                        html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewClasses(&quot;' + doc['goals'][i]['name'] + '&quot;,&quot;' + doc['goals'][i]['id'] + '&quot;)"><b>' + doc['goals'][i]['name'] + '</b></div>';
-                                    }
-                                    if (doc['goals'][i]['type'] == 'meet') {
-                                        html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="setGoalID(&quot;' + doc['goals'][i]['id'] + '&quot;);createEvent(&quot;goals.html&quot;, &quot;Goals&quot;);"><b>' + doc['goals'][i]['name'] + '</b></div>';
-                                    }
-                                }
-                                //3 items per column
-                                if (counter % 3 == 0) {
-                                    html += '</div><div class="row" style="padding-right:0; padding-left:0">';
-                                }
-                                counter++;
-                            }
-                            html += '</div>'
-                            //render grid
-                            $('#goalsGrid').html(html);
-                            $compile($('#goalsGrid'))($scope);
-                        })
-                    });
-                })
-            }
+            html += '</ion-list>';
+            $('#careplan').html(html);
+            $compile($('#careplan'))($scope);
         })
     }
-    $scope.viewClasses = function (name, id) {
+    $scope.updateGoal = function (id){
         var db = PouchDB('momlink');
-        //check if any classes have been completed
-        db.get('goals').then(function (doc) {
-            //get goal
-            for (i in doc['goals']) {
-                if (doc['goals'][i]['id'] == id) {
+        db.get('careplan').then(function (doc) {
+            for (i in doc['careplan']) {
+                if (doc['careplan'][i]['id'] == id) {
                     break;
                 }
             }
-            //pull class dates from goal
-            html = '<div class="list">';
-            for (var j in doc['goals'][i]['classes']) {
-                html += '<div class="item item-button-right">' + j + '<button class="button button-small button-positive" ng-click="showInfo(&quot;' + id + '&quot;,&quot;' + name + '&quot;,&quot;' + doc['goals'][i]['classes'][j] + '&quot;,&quot;' + j + '&quot;)">View</button></div>';
+            if (doc['careplan'][i]['status'] == '1') {
+                doc['careplan'][i]['status'] = '0'
+                doc['careplan'][i]['upload'] = '0'
             }
-            html += '</div>';
-            //show dates
-            $scope.choice = $ionicPopup.show({
-                template: html,
-                title: 'Available Classes',
-                buttons: [{ text: 'Cancel', onTap: function (e) { return 'Cancel'; } }],
-                scope: $scope
-            });
+            else {
+                doc['careplan'][i]['status'] = '1'
+                doc['careplan'][i]['upload'] = '0'
+            }
+            return db.put(doc)
         })
-    }
-    //show info for date
-    $scope.showInfo = function (id, name, classInfo, date) {
-        classInfo = classInfo.split(',');
-        html2 = '<div class="list">';
-        html2 += '<div class="item">Venue: ' + classInfo[0] + '</div>';
-        html2 += '<div class="item">Time: ' + classInfo[1] + ' - ' + classInfo[2] + '</div>';
-        html2 += '<div class="item">Instructor: ' + classInfo[3] + '</div>';
-        html2 += '</div>';
-        infoPopup = $ionicPopup.show({
-            template: html2,
-            title: date,
-            buttons: [
-              {
-                  text: 'Register', onTap: function (e) {
-                      var db = PouchDB('momlink');
-                      db.get('events').then(function (doc) {
-                          date = moment(date).format('YYYY-MM-DD')
-                          var eID = moment().format('MM-DD-YYYYThh:mm:ssa');
-                          $scope.eventID = eID;
-                          var start = date + "T" + classInfo[1];
-                          var end = date + "T" + classInfo[2];
-                          var event = {
-                              "id": eID,
-                              "title": name,
-                              "category": 'Class',
-                              "day": date,
-                              "start": start,
-                              "end": end,
-                              "venue": classInfo[0],
-                              "description": 'Class held by '.concat(classInfo[3]),
-                              "questions": [],
-                              "color": $scope.getColor('Class'),
-                              "viewed": '1',
-                              "scheduledBy": '0'
-                          };
-                          console.log(events);
-                          doc['events'].push(event);
-                          return db.put(doc);
-                      }).then(function () {
-                          //attach eventID to goal 
-                          db.get('goals').then(function (doc) {
-                              for (i in doc['goals']) {
-                                  if (doc['goals'][i]['id'] == id) {
-                                      doc['goals'][i]['eventID'] = $scope.eventID;
-                                      return db.put(doc);
-                                  }
-                              }
-                          }).then(function () {
-                              delete $scope.eventID;
-                              $scope.renderGoalsGrid();
-                              $scope.choice.close();
-                          })
-                      })
-                  },
-                  type: 'button-positive'
-              },
-              { text: 'Cancel' }
-            ]
-        });
-    };
-    $scope.setGoalID = function (id) {
-        window.localStorage.setItem('goalID', id);
     }
 })
 
@@ -7801,4 +7745,174 @@ across the app instead of just the calendar page
       { item: "Underwear", price: "1" },
       { item: "Washcloths", price: "2" }
     ]
-})*/
+})
+
+.controller('GoalsCtrl', function ($scope, $compile, $ionicPopup) {
+    $scope.renderGoalsGrid = function () {
+        goals = [];
+        var db = PouchDB('momlink');
+        //check if any classes have been completed
+        db.get('goals').then(function (doc) {
+            for (i in doc['goals']) {
+                //check for any class related goals not yet completed
+                if ((doc['goals'][i]['type'] == 'class' || doc['goals'][i]['type'] == 'meet') && doc['goals'][i]['completed'] == 'false') {
+                    goals.push(doc['goals'][i])
+                }
+            }
+        }).then(function () {
+            if (goals.length > 0) {
+                db.get('events').then(function (doc) {
+                    for (i in goals) {
+                        for (j in doc['events']) {
+                            //get the corresponding event
+                            if (doc['events'][j]['id'] == goals[i]['eventID']) {
+                                //check if the event has passed
+                                if (moment(doc['events'][j]['end']) < moment()) {
+                                    //if event has passed, change 'completed' to true
+                                    goals[i]['completed'] = 'true';
+                                }
+                            }
+                        }
+                    }
+                }).then(function () {
+                    //update db
+                    db.get('goals').then(function (doc) {
+                        for (i in goals) {
+                            for (j in doc['goals']) {
+                                if (doc['goals'][j]['id'] == goals[i]['id'] && goals[i]['completed'] == 'true') {
+                                    doc['goals'][j]['completed'] = 'true';
+                                }
+                            }
+                        }
+                        return db.put(doc);
+                    }).then(function () {
+                        //draw grid
+                        var counter = 1;
+                        //get start/end date
+                        db.get('goals').then(function (doc) {
+                            var html = '';
+                            html += '<div class="row" style="padding-right:0; padding-left:0; padding-top:0">';
+                            for (i in doc['goals']) {
+                                //event has been completed
+                                if (doc['goals'][i]['completed'] == 'true') {
+                                    html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent(&quot;' + doc['goals'][i]['eventID'] + '&quot;,&quot;goals.html&quot;,&quot;Goals&quot;)" style="background-color: #528ef4; color:white;"><b>' + doc['goals'][i]['name'] + '<br><i class="icon ion-checkmark-round"></i></b></div>';
+                                }
+                                    //event has been registered
+                                else if (doc['goals'][i]['eventID'] != '' && doc['goals'][i]['eventID'] != null) {
+                                    html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewEvent(&quot;' + doc['goals'][i]['eventID'] + '&quot;,&quot;goals.html&quot;,&quot;Goals&quot;)" style="background-color: #528ef4; color:white;"><b>' + doc['goals'][i]['name'] + '</b></div>';
+                                }
+                                    //event has not been started
+                                else {
+                                    if (doc['goals'][i]['type'] == 'class') {
+                                        html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="viewClasses(&quot;' + doc['goals'][i]['name'] + '&quot;,&quot;' + doc['goals'][i]['id'] + '&quot;)"><b>' + doc['goals'][i]['name'] + '</b></div>';
+                                    }
+                                    if (doc['goals'][i]['type'] == 'meet') {
+                                        html += '<div class="col-33 text-center padding nonActiveWeek" ng-click="setGoalID(&quot;' + doc['goals'][i]['id'] + '&quot;);createEvent(&quot;goals.html&quot;, &quot;Goals&quot;);"><b>' + doc['goals'][i]['name'] + '</b></div>';
+                                    }
+                                }
+                                //3 items per column
+                                if (counter % 3 == 0) {
+                                    html += '</div><div class="row" style="padding-right:0; padding-left:0">';
+                                }
+                                counter++;
+                            }
+                            html += '</div>'
+                            //render grid
+                            $('#goalsGrid').html(html);
+                            $compile($('#goalsGrid'))($scope);
+                        })
+                    });
+                })
+            }
+        })
+    }
+    $scope.viewClasses = function (name, id) {
+        var db = PouchDB('momlink');
+        //check if any classes have been completed
+        db.get('goals').then(function (doc) {
+            //get goal
+            for (i in doc['goals']) {
+                if (doc['goals'][i]['id'] == id) {
+                    break;
+                }
+            }
+            //pull class dates from goal
+            html = '<div class="list">';
+            for (var j in doc['goals'][i]['classes']) {
+                html += '<div class="item item-button-right">' + j + '<button class="button button-small button-positive" ng-click="showInfo(&quot;' + id + '&quot;,&quot;' + name + '&quot;,&quot;' + doc['goals'][i]['classes'][j] + '&quot;,&quot;' + j + '&quot;)">View</button></div>';
+            }
+            html += '</div>';
+            //show dates
+            $scope.choice = $ionicPopup.show({
+                template: html,
+                title: 'Available Classes',
+                buttons: [{ text: 'Cancel', onTap: function (e) { return 'Cancel'; } }],
+                scope: $scope
+            });
+        })
+    }
+    //show info for date
+    $scope.showInfo = function (id, name, classInfo, date) {
+        classInfo = classInfo.split(',');
+        html2 = '<div class="list">';
+        html2 += '<div class="item">Venue: ' + classInfo[0] + '</div>';
+        html2 += '<div class="item">Time: ' + classInfo[1] + ' - ' + classInfo[2] + '</div>';
+        html2 += '<div class="item">Instructor: ' + classInfo[3] + '</div>';
+        html2 += '</div>';
+        infoPopup = $ionicPopup.show({
+            template: html2,
+            title: date,
+            buttons: [
+              {
+                  text: 'Register', onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      db.get('events').then(function (doc) {
+                          date = moment(date).format('YYYY-MM-DD')
+                          var eID = moment().format('MM-DD-YYYYThh:mm:ssa');
+                          $scope.eventID = eID;
+                          var start = date + "T" + classInfo[1];
+                          var end = date + "T" + classInfo[2];
+                          var event = {
+                              "id": eID,
+                              "title": name,
+                              "category": 'Class',
+                              "day": date,
+                              "start": start,
+                              "end": end,
+                              "venue": classInfo[0],
+                              "description": 'Class held by '.concat(classInfo[3]),
+                              "questions": [],
+                              "color": $scope.getColor('Class'),
+                              "viewed": '1',
+                              "scheduledBy": '0'
+                          };
+                          console.log(events);
+                          doc['events'].push(event);
+                          return db.put(doc);
+                      }).then(function () {
+                          //attach eventID to goal 
+                          db.get('goals').then(function (doc) {
+                              for (i in doc['goals']) {
+                                  if (doc['goals'][i]['id'] == id) {
+                                      doc['goals'][i]['eventID'] = $scope.eventID;
+                                      return db.put(doc);
+                                  }
+                              }
+                          }).then(function () {
+                              delete $scope.eventID;
+                              $scope.renderGoalsGrid();
+                              $scope.choice.close();
+                          })
+                      })
+                  },
+                  type: 'button-positive'
+              },
+              { text: 'Cancel' }
+            ]
+        });
+    };
+
+})
+
+
+*/
