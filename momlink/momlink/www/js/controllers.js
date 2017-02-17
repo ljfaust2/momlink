@@ -20,7 +20,7 @@ across the app instead of just the calendar page
                     "triage_level": "1",
                     "reset_code": "595",
                     "answer": "",
-                    "agency": "",
+                    "agency": "3",
                     "pncc_id": "",
                     "sec_question": "",
                     "client_id": "555",
@@ -158,48 +158,7 @@ across the app instead of just the calendar page
             if (err.status === 404) {
                 db.put({
                     "_id": "articles",
-                    "categories": [
-                        ['19', 'Safe Sleep', 'baby_sleep_stomach.jpg'],
-                        ['20', 'Safety', 'baby-proof-home.png'],
-                        ['21', 'HUGS', 'HUGS.jpg'],
-                        ['22', 'Nutrition', 'Nutrition.png'],
-                        ['23', 'First Time Moms', 'firstimemoms.jpg'],
-                        ['24', 'Parenting', 'WCC_south%20bend.jpg'],
-                        ['45', 'Abstinence', 'abstinence.jpg'],
-                        ['46', 'Anticipatory Guidance', 'nesting.jpg'],
-                        ['47', 'Breast Feeding', 'breastfeeding.jpg'],
-                        ['48', 'Child Abuse', 'childabuse.jpg'],
-                        ['49', 'Community Resources', 'communityresources.jpeg'],
-                        ['50', 'Coping Skills', 'coping.jpg'],
-                        ['51', 'Dental Health', 'dentalhealth copy.jpg'],
-                        ['52', 'Domestic Violence', 'domesticviolence.jpg'],
-                        ['55', 'HIV Risks', 'hivrisk.png'],
-                        ['56', 'Family Planning', 'familyplanning.jpg'],
-                        ['57', 'Financial Planning', 'financialplanning.jpg'],
-                        ['58', 'Drug Cessation', 'drugcessation.jpg'],
-                        ['59', 'General Advice', 'unnamed-chunk-5-1.png'],
-                        ['60', 'Illness Care', ''],
-                        ['61', 'Normal Discomforts', ''],
-                        ['63', 'Prenatal Care', 'prenatalcare.jpg'],
-                        ['64', 'Prenatal Weight', 'prenatalweight.jpg'],
-                        ['65', 'Preterm Labor', ''],
-                        ['66', 'Parenting', ''],
-                        ['67', 'Postpartum Care', ''],
-                        ['68', 'Second-hand Smoke', 'secondhandsmoke.jpg'],
-                        ['69', 'Smoking Cessation', ''],
-                        ['70', 'STD Infection', ''],
-                        ['71', 'Vitamins', ''],
-                        ['72', 'Warning Signs', ''],
-                        ['73', 'Baby Growth', 'babygrowth.png'],
-                        ['74', 'Labor and Delivery', 'labor-delivery.jpg'],
-                        ['75', 'Managing Pregnancy Discomforts', 'pregdiscomforts.jpg'],
-                        ['76', 'Health Care', 'healthcare.jpg'],
-                        ['77', 'Alcohol', ''],
-                        ['78', 'Newborn Care', ''],
-                        ['79', 'Lessons Learned', ''],
-                        ['80', 'Infant Stimulation', 'infantstimulation.jpg'],
-                        ['81', 'Infant Feeding', 'infantfeeding.jpg'],
-                    ],
+                    "categories": [],
                     "articles": [],
                     "shared": [],
                     "history": [],
@@ -252,14 +211,14 @@ across the app instead of just the calendar page
                 });
             }
         });
-        /*db.get('userData').catch(function (err) {
+        db.get('userData').catch(function (err) {
             if (err.status === 404) {
                 db.put({
                     "_id": "userData",
                     "userData": []
                 });
             }
-        });*/
+        });
         db.get('update').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -645,8 +604,6 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
-        $scope.getCareplan();
-        $scope.updateCareplan();
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
             var time = moment("2016-12-21T10:56", "YYYY-MM-DDTHH:mm:ssZ").toDate();
@@ -686,6 +643,7 @@ across the app instead of just the calendar page
     Runs all php scripts
     */
     $scope.updateAll = function () {
+        $scope.getCategories()
         $scope.updateInbox();
         $scope.getEvents();
         //$scope.uploadMessages();
@@ -701,35 +659,42 @@ across the app instead of just the calendar page
         $scope.uploadTrackers();
         $scope.getCareplan();
         $scope.updateCareplan();
+        $scope.sendClickData();
     };
     $scope.updateAllEvents = function () {
         $scope.getEvents();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
+        $scope.sendClickData();
         $scope.toNewPage('calendar.html', 'Calendar');
     };
     $scope.updateAllReferrals = function () {
         $scope.getReferrals();
         $scope.updateReferrals();
+        $scope.sendClickData();
         $scope.toNewPage('referrals.html', 'Referrals');
     };
     $scope.updateAllContent = function () {
         $scope.getArticles();
         $scope.updateArticles();
+        $scope.sendClickData();
         $scope.toNewPage('education.html', 'Education');
     };
     $scope.updateAllSurveys = function () {
         $scope.getSurveys();
         $scope.updateSurveys();
+        $scope.sendClickData();
         $scope.toNewPage('survey.html', 'Survey');
     };
     $scope.updateAllGoals = function () {
         $scope.getCareplan();
         $scope.updateCareplan();
+        $scope.sendClickData();
         $scope.toNewPage('careplan.html', 'Care Plan');
     };
     $scope.updateInboxButton = function () {
         $scope.updateInbox();
+        $scope.sendClickData();
         $scope.toNewPage('inbox.html', 'Inbox');
     };
     //scrapped in favor of sendNewMesage and sendNewReply, may need later
@@ -1405,7 +1370,9 @@ across the app instead of just the calendar page
                                     console.log(JSON.stringify(article))
                                     var downloadLink = String("https://momlink.crc.nd.edu/MomLink-PNCC/uploads/" + article['filename']);
                                     var uri = encodeURI(downloadLink);
-                                    var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + article['filename'];
+                                    //remove spaces from filename
+                                    filename = article['filename'].replace(/\s/g, '')
+                                    var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + filename;
                                     console.log(uri)
                                     console.log(localPath)
                                     var fileTransfer = new FileTransfer();
@@ -1417,6 +1384,8 @@ across the app instead of just the calendar page
                                                 for (i in doc['articles']) {
                                                     if (doc['articles'][i]['id'] == article['id']) {
                                                         doc['articles'][i]['localPath'] = entry.toURL();
+                                                        //remove spaces from filename
+                                                        doc['articles'][i]['filename'] = doc['articles'][i]['filename'].replace(/\s/g, '')
                                                         console.log(entry.toURL())
                                                     }
                                                 }
@@ -1765,6 +1734,51 @@ across the app instead of just the calendar page
             }
         });
     };
+
+    $scope.getCategories = function () {
+        var db = PouchDB('momlink');
+        var agency;
+        db.get('login').then(function (doc) {
+            agency = doc['agency']
+        }).then(function () {
+            var post_information = { 'agency': agency };
+            console.log(JSON.stringify(post_information))
+            $.ajax({
+                url: 'https://momlink.crc.nd.edu/~jonathan/current/getCategories.php',
+                type: 'POST',
+                dataType: 'json',
+                data: post_information,
+                async: false,
+                success: function (data) {
+                    console.log(JSON.stringify(data))
+                    if (data.length > 0) {
+                        db.get('articles').then(function (doc) {
+                            for (i in data) {
+                                //check if referral is already in local db
+                                var isUnique = true;
+                                for (j in doc['categories']) {
+                                    if (data[i]['id'] == doc['categories'][j]['id']) {
+                                        isUnique = false;
+                                    }
+                                }
+                                if (isUnique == true) {
+                                    filename = data[i]['image'].substring(data[i]['image'].lastIndexOf("/") + 1);
+                                    var category = [data[i]['id'], data[i]['title'], filename, data[i]['ranking'], data[i]['description']]
+                                    doc['categories'].push(category);
+                                }
+                            }
+                            console.log('Categories downloaded')
+                            return db.put(doc);
+                        });
+                    }
+                    else {
+                        console.log('No new categories')
+                    }
+                }
+            });
+        })
+    };
+
     $scope.updateCareplan = function () {
         var db = PouchDB('momlink');
         var uploadGoals = [];
@@ -1807,6 +1821,39 @@ across the app instead of just the calendar page
             }
             else {
                 console.log('Goals already up to date')
+            }
+        })
+    };
+    $scope.sendClickData = function () {
+        var db = PouchDB('momlink');
+        db.get('userData').then(function (doc) {
+            if (doc['userData'].length > 0) {
+                var post_information = {};
+                console.log(JSON.stringify(doc['userData']))
+                post_information.clickData = doc['userData'];
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/uploadClicks.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async: false,
+                    success: function (data) {
+                        console.log(JSON.stringify(data))
+                        //clear out click log
+                        if (data == true) {
+                            db.get('userData').then(function (doc) {
+                                doc['userData'] = []
+                                return db.put(doc).then(function () {
+                                    console.log('userData uploaded')
+                                })
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('userData already up to date')
             }
         })
     };
@@ -2094,8 +2141,8 @@ across the app instead of just the calendar page
                     currentPage = $('#headline').html();
                 }
                 db.get('userData').then(function (doc) {
-                    date = new moment().format('MM/DD/YYYY');
-                    time = new moment().format('hh:mm:ssa');
+                    date = moment().format('YYYY/MM/DD');
+                    time = moment().format('HH:mm:ss');
                     console.log([currentPage, clickFunction, date, time]);
                     doc['userData'].push([currentPage, clickFunction, date, time])
                     return db.put(doc);
@@ -2431,7 +2478,6 @@ across the app instead of just the calendar page
             $scope.toNewPage('history.html', 'History')
         }
     };
-
 
     /*
     Opens a modal for the appropriate tracker from the history page
@@ -4617,7 +4663,9 @@ across the app instead of just the calendar page
                                     console.log(JSON.stringify(article))
                                     var downloadLink = String("https://momlink.crc.nd.edu/MomLink-PNCC/uploads/" + article['filename']);
                                     var uri = encodeURI(downloadLink);
-                                    var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + article['filename'];
+                                    //remove spaces from filename
+                                    filename = article['filename'].replace(/\s/g, '')
+                                    var localPath = cordova.file.externalRootDirectory + "/MomLink/content/" + filename;
                                     console.log(uri)
                                     console.log(localPath)
                                     var fileTransfer = new FileTransfer();
@@ -4629,6 +4677,8 @@ across the app instead of just the calendar page
                                                 for (i in doc['articles']) {
                                                     if (doc['articles'][i]['id'] == article['id']) {
                                                         doc['articles'][i]['localPath'] = entry.toURL();
+                                                        //remove spaces from filename
+                                                        doc['articles'][i]['filename'] = doc['articles'][i]['filename'].replace(/\s/g, '');
                                                         console.log(entry.toURL())
                                                     }
                                                 }
