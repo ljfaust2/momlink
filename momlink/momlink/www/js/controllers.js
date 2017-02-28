@@ -507,83 +507,6 @@ across the app instead of just the calendar page
         window.localStorage.setItem('cid', '555')
     }
 
-    $scope.sendNewMessage = function (recipient) {
-        $ionicPopup.show({
-            template: '<div>Subject</div><input id="msgSubject" type="text"><br><div>Body</div><textarea id="msgContent" rows="4"></textarea>',
-            title: 'New Message',
-            scope: $scope,
-            buttons: [
-              { text: 'Cancel' },
-              {
-                  text: '<b>Send</b>',
-                  type: 'button-positive',
-                  onTap: function (e) {
-                      var message = {
-                          "date": moment().format('MM/DD/YYYY'),
-                          "subject": $('#msgSubject').val(),
-                          "pncc_id": recipient,
-                          "content": $('#msgContent').val(),
-                      };
-                      var post_information = { 'data': encodeURIComponent(JSON.stringify(message)), 'cid': window.localStorage.getItem('cid') };
-                      console.log(JSON.stringify(post_information))
-                      $.ajax({
-                          url: 'https://momlink.crc.nd.edu/~jonathan/current/sendNewMessage.php',
-                          type: 'POST',
-                          dataType: 'json',
-                          data: post_information,
-                          async: false,
-                          success: function (data) {
-                              console.log(JSON.stringify(data))
-                              if (data = true) {
-                                  console.log('message sent successfully')
-                              }
-                          }
-                      });
-
-                  }
-              }
-            ]
-        });
-    }
-    $scope.sendNewReply = function (recipient, msgID) {
-        $ionicPopup.show({
-            template: '<textarea id="msgContent" rows="4"></textarea>',
-            title: 'New Reply',
-            scope: $scope,
-            buttons: [
-              { text: 'Cancel' },
-              {
-                  text: '<b>Send</b>',
-                  type: 'button-positive',
-                  onTap: function (e) {
-                      var message = {
-                          "date": moment().format('MM/DD/YYYY'),
-                          "pncc_id": recipient,
-                          "content": $('#msgContent').val(),
-                          "msgid": msgID
-                      };
-                      var post_information = { 'data': encodeURIComponent(JSON.stringify(message)), 'cid': window.localStorage.getItem('cid') };
-                      console.log(JSON.stringify(post_information))
-                      $.ajax({
-                          url: 'https://momlink.crc.nd.edu/~jonathan/current/sendNewReply.php',
-                          type: 'POST',
-                          dataType: 'json',
-                          data: post_information,
-                          async: false,
-                          success: function (data) {
-                              console.log(JSON.stringify(data))
-                              if (data = true) {
-                                  console.log('message sent successfully')
-                              }
-                          }
-                      });
-
-                  }
-              }
-            ]
-        });
-    }
-
     $scope.renderProgressBar = function () {
         var db = new PouchDB('momlink')
         var pbHtml = '';
@@ -809,7 +732,7 @@ across the app instead of just the calendar page
             success: function (data) {
                 //console.log(JSON.stringify(data))
                 db.get('inbox').then(function (doc) {
-                    if (data.length > 0) {
+                    if (data.length > 0 > 0 && data[0]['id'] != null) {
                         for (i in data) {
                             var isUnique = true;
                             for (j in doc['threads']) {
@@ -846,7 +769,7 @@ across the app instead of just the calendar page
                                 async: false,
                                 success: function (data) {
                                     db.get('inbox').then(function (doc) {
-                                        if (data.length > 0) {
+                                        if (data.length > 0 > 0 && data[0]['id'] != null) {
                                             for (i in data) {
                                                 //check if message is already in local db
                                                 var isUnique = true;
@@ -2743,157 +2666,6 @@ across the app instead of just the calendar page
         }
     };
 
-    $scope.newPNCCMessage = function (recipient, email, phone) {
-        if (email != '' && phone != '') {
-            $ionicPopup.show({
-                title: 'Contact via',
-                cssClass: 'popup-vertical-buttons',
-                buttons: [
-                    {
-                        text: 'Call', onTap: function (e) {
-                            $scope.clickTracker('call');
-                            window.location.href = "tel://" + '1-' + phone;
-                            return 'call';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'Text', onTap: function (e) {
-                            $scope.clickTracker('text');
-                            text();
-                            return 'text';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'Email', onTap: function (e) {
-                            $scope.clickTracker('email');
-                            mail();
-                            return 'email';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'MomLink Message', onTap: function (e) {
-                            $scope.clickTracker('mmessage');
-                            momlinkMessage();
-                            return 'momlinkMessage';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'Cancel', onTap: function (e) {
-                            $scope.clickTracker('cancelMessage');
-                            return 'cancel';
-                        },
-                        type: 'button-stable'
-                    }
-                ],
-            });
-        }
-        else if (email == '' && phone != '') {
-            $ionicPopup.show({
-                title: 'Contact via',
-                cssClass: 'popup-vertical-buttons',
-                buttons: [
-                    {
-                        text: 'Call', onTap: function (e) {
-                            $scope.clickTracker('call');
-                            window.location.href = "tel://" + '1-' + phone;
-                            return 'call';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'Text', onTap: function (e) {
-                            $scope.clickTracker('text');
-                            text();
-                            return 'text';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'MomLink Message', onTap: function (e) {
-                            $scope.clickTracker('mmessage');
-                            momlinkMessage();
-                            return 'momlinkMessage';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'Cancel', onTap: function (e) {
-                            $scope.clickTracker('cancelMessage');
-                            return 'cancel';
-                        },
-                        type: 'button-stable'
-                    }
-                ],
-            });
-        }
-        else if (phone == '' && email != '') {
-            $ionicPopup.show({
-                title: 'Contact via',
-                cssClass: 'popup-vertical-buttons',
-                buttons: [
-                    {
-                        text: 'Email', onTap: function (e) {
-                            $scope.clickTracker('email');
-                            mail();
-                            return 'email';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'MomLink Message', onTap: function (e) {
-                            $scope.clickTracker('mmessage');
-                            momlinkMessage();
-                            return 'momlinkMessage';
-                        },
-                        type: 'button-positive'
-                    },
-                    {
-                        text: 'Cancel', onTap: function (e) {
-                            $scope.clickTracker('cancelMessage');
-                            return 'cancel';
-                        },
-                        type: 'button-stable'
-                    }
-                ],
-            });
-        }
-        else {
-            //$scope.toNewPage(momlinkmessage)
-        }
-        function text() {
-            var message = '';
-            var options = {
-                android: {
-                    intent: 'INTENT'  // send SMS with the native android SMS messaging
-                    //intent: '' // send SMS without open any other app
-                }
-            };
-            sms.send(phone, message, options);
-        }
-        function mail() {
-            window.cordova.plugins.email.open({
-                to: [email],
-            }, console.log('Email Sent'), $scope)
-        }
-        function momlinkMessage() {
-            //open modal to create new message
-            var networkState = navigator.connection.type;
-            if (networkState == Connection.NONE) {
-                //alert must be connected to wifi
-                $ionicPopup.alert({
-                    title: 'Please Connect to WiFi to Send a Message.',
-                });
-            }
-            else {
-                $scope.sendNewMessage(recipient);
-            }
-        }
-    };
-
     /*
     Opens the modal for creating events
     */
@@ -3772,6 +3544,298 @@ across the app instead of just the calendar page
                 allows user to call/text/email them and render sms conversations
                 */
 .controller('InboxCtrl', function ($scope, $compile, $ionicPopup) {
+    $scope.sendNewMessage = function (recipient) {
+        if (navigator.connection.type == Connection.NONE && articles.length == 0) {
+            //alert must be connected to wifi
+            $ionicPopup.alert({
+                title: "Please connect to WiFi and try again.",
+            });
+        }
+        else {
+            $ionicPopup.show({
+                template: '<div>Subject</div><input id="msgSubject" type="text"><br><div>Body</div><textarea id="msgContent" rows="4"></textarea>',
+                title: 'New Message',
+                scope: $scope,
+                buttons: [
+                  { text: 'Cancel' },
+                  {
+                      text: '<b>Send</b>',
+                      type: 'button-positive',
+                      onTap: function (e) {
+                          var message = {
+                              "date": moment().format('MM/DD/YYYY'),
+                              "subject": $('#msgSubject').val(),
+                              "pncc_id": recipient,
+                              "content": $('#msgContent').val(),
+                          };
+                          var post_information = { 'data': encodeURIComponent(JSON.stringify(message)), 'cid': window.localStorage.getItem('cid') };
+                          $.ajax({
+                              url: 'https://momlink.crc.nd.edu/~jonathan/current/sendNewMessage.php',
+                              type: 'POST',
+                              dataType: 'json',
+                              data: post_information,
+                              async: false,
+                              success: function (data) {
+                                  //need new message and thread data
+                                  console.log(JSON.stringify(data))
+                                  if (data.length > 0) {
+                                      var db = PouchDB('momlink');
+                                      db.get('inbox').then(function (doc) {
+                                          threadData = data[0];
+                                          console.log(JSON.stringify(threadData))
+                                          var thread = {
+                                              "id": threadData['id'],
+                                              "date": threadData['mdate'],
+                                              "subject": threadData['subject'],
+                                              "excerpt": threadData['excerpt'],
+                                              "pncc_id": threadData['pncc_id'],
+                                              "msgid": threadData['msgid'],
+                                              "read": 1
+                                          };
+                                          doc['threads'].push(thread);
+
+                                          msgData = data[1];
+                                          console.log(JSON.stringify(msgData))
+                                          var message = {
+                                              "id": msgData['id'],
+                                              "date": msgData['mdate'],
+                                              "sender": msgData['sender'],
+                                              "subject": msgData['subject'],
+                                              "content": msgData['content'],
+                                              "pncc_id": msgData['pncc_id'],
+                                              "msgid": msgData['msgid'],
+                                          };
+                                          doc['messages'].push(message);
+
+                                          console.log('message sent successfully')
+                                          return db.put(doc);
+                                      })
+                                  }
+                              }
+                          });
+
+                      }
+                  }
+                ]
+            });
+        }
+    }
+
+    $scope.sendNewReply = function (recipient, msgID) {
+        if (navigator.connection.type == Connection.NONE && articles.length == 0) {
+            //alert must be connected to wifi
+            $ionicPopup.alert({
+                title: "Please connect to WiFi and try again.",
+            });
+        }
+        else {
+            $ionicPopup.show({
+                template: '<textarea id="msgContent" rows="4"></textarea>',
+                title: 'New Reply',
+                scope: $scope,
+                buttons: [
+                  { text: 'Cancel' },
+                  {
+                      text: '<b>Send</b>',
+                      type: 'button-positive',
+                      onTap: function (e) {
+                          var message = {
+                              "date": moment().format('MM/DD/YYYY'),
+                              "pncc_id": recipient,
+                              "content": $('#msgContent').val(),
+                              "msgid": msgID
+                          };
+                          var post_information = { 'data': encodeURIComponent(JSON.stringify(message)), 'cid': window.localStorage.getItem('cid') };
+                          console.log(JSON.stringify(post_information))
+                          $.ajax({
+                              url: 'https://momlink.crc.nd.edu/~jonathan/current/sendNewReply.php',
+                              type: 'POST',
+                              dataType: 'json',
+                              data: post_information,
+                              async: false,
+                              success: function (data) {
+                                  var db = PouchDB('momlink');
+                                  console.log(JSON.stringify(data))
+                                  if (data.length > 0) {
+                                      console.log('message sent successfully')
+                                      db.get('inbox').then(function (doc) {
+                                          var message = {
+                                              "id": data[0]['id'],
+                                              "date": data[0]['mdate'],
+                                              "sender": data[0]['sender'],
+                                              "subject": data[0]['subject'],
+                                              "content": data[0]['content'],
+                                              "pncc_id": data[0]['pncc_id'],
+                                              "msgid": data[0]['msgid'],
+                                          };
+                                          doc['messages'].push(message);
+                                          console.log('Messages downloaded')
+                                          return db.put(doc).then(function () {
+                                              console.log('go here?')
+                                              $scope.renderThreadList(recipient, msgID)
+                                          })
+                                      })
+                                  }
+                              }
+                          });
+                      }
+                  }
+                ]
+            });
+        }
+    }
+
+    $scope.newPNCCMessage = function (recipient, email, phone) {
+        if (email != '' && phone != '') {
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Call', onTap: function (e) {
+                            $scope.clickTracker('call');
+                            window.location.href = "tel://" + '1-' + phone;
+                            return 'call';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Text', onTap: function (e) {
+                            $scope.clickTracker('text');
+                            text();
+                            return 'text';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Email', onTap: function (e) {
+                            $scope.clickTracker('email');
+                            mail();
+                            return 'email';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'MomLink Message', onTap: function (e) {
+                            $scope.clickTracker('mmessage');
+                            momlinkMessage();
+                            return 'momlinkMessage';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            $scope.clickTracker('cancelMessage');
+                            return 'cancel';
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
+        }
+        else if (email == '' && phone != '') {
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Call', onTap: function (e) {
+                            $scope.clickTracker('call');
+                            window.location.href = "tel://" + '1-' + phone;
+                            return 'call';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Text', onTap: function (e) {
+                            $scope.clickTracker('text');
+                            text();
+                            return 'text';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'MomLink Message', onTap: function (e) {
+                            $scope.clickTracker('mmessage');
+                            momlinkMessage();
+                            return 'momlinkMessage';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            $scope.clickTracker('cancelMessage');
+                            return 'cancel';
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
+        }
+        else if (phone == '' && email != '') {
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Email', onTap: function (e) {
+                            $scope.clickTracker('email');
+                            mail();
+                            return 'email';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'MomLink Message', onTap: function (e) {
+                            $scope.clickTracker('mmessage');
+                            momlinkMessage();
+                            return 'momlinkMessage';
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                            $scope.clickTracker('cancelMessage');
+                            return 'cancel';
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
+        }
+        else {
+            //$scope.toNewPage(momlinkmessage)
+        }
+        function text() {
+            var message = '';
+            var options = {
+                android: {
+                    intent: 'INTENT'  // send SMS with the native android SMS messaging
+                    //intent: '' // send SMS without open any other app
+                }
+            };
+            sms.send(phone, message, options);
+        }
+        function mail() {
+            window.cordova.plugins.email.open({
+                to: [email],
+            }, console.log('Email Sent'), $scope)
+        }
+        function momlinkMessage() {
+            //open modal to create new message
+            var networkState = navigator.connection.type;
+            if (networkState == Connection.NONE) {
+                //alert must be connected to wifi
+                $ionicPopup.alert({
+                    title: 'Please Connect to WiFi to Send a Message.',
+                });
+            }
+            else {
+                $scope.sendNewMessage(recipient);
+            }
+        }
+    };
+
     /*
     Pulls all referrals and assocaited contact information
     */
@@ -3878,6 +3942,7 @@ across the app instead of just the calendar page
             //allThreads [sms/mm, pnccID, pnccName, threadID (if applicable), subject (if applicable), date, message]
             for (t in allThreads) {
                 if (allThreads[t][0] == 'mm') {
+                    console.log()
                     html += '<div class="item item-text-wrap" ng-click="renderThreadList(' + allThreads[t][1] + ',' + allThreads[t][3] + ')">';
                     if (allThreads[t][7] == 0) {
                         html += '<h2><b>' + allThreads[t][2] + ' - ' + allThreads[t][4] + '</b></h2>';
@@ -3905,7 +3970,6 @@ across the app instead of just the calendar page
     };
 
     $scope.renderThreadList = function (pncc_id, msgid) {
-        console.log('lkajsldfjaslfkjsdlf')
         var db = PouchDB('momlink');
         var html = '';
         db.get('inbox').then(function (doc) {
@@ -3915,12 +3979,10 @@ across the app instead of just the calendar page
                     pnccName = doc['pncc'][j]['name'];
                 }
             }
-            console.log('step one')
             html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">' + pnccName + '</div><button class ="button button-icon icon ion-email" ng-click="sendNewReply(&quot;' + pncc_id + '&quot;,&quot;' + msgid + '&quot;)"></button></div>'
             html += '<div class="list has-header">';
             //loop through inbox for all messages containing the thread id
             for (i in doc['messages']) {
-                console.log('step two')
                 if (doc['messages'][i]['msgid'] == msgid) {
                     if (doc['messages'][i]['sender'] == 1) {
                         html += '<div class="item item-text-wrap" style="color: #e6005c;">' + doc['messages'][i]['content'] + '</div>';
@@ -3929,17 +3991,18 @@ across the app instead of just the calendar page
                         html += '<div class="item item-text-wrap" style="color: #0866c6;">' + doc['messages'][i]['content'] + '</div>';
                     }
                 }
-                if (doc['threads'][i]['id'] == msgid) {
-                    doc['threads'][i]['read'] = 1;
+
+            }
+            for (j in doc['threads']) {
+                if (doc['threads'][j]['id'] == msgid) {
+                    doc['threads'][j]['read'] = 1;
                 }
             }
             return db.put(doc).then(function () {
-                console.log('step three')
                 html += '</div>';
                 $("#".concat('threads')).html(html);
                 $compile($("#".concat('threads')))($scope);
             })
-            console.log('whutwhutwhut')
         });
     };
 
@@ -4364,12 +4427,12 @@ across the app instead of just the calendar page
 
 
 /*
-            The education controller handles articles sent to the user by their pncc
-            Allows user to download articles for offline use
-            Articles are placed into two categories: shared and history, shared articles are 
-            those recently given to user, shared articles are then moved to the history section after
-            the articles quiz has been completed with a perfect score
-            */
+The education controller handles articles sent to the user by their pncc
+Allows user to download articles for offline use
+Articles are placed into two categories: shared and history, shared articles are 
+those recently given to user, shared articles are then moved to the history section after
+the articles quiz has been completed with a perfect score
+*/
 .controller('EducationCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
     var timer;
     var sessionTime = 0;
@@ -6986,7 +7049,7 @@ across the app instead of just the calendar page
         db.get('careplan').then(function (doc) {
             for (i in doc['careplan']) {
                 html += '<div class="item item-checkbox item-icon-right item-text-wrap" ng-click="updateGoal(&quot;' + doc['careplan'][i]['id'] + '&quot;)">' + doc['careplan'][i]['goal'] + '<label class="checkbox">';
-                if(doc['careplan'][i]['status'] == '1'){
+                if (doc['careplan'][i]['status'] == '1') {
                     html += '<input type="checkbox" name="G" checked></label></div>'
                 }
                 else {
@@ -6999,7 +7062,7 @@ across the app instead of just the calendar page
             $compile($('#careplan'))($scope);
         })
     }
-    $scope.updateGoal = function (id){
+    $scope.updateGoal = function (id) {
         var db = PouchDB('momlink');
         db.get('careplan').then(function (doc) {
             for (i in doc['careplan']) {
