@@ -566,10 +566,10 @@ across the app instead of just the calendar page
     Runs all php scripts
     */
     $scope.updateAll = function () {
+        $scope.clickTracker('updateAll');
         $scope.getCategories()
         $scope.updateInbox();
         $scope.getEvents();
-        //$scope.uploadMessages();
         $scope.updateClientEvents();
         $scope.deleteClientEvents();
         $scope.getReferrals();
@@ -2046,7 +2046,6 @@ across the app instead of just the calendar page
         xhr.send();
     };
 
-
     /*
     Tracks behavior by saving the function executed whenever the
     user clicks a button
@@ -2074,7 +2073,6 @@ across the app instead of just the calendar page
         }, false);
     };
 
-
     /*
     Not all functions are caught by the click listener, therefore clickTracker is a 
     manual way of ensuring all user behaviors are tracked
@@ -2091,7 +2089,6 @@ across the app instead of just the calendar page
             return db.put(doc);
         })
     };
-
 
     /*
     Saves the users login data if they have already logged in, an auto login will not
@@ -2685,7 +2682,6 @@ across the app instead of just the calendar page
         })
     }
 
-
     /*
     Saves event to the db
     */
@@ -2816,7 +2812,6 @@ across the app instead of just the calendar page
             }
         });
     }
-
 
     /*
     View event given an eventID
@@ -3515,7 +3510,7 @@ across the app instead of just the calendar page
     /*
     Temporary function for study, emails a log of user behavior
     */
-    $scope.sendLog = function () {
+    /*$scope.sendLog = function () {
         var db = PouchDB('momlink');
         var log = '';
         db.get('userData').then(function (doc) {
@@ -3536,8 +3531,9 @@ across the app instead of just the calendar page
                 body: log
             });
         })
-    }
+    }*/
 })
+
 
 /*
                 The inbox controller pulls referral and pncc contacts
@@ -3557,7 +3553,12 @@ across the app instead of just the calendar page
                 title: 'New Message',
                 scope: $scope,
                 buttons: [
-                  { text: 'Cancel' },
+                  {
+                      text: 'Cancel',
+                      onTap: function () {
+                          $scope.clickTracker('cancelNewMMessage');
+                      }
+                  },
                   {
                       text: '<b>Send</b>',
                       type: 'button-positive',
@@ -3608,7 +3609,9 @@ across the app instead of just the calendar page
                                           doc['messages'].push(message);
 
                                           console.log('message sent successfully')
-                                          return db.put(doc);
+                                          return db.put(doc).then(function () {
+                                              $scope.clickTracker('newMMessageSent');
+                                          })
                                       })
                                   }
                               }
@@ -3634,7 +3637,12 @@ across the app instead of just the calendar page
                 title: 'New Reply',
                 scope: $scope,
                 buttons: [
-                  { text: 'Cancel' },
+                  {
+                      text: 'Cancel',
+                      onTap: function () {
+                          $scope.clickTracker('cancelReply');
+                      }
+                  },
                   {
                       text: '<b>Send</b>',
                       type: 'button-positive',
@@ -3672,6 +3680,7 @@ across the app instead of just the calendar page
                                           console.log('Messages downloaded')
                                           return db.put(doc).then(function () {
                                               console.log('go here?')
+                                              $scope.clickTracker('replySent');
                                               $scope.renderThreadList(recipient, msgID)
                                           })
                                       })
@@ -4002,6 +4011,7 @@ across the app instead of just the calendar page
                 html += '</div>';
                 $("#".concat('threads')).html(html);
                 $compile($("#".concat('threads')))($scope);
+                $scope.clickTracker('renderThreadList('+pncc_id+')');
             })
         });
     };
@@ -4117,6 +4127,7 @@ across the app instead of just the calendar page
                 defaultView: 'basicDay',
                 events: doc['events'],
                 dayClick: function (date) {
+                    $scope.clickTracker('createEvent');
                     $scope.createEvent('calendar.html', 'Calendar', date.format())
                 },
                 eventRender: function (event, element) {
@@ -4346,10 +4357,12 @@ across the app instead of just the calendar page
             if (doc['referrals'][i]['referral_status'] == '1') {
                 doc['referrals'][i]['referral_status'] = '0'
                 doc['referrals'][i]['upload'] = '0'
+                $scope.clickTracker('changeStatus(0)');
             }
             else {
                 doc['referrals'][i]['referral_status'] = '1'
                 doc['referrals'][i]['upload'] = '0'
+                $scope.clickTracker('changeStatus(1)');
             }
             return db.put(doc).then(function () {
                 $scope.toNewPage('referrals.html', 'Referrals');
@@ -7273,6 +7286,7 @@ the articles quiz has been completed with a perfect score
         });
     };
     $scope.editNote = function (noteID) {
+        $scope.clickTracker('editNote');
         $scope.modal = $ionicModal.fromTemplateUrl('editNoteModal.html', {
             scope: $scope,
             animation: 'slide-in-up'
