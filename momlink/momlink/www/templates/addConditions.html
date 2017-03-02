@@ -3,10 +3,8 @@
         <button class="button button-icon icon ion-close-round" ng-click="closeModal();"></button>
         <h1 class="title" id="modalHeadline">Conditions</h1>
     </ion-header-bar>
-    <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl">
-        <ion-checkbox ng-model="condition.headache">Headache</ion-checkbox>
-        <ion-checkbox ng-model="condition.fever">Fever</ion-checkbox>
-        <ion-checkbox ng-model="condition.chills">Chills</ion-checkbox>
+    <ion-content overflow-scroll="true" class="has-header" ng-controller="TrackCtrl" ng-init="populateConditions()">
+        <div id="conditionsList"></div>
         <div class="row padding">
             <div class="col">
                 <center>

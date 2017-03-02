@@ -117,6 +117,14 @@ across the app instead of just the calendar page
                 });
             }
         });
+        db.get('conditionsList').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "conditionsList",
+                    'conditionsList': []
+                });
+            }
+        });
         db.get('track').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -527,6 +535,7 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
+        $scope.getConditions()
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
             var time = moment("2016-12-21T10:56", "YYYY-MM-DDTHH:mm:ssZ").toDate();
@@ -582,6 +591,7 @@ across the app instead of just the calendar page
         $scope.uploadTrackers();
         $scope.getCareplan();
         $scope.updateCareplan();
+        $scope.getConditions();
         $scope.sendClickData();
     };
     $scope.updateAllEvents = function () {
@@ -1518,6 +1528,9 @@ across the app instead of just the calendar page
             if (tableName == 'weight') {
                 serverTableName = 'client_weight';
             }
+            if (tableName == 'conditions') {
+                serverTableName = 'client_conditions';
+            }
             //check update table to get the last element sent to server
             db.get('update').then(function (doc) {
                 recentID = doc[tableName];
@@ -1552,8 +1565,6 @@ across the app instead of just the calendar page
                     console.log(JSON.stringify(uploadData))
                     if (uploadData.length > 0) {
                         var post_information = { 'data': JSON.stringify(uploadData), 'cid': window.localStorage.getItem('cid'), 'table': serverTableName };
-                        console.log(JSON.stringify(post_information))
-                        console.log(table[1])
                         $.ajax({
                             url: 'https://momlink.crc.nd.edu/~jonathan/current/send' + table[1] + '.php',
                             type: 'POST',
@@ -1561,6 +1572,7 @@ across the app instead of just the calendar page
                             data: post_information,
                             async: false,
                             success: function (data) {
+                                //console.log(JSON.stringify(data))
                                 if (data = true) {
                                     console.log('tracking data successfully uploaded')
                                     //run script to update record table
@@ -1657,7 +1669,31 @@ across the app instead of just the calendar page
             }
         });
     };
-
+    $scope.getConditions = function () {
+        var db = PouchDB('momlink');
+        //var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getConditions.php',
+            type: 'POST',
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+                if (data.length > 0) {
+                    db.get('conditionsList').then(function (doc) {
+                        //console.log(JSON.stringify(data))
+                        for (i in data) {
+                            //check if condition is already in local db
+                            if ($.inArray(data[i]['name'], doc['conditionsList']) == -1) {
+                                doc['conditionsList'].push(data[i]['name']);
+                            }
+                        }
+                        console.log('Conditions downloaded')
+                        return db.put(doc);
+                    });
+                }
+            }
+        });
+    };
     $scope.getCategories = function () {
         var db = PouchDB('momlink');
         var agency;
@@ -4011,7 +4047,7 @@ across the app instead of just the calendar page
                 html += '</div>';
                 $("#".concat('threads')).html(html);
                 $compile($("#".concat('threads')))($scope);
-                $scope.clickTracker('renderThreadList('+pncc_id+')');
+                $scope.clickTracker('renderThreadList(' + pncc_id + ')');
             })
         });
     };
@@ -6490,6 +6526,23 @@ the articles quiz has been completed with a perfect score
             //}
         }
     };
+    $scope.populateConditions = function () {
+        var db = PouchDB('momlink');
+        var html = '<a class="item" ng-click="addCondition()"><i class="ion-plus-round"></i> Add new condition to list</a>';
+        db.get('conditionsList').then(function (doc) {
+            sorted = doc['conditionsList'].sort()
+            for (i in sorted) {
+                //need to remove spaces and lower case ng-model parameter
+                var model = '';
+                model = String(sorted[i]).replace(/\s/g, '');
+                model = model.replace(/[^a-zA-Z ]/g, "");
+                html += '<ion-checkbox ng-model="condition.' + model + '" on-hold="deleteCondition(&quot;' + sorted[i] + '&quot;)">' + sorted[i] + '</ion-checkbox>';
+            }
+        }).then(function () {
+            $('#conditionsList').html(html);
+            $compile($('#conditionsList'))($scope);
+        })
+    }
     $scope.submitConditions = function () {
         var array = [];
         for (i in $scope.condition) {
@@ -6513,6 +6566,60 @@ the articles quiz has been completed with a perfect score
             $scope.toNewPage('history.html', 'History');
         });
     }
+
+    $scope.addCondition = function () {
+        $ionicPopup.show({
+            template: '<input id="addCond" type="text">',
+            title: 'Add condition',
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'Add',
+                  type: 'button-positive',
+                  onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      db.get('conditionsList').then(function (doc) {
+                          doc['conditionsList'].push($('#addCond').val());
+                          return db.put(doc);
+                      }).then(function () {
+                          $scope.populateConditions();
+                      })
+                  }
+              },
+              { text: 'Cancel' }
+            ]
+        });
+    };
+
+    $scope.deleteCondition = function (id) {
+        $ionicPopup.show({
+            title: 'Are you sure you want to delete this condition?',
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'Delete',
+                  type: 'button-assertive',
+                  onTap: function (e) {
+                      var db = PouchDB('momlink');
+                      db.get('conditionsList').then(function (doc) {
+                          for (i in doc['conditionsList']) {
+                              if (doc['conditionsList'][i] == id) {
+                                  doc['conditionsList'].splice(i, 1)
+                                  //delete element
+                                  break;
+                              }
+                          }
+                          return db.put(doc);
+                      }).then(function () {
+                          $scope.populateConditions();
+                      })
+                  }
+              },
+              { text: 'Cancel' }
+            ]
+        });
+    };
+
     /*$scope.populateConditions = function () {
         var date = new Date($scope.currentDate);
         date = (date.getFullYear() + '/' + ('0' + (date.getMonth() + 1)).slice(-2)) + '/' + ('0' + date.getDate()).slice(-2);
