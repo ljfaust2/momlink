@@ -15,15 +15,15 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "login",
                     "login_code": "6",
-                    "username": "hello",
-                    "password": "world",
-                    "triage_level": "1",
+                    "username": "",
+                    "password": "",
+                    "triage_level": "",
                     "reset_code": "595",
                     "answer": "",
-                    "agency": "3",
+                    "agency": "",
                     "pncc_id": "",
                     "sec_question": "",
-                    "client_id": "555",
+                    "client_id": "",
                     "token": ""
                 });
             }
@@ -223,7 +223,8 @@ across the app instead of just the calendar page
             if (err.status === 404) {
                 db.put({
                     "_id": "userData",
-                    "userData": []
+                    "userData": [],
+                    "pushNotfications": []
                 });
             }
         });
@@ -593,6 +594,7 @@ across the app instead of just the calendar page
         $scope.updateCareplan();
         $scope.getConditions();
         $scope.sendClickData();
+        $scope.sendPushData();
     };
     $scope.updateAllEvents = function () {
         $scope.getEvents();
@@ -740,7 +742,8 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
-                //console.log(JSON.stringify(data))
+                console.log('MESSAGES')
+                console.log(JSON.stringify(data))
                 db.get('inbox').then(function (doc) {
                     if (data.length > 0 > 0 && data[0]['id'] != null) {
                         for (i in data) {
@@ -932,6 +935,7 @@ across the app instead of just the calendar page
                     data: post_information,
                     async: false,
                     success: function (data) {
+                        console.log(JSON.stringify(data))
                         dbIDs = []
                         eventIDs = []
                         //get ids in db
@@ -1136,6 +1140,7 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
+                console.log(JSON.stringify(data))
                 if (data.length > 0 && data[0]['id'] != null) {
                     console.log(JSON.stringify(data[0]['id']))
                     db.get('referrals').then(function (doc) {
@@ -1642,7 +1647,7 @@ across the app instead of just the calendar page
                     //console.log(JSON.stringify(data[0]['id']))
                     db.get('careplan').then(function (doc) {
                         for (i in data) {
-                            //check if referral is already in local db
+                            //check if careplan is already in local db
                             var isUnique = true;
                             for (j in doc['careplan']) {
                                 if (data[i]['record_id'] == doc['careplan'][j]['id']) {
@@ -1650,13 +1655,13 @@ across the app instead of just the calendar page
                                 }
                             }
                             if (isUnique == true) {
-                                var referral = {
+                                var cp = {
                                     "id": data[i]['record_id'],
                                     "goal": data[i]['goal'],
-                                    "status": data[i]['status'],
+                                    "status": data[i]['careplan_status'],
                                     "upload": '1'
                                 };
-                                doc['careplan'].push(referral);
+                                doc['careplan'].push(cp);
                             }
                         }
                         console.log('Careplan downloaded')
@@ -1805,6 +1810,39 @@ across the app instead of just the calendar page
                                 doc['userData'] = []
                                 return db.put(doc).then(function () {
                                     console.log('userData uploaded')
+                                })
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('userData already up to date')
+            }
+        })
+    };
+    $scope.sendPushData = function () {
+        var db = PouchDB('momlink');
+        db.get('userData').then(function (doc) {
+            if (doc['pushNotfications'].length > 0) {
+                var post_information = {};
+                console.log(JSON.stringify(doc['pushNotfications']))
+                post_information.clickData = doc['pushNotfications'];
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/uploadNotifications.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async: false,
+                    success: function (data) {
+                        console.log(JSON.stringify(data))
+                        //clear out click log
+                        if (data == true) {
+                            db.get('userData').then(function (doc) {
+                                doc['pushNotfications'] = []
+                                return db.put(doc).then(function () {
+                                    console.log('pushNotfications uploaded')
                                 })
                             });
                         }
@@ -2148,9 +2186,10 @@ across the app instead of just the calendar page
     $scope.pushListener = function () {
         document.addEventListener("deviceready", function () {
             FCMPlugin.onNotification(function (data) {
-                //console.log(JSON.stringify(data))
+                console.log(JSON.stringify(data))
                 if (data.wasTapped) {
                     //Notification was received on device tray and tapped by the user.
+                    $scope.pushTracker(data.title,data.body)
                     $ionicPopup.alert({
                         title: data.title,
                         template: data.body
@@ -2164,6 +2203,16 @@ across the app instead of just the calendar page
                 }
             });
         });
+    };
+
+    $scope.pushTracker = function (title, body) {
+        var db = PouchDB('momlink');
+        db.get('userData').then(function (doc) {
+            date = moment().format('YYYY/MM/DD'),
+            time = moment().format('HH:mm:ss'),
+            doc['pushNotfications'].push([title, body, date, time])
+            return db.put(doc);
+        })
     };
 
     /*
@@ -2278,7 +2327,6 @@ across the app instead of just the calendar page
                             dataType: 'json',
                             data: post_information,
                             success: function (data) {
-                                console.log('HIT')
                                 console.log(JSON.stringify(data))
                                 if (data[0]['success'] != 0) {
                                     doc['client_id'] = data[1]['client_id']
