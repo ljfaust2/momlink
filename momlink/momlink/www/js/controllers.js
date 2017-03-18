@@ -15,15 +15,15 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "login",
                     "login_code": "6",
-                    "username": "",
-                    "password": "",
+                    "username": "u",
+                    "password": "p",
                     "triage_level": "",
                     "reset_code": "595",
                     "answer": "",
                     "agency": "",
                     "pncc_id": "",
                     "sec_question": "",
-                    "client_id": "",
+                    "client_id": "555",
                     "token": ""
                 });
             }
@@ -303,21 +303,21 @@ across the app instead of just the calendar page
             if (err.status === 404) {
                 db.put({
                     "_id": "client_trackers",
-                    'activity': '1',
-                    "babyHeartRate": '1',
-                    "bloodGlucose": '1',
-                    "bloodIron": '1',
-                    "bloodPressure": '1',
-                    "caffeine": '1',
-                    "cigarette": '1',
-                    "conditions": '1',
-                    "nutrition": '1',
-                    "kicks": '1',
-                    'mood': '1',
-                    'pain': '1',
-                    'pills': '1',
-                    'stress': '1',
-                    "weight": '1',
+                    'activity': { 'status': '1', 'order': 0 },
+                    "babyHeartRate": { 'status': '1', 'order': 1 },
+                    "bloodGlucose": { 'status': '1', 'order': 2 },
+                    "bloodIron": { 'status': '1', 'order': 3 },
+                    "bloodPressure": { 'status': '1', 'order': 4 },
+                    "caffeine": { 'status': '1', 'order': 5 },
+                    "cigarette": { 'status': '1', 'order': 6 },
+                    "conditions": { 'status': '1', 'order': 7 },
+                    "nutrition": { 'status': '1', 'order': 8 },
+                    "kicks": { 'status': '1', 'order': 9 },
+                    'mood': { 'status': '1', 'order': 10 },
+                    'pain': { 'status': '1', 'order': 11 },
+                    'pills': { 'status': '1', 'order': 12 },
+                    'stress': { 'status': '1', 'order': 13 },
+                    "weight": { 'status': '1', 'order': 14 },
                 });
             }
         });
@@ -588,7 +588,7 @@ across the app instead of just the calendar page
         $scope.updateArticles();
         $scope.getSurveys();
         $scope.updateSurveys();
-        $scope.retrieveClientTrackers();
+        //$scope.retrieveClientTrackers();
         $scope.uploadTrackers();
         $scope.getCareplan();
         $scope.updateCareplan();
@@ -884,7 +884,7 @@ across the app instead of just the calendar page
         });
     }
 
-    $scope.retrieveClientTrackers = function () {
+    /*$scope.retrieveClientTrackers = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
         $.ajax({
@@ -896,20 +896,20 @@ across the app instead of just the calendar page
             success: function (data) {
                 if (data.length > 0) {
                     db.get('client_trackers').then(function (doc) {
-                        doc['activity'] = data[0]['activity'];
-                        doc['babyHeartRate'] = data[0]['babyHeartRate'];
-                        doc['bloodGlucose'] = data[0]['bloodGlucose'];
-                        doc['bloodIron'] = data[0]['bloodIron'];
-                        doc['bloodPressure'] = data[0]['bloodPressure'];
-                        doc['caffeine'] = data[0]['caffeine'];
-                        doc['cigarette'] = data[0]['cigarettes'];
-                        doc['nutrition'] = data[0]['nutrition'];
-                        doc['kicks'] = data[0]['kicks'];
-                        doc['mood'] = data[0]['mood'];
-                        doc['pain'] = data[0]['pain'];
-                        doc['pills'] = data[0]['pills'];
-                        doc['stress'] = data[0]['stressors'];
-                        doc['weight'] = data[0]['weight'];
+                        doc['activity'] = {'status' : data[0]['activity'], 'order' : 1 };
+                        doc['babyHeartRate'] = { 'status': data[0]['babyHeartRate'], 'order': 2 };
+                        doc['bloodGlucose'] = { 'status': data[0]['bloodGlucose'], 'order': 3 };
+                        doc['bloodIron'] = { 'status': data[0]['bloodIron'], 'order': 4 };
+                        doc['bloodPressure'] = { 'status': data[0]['bloodPressure'], 'order': 5 };
+                        doc['caffeine'] = { 'status': data[0]['caffeine'], 'order': 6 };
+                        doc['cigarette'] = { 'status': data[0]['cigarettes'], 'order': 7 };
+                        doc['nutrition'] = { 'status': data[0]['nutrition'], 'order': 8 };
+                        doc['kicks'] = { 'status': data[0]['kicks'], 'order': 9 };
+                        doc['mood'] = { 'status': data[0]['mood'], 'order': 10 };
+                        doc['pain'] = { 'status': data[0]['pain'], 'order': 11 };
+                        doc['pills'] = { 'status': data[0]['pills'], 'order': 12 };
+                        doc['stress'] = { 'status': data[0]['stressors'], 'order': 13 };
+                        doc['weight'] = { 'status': data[0]['weight'], 'order': 14 };
                         return db.put(doc);
                     });
                 }
@@ -919,7 +919,7 @@ across the app instead of just the calendar page
             }
         });
         console.log('client_trackers');
-    };
+    };*/
     $scope.getEvents = function () {
         var db = PouchDB('momlink');
         var recentID = '';
@@ -2189,7 +2189,7 @@ across the app instead of just the calendar page
                 console.log(JSON.stringify(data))
                 if (data.wasTapped) {
                     //Notification was received on device tray and tapped by the user.
-                    $scope.pushTracker(data.title,data.body)
+                    $scope.pushTracker(data.title, data.body)
                     $ionicPopup.alert({
                         title: data.title,
                         template: data.body
@@ -3964,7 +3964,7 @@ across the app instead of just the calendar page
         var html = '';
         db.get('inbox').then(function (doc) {
             pncc = doc['pncc'];
-            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">Contacts</div></div>'
+            html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderThreads()"></button><div class="title">Select Contact to Message</div></div>'
             html += '<div class="list has-header">';
             for (i in pncc) {
                 html += '<div class="item item-thumbnail-left" ng-click="newPNCCMessage(&quot;' + pncc[i]['id'] + '&quot;,&quot;' + pncc[i]['email'] + '&quot;,&quot;' + pncc[i]['phone'] + '&quot;)">';
@@ -3990,7 +3990,7 @@ across the app instead of just the calendar page
         var thread = [];
         var html = '';
         db.get('inbox').then(function (doc) {
-            html += '<div class="bar bar-header"><div class="title"></div><button class ="button button-icon icon ion-person-add" ng-click="showPNCCContacts()"></button></div>'
+            html += '<div class="bar bar-header"><div class="title"></div><button class ="button button-icon icon ion-email" ng-click="showPNCCContacts()"></button></div>'
             html += '<div class="list has-header">';
             if (doc['threads'].size == 0) {
                 html += '<div class="item item-text-wrap">No Threads to Show</div>';
@@ -4081,7 +4081,7 @@ across the app instead of just the calendar page
                         html += '<div class="item item-text-wrap" style="color: #e6005c;">' + doc['messages'][i]['content'] + '</div>';
                     }
                     else {
-                        html += '<div class="item item-text-wrap" style="color: #0866c6;">' + doc['messages'][i]['content'] + '</div>';
+                        html += '<div class="item item-text-wrap"><p style="text-align:right; color: #0866c6;">' + doc['messages'][i]['content'] + '</p></div>';
                     }
                 }
 
@@ -4129,12 +4129,11 @@ across the app instead of just the calendar page
                             html += '<div class="item item-text-wrap" style="color: #e6005c;">' + reverse[i].body + '</div>';
                         }
                         else {
-                            html += '<div class="item item-text-wrap" style="color: #0866c6;">' + data[i].body + '</div>';
+                            html += '<div class="item item-text-wrap"><p style="text-align:right; color: #0866c6;">' + data[i].body + '</p></div>';
                         }
                     }
                 }
                 html += '</div>';
-                console.log(html)
                 $("#".concat('threads')).html(html);
                 $compile($("#".concat('threads')))($scope);
             }, function (error) { console.log(error) });
@@ -4162,7 +4161,8 @@ across the app instead of just the calendar page
                         html += '<div class="item item-text-wrap" style="color: #e6005c;">' + data[i].body + '</div>';
                     }
                     else {
-                        html += '<div class="item item-text-wrap" style="color: #0866c6;">' + data[i].body + '</div>';
+                        console.log('hit2')
+                        html += '<div class="item item-text-wrap"><p style="text-align:right; color: #0866c6;">' + data[i].body + '</p></div>';
                     }
                 }
             }
@@ -5481,16 +5481,29 @@ the articles quiz has been completed with a perfect score
             var html5 = '<div class="row">';
             var col = 0;
             db.get('client_trackers').then(function (doc) {
-                for (var i in doc) {
-                    if (doc[i] == '1') {
+                //need to first "sort" the dictionary
+                var sortTrackers = Object.keys(doc).map(function (key) { return [key, parseInt(doc[key]['status']), parseInt(doc[key]['order'])] });
+                sortTrackers.splice(-2, 2)
+                sortTrackers = sortTrackers.sort(sortFunction)
+                function sortFunction(a, b) {
+                    if (a[2] === b[2]) {
+                        return 0;
+                    }
+                    else {
+                        return (a[2] < b[2]) ? -1 : 1;
+                    }
+                }
+
+                for (var i in sortTrackers) {
+                    if (sortTrackers[i][1] == 1) {
                         html5 += '<div class="col text-center">';
-                        if ($.inArray(i, checked) != -1) {
-                            html5 += '<input type="image" src="../img/trackersGray/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;)" name="type" style="max-width:100%;height:auto;">';
+                        if ($.inArray(sortTrackers[i][0], checked) != -1) {
+                            html5 += '<input type="image" src="../img/trackersGray/' + sortTrackers[i][0] + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(sortTrackers[i][0]) + '&quot;)" name="type" style="max-width:100%;height:auto;">';
                         }
                         else {
-                            html5 += '<input type="image" src="../img/trackers/' + i + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(i) + '&quot;,&quot;' + date + '&quot;)" name="type" style="max-width:100%;height:auto;">';
+                            html5 += '<input type="image" src="../img/trackers/' + sortTrackers[i][0] + '.png" ng-click="goToHistory(&quot;add' + capitalizeFirstLetter(sortTrackers[i][0]) + '&quot;,&quot;' + date + '&quot;)" name="type" style="max-width:100%;height:auto;">';
                         }
-                        html5 += '<p>' + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + '</p>';
+                        html5 += '<p>' + capitalizeFirstLetter(sortTrackers[i][0].replace(/([A-Z])/g, ' $1').trim()) + '</p>';
                         html5 += '</div>';
                         col++;
                     }
@@ -7641,6 +7654,98 @@ the articles quiz has been completed with a perfect score
             console.log(error.code);
         }
     }
+})
+
+
+/*
+            
+            */
+.controller('SettingsCtrl', function ($scope, $ionicModal, $ionicPopup, $compile, $ionicListDelegate) {
+    $scope.listTrackers = function () {
+        var db = PouchDB('momlink');
+        $scope.trackers = []
+        $scope.moveItem = function (item, fromIndex, toIndex) {
+            $scope.trackers.splice(fromIndex, 1);
+            $scope.trackers.splice(toIndex, 0, item);        
+            db.get('client_trackers').then(function (doc) {
+                for (var i in $scope.trackers) {
+                    doc[$scope.trackers[i].id]['order'] = i
+                }
+                return db.put(doc);
+            })
+        };
+        $scope.removeItem = function (item) {
+            db.get('client_trackers').then(function (doc) {
+                doc[item.id]['status'] = '0'
+                return db.put(doc).then(function () {
+                    $scope.toNewPage('settings.html', 'Settings')
+                })
+            })
+        };
+
+        $scope.addItem = function (item) {
+            console.log(item)
+            db.get('client_trackers').then(function (doc) {
+                doc[item]['status'] = '1'
+                return db.put(doc).then(function () {
+                    $scope.toNewPage('settings.html', 'Settings')
+                })
+            })
+        };
+
+        db.get('client_trackers').then(function (doc) {
+            //need to first "sort" the dictionary
+            var sortTrackers = Object.keys(doc).map(function (key) { return [key, parseInt(doc[key]['status']), parseInt(doc[key]['order'])] });
+            sortTrackers.splice(-2,2)
+            sortTrackers = sortTrackers.sort(sortFunction)
+            function sortFunction(a, b) {
+                if (a[2] === b[2]) {
+                    return 0;
+                }
+                else {
+                    return (a[2] < b[2]) ? -1 : 1;
+                }
+            }
+
+            for (var i in sortTrackers) {
+                if (sortTrackers[i][1] == 1) {
+                    $scope.trackers.push({ 'id': sortTrackers[i][0], 'title': capitalizeFirstLetter(sortTrackers[i][0].replace(/([A-Z])/g, ' $1').trim()) })
+                }
+            }
+        }).then(function () {
+            var html5 = '<ion-list show-delete="data.showDelete=true" show-reorder="data.showReorder=true">';
+            html5 += '<div class="item item-divider">Turn Off/Reorder Trackers</div>'
+            html5 += '<ion-item ng-repeat="item in trackers">'
+            html5 += '<h2>{{item.title}}</h2>';
+            html5 += '<ion-delete-button class="ion-close-round"  on-tap="removeItem(item)"></ion-delete-button>'
+            html5 += '<ion-reorder-button class="ion-navicon" on-reorder="moveItem(item, $fromIndex, $toIndex)"></ion-reorder-button>';
+            html5 += '</ion-item>';
+            html5 += '</ion-list>';
+           
+            db.get('client_trackers').then(function (doc) {
+                var deadTrackers = []
+                html5 += '<div class="item item-divider">Reactivate Trackers</div>';
+                html5 += '<ion-list>';
+                for (var i in doc) {
+                    if (doc[i]['status'] == '0') {
+                        html5 += '<ion-item ng-click=addItem("' + i + '")>'
+                        html5 += '<h2>' + capitalizeFirstLetter(i.replace(/([A-Z])/g, ' $1').trim()) + '</h2>';
+                        html5 += '</ion-item>';
+                    }
+                    html5 += '</ion-list>';
+                }
+            }).then(function () {
+                $('#trackers').html(html5);
+                $compile($('#trackers'))($scope);
+            })
+
+        })
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+    }
+
+
 })
 
 
