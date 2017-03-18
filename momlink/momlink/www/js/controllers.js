@@ -15,15 +15,15 @@ across the app instead of just the calendar page
                 db.put({
                     "_id": "login",
                     "login_code": "6",
-                    "username": "u",
-                    "password": "p",
+                    "username": "",
+                    "password": "",
                     "triage_level": "",
                     "reset_code": "595",
                     "answer": "",
-                    "agency": "",
+                    "agency": "5",
                     "pncc_id": "",
                     "sec_question": "",
-                    "client_id": "555",
+                    "client_id": "",
                     "token": ""
                 });
             }
@@ -513,7 +513,7 @@ across the app instead of just the calendar page
             }
         });*/
         //db.destroy();
-        window.localStorage.setItem('cid', '555')
+        //window.localStorage.setItem('cid', '555')
     }
 
     $scope.renderProgressBar = function () {
@@ -690,47 +690,53 @@ across the app instead of just the calendar page
     $scope.updateInbox = function () {
         //get PNCCs
         var db = PouchDB('momlink');
-        var post_information = { 'cid': window.localStorage.getItem('cid') };
-        console.log(JSON.stringify(post_information))
-        $.ajax({
-            url: 'https://momlink.crc.nd.edu/~jonathan/current/getPNCCs.php',
-            type: 'POST',
-            dataType: 'json',
-            data: post_information,
-            async: false,
-            success: function (data) {
-                db.get('inbox').then(function (doc) {
-                    if (data.length > 0) {
-                        for (i in data) {
-                            //check if pncc is already in local db
-                            var isUnique = true;
-                            for (j in doc['pncc']) {
-                                if (data[i]['id'] == doc['pncc'][j]['id']) {
-                                    isUnique = false;
+        var agency;
+        db.get('login').then(function (doc) {
+            agency = doc['agency']
+        }).then(function () {
+            var post_information = { 'cid': window.localStorage.getItem('cid'), 'agency': agency };
+            console.log(JSON.stringify(post_information))
+            $.ajax({
+                url: 'https://momlink.crc.nd.edu/~jonathan/current/getPNCCs.php',
+                type: 'POST',
+                dataType: 'json',
+                data: post_information,
+                async: false,
+                success: function (data) {
+                    console.log(JSON.stringify(data))
+                    db.get('inbox').then(function (doc) {
+                        if (data.length > 0) {
+                            for (i in data) {
+                                //check if pncc is already in local db
+                                var isUnique = true;
+                                for (j in doc['pncc']) {
+                                    if (data[i]['id'] == doc['pncc'][j]['id']) {
+                                        isUnique = false;
+                                    }
+                                }
+                                if (isUnique == true) {
+                                    var pncc = {
+                                        "id": data[i]['id'],
+                                        "name": data[i]['first_name'] + ' ' + data[i]['last_name'],
+                                        "phone": data[i]['phone'],
+                                        "email": data[i]['email'],
+                                        "smsID": 0,
+                                    };
+                                    doc['pncc'].push(pncc);
                                 }
                             }
-                            if (isUnique == true) {
-                                var pncc = {
-                                    "id": data[i]['id'],
-                                    "name": data[i]['first_name'] + ' ' + data[i]['last_name'],
-                                    "phone": data[i]['phone'],
-                                    "email": data[i]['email'],
-                                    "smsID": 0,
-                                };
-                                doc['pncc'].push(pncc);
-                            }
+                            console.log('PNCCs downloaded')
+                            return db.put(doc);
                         }
-                        console.log('PNCCs downloaded')
-                        return db.put(doc);
-                    }
-                    else {
-                        console.log('No new PNCCs')
-                    }
-                }).then(function () {
-                    $scope.getMessages();
-                });
-            }
-        });
+                        else {
+                            console.log('No new PNCCs')
+                        }
+                    }).then(function () {
+                        $scope.getMessages();
+                    });
+                }
+            });
+        })
     };
     $scope.getMessages = function () {
         var db = PouchDB('momlink');
@@ -7666,7 +7672,7 @@ the articles quiz has been completed with a perfect score
         $scope.trackers = []
         $scope.moveItem = function (item, fromIndex, toIndex) {
             $scope.trackers.splice(fromIndex, 1);
-            $scope.trackers.splice(toIndex, 0, item);        
+            $scope.trackers.splice(toIndex, 0, item);
             db.get('client_trackers').then(function (doc) {
                 for (var i in $scope.trackers) {
                     doc[$scope.trackers[i].id]['order'] = i
@@ -7696,7 +7702,7 @@ the articles quiz has been completed with a perfect score
         db.get('client_trackers').then(function (doc) {
             //need to first "sort" the dictionary
             var sortTrackers = Object.keys(doc).map(function (key) { return [key, parseInt(doc[key]['status']), parseInt(doc[key]['order'])] });
-            sortTrackers.splice(-2,2)
+            sortTrackers.splice(-2, 2)
             sortTrackers = sortTrackers.sort(sortFunction)
             function sortFunction(a, b) {
                 if (a[2] === b[2]) {
@@ -7721,7 +7727,7 @@ the articles quiz has been completed with a perfect score
             html5 += '<ion-reorder-button class="ion-navicon" on-reorder="moveItem(item, $fromIndex, $toIndex)"></ion-reorder-button>';
             html5 += '</ion-item>';
             html5 += '</ion-list>';
-           
+
             db.get('client_trackers').then(function (doc) {
                 var deadTrackers = []
                 html5 += '<div class="item item-divider">Reactivate Trackers</div>';
