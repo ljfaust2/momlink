@@ -588,7 +588,7 @@ across the app instead of just the calendar page
         $scope.updateArticles();
         $scope.getSurveys();
         $scope.updateSurveys();
-        //$scope.retrieveClientTrackers();
+        $scope.retrieveClientTrackers();
         $scope.uploadTrackers();
         $scope.getCareplan();
         $scope.updateCareplan();
@@ -890,7 +890,7 @@ across the app instead of just the calendar page
         });
     }
 
-    /*$scope.retrieveClientTrackers = function () {
+    $scope.retrieveClientTrackers = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
         $.ajax({
@@ -902,20 +902,20 @@ across the app instead of just the calendar page
             success: function (data) {
                 if (data.length > 0) {
                     db.get('client_trackers').then(function (doc) {
-                        doc['activity'] = {'status' : data[0]['activity'], 'order' : 1 };
-                        doc['babyHeartRate'] = { 'status': data[0]['babyHeartRate'], 'order': 2 };
-                        doc['bloodGlucose'] = { 'status': data[0]['bloodGlucose'], 'order': 3 };
-                        doc['bloodIron'] = { 'status': data[0]['bloodIron'], 'order': 4 };
-                        doc['bloodPressure'] = { 'status': data[0]['bloodPressure'], 'order': 5 };
-                        doc['caffeine'] = { 'status': data[0]['caffeine'], 'order': 6 };
-                        doc['cigarette'] = { 'status': data[0]['cigarettes'], 'order': 7 };
-                        doc['nutrition'] = { 'status': data[0]['nutrition'], 'order': 8 };
-                        doc['kicks'] = { 'status': data[0]['kicks'], 'order': 9 };
-                        doc['mood'] = { 'status': data[0]['mood'], 'order': 10 };
-                        doc['pain'] = { 'status': data[0]['pain'], 'order': 11 };
-                        doc['pills'] = { 'status': data[0]['pills'], 'order': 12 };
-                        doc['stress'] = { 'status': data[0]['stressors'], 'order': 13 };
-                        doc['weight'] = { 'status': data[0]['weight'], 'order': 14 };
+                        doc['activity']['status'] = data[0]['activity'];
+                        doc['babyHeartRate']['status'] = data[0]['babyHeartRate'];
+                        doc['bloodGlucose']['status'] = data[0]['bloodGlucose'];
+                        doc['bloodIron']['status'] = data[0]['bloodIron'];
+                        doc['bloodPressure']['status'] = data[0]['bloodPressure'];
+                        doc['caffeine']['status'] = data[0]['caffeine'];
+                        doc['cigarette']['status'] = data[0]['cigarettes'];
+                        doc['nutrition']['status'] = data[0]['nutrition'];
+                        doc['kicks']['status'] = data[0]['kicks'];
+                        doc['mood']['status'] = data[0]['mood'];
+                        doc['pain']['status'] = data[0]['pain'];
+                        doc['pills']['status'] = data[0]['pills'];
+                        doc['stress']['status'] = data[0]['stressors'];
+                        doc['weight']['status'] = data[0]['weight'];
                         return db.put(doc);
                     });
                 }
@@ -925,7 +925,8 @@ across the app instead of just the calendar page
             }
         });
         console.log('client_trackers');
-    };*/
+    };
+
     $scope.getEvents = function () {
         var db = PouchDB('momlink');
         var recentID = '';
@@ -2320,50 +2321,59 @@ across the app instead of just the calendar page
         db.get('login').then(function (doc) {
             //check if first-time user
             if (doc['client_id'] == "") {
-                //create all local databases here//
-                //get token for push notifications
-                document.addEventListener("deviceready", function () {
-                    FCMPlugin.getToken(function (token) {
-                        // save this server-side and use it to push notifications to this device
-                        var post_information = { 'username': user, 'password': pass, 'token': token };
-                        console.log(JSON.stringify(post_information))
-                        $.ajax({
-                            url: 'https://momlink.crc.nd.edu/~jonathan/current/firstTimeLogin.php',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: post_information,
-                            success: function (data) {
-                                console.log(JSON.stringify(data))
-                                if (data[0]['success'] != 0) {
-                                    doc['client_id'] = data[1]['client_id']
-                                    doc['agency'] = data[1]['agency']
-                                    doc['pncc_id'] = data[1]['pncc_id']
-                                    doc['triage_level'] = data[1]['triage_level']
-                                    doc['sec_question'] = data[1]['sec_question']
-                                    doc['username'] = user;
-                                    doc['password'] = pass;
-                                    window.localStorage.setItem('cid', data[1]['client_id'])
-                                    window.localStorage.setItem('username', user)
-                                    window.localStorage.setItem('password', pass)
-                                    return db.put(doc).then(function () {
-                                        window.location = "templates/main.html";
-                                    })
+                var networkState = navigator.connection.type;
+                if (networkState == Connection.NONE) {
+                    //alert must be connected to wifi
+                    $ionicPopup.alert({
+                        title: 'Please connect to WiFi before first-time login',
+                    });
+                }
+                else {
+                    //create all local databases here//
+                    //get token for push notifications
+                    document.addEventListener("deviceready", function () {
+                        FCMPlugin.getToken(function (token) {
+                            // save this server-side and use it to push notifications to this device
+                            var post_information = { 'username': user, 'password': pass, 'token': token };
+                            console.log(JSON.stringify(post_information))
+                            $.ajax({
+                                url: 'https://momlink.crc.nd.edu/~jonathan/current/firstTimeLogin.php',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: post_information,
+                                success: function (data) {
+                                    console.log(JSON.stringify(data))
+                                    if (data[0]['success'] != 0) {
+                                        doc['client_id'] = data[1]['client_id']
+                                        doc['agency'] = data[1]['agency']
+                                        doc['pncc_id'] = data[1]['pncc_id']
+                                        doc['triage_level'] = data[1]['triage_level']
+                                        doc['sec_question'] = data[1]['sec_question']
+                                        doc['username'] = user;
+                                        doc['password'] = pass;
+                                        window.localStorage.setItem('cid', data[1]['client_id'])
+                                        window.localStorage.setItem('username', user)
+                                        window.localStorage.setItem('password', pass)
+                                        return db.put(doc).then(function () {
+                                            window.location = "templates/main.html";
+                                        })
+                                    }
+                                    else {
+                                        $ionicPopup.alert({
+                                            title: 'Invalid Username/Password',
+                                            subTitle: 'Usernames and passwords are case sensitive'
+                                        });
+                                    }
                                 }
-                                else {
-                                    $ionicPopup.alert({
-                                        title: 'Invalid Username/Password',
-                                        subTitle: 'Usernames and passwords are case sensitive'
-                                    });
-                                }
-                            }
-                        });
-                    }, function (error) {
-                        $ionicPopup.alert({
-                            title: 'Error Generating FCM Token',
-                            subTitle: error
+                            });
+                        }, function (error) {
+                            $ionicPopup.alert({
+                                title: 'Error Generating FCM Token',
+                                subTitle: error
+                            });
                         });
                     });
-                });
+                }
             }
             else {
                 if (user == doc['username'] && pass == doc['password']) {
