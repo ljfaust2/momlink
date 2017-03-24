@@ -321,6 +321,27 @@ across the app instead of just the calendar page
                 });
             }
         });
+        db.get('alerts').catch(function (err) {
+            if (err.status === 404) {
+                db.put({
+                    "_id": "alerts",
+                    'activity': [],
+                    "babyHeartRate": [],
+                    "bloodGlucose": [],
+                    "bloodIron": [],
+                    "bloodPressure": [],
+                    "caffeine": [],
+                    "cigarette": [],
+                    "conditions": [],
+                    "kicks": [],
+                    'mood': [],
+                    'pain': [],
+                    'pills': [],
+                    'stress': [],
+                    "weight": [],
+                });
+            }
+        });
         /*db.get('classes').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -536,7 +557,8 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
-        $scope.getConditions()
+        //$scope.toNewPage('graphs.html', 'Graphs');
+        $scope.getAlerts()
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
             var time = moment("2016-12-21T10:56", "YYYY-MM-DDTHH:mm:ssZ").toDate();
@@ -558,6 +580,18 @@ across the app instead of just the calendar page
             console.log(JSON.stringify(schedule))
             cordova.plugins.notification.local.schedule(schedule);
         })*/
+    }
+
+    $scope.renderGraph = function () {
+        g = new Dygraph(
+          // containing div
+          document.getElementById("graphdiv"),
+          // CSV or path to a CSV file.
+          "Date,Temperature\n" +
+          "2008-05-07,75\n" +
+          "2008-05-08,70\n" +
+          "2008-05-09,80\n"
+        );
     }
 
     $setReminder = function (title, time) {
@@ -1748,6 +1782,45 @@ across the app instead of just the calendar page
                 }
             });
         })
+    };
+
+    $scope.getAlerts = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        console.log(JSON.stringify(post_information))
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getAlerts.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                console.log(JSON.stringify(data))
+                if (data.length > 0) {
+                    db.get('alerts').then(function (doc) {
+                        console.log(JSON.stringify(doc))
+                        for (i in data) {
+                            console.log('check')
+                            //check if alert is already in local db
+                            var isUnique = true;
+                            for (j in doc[data[i]['tracker']]) {
+                                if (data[i]['id'] == doc[data[i]['tracker']][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                doc[data[i]['tracker']].push({ "id": data[i]['id'], "type": data[i]['type'], "value": data[i]['value'], "message": data[i]['message'] })
+                            }
+                        }
+                        console.log('alerts downloaded')
+                        return db.put(doc);
+                    });
+                }
+                else {
+                    console.log('No new alerts')
+                }
+            }
+        });
     };
 
     $scope.updateCareplan = function () {
@@ -6139,7 +6212,34 @@ the articles quiz has been completed with a perfect score
             doc[type].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            $scope.toNewPage('history.html', 'History');
+            db.get('alerts').then(function (doc) {
+                if (doc[type].length > 0) {
+                    for (i in doc[type]) {
+                        console.log(JSON.stringify(doc[type][i]))
+                        if (doc[type][i]['type'] == ">") {
+                            if (parseInt(value) > parseInt(doc[type][i]['value'])) {
+                                $ionicPopup.alert({
+                                    title: doc[type][i]['message']
+                                });
+                            }
+                        }
+                        else if (doc[type][i]['type'] == "<") {
+                            if (parseInt(value) < parseInt(doc[type][i]['value'])) {
+                                $ionicPopup.alert({
+                                    title: doc[type][i]['message']
+                                });
+                            }
+                        }
+                        else if (doc[type][i]['type'] == "1") {
+                            $ionicPopup.alert({
+                                title: doc[type][i]['message']
+                            });
+                        }
+                    }
+                }
+            }).then(function (doc) {
+                $scope.toNewPage('history.html', 'History');
+            })
         });
     }
     $scope.submitPain = function (type) {
@@ -6169,21 +6269,6 @@ the articles quiz has been completed with a perfect score
                 "diastolic": $('#count2').html()
             };
             doc['bloodPressure'].push(element);
-            return db.put(doc);
-        }).then(function (doc) {
-            $scope.toNewPage('history.html', 'History');
-        });
-    }
-    $scope.submitAdd = function (type) {
-        var db = PouchDB('momlink');
-        db.get('track').then(function (doc) {
-            var element = {
-                "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('YYYY/MM/DD'),
-                "time": moment().format('HH:mm:ss'),
-                "value": parseInt($('#count12').html()) * (.5) + parseInt($('#count1').html())
-            };
-            doc[type].push(element);
             return db.put(doc);
         }).then(function (doc) {
             $scope.toNewPage('history.html', 'History');
