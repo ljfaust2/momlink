@@ -557,8 +557,7 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
-        //$scope.toNewPage('graphs.html', 'Graphs');
-        $scope.getAlerts()
+        $scope.toNewPage('graphs.html', 'Graphs');
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
             var time = moment("2016-12-21T10:56", "YYYY-MM-DDTHH:mm:ssZ").toDate();
@@ -580,18 +579,6 @@ across the app instead of just the calendar page
             console.log(JSON.stringify(schedule))
             cordova.plugins.notification.local.schedule(schedule);
         })*/
-    }
-
-    $scope.renderGraph = function () {
-        g = new Dygraph(
-          // containing div
-          document.getElementById("graphdiv"),
-          // CSV or path to a CSV file.
-          "Date,Temperature\n" +
-          "2008-05-07,75\n" +
-          "2008-05-08,70\n" +
-          "2008-05-09,80\n"
-        );
     }
 
     $setReminder = function (title, time) {
@@ -627,6 +614,7 @@ across the app instead of just the calendar page
         $scope.getCareplan();
         $scope.updateCareplan();
         $scope.getConditions();
+        $scope.getAlerts()
         $scope.sendClickData();
         $scope.sendPushData();
     };
@@ -6781,6 +6769,73 @@ the articles quiz has been completed with a perfect score
             ]
         });
     };
+
+    $scope.renderGraph = function () {
+        var db = PouchDB('momlink');
+        var tracker = $scope.trackType
+        var data2 = []
+        tracker = tracker.substring(3, 90);
+        title = tracker
+        tracker = tracker.charAt(0).toLowerCase() + tracker.slice(1);
+        console.log(tracker)
+        db.get('track').then(function (doc) {
+            for (i in doc[tracker]) {
+                console.log(JSON.stringify(doc[tracker][i]))
+                dict = {}
+                dict['x'] = moment(doc[tracker][i]['id'], "MM-DD-YYYYThh:mm:ssa").toDate()
+                dict['y'] = parseFloat(doc[tracker][i]['value'])
+                data2.push(dict)
+            }
+            console.log(JSON.stringify(data2))
+        }).then(function () {
+            html = '<canvas id="myChart" width="500" height="500"></canvas>';
+            $('#history').html(html);
+            $compile($('#history'))($scope);
+
+            var config = {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: String(title.replace(/([A-Z])/g, ' $1').trim()),
+                        backgroundColor: "rgba(75,192,192,0.1)",
+                        borderColor: "rgba(75,192,192,1)",
+                        pointBorderColor: "rgba(0,0,0,1)",
+                        data: data2
+                    }]
+                },
+                options: {
+                    animation: false,
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                displayFormats: {
+                                    'millisecond': 'MMM DD',
+                                    'second': 'MMM DD',
+                                    'minute': 'MMM DD',
+                                    'hour': 'MMM DD',
+                                    'day': 'MMM DD',
+                                    'week': 'MMM DD',
+                                    'month': 'MMM DD',
+                                    'quarter': 'MMM DD',
+                                    'year': 'MMM DD',
+                                }
+                            }
+                        }],
+                    },
+                }
+            };
+            console
+            console.log(JSON.stringify(config['data']['datasets']['data']))
+            var ctx = document.getElementById("myChart").getContext("2d");
+            new Chart(ctx, config);
+
+
+        })
+
+
+
+    }
 
     /*$scope.populateConditions = function () {
         var date = new Date($scope.currentDate);

@@ -2,6 +2,7 @@
     <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="renderTrackSubheaderDate()">
         <button class="button button-icon icon ion-reply" ng-click="toNewPage('track.html','Track')"></button>
         <h2 class="title" id="todaysDate"></h2>
+        <button class="button button-icon icon ion-calendar" ng-click="renderGraph()"></button>
     </ion-subheader-bar>
     <ion-view>
         <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="loadHistory()" on-swipe-left="increaseDate(); loadHistory();" on-swipe-right="decreaseDate(); loadHistory();">
