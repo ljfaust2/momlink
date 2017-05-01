@@ -20,7 +20,7 @@ across the app instead of just the calendar page
                     "triage_level": "",
                     "reset_code": "595",
                     "answer": "",
-                    "agency": "5",
+                    "agency": "",
                     "pncc_id": "",
                     "sec_question": "",
                     "client_id": "",
@@ -557,7 +557,7 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
-        $scope.toNewPage('graphs.html', 'Graphs');
+        /*cordova.plugins.notification.badge.set(1);*/
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
             var time = moment("2016-12-21T10:56", "YYYY-MM-DDTHH:mm:ssZ").toDate();
@@ -608,7 +608,6 @@ across the app instead of just the calendar page
         $scope.getArticles();
         $scope.updateArticles();
         $scope.getSurveys();
-        $scope.updateSurveys();
         $scope.retrieveClientTrackers();
         $scope.uploadTrackers();
         $scope.getCareplan();
@@ -639,7 +638,6 @@ across the app instead of just the calendar page
     };
     $scope.updateAllSurveys = function () {
         $scope.getSurveys();
-        $scope.updateSurveys();
         $scope.sendClickData();
         $scope.toNewPage('survey.html', 'Survey');
     };
@@ -1447,96 +1445,104 @@ across the app instead of just the calendar page
     };
     $scope.getSurveys = function () {
         var db = PouchDB('momlink');
-        var post_information = { 'cid': window.localStorage.getItem('cid') };
-        $.ajax({
-            url: 'https://momlink.crc.nd.edu/~jonathan/current/getSurveys.php',
-            type: 'POST',
-            dataType: 'json',
-            data: post_information,
-            async: false,
-            success: function (data) {
-                if (data.length > 0) {
-                    db.get('surveys').then(function (doc) {
-                        for (i in data) {
-                            //check if referral is already in local db
-                            var isUnique = true;
-                            for (j in doc['surveys']) {
-                                if (data[i]['id'] == doc['surveys'][j]['id']) {
-                                    isUnique = false;
+        var downloads = [];
+        var agency;
+        db.get('login').then(function (doc) {
+            agency = doc['agency']
+        }).then(function () {
+            var post_information = { 'cid': window.localStorage.getItem('cid'), 'agency': agency };
+            console.log(JSON.stringify(post_information))
+            $.ajax({
+                url: 'https://momlink.crc.nd.edu/~jonathan/current/getSurveys.php',
+                type: 'POST',
+                dataType: 'json',
+                data: post_information,
+                async: false,
+                success: function (data) {
+                    console.log(JSON.stringify(data))
+                    if (data.length > 0) {
+                        db.get('surveys').then(function (doc) {
+                            //console.log(JSON.stringify(doc['surveys']))
+                            for (i in data) {
+                                var add = true;
+                                //check if survey is already in local db
+                                for (j in doc['surveys']) {
+                                    if (doc['surveys'][j]['id'] == data[i]['questionnaire_id']) {
+                                        add = false;
+                                        break;
+                                    }
+                                }
+                                if (add) {
+                                    //makes quiz suitable for json parse
+                                    //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
+                                    data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
+                                    var survey = {
+                                        "id": data[i]['questionnaire_id'],
+                                        "title": data[i]['title'],
+                                        "content": JSON.parse(data[i]['quiz']),
+                                        "responses": [],
+                                        "upload": '0',
+                                        "dateTaken": ''
+                                    };
+                                    //console.log(JSON.stringify(survey))
+                                    doc['surveys'].push(survey);
                                 }
                             }
-                            if (isUnique == true) {
-                                //makes content suitable for json parse
-                                data[i]['content'] = data[i]['content'].replace(/'/g, '"');
-                                var survey = {
-                                    "id": data[i]['id'],
-                                    "title": data[i]['name'],
-                                    "questions": JSON.parse(data[i]['content']),
-                                    "dateGiven": data[i]['dateGiven'],
-                                    "dateTaken": '',
-                                    "upload": '0',
-                                    "survey_status": '0',
-                                };
-                                doc['surveys'].push(survey);
+                            return db.put(doc);
+                            console.log('Surveys downloaded')
+                        })
+                    }
+                    else {
+                        console.log('No new surveys')
+                    }
+                }
+            });
+        }).then(function (doc) {
+            var uploadSurveys = [];
+            db.get('surveys').then(function (doc) {
+                //get all referrals where upload == 0 and survey_status == 1 (surveys not previously updated but have been completed)
+                for (i in doc['surveys']) {
+                    if (doc['surveys'][i]['upload'] == 0 && doc['surveys'][i]['survey_status'] == 1) {
+                        uploadSurveys.push([doc['surveys'][i]['id'], doc['surveys'][i]['responses']])
+                    }
+                }
+            }).then(function () {
+                if (uploadSurveys.length > 0) {
+                    var post_information = {};
+                    post_information.surveys = uploadSurveys;
+                    post_information.cid = window.localStorage.getItem('cid');
+                    $.ajax({
+                        url: 'https://momlink.crc.nd.edu/~jonathan/current/updateSurveys.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                        async: false,
+                        success: function (data) {
+                            //for each survey updated, update uploaded value to 1
+                            if (data == true) {
+                                db.get('surveys').then(function (doc) {
+                                    //set upload value so it is not reuploaded
+                                    for (k in uploadSurveys) {
+                                        for (m in doc['surveys']) {
+                                            if (uploadSurveys[k][0] == doc['surveys'][m]['id']) {
+                                                doc['surveys'][m]['upload'] = '1';
+                                            }
+                                        }
+                                    }
+                                    console.log('Surveys updated')
+                                    return db.put(doc);
+                                });
                             }
                         }
-                        console.log('Surveys downloaded')
-                        return db.put(doc);
                     });
                 }
                 else {
-                    console.log('No new surveys')
+                    console.log('Surveys already up to date')
                 }
-            }
-        });
-        console.log('eight');
-    };
-    $scope.updateSurveys = function () {
-        var db = PouchDB('momlink');
-        var uploadSurveys = [];
-        db.get('surveys').then(function (doc) {
-            //get all referrals where upload == 0 and survey_status == 1 (surveys not previously updated but have been completed)
-            for (i in doc['surveys']) {
-                if (doc['surveys'][i]['upload'] == 0 && doc['surveys'][i]['survey_status'] == 1) {
-                    uploadSurveys.push(doc['surveys'][i])
-                }
-            }
-        }).then(function () {
-            if (uploadSurveys.length > 0) {
-                var post_information = {};
-                post_information.surveys = uploadSurveys;
-                post_information.cid = window.localStorage.getItem('cid');
-                $.ajax({
-                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updateSurveys.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
-                    async: false,
-                    success: function (data) {
-                        //for each survey updated, update uploaded value to 1
-                        if (data == true) {
-                            db.get('surveys').then(function (doc) {
-                                //set upload value so it is not reuploaded
-                                for (k in uploadSurveys) {
-                                    for (m in doc['surveys']) {
-                                        if (uploadSurveys[k]['id'] == doc['surveys'][m]['id']) {
-                                            doc['surveys'][m]['upload'] = '1';
-                                        }
-                                    }
-                                }
-                                console.log('Surveys updated')
-                                return db.put(doc);
-                            });
-                        }
-                    }
-                });
-            }
-            else {
-                console.log('Surveys already up to date')
-            }
+            })
         })
-        console.log('nine');
     };
+
     $scope.uploadTrackers = function () {
         //each cell holds the table and php script
         var tables = [['activity', 'Activity'], ['bloodGlucose', 'Track'], ['babyHeartRate', 'Track'], ['bloodIron', 'Track'],
@@ -7277,7 +7283,8 @@ the articles quiz has been completed with a perfect score
         db.get('surveys').then(function (doc) {
             for (i in doc['surveys']) {
                 if (doc['surveys'][i]['dateTaken'] == '') {
-                    html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + ' <p> Given on: ' + doc['surveys'][i]['dateGiven'] + '</p></a>';
+                    html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + '</a>';
+                    //html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + ' <p> Given on: ' + doc['surveys'][i]['dateGiven'] + '</p></a>';
                 }
             }
             html += '</div>';
@@ -7308,17 +7315,18 @@ the articles quiz has been completed with a perfect score
                 //get survey
                 if (doc['surveys'][i]['id'] == surveyID) {
                     var formID = 0;
-                    for (j in doc['surveys'][i]['questions']) {
-                        question = j;
-                        answers = doc['surveys'][i]['questions'][j];
+                    for (j in doc['surveys'][i]['content']) {
+                        question = doc['surveys'][i]['content'][j][0];
+                        answers = doc['surveys'][i]['content'][j][1];
                         //render question
                         html += '  <div class="item item-text-wrap item-icon-right item-divider">' + question + '<i class="icon ion-volume-medium" ng-click="speak(&quot;' + question + '&quot;)"></i></div>';
                         //render answers
                         html += '<form id="' + String(formID) + '">';
                         html += '<ion-list>';
                         for (k = 0; k < answers.length; k++) {
-                            answer = answers[k];
-                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(formID) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                            answer = answers[k][0];
+                            answerID = answers[k][1];
+                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(formID) + '" value="' + String(answerID) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
                         }
                         html += '</ion-list>';
                         html += '</form>';
@@ -7357,10 +7365,13 @@ the articles quiz has been completed with a perfect score
             for (i in doc['surveys']) {
                 if (doc['surveys'][i]['id'] == surveyID) {
                     var formID = 0;
-                    for (j in doc['surveys'][i]['questions']) {
+                    for (j in doc['surveys'][i]['content']) {
+                        questionID = doc['surveys'][i]['content'][j][2]
                         selectedAnswer = $('input[name="' + String(formID) + '"]:checked', '#'.concat(formID)).val();
                         //prune all other answers != selectedAnswer
-                        doc['surveys'][i]['questions'][j] = selectedAnswer;
+                        doc['surveys'][i]['responses'].push([questionID, selectedAnswer]);
+                        console.log(questionID)
+                        console.log(selectedAnswer)
                         doc['surveys'][i]['survey_status'] = '1';
                         formID++;
                     }
