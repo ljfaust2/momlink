@@ -1300,6 +1300,8 @@ across the app instead of just the calendar page
                                         "readHistory": {},
                                         "quiz": JSON.parse(data[i]['quiz']),
                                         "quizAttempts": '0',
+                                        "quizFollowup": '0',
+                                        "lastAttempt": "",
                                         "bestScore": '0',
                                         "quizHistory": {},
                                         "upload": '0',
@@ -3415,6 +3417,148 @@ across the app instead of just the calendar page
         })
     };
 
+    $scope.checkQuizzes = function () {
+        var db = PouchDB('momlink');
+        db.get('articles').then(function (doc) {
+            var x = 0;
+            var loopQuizzes = function (arr) {
+                //console.log(JSON.stringify(arr))
+                checkQuiz(arr[x], function () {
+                    x++;
+                    if (x < arr.length) {
+                        loopQuizzes(arr);
+                    }
+                    else {
+                        console.log('finished!')
+                    }
+                });
+            }
+            function checkQuiz(article, callback) {
+                quizTaken = moment(article['lastAttempt']);
+                if (article['quiz'].length > 0 && article['lastAttempt'] != '' && quizTaken.add(14, 'days') < moment() && article['quizFollowup'] == '0') {
+                    console.log(JSON.stringify(article))
+                    //show popup and take quiz
+                    $ionicPopup.show({
+                        title: 'Check-up Quiz',
+                        scope: $scope,
+                        buttons: [
+                          {
+                              text: 'Ok',
+                              type: 'button-stable',
+                              onTap: function (e) {
+                                  //show quiz
+                                  var html = '<div ng-controller="HeaderCtrl">';
+                                  quiz = article['quiz'];
+                                  for (j in quiz) {
+                                      question = quiz[j][0];
+                                      answers = quiz[j][1];
+                                      //render question
+                                      html += '<div class="item item-text-wrap item-divider item-icon-right">' + question + '<i class="icon ion-volume-medium" ng-click="speak(&quot;' + question + '&quot;)"></i></div>';
+                                      //render answers
+                                      html += '<form id="' + String(j) + '">'
+                                      html += '<ion-list>'
+                                      for (k = 0; k < answers.length; k++) {
+                                          answer = quiz[j][1][k][0];
+                                          answerID = quiz[j][1][k][1];
+                                          html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(j) + '" value="' + String(answerID) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                                      }
+                                      html += '</ion-list>'
+                                      html += '</form>'
+                                      //render follow-up
+                                      html += '<div class="item item-text-wrap item-divider item-icon-right">Please indicate how certain you are about the correctness of your response<i class="icon ion-volume-medium" ng-click="speak(&quot;Please indicate how certain you are about the correctness of your response&quot;)"></i></div>';
+                                      //render follow-up answers
+                                      html += '<form id="C' + String(j) + '">'
+                                      html += '<ion-list>'
+                                      responses = ['Highly uncertain', 'Uncertain', 'Somewhat uncertain', 'Neutral', 'Somewhat certain', 'Certain', 'Highly certain']
+                                      for (m in responses) {
+                                          answer = responses[m];
+                                          html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="C' + String(j) + '" value="' + String(answer) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                                      }
+                                      html += '</ion-list>';
+                                      html += '</form>';
+                                      html += '</div>';
+                                  };
+                                  $ionicPopup.show({
+                                      title: 'Quiz',
+                                      template: html,
+                                      buttons: [
+                                  {
+                                      text: 'Grade', onTap: function (e) {
+                                          //score the quiz
+                                          var score = 0;
+                                          var finalScore;
+                                          var maxScore;
+                                          var usersAnswers = [];
+                                          quiz = article['quiz'];
+                                          for (j in quiz) {
+                                              selectedAnswer = $('input[name="' + String(j) + '"]:checked', '#'.concat(j)).val();
+                                              confidenceAnswer = $('input[name="C' + String(j) + '"]:checked', '#C'.concat(j)).val();
+                                              correctAnswer = quiz[j][1][quiz[j][2]];
+                                              questionID = quiz[j][3];
+                                              if (selectedAnswer == correctAnswer) {
+                                                  usersAnswers.push([selectedAnswer, 1, confidenceAnswer, questionID]);
+                                                  score++;
+                                              }
+                                              else {
+                                                  usersAnswers.push([selectedAnswer, 0, confidenceAnswer, questionID]);
+                                              }
+                                          }
+                                          finalScore = score;
+                                          maxScore = quiz.length;
+                                          //check if new score is best score
+                                          var bestScore = 0;
+                                          if (parseInt(article['bestScore']) < score) {
+                                              article['bestScore'] = String(score);
+                                          }
+                                          //also need to record answers selected, prequiz value of 1 means the quiz was a prequiz
+                                          db.get('articles').then(function (doc) {
+                                              for (k in doc['articles']) {
+                                                  if (doc['articles'][k]['id'] == article['id']) {
+                                                      break;
+                                                  }
+                                              }
+                                              doc['articles'][k]['quizAttempts'] = String(parseInt(article['quizAttempts']) + 1)
+                                              //2 indicates a follow-up quiz
+                                              doc['articles'][k]['quizHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = [finalScore, maxScore, usersAnswers, 2];
+                                              doc['articles'][k]['lastAttempt'] = String(moment().format('YYYY-MM-DDTHH:mm:ss'));
+                                              doc['articles'][k]['article_status'] = '1';
+                                              doc['articles'][k]['quizFollowup'] = '1';
+                                              doc['articles'][k]['upload'] = '0';
+                                              return db.put(doc).then(function () {
+                                                  $ionicPopup.show({
+                                                      title: 'Results',
+                                                      template: '<div style="text-align:center">Your Score: ' + finalScore + '</div>',
+                                                      buttons: [
+                                                  {
+                                                      text: 'Finish', onTap: function (e) {
+                                                          callback()
+                                                      },
+                                                      type: 'button-positive'
+                                                  }
+                                                      ],
+                                                  })
+                                              })
+                                          })
+                                      },
+                                      type: 'button-positive'
+                                  }
+                                      ],
+                                  });
+                              }
+                          }
+                        ]
+                    })
+                }
+                else {
+                    console.log(JSON.stringify(article))
+                    callback()
+                }
+            }
+            loopQuizzes(doc['articles'])
+        });
+    }
+
+
     /*
     Events are composed of two pages, hides second page and returns to first
     */
@@ -3702,10 +3846,10 @@ across the app instead of just the calendar page
 })
 
 
-/*
-                The inbox controller pulls referral and pncc contacts
-                allows user to call/text/email them and render sms conversations
-                */
+    /*
+                    The inbox controller pulls referral and pncc contacts
+                    allows user to call/text/email them and render sms conversations
+                    */
 .controller('InboxCtrl', function ($scope, $compile, $ionicPopup) {
     $scope.sendNewMessage = function (recipient) {
         if (navigator.connection.type == Connection.NONE && articles.length == 0) {
@@ -5251,6 +5395,7 @@ the articles quiz has been completed with a perfect score
                     //also need to record answers selected, prequiz value of 1 means the quiz was a prequiz
                     article['quizAttempts'] = String(parseInt(article['quizAttempts']) + 1)
                     article['quizHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = [finalScore, maxScore, usersAnswers, prequiz];
+                    article['lastAttempt'] = String(moment().format('YYYY-MM-DDTHH:mm:ss'));
                     article['article_status'] = '1';
                     article['upload'] = '0';
                     return db.put(doc)
