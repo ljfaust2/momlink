@@ -1301,7 +1301,7 @@ across the app instead of just the calendar page
                                         "quiz": JSON.parse(data[i]['quiz']),
                                         "quizAttempts": '0',
                                         "quizFollowup": '0',
-                                        "lastAttempt": "",
+                                        "firstAttempt": '',
                                         "bestScore": '0',
                                         "quizHistory": {},
                                         "upload": '0',
@@ -1482,7 +1482,7 @@ across the app instead of just the calendar page
                                         "id": data[i]['questionnaire_id'],
                                         "title": data[i]['title'],
                                         "content": JSON.parse(data[i]['quiz']),
-                                        "responses": [],
+                                        "surveyHistory": {},
                                         "upload": '0',
                                         "dateTaken": ''
                                     };
@@ -1502,10 +1502,10 @@ across the app instead of just the calendar page
         }).then(function (doc) {
             var uploadSurveys = [];
             db.get('surveys').then(function (doc) {
-                //get all referrals where upload == 0 and survey_status == 1 (surveys not previously updated but have been completed)
+                //get all surveys where upload == 0 and survey_status == 1 (surveys not previously updated but have been completed)
                 for (i in doc['surveys']) {
                     if (doc['surveys'][i]['upload'] == 0 && doc['surveys'][i]['survey_status'] == 1) {
-                        uploadSurveys.push([doc['surveys'][i]['id'], doc['surveys'][i]['responses']])
+                        uploadSurveys.push(doc['surveys'][i])
                     }
                 }
             }).then(function () {
@@ -1513,6 +1513,8 @@ across the app instead of just the calendar page
                     var post_information = {};
                     post_information.surveys = uploadSurveys;
                     post_information.cid = window.localStorage.getItem('cid');
+                    console.log('update')
+                    console.log(JSON.stringify(post_information))
                     $.ajax({
                         url: 'https://momlink.crc.nd.edu/~jonathan/current/updateSurveys.php',
                         type: 'POST',
@@ -1520,14 +1522,17 @@ across the app instead of just the calendar page
                         data: { data: encodeURIComponent(JSON.stringify(post_information)) },
                         async: false,
                         success: function (data) {
+                            console.log('output')
+                            console.log(JSON.stringify(data))
                             //for each survey updated, update uploaded value to 1
                             if (data == true) {
                                 db.get('surveys').then(function (doc) {
                                     //set upload value so it is not reuploaded
                                     for (k in uploadSurveys) {
                                         for (m in doc['surveys']) {
-                                            if (uploadSurveys[k][0] == doc['surveys'][m]['id']) {
+                                            if (uploadSurveys[k]['id'] == doc['surveys'][m]['id']) {
                                                 doc['surveys'][m]['upload'] = '1';
+                                                doc['surveys'][m]['surveysHistory'] = {};
                                             }
                                         }
                                     }
@@ -3434,8 +3439,8 @@ across the app instead of just the calendar page
                 });
             }
             function checkQuiz(article, callback) {
-                quizTaken = moment(article['lastAttempt']);
-                if (article['quiz'].length > 0 && article['lastAttempt'] != '' && quizTaken.add(14, 'days') < moment() && article['quizFollowup'] == '0') {
+                quizTaken = moment(article['firstAttempt']);
+                if (article['quiz'].length > 0 && article['firstAttempt'] != '' && quizTaken.add(14, 'days') < moment() && article['quizFollowup'] == '0') {
                     console.log(JSON.stringify(article))
                     //show popup and take quiz
                     $ionicPopup.show({
@@ -3520,7 +3525,6 @@ across the app instead of just the calendar page
                                               doc['articles'][k]['quizAttempts'] = String(parseInt(article['quizAttempts']) + 1)
                                               //2 indicates a follow-up quiz
                                               doc['articles'][k]['quizHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = [finalScore, maxScore, usersAnswers, 2];
-                                              doc['articles'][k]['lastAttempt'] = String(moment().format('YYYY-MM-DDTHH:mm:ss'));
                                               doc['articles'][k]['article_status'] = '1';
                                               doc['articles'][k]['quizFollowup'] = '1';
                                               doc['articles'][k]['upload'] = '0';
@@ -5395,7 +5399,9 @@ the articles quiz has been completed with a perfect score
                     //also need to record answers selected, prequiz value of 1 means the quiz was a prequiz
                     article['quizAttempts'] = String(parseInt(article['quizAttempts']) + 1)
                     article['quizHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = [finalScore, maxScore, usersAnswers, prequiz];
-                    article['lastAttempt'] = String(moment().format('YYYY-MM-DDTHH:mm:ss'));
+                    if (article['firstAttempt'] == undefined) {
+                        article['firstAttempt'] = String(moment().format('YYYY-MM-DDTHH:mm:ss'));
+                    }
                     article['article_status'] = '1';
                     article['upload'] = '0';
                     return db.put(doc)
@@ -7427,17 +7433,15 @@ the articles quiz has been completed with a perfect score
         var html = '<div class="list">';
         db.get('surveys').then(function (doc) {
             for (i in doc['surveys']) {
-                if (doc['surveys'][i]['dateTaken'] == '') {
-                    html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + '</a>';
-                    //html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + ' <p> Given on: ' + doc['surveys'][i]['dateGiven'] + '</p></a>';
-                }
+                html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + '</a>';
+                //html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + ' <p> Given on: ' + doc['surveys'][i]['dateGiven'] + '</p></a>';
             }
             html += '</div>';
             $('#recent').html(html);
             $compile($('#recent'))($scope);
         })
     };
-    $scope.renderPastSurveys = function () {
+    /*$scope.renderPastSurveys = function () {
         var db = PouchDB('momlink');
         var html = '<div class="list">';
         db.get('surveys').then(function (doc) {
@@ -7450,7 +7454,7 @@ the articles quiz has been completed with a perfect score
             $('#history').html(html);
             $compile($('#history'))($scope);
         })
-    };
+    };*/
     $scope.renderSurvey = function (surveyID) {
         $scope.clickTracker('startSurvey');
         var db = PouchDB('momlink');
@@ -7510,16 +7514,20 @@ the articles quiz has been completed with a perfect score
             for (i in doc['surveys']) {
                 if (doc['surveys'][i]['id'] == surveyID) {
                     var formID = 0;
+                    var usersAnswers = []
                     for (j in doc['surveys'][i]['content']) {
                         questionID = doc['surveys'][i]['content'][j][2]
                         selectedAnswer = $('input[name="' + String(formID) + '"]:checked', '#'.concat(formID)).val();
                         //prune all other answers != selectedAnswer
-                        doc['surveys'][i]['responses'].push([questionID, selectedAnswer]);
+                        usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss'))]);
                         console.log(questionID)
                         console.log(selectedAnswer)
                         doc['surveys'][i]['survey_status'] = '1';
                         formID++;
                     }
+                    //console.log(JSON.stringify(usersAnswers))
+                    doc['surveys'][i]['surveyHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = usersAnswers;
+                    doc['surveys'][i]['upload'] = '0';
                     doc['surveys'][i]['dateTaken'] = moment().format('YYYY-MM-DD');
                     return db.put(doc)
                 }
