@@ -557,6 +557,7 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
+        //$scope.getCategories()
         /*cordova.plugins.notification.badge.set(1);*/
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
@@ -598,7 +599,7 @@ across the app instead of just the calendar page
     */
     $scope.updateAll = function () {
         $scope.clickTracker('updateAll');
-        $scope.getCategories()
+        //$scope.getCategories()
         $scope.updateInbox();
         $scope.getEvents();
         $scope.updateClientEvents();
@@ -1760,10 +1761,10 @@ across the app instead of just the calendar page
                     if (data.length > 0) {
                         db.get('articles').then(function (doc) {
                             for (i in data) {
-                                //check if referral is already in local db
+                                //check if category is already in local db
                                 var isUnique = true;
                                 for (j in doc['categories']) {
-                                    if (data[i]['id'] == doc['categories'][j]['id']) {
+                                    if (data[i]['id'] == doc['categories'][j][0]) {
                                         isUnique = false;
                                     }
                                 }
