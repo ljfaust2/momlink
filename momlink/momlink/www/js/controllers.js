@@ -4804,13 +4804,13 @@ the articles quiz has been completed with a perfect score
             }
             //build string
             html += '<div class="row has-header" style="padding-right:0;padding-left:0;padding-top:0">'
-            html += '<div class="col-33 text-center padding" ng-click="renderArticleList(&quot;' + type + '&quot;,&quot;All&quot;);clickTracker(&quot;renderCategories(All)&quot;)" style="position:relative"><img class="autoSize" src="../img/articles/all.png">';
+            /*html += '<div class="col-33 text-center padding" ng-click="renderArticleList(&quot;' + type + '&quot;,&quot;All&quot;);clickTracker(&quot;renderCategories(All)&quot;)" style="position:relative"><img class="autoSize" src="../img/articles/all.png">';
             if (totalUnreadArticles > 0) {
                 html += '<span class ="badge badge-positive topRightBadge">' + totalUnreadArticles + '</span>All</div>';
             }
             else {
                 html += 'All</div>';
-            }
+            }*/
             for (i in categories) {
                 //add column              
                 html += '<div class="col-33 text-center padding" ng-click="renderArticleList(&quot;' + type + '&quot;,&quot;' + i + '&quot;);clickTracker(&quot;renderCategories(' + i + ')&quot;)" style="position:relative">';
