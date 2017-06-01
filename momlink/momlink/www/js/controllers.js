@@ -2376,7 +2376,7 @@ across the app instead of just the calendar page
                 }
             }
             if (countSurveys > 0) {
-                html = '<img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage(&quot;survey.html&quot;, &quot;Survey&quot;)" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">' + countSurveys + '</span><p>Survey</p>';
+                html = '<img src="../img/mainIcons/momlink_icon-32.png" ng-click="toNewPage(&quot;survey.html&quot;, &quot;Survey&quot;)" style="max-width:100%;height:auto;vertical-align:middle"><span class="badge badge-positive topRightBadge">' + countSurveys + '</span><p>Survey</p>';
                 $('#survey').html(html);
                 $compile($('#survey'))($scope);
             }
@@ -4269,7 +4269,7 @@ across the app instead of just the calendar page
             html += '<div class="list has-header">';
             for (i in pncc) {
                 html += '<div class="item item-thumbnail-left" ng-click="newPNCCMessage(&quot;' + pncc[i]['id'] + '&quot;,&quot;' + pncc[i]['email'] + '&quot;,&quot;' + pncc[i]['phone'] + '&quot;)">';
-                if (pncc[i]['img'] != null) {
+                if (pncc[i]['img'] != null && pncc[i]['img'] != '') {
                     html += '<img src="../img/pnccs/' + pncc[i]['img'] + '">';
                 }
                 else {
@@ -4690,8 +4690,6 @@ across the app instead of just the calendar page
             The referral controller shows all referrals and option to schedule meetings with them
             */
 .controller('ReferralCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
-
-
     /*
     Populate all users referrals
     */
@@ -4929,21 +4927,10 @@ the articles quiz has been completed with a perfect score
             if (type == 'recommended') {
                 html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderCategories(&quot;' + type + '&quot;)"></button><div class="title">' + categoryName + '</div></div>';
                 html += '<div class="list has-header">';
-                if (categoryName == 'All') {
-                    for (i in doc[type]) {
-                        for (j in doc['articles']) {
-                            if (doc[type][i] == doc['articles'][j]['id']) {
-                                displayArticle(doc['articles'][j])
-                            }
-                        }
-                    }
-                }
-                else {
-                    for (i in doc[type]) {
-                        for (j in doc['articles']) {
-                            if (doc[type][i] == doc['articles'][j]['id'] && categoryName == doc['articles'][j]['category']) {
-                                displayArticle(doc['articles'][j])
-                            }
+                for (i in doc[type]) {
+                    for (j in doc['articles']) {
+                        if (doc[type][i] == doc['articles'][j]['id'] && categoryName == doc['articles'][j]['category']) {
+                            displayArticle(doc['articles'][j])
                         }
                     }
                 }
@@ -4968,7 +4955,12 @@ the articles quiz has been completed with a perfect score
                 console.log(JSON.stringify(article))
                 html += '<div class="item item-thumbnail-left item-text-wrap">';
                 if (article['filename'] != null) {
-                    html += '<img src="' + $scope.getFormatImg(article['filename']) + '">';
+                    if (article['completed'] == 0) {
+                        html += '<img src="../img/formats/' + $scope.getFormatImg(article['filename']) + '">';
+                    }
+                    else {
+                        html += '<img src="../img/formatsGray/' + $scope.getFormatImg(article['filename']) + '">';
+                    }
                 }
                 //bold if the article has not been read
                 if (article['lastRead'] == '') { html += '<h2><b>' + article['title'] + '</b></h2>'; }
@@ -5011,7 +5003,7 @@ the articles quiz has been completed with a perfect score
                 }
                 else {
                     html5 += '<input type="image" src="../img/buttons/btn-09.png" ng-click="categoryHandler(&quot;' + doc['categories'][i][0] + '&quot;,&quot;' + doc['categories'][i][1] + '&quot;)" style="max-width:100%;height:auto;">';
-                }             
+                }
                 html5 += '<p>' + doc['categories'][i][1] + '</p>';
                 html5 += '</div>';
                 col++;
@@ -5525,25 +5517,25 @@ the articles quiz has been completed with a perfect score
     */
     $scope.getFormatImg = function (type) {
         if (type == 'Website') {
-            return '../img/formats/website.png';
+            return 'website.png';
         }
         switch (type.substr(type.length - 3)) {
             case 'pdf':
-                return '../img/formats/pdf.png';
+                return 'pdf.png';
             case 'png':
-                return '../img/formats/image.png';
+                return 'image.png';
             case 'jpg':
-                return '../img/formats/image.png';
+                return 'image.png';
             case 'peg':
-                return '../img/formats/image.png';
+                return 'image.png';
             case 'iff':
-                return '../img/formats/image.png';
+                return 'image.png';
             case 'mp3':
-                return '../img/formats/audio.png';
+                return 'audio.png';
             case 'mp4':
-                return '../img/formats/video.png';
+                return 'video.png';
             case '3gp':
-                return '../img/formats/video.png';
+                return 'video.png';
         }
     };
 
