@@ -222,7 +222,7 @@
     "cordova-plugin-fcm": {
         "source": {
             "type": "git",
-            "url": "https://github.com/fechanique/cordova-plugin-fcm",
+            "url": "https://github.com/lp1bp/cordova-plugin-fcm",
             "subdir": "."
         },
         "is_top_level": true,

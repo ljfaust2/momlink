@@ -168,8 +168,7 @@ across the app instead of just the calendar page
                     "_id": "articles",
                     "categories": [],
                     "articles": [],
-                    "shared": [],
-                    "history": [],
+                    "recommended": [],
                     /*{
                         "id": "1",
                         "title": "Smoking During Pregnancy",
@@ -215,6 +214,7 @@ across the app instead of just the calendar page
             if (err.status === 404) {
                 db.put({
                     "_id": "referrals",
+                    //"categories": [],
                     "referrals": [],
                 });
             }
@@ -557,7 +557,7 @@ across the app instead of just the calendar page
     }
 
     $scope.testPHP = function () {
-        //$scope.getCategories()
+        //$scope.getReferralCategories();
         /*cordova.plugins.notification.badge.set(1);*/
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
@@ -736,9 +736,14 @@ across the app instead of just the calendar page
                                     }
                                 }
                                 if (isUnique == true) {
+                                    var filename = '';
+                                    if (data[i]['image_path'] != null) {
+                                        filename = data[i]['image_path'].substring(data[i]['image_path'].lastIndexOf("/") + 1);
+                                    }
                                     var pncc = {
                                         "id": data[i]['id'],
                                         "name": data[i]['first_name'] + ' ' + data[i]['last_name'],
+                                        "img": filename,
                                         "phone": data[i]['phone'],
                                         "email": data[i]['email'],
                                         "smsID": 0,
@@ -1161,6 +1166,7 @@ across the app instead of just the calendar page
     $scope.getReferrals = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
+        console.log(window.localStorage.getItem('cid'))
         $.ajax({
             url: 'https://momlink.crc.nd.edu/~jonathan/current/getReferrals.php',
             type: 'POST',
@@ -1168,9 +1174,7 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
-                console.log(JSON.stringify(data))
                 if (data.length > 0 && data[0]['id'] != null) {
-                    console.log(JSON.stringify(data[0]['id']))
                     db.get('referrals').then(function (doc) {
                         for (i in data) {
                             //check if referral is already in local db
@@ -1181,6 +1185,10 @@ across the app instead of just the calendar page
                                 }
                             }
                             if (isUnique == true) {
+                                var filename = '';
+                                if (data[i]['image'] != null) {
+                                    filename = data[i]['image'].substring(data[i]['image'].lastIndexOf("/") + 1);
+                                }
                                 var referral = {
                                     "id": data[i]['id'],
                                     "name": data[i]['name'],
@@ -1188,6 +1196,8 @@ across the app instead of just the calendar page
                                     "phone": data[i]['phone'],
                                     "email": data[i]['email'],
                                     "date": moment().format('MM/DD/YYYY'),
+                                    "category": data[i]['category_label'],
+                                    "img": filename,
                                     "meeting": '',
                                     "upload": '1',
                                     "referral_status": '',
@@ -1275,8 +1285,8 @@ across the app instead of just the calendar page
                 if (data.length > 0) {
                     db.get('articles').then(function (doc) {
                         for (i in data) {
-                            //check if articleID is already in shared/history
-                            if ($.inArray(data[i]['id'], doc['shared']) == -1 && $.inArray(data[i]['id'], doc['history'])) {
+                            //check if articleID is already in recommended
+                            if ($.inArray(data[i]['id'], doc['recommended']) == -1) {
                                 //check if article is already in local db
                                 var isUnique = true;
                                 for (j in doc['articles']) {
@@ -1306,17 +1316,18 @@ across the app instead of just the calendar page
                                         "bestScore": '0',
                                         "quizHistory": {},
                                         "upload": '0',
-                                        "article_status": '0'
+                                        "article_status": '0',
+                                        "completed": "0"
                                     };
                                     //console.log(JSON.stringify(article))
                                     doc['articles'].push(article);
-                                    doc['shared'].push(data[i]['id']);
+                                    doc['recommended'].push(data[i]['id']);
                                     if (article["content_text"].substring(0, 2) == './') {
                                         downloads.push(article);
                                     }
                                 }
                                 else {
-                                    doc['shared'].push(data[i]['id']);
+                                    doc['recommended'].push(data[i]['id']);
                                 }
                             }
                         }
@@ -1785,6 +1796,56 @@ across the app instead of just the calendar page
             });
         })
     };
+    /*$scope.getReferralCategories = function () {
+        var db = PouchDB('momlink');
+        var agency;
+        db.get('login').then(function (doc) {
+            agency = doc['agency']
+        }).then(function () {
+            var post_information = { 'agency': agency };
+            console.log(JSON.stringify(post_information))
+            $.ajax({
+                url: 'https://momlink.crc.nd.edu/~jonathan/current/getReferralCategories.php',
+                type: 'POST',
+                dataType: 'json',
+                data: post_information,
+                async: false,
+                success: function (data) {
+                    console.log(JSON.stringify(data))
+                    if (data.length > 0) {
+                        db.get('referrals').then(function (doc) {
+                            for (i in data) {
+                                //check if category is already in local db
+                                var isUnique = true;
+                                for (j in doc['categories']) {
+                                    if (data[i]['category_id'] == doc['categories'][j][0]) {
+                                        isUnique = false;
+                                    }
+                                }
+                                if (isUnique == true) {
+                                    console.log(JSON.stringify(data[i]['category_id']))
+                                    console.log(JSON.stringify(data[i]['image']))
+                                    if (data[i]['image'] != null) {
+                                        filename = data[i]['image'].substring(data[i]['image'].lastIndexOf("/") + 1);
+                                    }
+                                    else {
+                                        filename = ''
+                                    }
+                                    var category = [data[i]['category_id'], data[i]['category_label'], filename]
+                                    doc['categories'].push(category);
+                                }
+                            }
+                            console.log('Referral Categories downloaded')
+                            return db.put(doc);
+                        });
+                    }
+                    else {
+                        console.log('No new referral categories')
+                    }
+                }
+            });
+        })
+    };*/
 
     $scope.getAlerts = function () {
         var db = PouchDB('momlink');
@@ -2042,7 +2103,7 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         cycle = 0;
         db.get('articles').then(function (doc) {
-            articles = doc['shared'];
+            articles = doc['recommended'];
             if (articles.length == 0) {
                 html = '<div class="row; centerVH;"><br>No New Articles</div>';
                 $('#articlesHeader').html(html);
@@ -2059,7 +2120,7 @@ across the app instead of just the calendar page
                         articleHtml += '<span style="display: inline-block; max-height:75%; overflow:hidden">' + articles[cycle]['description'] + '</span>';
                         articleHtml += '<br/>'
                     }
-                    articleHtml += '<button class="button button-small button-stable" ng-click="openArticle(&quot;shared&quot;,&quot;' + String(articles[cycle]['id']) + '&quot;,&quot;' + articles[cycle]['category'] + '&quot;)">Read More</button>&nbsp;';
+                    articleHtml += '<button class="button button-small button-stable" ng-click="openArticle(&quot;recommended&quot;,&quot;' + String(articles[cycle]['id']) + '&quot;,&quot;' + articles[cycle]['category'] + '&quot;)">Read More</button>&nbsp;';
                     articleHtml += '</div></div>';
                     $('#articlesHeader').fadeOut("slow", function () {
                         $('#articlesHeader').html(articleHtml);
@@ -2322,8 +2383,8 @@ across the app instead of just the calendar page
         }).then(function (doc) {
             //Education Badge, number of articles unread
             db.get('articles').then(function (doc) {
-                for (i in doc['shared']) {
-                    if (doc['shared'][i]['lastRead'] == '') {
+                for (i in doc['recommended']) {
+                    if (doc['recommended'][i]['lastRead'] == '') {
                         countArticles++;
                     }
                 }
@@ -4171,16 +4232,24 @@ across the app instead of just the calendar page
             referrals = doc['referrals'];
             html += '<div class="list">';
             for (i in referrals) {
-                html += '<div class="item item-thumbnail-left" ng-click="renderConversation(&quot;referrals' + '&quot;,&quot;' + referrals[i]['name'] + '&quot;,&quot;' + referrals[i]['phone'] + '&quot;,&quot;' + referrals[i]['email'] + '&quot;)">';
-                html += '<img src="' + referrals[i]['img'] + '">';
-                html += '<h2>' + referrals[i]['name'] + '</h2>';
-                if (referrals[i]['phone'] != '') {
-                    html += '<p>' + referrals[i]['phone'] + '</p>';
+                if ((referrals[i]['phone'] != null && referrals[i]['email'] != null) && (referrals[i]['phone'] != '' && referrals[i]['email'] != '')) {
+                    html += '<div class="item item-thumbnail-left" ng-click="renderConversation(&quot;referrals' + '&quot;,&quot;' + referrals[i]['name'] + '&quot;,&quot;' + referrals[i]['phone'] + '&quot;,&quot;' + referrals[i]['email'] + '&quot;)">';
+                    if (referrals[i]['img'] != '') {
+                        html += '<img src="../img/referralTopics/' + referrals[i]['img'] + '">';
+                    }
+                    else {
+                        //use some default image
+                        html += '<img src="../img/buttons/btn-06.png">';
+                    }
+                    html += '<h2>' + referrals[i]['name'] + '</h2>';
+                    if (referrals[i]['phone'] != '') {
+                        html += '<p>' + referrals[i]['phone'] + '</p>';
+                    }
+                    if (referrals[i]['email'] != '') {
+                        html += '<p>' + referrals[i]['email'] + '</p>';
+                    }
+                    html += '</div>';
                 }
-                if (referrals[i]['email'] != '') {
-                    html += '<p>' + referrals[i]['email'] + '</p>';
-                }
-                html += '</div>';
             }
             html += '</div>';
             $("#referrals").html(html);
@@ -4200,7 +4269,13 @@ across the app instead of just the calendar page
             html += '<div class="list has-header">';
             for (i in pncc) {
                 html += '<div class="item item-thumbnail-left" ng-click="newPNCCMessage(&quot;' + pncc[i]['id'] + '&quot;,&quot;' + pncc[i]['email'] + '&quot;,&quot;' + pncc[i]['phone'] + '&quot;)">';
-                html += '<img src="' + pncc[i]['image'] + '">';
+                if (pncc[i]['img'] != null) {
+                    html += '<img src="../img/pnccs/' + pncc[i]['img'] + '">';
+                }
+                else {
+                    //use some default image
+                    html += '<img src="../img/buttons/btn-06.png">';
+                }
                 html += '<h2>' + pncc[i]['name'] + '</h2>';
                 if (pncc[i]['phone'] != '') {
                     html += '<p>' + pncc[i]['phone'] + '</p>';
@@ -4615,6 +4690,8 @@ across the app instead of just the calendar page
             The referral controller shows all referrals and option to schedule meetings with them
             */
 .controller('ReferralCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
+
+
     /*
     Populate all users referrals
     */
@@ -4634,7 +4711,13 @@ across the app instead of just the calendar page
                     var today = moment().format('YYYY-MM-DD')
                     if ((type == 'recent' && (meetingTime == '' || moment(meetingTime) >= moment(today))) || (type == 'previous' && (moment(meetingTime) < moment(today)))) {
                         html += '<a class="item item-thumbnail-left item-text-wrap" ng-click="schedule(&quot;' + referrals[i]['id'] + '&quot;)">';
-                        html += '<img src="' + referrals[i]['img'] + '" ng-click="schedule(&quot;' + referrals[i]['id'] + '&quot;)">';
+                        if (referrals[i]['img'] != '') {
+                            html += '<img src="../img/referralTopics/' + referrals[i]['img'] + '" ng-click="schedule(&quot;' + referrals[i]['id'] + '&quot;)">';
+                        }
+                        else {
+                            //use some default image
+                            html += '<img src="../img/buttons/btn-06.png" ng-click="schedule(&quot;' + referrals[i]['id'] + '&quot;)">';
+                        }
                         html += '<h2 style="display:inline; vertical-align: text-bottom">' + referrals[i]['name'] + '</h2>&nbsp;'
                         html += '<p>Referred on ' + referrals[i]['date'] + '</p>';
                         if (referrals[i]['address'] != '') {
@@ -4843,7 +4926,7 @@ the articles quiz has been completed with a perfect score
         var articleIDs = [];
         var html = '';
         db.get('articles').then(function (doc) {
-            if (type == 'shared' || type == 'history') {
+            if (type == 'recommended') {
                 html += '<div class="bar bar-header"><button class ="button button-icon icon ion-arrow-left-a" ng-click="renderCategories(&quot;' + type + '&quot;)"></button><div class="title">' + categoryName + '</div></div>';
                 html += '<div class="list has-header">';
                 if (categoryName == 'All') {
@@ -4920,11 +5003,15 @@ the articles quiz has been completed with a perfect score
                     return (parseInt(a[3]) < parseInt(b[3])) ? -1 : 1;
                 }
             }
-
             for (i in doc['categories'].sort(sortCategories)) {
                 console.log(doc['categories'][i][3])
                 html5 += '<div class="col text-center">';
-                html5 += '<input type="image" src="../img/topics/' + doc['categories'][i][2] + '"ng-click="categoryHandler(&quot;' + doc['categories'][i][0] + '&quot;,&quot;' + doc['categories'][i][1] + '&quot;)" style="max-width:100%;height:auto;">';
+                if (doc['categories'][i][2] != '') {
+                    html5 += '<input type="image" src="../img/topics/' + doc['categories'][i][2] + '" ng-click="categoryHandler(&quot;' + doc['categories'][i][0] + '&quot;,&quot;' + doc['categories'][i][1] + '&quot;)" style="max-width:100%;height:auto;">';
+                }
+                else {
+                    html5 += '<input type="image" src="../img/buttons/btn-09.png" ng-click="categoryHandler(&quot;' + doc['categories'][i][0] + '&quot;,&quot;' + doc['categories'][i][1] + '&quot;)" style="max-width:100%;height:auto;">';
+                }             
                 html5 += '<p>' + doc['categories'][i][1] + '</p>';
                 html5 += '</div>';
                 col++;
@@ -4998,7 +5085,6 @@ the articles quiz has been completed with a perfect score
                 async: false,
                 success: function (data) {
                     var downloads = [];
-                    console.log(JSON.stringify(data))
                     if (data.length > 0) {
                         for (i in data) {
                             //check if article is already in local db
@@ -5376,7 +5462,8 @@ the articles quiz has been completed with a perfect score
                     for (j in quiz) {
                         selectedAnswer = $('input[name="' + String(j) + '"]:checked', '#'.concat(j)).val();
                         confidenceAnswer = $('input[name="C' + String(j) + '"]:checked', '#C'.concat(j)).val();
-                        correctAnswer = quiz[j][1][quiz[j][2]];
+                        //get correct answer at index
+                        correctAnswer = quiz[j][2]
                         questionID = quiz[j][3];
                         if (selectedAnswer == correctAnswer) {
                             usersAnswers.push([selectedAnswer, 1, confidenceAnswer, questionID]);
@@ -5405,6 +5492,9 @@ the articles quiz has been completed with a perfect score
                     }
                     article['article_status'] = '1';
                     article['upload'] = '0';
+                    if (type == 'recommended' && score == article['quiz'].length) {
+                        article['completed'] = '1';
+                    }
                     return db.put(doc)
                 }
             }
@@ -5426,26 +5516,7 @@ the articles quiz has been completed with a perfect score
                 ],
             })
         }).then(function () {
-            if (type == 'shared' && score == article['quiz'].length) {
-                //Moves an article from the shared section to the history section
-                db.get('articles').then(function (doc) {
-                    //remove article id from shared
-                    for (i in doc['shared']) {
-                        if (doc['shared'][i] == articleID) {
-                            article = doc['shared'][i];
-                            doc['shared'].splice(i, 1);
-                        }
-                    }
-                    //add article id to history
-                    doc['history'].push(articleID)
-                    return db.put(doc);
-                }).then(function () {
-                    $scope.renderArticleList(type, category)
-                })
-            }
-            else {
-                $scope.renderArticleList(type, category)
-            }
+            $scope.renderArticleList(type, category)
         })
     };
 
