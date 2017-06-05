@@ -6,7 +6,7 @@ across the app instead of just the calendar page
 */
 .controller('HeaderCtrl', function ($scope, $ionicSideMenuDelegate, $ionicPopup, $ionicModal, $location, $document, $interval, $compile) {
     /*
-    Creates all necessary tables on first login
+    Called the first time a user logs in, creates database and sets up all necessary tables
     */
     $scope.initializeDB = function () {
         var db = new PouchDB('momlink')
@@ -30,7 +30,6 @@ across the app instead of just the calendar page
         });
         db.get('profile').catch(function (err) {
             if (err.status === 404) {
-                //start date will be the day they create their account
                 db.put({
                     "_id": "profile",
                     "name": "",
@@ -533,10 +532,13 @@ across the app instead of just the calendar page
                 });
             }
         });*/
+        //Uncomment and logout on the app to reset the database in the ripple emulator
         //db.destroy();
-        //window.localStorage.setItem('cid', '555')
     }
 
+    /*
+    Renders progress bar on main screen to show how far along the pregnancy is
+    */
     $scope.renderProgressBar = function () {
         var db = new PouchDB('momlink')
         var pbHtml = '';
@@ -545,6 +547,7 @@ across the app instead of just the calendar page
                 difference = moment.duration(moment().diff(moment(doc['startDate']))).asMonths();
                 month = parseInt(difference) + 1;
                 if (month > 9) {
+                    //show the final page
                     pbHtml += ' <img src="../img/stages/postpartum.png" width="100%" style="max-width:100%; height:auto;vertical-align:middle"> ';
                 }
                 else {
@@ -556,8 +559,10 @@ across the app instead of just the calendar page
         });
     }
 
+    /*
+    Called when clicking 'Test' button on the home page, used for debugging purposes
+    */
     $scope.testPHP = function () {
-        //$scope.getReferralCategories();
         /*cordova.plugins.notification.badge.set(1);*/
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
@@ -582,10 +587,13 @@ across the app instead of just the calendar page
         })*/
     }
 
+    /*
+    Calls the notifications plugin to schedule reminds from the app
+    */
     $setReminder = function (title, time) {
         time = new moment(time);
         time = new Date(time);
-        console.log(time)
+        //console.log(time)
         document.addEventListener("deviceready", function () {
             cordova.plugins.notification.local.schedule({
                 title: title,
@@ -593,9 +601,11 @@ across the app instead of just the calendar page
             });
         });
     }
+
+
     //PHP
     /*
-    Runs all php scripts
+    Runs all php scripts, called from side-menu update button
     */
     $scope.updateAll = function () {
         $scope.clickTracker('updateAll');
@@ -618,6 +628,11 @@ across the app instead of just the calendar page
         $scope.sendClickData();
         $scope.sendPushData();
     };
+
+
+    /*
+    Runs php scripts related to events
+    */
     $scope.updateAllEvents = function () {
         $scope.getEvents();
         $scope.updateClientEvents();
@@ -625,34 +640,60 @@ across the app instead of just the calendar page
         $scope.sendClickData();
         $scope.toNewPage('calendar.html', 'Calendar');
     };
+
+
+    /*
+    Runs php scripts related to referrals
+    */
     $scope.updateAllReferrals = function () {
         $scope.getReferrals();
         $scope.updateReferrals();
         $scope.sendClickData();
         $scope.toNewPage('referrals.html', 'Referrals');
     };
+
+
+    /*
+    Runs php scripts related to education section
+    */
     $scope.updateAllContent = function () {
         $scope.getArticles();
         $scope.updateArticles();
         $scope.sendClickData();
         $scope.toNewPage('education.html', 'Education');
     };
+
+
+    /*
+    Runs php scripts related to surveys
+    */
     $scope.updateAllSurveys = function () {
         $scope.getSurveys();
         $scope.sendClickData();
         $scope.toNewPage('survey.html', 'Survey');
     };
+
+
+    /*
+    Runs php scripts related to care plan section
+    */
     $scope.updateAllGoals = function () {
         $scope.getCareplan();
         $scope.updateCareplan();
         $scope.sendClickData();
         $scope.toNewPage('careplan.html', 'Care Plan');
     };
+
+
+    /*
+    Runs php scripts related to inbox section
+    */
     $scope.updateInboxButton = function () {
         $scope.updateInbox();
         $scope.sendClickData();
         $scope.toNewPage('inbox.html', 'Inbox');
     };
+
     //scrapped in favor of sendNewMesage and sendNewReply, may need later
     /*$scope.uploadMessages = function () {
         //similar to upload trackers but for clientMessages table
@@ -704,12 +745,13 @@ across the app instead of just the calendar page
     };*/
 
     /*
-      need to run these three functions asynchronously 
-      getMessages is called inside the updateInbox function as it is dependent on pnccs in the db
-      uploadSMSMessages is called inside the getMessages function
+      Updates inbox section asynchronously
+       first updates PNCC contact list 
+       then calls getMessages to pull new messages sent from pnccs
+       getMessages then calls uploadSMSMessages to upload new SMSs the client has sent
     */
     $scope.updateInbox = function () {
-        //get PNCCs
+        //get/update pncc contact list
         var db = PouchDB('momlink');
         var agency;
         db.get('login').then(function (doc) {
@@ -724,7 +766,7 @@ across the app instead of just the calendar page
                 data: post_information,
                 async: false,
                 success: function (data) {
-                    console.log(JSON.stringify(data))
+                    //console.log(JSON.stringify(data))
                     db.get('inbox').then(function (doc) {
                         if (data.length > 0) {
                             for (i in data) {
@@ -748,6 +790,7 @@ across the app instead of just the calendar page
                                         "email": data[i]['email'],
                                         "smsID": 0,
                                     };
+                                    //add pncc to local db
                                     doc['pncc'].push(pncc);
                                 }
                             }
@@ -758,12 +801,18 @@ across the app instead of just the calendar page
                             console.log('No new PNCCs')
                         }
                     }).then(function () {
+                        //call function to pull messages
                         $scope.getMessages();
                     });
                 }
             });
         })
     };
+
+
+    /*
+    Pull messages from server. 
+    */
     $scope.getMessages = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -774,14 +823,16 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
-                console.log('MESSAGES')
-                console.log(JSON.stringify(data))
+                //console.log(JSON.stringify(data))
                 db.get('inbox').then(function (doc) {
-                    if (data.length > 0 > 0 && data[0]['id'] != null) {
+                    if (data.length > 0 && data[0]['id'] != null) {
                         for (i in data) {
                             var isUnique = true;
                             for (j in doc['threads']) {
+                                //check for new message threads
                                 //if thread is already in the local db, update if new message has come in
+                                //excerpt is the newest message in a thread, if the excerpt coming from the 
+                                //server does not match the local excerpt then update local excerpt
                                 if (data[i]['id'] == doc['threads'][j]['id']) {
                                     if (data[i]['excerpt'] != doc['threads'][j]['excerpt']) {
                                         doc['threads'][j]['excerpt'] = data[i]['excerpt'];
@@ -801,11 +852,13 @@ across the app instead of just the calendar page
                                     "msgid": data[i]['msgid'],
                                     "read": 0
                                 };
+                                //add new thread to db
                                 doc['threads'].push(thread);
                             }
                         }
                         console.log('Threads downloaded')
                         return db.put(doc).then(function () {
+                            //check for new messages
                             $.ajax({
                                 url: 'https://momlink.crc.nd.edu/~jonathan/current/getMessages.php',
                                 type: 'POST',
@@ -853,6 +906,11 @@ across the app instead of just the calendar page
             }
         });
     };
+
+
+    /*
+    Uploads clients SMS messages to PNCCs to the server
+    */
     $scope.uploadSMSMessages = function () {
         var db = PouchDB('momlink');
         var uploadData = [];
@@ -916,6 +974,11 @@ across the app instead of just the calendar page
         });
     }
 
+
+    /*
+    Allows pnccs to determine which trackers they want the client to use
+    Syncs client_trackers table with table on server
+    */
     $scope.retrieveClientTrackers = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -953,6 +1016,10 @@ across the app instead of just the calendar page
         console.log('client_trackers');
     };
 
+
+    /*
+    Pull events from server
+    */
     $scope.getEvents = function () {
         var db = PouchDB('momlink');
         var recentID = '';
@@ -996,7 +1063,7 @@ across the app instead of just the calendar page
                                         for (i in data) {
                                             var dateFormatted = moment(data[i]['edate']);
                                             dateFormatted = dateFormatted.format('YYYY-MM-DD');
-                                            //check that time is in the right format
+                                            //check that time is in the right format (times are stored in multiple ways on the server)
                                             if (data[i]['start'] != "" && (data[i]['start'].indexOf("AM") >= 0 || data[i]['start'].indexOf("am") >= 0 || data[i]['start'].indexOf("PM") >= 0 || data[i]['start'].indexOf("pm") >= 0)) {
                                                 var startTime = moment(data[i]['start'], ["h:mm A"]).format("HH:mm");
                                             }
@@ -1038,14 +1105,18 @@ across the app instead of just the calendar page
                     }
                 });
             })
-
         });
     };
+
+
+    /*
+    Push client made events to server
+    */
     $scope.updateClientEvents = function () {
         var db = PouchDB('momlink');
         var uploadEvents = [];
         db.get('events').then(function (doc) {
-            //get all events where share = 1 AND upload = 0 or 2 (2 means changes have been made that need to be sent)
+            //get all events where share = 1 AND upload = 0 or 2 (0 = not uploaded, 2 = changes have been made that need to be sent)
             for (i in doc['events']) {
                 if (doc['events'][i]['share'] == 1 && (doc['events'][i]['upload'] == 0 || doc['events'][i]['upload'] == 2)) {
                     uploadEvents.push(doc['events'][i])
@@ -1061,7 +1132,6 @@ across the app instead of just the calendar page
                 delete uploadEvents[j]['scheduledBy'];
                 delete uploadEvents[j]['questions'];
             }
-
         }).then(function () {
             if (uploadEvents.length > 0) {
                 var post_information = {};
@@ -1108,6 +1178,11 @@ across the app instead of just the calendar page
             }
         })
     };
+
+
+    /*
+    Remove client event from server if client no longer wants to share the event
+    */
     $scope.deleteClientEvents = function () {
         var db = PouchDB('momlink');
         var uploadEvents = [];
@@ -1163,6 +1238,11 @@ across the app instead of just the calendar page
             }
         })
     };
+
+
+    /*
+    Pull referrals from server
+    */
     $scope.getReferrals = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -1215,6 +1295,11 @@ across the app instead of just the calendar page
             }
         });
     };
+
+
+    /*
+    Update if client has followed up with referrals
+    */
     $scope.updateReferrals = function () {
         var db = PouchDB('momlink');
         var uploadReferrals = [];
@@ -1270,6 +1355,11 @@ across the app instead of just the calendar page
             }
         })
     };
+
+
+    /*
+    Pull articles from server
+    */
     $scope.getArticles = function () {
         var db = PouchDB('momlink');
         var downloads = [];
@@ -1397,6 +1487,11 @@ across the app instead of just the calendar page
             }
         });
     };
+
+
+    /*
+    Update clients reading history and quiz history for each article
+    */
     $scope.updateArticles = function () {
         var db = PouchDB('momlink');
         var uploadArticles = [];
@@ -1435,7 +1530,7 @@ across the app instead of just the calendar page
                         //for each article updated, update uploaded value to 1
                         if (data == true) {
                             db.get('articles').then(function (doc) {
-                                //set upload value so it is not reuploaded and clean local read/quiz history 
+                                //set upload value so it is not reuploaded and empty local read/quiz history 
                                 for (k in uploadArticles) {
                                     for (m in doc['articles']) {
                                         if (uploadArticles[k]['id'] == doc['articles'][m]['id']) {
@@ -1453,10 +1548,16 @@ across the app instead of just the calendar page
                 });
             }
             else {
+
                 console.log('Articles already up to date')
             }
         })
     };
+
+
+    /*
+    Pull surveys from server
+    */
     $scope.getSurveys = function () {
         var db = PouchDB('momlink');
         var downloads = [];
@@ -1562,6 +1663,10 @@ across the app instead of just the calendar page
         })
     };
 
+
+    /*
+    Send tracking data to server
+    */
     $scope.uploadTrackers = function () {
         //each cell holds the table and php script
         var tables = [['activity', 'Activity'], ['bloodGlucose', 'Track'], ['babyHeartRate', 'Track'], ['bloodIron', 'Track'],
@@ -1686,6 +1791,11 @@ across the app instead of just the calendar page
         }
         loopTrackers(tables);
     };
+
+
+    /*
+    Pull careplan tasks from server
+    */
     $scope.getCareplan = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -1728,6 +1838,11 @@ across the app instead of just the calendar page
             }
         });
     };
+
+
+    /*
+    Pull conditions from server that client can track
+    */
     $scope.getConditions = function () {
         var db = PouchDB('momlink');
         //var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -1753,6 +1868,11 @@ across the app instead of just the calendar page
             }
         });
     };
+
+
+    /*
+    Pull education categories
+    */
     $scope.getCategories = function () {
         var db = PouchDB('momlink');
         var agency;
@@ -1796,6 +1916,8 @@ across the app instead of just the calendar page
             });
         })
     };
+
+    //May need if referral section is revised
     /*$scope.getReferralCategories = function () {
         var db = PouchDB('momlink');
         var agency;
@@ -1847,6 +1969,10 @@ across the app instead of just the calendar page
         })
     };*/
 
+
+    /*
+    pull alerts from server
+    */
     $scope.getAlerts = function () {
         var db = PouchDB('momlink');
         var post_information = { 'cid': window.localStorage.getItem('cid') };
@@ -1886,6 +2012,10 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Send info to server on whether client completed task
+    */
     $scope.updateCareplan = function () {
         var db = PouchDB('momlink');
         var uploadGoals = [];
@@ -1931,6 +2061,11 @@ across the app instead of just the calendar page
             }
         })
     };
+
+
+    /*
+    Sends tracking data to server
+    */
     $scope.sendClickData = function () {
         var db = PouchDB('momlink');
         db.get('userData').then(function (doc) {
@@ -1964,6 +2099,11 @@ across the app instead of just the calendar page
             }
         })
     };
+
+
+    /*
+    Sends tracking data to server
+    */
     $scope.sendPushData = function () {
         var db = PouchDB('momlink');
         db.get('userData').then(function (doc) {
@@ -1998,15 +2138,17 @@ across the app instead of just the calendar page
         })
     };
 
+
     /*
-    Opens side menu navigation page
+    Opens side menu navigation panel
     */
     $scope.toggleRightSideMenu = function () {
         $ionicSideMenuDelegate.toggleRight();
     };
 
+
     /*
-    Shows current date on the home page and history pages
+    Shows current date on the home page and track history pages
     */
     $scope.renderSubheaderDate = function () {
         today = moment().format('MMMM Do YYYY');
@@ -2014,11 +2156,11 @@ across the app instead of just the calendar page
         var date = new Date()
         window.localStorage.setItem('currentDate', date)
     };
-
     $scope.renderTrackSubheaderDate = function () {
         today = moment(window.localStorage.getItem('currentDate')).format('MMMM Do YYYY');
         document.getElementById("todaysDate").innerHTML = today;
     };
+
 
     /*
     Displays todays events in the slider of the home page
@@ -2103,18 +2245,31 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         cycle = 0;
         db.get('articles').then(function (doc) {
-            articles = doc['recommended'];
-            if (articles.length == 0) {
+            recommended = doc['recommended'];
+            articles = []
+            if (recommended.length == 0) {
                 html = '<div class="row; centerVH;"><br>No New Articles</div>';
                 $('#articlesHeader').html(html);
                 $compile($('#articlesHeader'))($scope);
             }
             else {
+                for(i in recommended){
+                    for (j in doc['articles']) {
+                        if (i == doc['articles'][j]['id']) {
+                            articles.push(doc['articles'][j])
+                        }
+                    }
+                }
+                //check article contents
+                console.log('list articles')
+                console.log(JSON.stringify(articles))
                 renderHeaderArticle = function () {
                     articleHtml = '<div class="row centerWhite" ng-controller="EducationCtrl">';
                     var img = $scope.getCategoryImg(articles[cycle]['category']);
                     articleHtml += '<div class="col-15" align="left"><img src="' + img + '" style="height:60%;"></div>';
                     articleHtml += '<div class="col no-padding" align="left">';
+                    console.log('article Header')
+                    console.log(articles[cycle]['title'])
                     articleHtml += '<p>' + articles[cycle]['title'] + '</p>'
                     if (articles[cycle]['description'] != '' && articles[cycle]['description'] != null) {
                         articleHtml += '<span style="display: inline-block; max-height:75%; overflow:hidden">' + articles[cycle]['description'] + '</span>';
@@ -2141,64 +2296,6 @@ across the app instead of just the calendar page
                 }, 9000);
             }
         })
-    };
-    $scope.getCategoryImg = function (type) {
-        switch (type) {
-            case 'Safe Sleep':
-                return '../img/topics/sleep_big.png';
-            case 'Safety':
-                return '../img/formats/baby-proof-home.png';
-            case 'HUGS':
-                return '../img/topics/HUGS.jpg';
-            case 'Nutrition':
-                return '../img/formats/Nutrition.png';
-            case 'First Time Moms':
-                return '../img/topics/firstimemoms.jpg';
-            case 'Parenting':
-                return '../img/formats/WCC_south bend.jpg';
-            case 'Abstinence':
-                return '../img/topics/abstinence.jpg';
-            case 'Anticipatory Guidance':
-                return '../img/formats/nesting.jpg';
-            case 'Breastfeeding':
-                return '../img/topics/breastfeeding.jpg';
-            case 'Child Abuse':
-                return '../img/topics/childabuse.jpg';
-            case 'Community Resources':
-                return '../img/topics/communityresources.jpeg';
-            case 'Coping Skills':
-                return '../img/topics/coping.jpg';
-            case 'Dental Health':
-                return '../img/topics/dentalhealth copy.jpg';
-            case 'Domestic Violence':
-                return '../img/topics/domesticviolence.jpg';
-            case 'HIV Risks':
-                return '../img/topics/hivrisk.png';
-            case 'Family Planning':
-                return '../img/topics/familyplanning.jpg';
-            case 'Financial Planning':
-                return '../img/topics/financialplanning.jpg';
-            case 'Drug Cessation':
-                return '../img/topics/drugcessation.jpg';
-            case 'General Advice':
-                return '../img/topics/unnamed-chunk-5-1.png';
-            case 'Prenatal Care':
-                return '../img/topics/prenatalcare.jpg';
-            case 'Prenatal Weight':
-                return '../img/topics/prenatalweight.jpg';
-            case 'Baby Growth':
-                return '../img/topics/babygrowth.png';
-            case 'Labor and Delivery':
-                return '../img/topics/labor-delivery.jpg';
-            case 'Managing Pregnancy Discomforts':
-                return '../img/topics/pregdiscomforts.jpg';
-            case 'Health Care':
-                return '../img/topics/healthcare.jpg';
-            case 'Infant Stimulation':
-                return '../img/topics/infantstimulation.jpg';
-            case 'Infant Feeding':
-                return '../img/topics/infantfeeding.jpg';
-        }
     };
 
 
@@ -2263,6 +2360,7 @@ across the app instead of just the calendar page
         xhr.send();
     };
 
+
     /*
     Tracks behavior by saving the function executed whenever the
     user clicks a button
@@ -2290,8 +2388,9 @@ across the app instead of just the calendar page
         }, false);
     };
 
+
     /*
-    Not all functions are caught by the click listener, therefore clickTracker is a 
+    Not all functions are caught by the click listener, clickTracker is a 
     manual way of ensuring all user behaviors are tracked
     */
     $scope.clickTracker = function (event) {
@@ -2306,6 +2405,7 @@ across the app instead of just the calendar page
             return db.put(doc);
         })
     };
+
 
     /*
     Saves the users login data if they have already logged in, an auto login will not
@@ -2326,6 +2426,11 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Saves the users login data if they have already logged in, an auto login will not
+    occur if the user has logged out of the app the last time they used it
+    */
     $scope.pushListener = function () {
         document.addEventListener("deviceready", function () {
             FCMPlugin.onNotification(function (data) {
@@ -2348,6 +2453,10 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Saves a copy of each notification recieved to the db
+    */
     $scope.pushTracker = function (title, body) {
         var db = PouchDB('momlink');
         db.get('userData').then(function (doc) {
@@ -2357,6 +2466,7 @@ across the app instead of just the calendar page
             return db.put(doc);
         })
     };
+
 
     /*
     Renders badges (numerical notifications) on the homepage
@@ -2440,6 +2550,7 @@ across the app instead of just the calendar page
         })
     };
 
+
     /*
     Removes the splash screen only after the main page has loaded
     */
@@ -2448,6 +2559,7 @@ across the app instead of just the calendar page
             navigator.splashscreen.hide()
         });
     };
+
 
     /*
     Checks the username and password against those in the login table
@@ -2528,6 +2640,7 @@ across the app instead of just the calendar page
         });
     };
 
+
     /*
     Logs the user out and removes all local storage variables
     User must log in manually on next app visit
@@ -2543,6 +2656,7 @@ across the app instead of just the calendar page
         window.location = "../index.html";
     };
 
+
     /*
     Renders the users security question
     */
@@ -2557,6 +2671,7 @@ across the app instead of just the calendar page
             $compile($('#secQuestion'))($scope);
         });
     }
+
 
     /*
     Checks security question answer
@@ -2614,9 +2729,9 @@ across the app instead of just the calendar page
                     }
                 }
             });
-
         })
     }
+
 
     /*
     History page is used by all trackers expect nutrtion, therefore, trackType
@@ -2634,6 +2749,7 @@ across the app instead of just the calendar page
             $scope.toNewPage('history.html', 'History')
         }
     };
+
 
     /*
     Opens a modal for the appropriate tracker from the history page
@@ -2653,6 +2769,11 @@ across the app instead of just the calendar page
             }
         })
     };
+
+
+    /*
+    Displays number of kicks user had logged so far in a given session
+    */
     $scope.renderKicks = function () {
         var kcHtml = '';
         if ($scope.kicks == null) {
@@ -2681,6 +2802,11 @@ across the app instead of just the calendar page
         $('#kicks').html(kcHtml);
         $compile($('#kicks'))($scope);
     }
+
+
+    /*
+    Starts kick counter and timer
+    */
     $scope.startKickCounter = function () {
         navigator.vibrate(100);
         var kcHtml = '';
@@ -2701,6 +2827,10 @@ across the app instead of just the calendar page
         $('#kicks').html(kcHtml);
         $compile($('#kicks'))($scope);
     }
+
+    /*
+    Increases number of kicks by 1
+    */
     $scope.increaseKickCounter = function () {
         navigator.vibrate(100);
         $scope.kicks++;
@@ -2738,6 +2868,11 @@ across the app instead of just the calendar page
             $('#kickCounter').html(String($scope.kicks + ' Kicks'));
         }
     }
+
+
+    /*
+    Cancels current kick counting session
+    */
     $scope.cancelKickCounter = function () {
         delete $scope.kicks;
         delete $scope.kicksStart;
@@ -2771,6 +2906,10 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Renders add pill page
+    */
     $scope.goToAddPill = function () {
         window.localStorage.setItem('currentPage', 'addNewPill.html');
         $.ajax({
@@ -2782,6 +2921,10 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Renders edit pill page
+    */
     $scope.goToEditPill = function (pillID) {
         $scope.pillID = pillID;
         window.localStorage.setItem('currentPage', 'editPill.html');
@@ -2793,6 +2936,7 @@ across the app instead of just the calendar page
             }
         });
     };
+
 
     /*
     If the contact has provided their email address and phone number, 
@@ -2899,6 +3043,7 @@ across the app instead of just the calendar page
         }
     };
 
+
     /*
     Opens the modal for creating events
     */
@@ -2917,6 +3062,7 @@ across the app instead of just the calendar page
             $scope.modal.show();
         })
     }
+
 
     /*
     Saves event to the db
@@ -3048,6 +3194,7 @@ across the app instead of just the calendar page
             }
         });
     }
+
 
     /*
     View event given an eventID
@@ -3185,6 +3332,7 @@ across the app instead of just the calendar page
         });
     }
 
+
     /*
     If a date in calendar is clicked, the date field will be automatically populated
     */
@@ -3198,8 +3346,9 @@ across the app instead of just the calendar page
         }
     }
 
+
     /*
-    Updates db with new/changed data
+    Updates event table in local db
     */
     $scope.updateEvent = function () {
         var db = PouchDB('momlink');
@@ -3341,6 +3490,10 @@ across the app instead of just the calendar page
         })
     };
 
+
+    /*
+    Asks client upon login whether they've followed up with their referral
+    */
     $scope.checkReferrals = function () {
         var db = PouchDB('momlink');
         var followups = []
@@ -3484,6 +3637,11 @@ across the app instead of just the calendar page
         })
     };
 
+
+    /*
+    Prompts client upon login to complete a follow-up quiz from an article
+    read two weeks prior
+    */
     $scope.checkQuizzes = function () {
         var db = PouchDB('momlink');
         db.get('articles').then(function (doc) {
@@ -3664,6 +3822,9 @@ across the app instead of just the calendar page
     };
 
 
+    /*
+    Toggles input for reminder, how many minutes before event begins
+    */
     $scope.toggleMinsBefore = function () {
         if ($("#minsBeforeDrop").css('display') == 'none') {
             $('#minsBeforeDrop').css('display', '')
@@ -3734,6 +3895,12 @@ across the app instead of just the calendar page
         return time;
     }
 
+
+    /*
+    Shows the user the appropriate progress screen based on 
+    the stage of their pregnancy, determined by time to expected 
+    delivery date
+    */
     $scope.progress = function () {
         var db = PouchDB('momlink');
         var week;
@@ -3768,6 +3935,11 @@ across the app instead of just the calendar page
             })
         })
     }
+
+
+    /*
+    Navigate between progress panels
+    */
     $scope.navProgress = function (nav) {
         var db = PouchDB('momlink');
         var week = $("#week").html().slice(-2);
@@ -3799,6 +3971,10 @@ across the app instead of just the calendar page
 
     }
 
+
+    /*
+    popup handler
+    */
     $scope.imagePopup = function (image) {
         console.log(image)
         var template = '<ion-modal-view>';
@@ -3818,6 +3994,7 @@ across the app instead of just the calendar page
         $scope.modal.show();
     }
 
+
     /*
     Returns the time parameter from a date such as 08/01/2016T10:23
     */
@@ -3826,6 +4003,10 @@ across the app instead of just the calendar page
         return time;
     }
 
+
+    /*
+    returns category label based on id
+    */
     $scope.decodeCategory = function (category) {
         switch (category) {
             case '1':
@@ -3845,6 +4026,10 @@ across the app instead of just the calendar page
         }
     }
 
+
+    /*
+    returns category label based on id
+    */
     $scope.decodeReminder = function (str) {
         str = str.replace(/:/gi, '');
         str = str.replace(/-/gi, '');
@@ -3853,6 +4038,7 @@ across the app instead of just the calendar page
         str = str.replace(/pm/gi, '');
         return str;
     }
+
 
     /*
     Text to speech function using responsiveVoice.js
@@ -3866,6 +4052,7 @@ across the app instead of just the calendar page
             });
         }, false);
     }
+
 
     /*
     Temporary function to see contents of db
@@ -3884,9 +4071,8 @@ across the app instead of just the calendar page
         })*/
     }
 
-    /*
-    Temporary function for study, emails a log of user behavior
-    */
+
+    //Temporary function for study, emails a log of user behavior
     /*$scope.sendLog = function () {
         var db = PouchDB('momlink');
         var log = '';
@@ -3912,11 +4098,14 @@ across the app instead of just the calendar page
 })
 
 
-    /*
-                    The inbox controller pulls referral and pncc contacts
-                    allows user to call/text/email them and render sms conversations
-                    */
+/*
+The inbox controller pulls referral and pncc contacts
+allows user to call/text/email them and render sms conversations
+*/
 .controller('InboxCtrl', function ($scope, $compile, $ionicPopup) {
+    /*
+    Send message
+    */
     $scope.sendNewMessage = function (recipient) {
         if (navigator.connection.type == Connection.NONE && articles.length == 0) {
             //alert must be connected to wifi
@@ -4001,6 +4190,10 @@ across the app instead of just the calendar page
         }
     }
 
+
+    /*
+    Reply to message
+    */
     $scope.sendNewReply = function (recipient, msgID) {
         if (navigator.connection.type == Connection.NONE && articles.length == 0) {
             //alert must be connected to wifi
@@ -4071,6 +4264,10 @@ across the app instead of just the calendar page
         }
     }
 
+
+    /*
+    Provides options for what type of message to send
+    */
     $scope.newPNCCMessage = function (recipient, email, phone) {
         if (email != '' && phone != '') {
             $ionicPopup.show({
@@ -4222,6 +4419,7 @@ across the app instead of just the calendar page
         }
     };
 
+
     /*
     Pulls all referrals and assocaited contact information
     */
@@ -4257,6 +4455,7 @@ across the app instead of just the calendar page
         });
     };
 
+
     /*
     Pulls all pnncs and assocaited contact information
     */
@@ -4291,6 +4490,10 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Renders all threads sorted by date of most recent message
+    */
     $scope.renderThreads = function () {
         var db = PouchDB('momlink');
         var allThreads = [];
@@ -4369,6 +4572,10 @@ across the app instead of just the calendar page
         })
     };
 
+
+    /*
+    Renders all messages in a given thread
+    */
     $scope.renderThreadList = function (pncc_id, msgid) {
         var db = PouchDB('momlink');
         var html = '';
@@ -4407,6 +4614,10 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Renders all messages in a given thread specific to pnccs
+    */
     $scope.renderPNCCConversation = function (pncc_id) {
         var db = PouchDB('momlink');
         var html = '';
@@ -4446,6 +4657,7 @@ across the app instead of just the calendar page
             }, function (error) { console.log(error) });
         });
     };
+
 
     /*
     Displays sms conversation between user and contact
@@ -4498,9 +4710,9 @@ across the app instead of just the calendar page
 
 
 /*
-            The calendar controller implements fullCalendar.js to display events
-            and handles event questions
-            */
+The calendar controller implements fullCalendar.js to display events
+and handles event questions
+*/
 .controller('CalendarCtrl', function ($scope, $ionicPopup, $compile) {
     /*
     Displays fullCalendar and attaches the viewEvent function to each event
@@ -4542,6 +4754,10 @@ across the app instead of just the calendar page
         $('#calendar').fullCalendar('rerenderEvents');
     };
 
+
+    /*
+    Allows user to share events with their pnccs
+    */
     $scope.toggleShare = function () {
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
@@ -4556,6 +4772,10 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Allows user to set reminder for an event
+    */
     $scope.toggleReminder = function () {
         var db = PouchDB('momlink');
         db.get('events').then(function (doc) {
@@ -4570,6 +4790,7 @@ across the app instead of just the calendar page
             }
         });
     };
+
 
     /*
     Displays all questions either initally present or user has added
@@ -4687,8 +4908,8 @@ across the app instead of just the calendar page
 
 
 /*
-            The referral controller shows all referrals and option to schedule meetings with them
-            */
+Shows all referrals and option to schedule meetings with them
+*/
 .controller('ReferralCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
     /*
     Populate all users referrals
@@ -4745,6 +4966,10 @@ across the app instead of just the calendar page
         });
     };
 
+
+    /*
+    Change status of whether referral was met
+    */
     $scope.changeStatus = function (id) {
         var db = PouchDB('momlink');
         db.get('referrals').then(function (doc) {
@@ -4766,6 +4991,7 @@ across the app instead of just the calendar page
             })
         })
     }
+
 
     /*
     Ask the user if they have already contacted/scheduled a meeting,
@@ -4837,11 +5063,8 @@ across the app instead of just the calendar page
 
 
 /*
-The education controller handles articles sent to the user by their pncc
-Allows user to download articles for offline use
-Articles are placed into two categories: shared and history, shared articles are 
-those recently given to user, shared articles are then moved to the history section after
-the articles quiz has been completed with a perfect score
+Handles articles sent to the user by their pncc
+Also allows users to download articles from a library based on category
 */
 .controller('EducationCtrl', function ($scope, $ionicPopup, $ionicModal, $timeout, $compile) {
     var timer;
@@ -5193,6 +5416,7 @@ the articles quiz has been completed with a perfect score
         });
     }
 
+
     /*
     Checks whether the user has already read the article/taken the articles quiz
     */
@@ -5233,6 +5457,7 @@ the articles quiz has been completed with a perfect score
             ],
         });
     };
+
 
     /*
     Opens the selected article
@@ -5327,6 +5552,7 @@ the articles quiz has been completed with a perfect score
         })
     }
 
+
     /*
     Opens the selected quiz
     prequiz variable determines if the quiz is being taken prior to reading the article
@@ -5347,6 +5573,9 @@ the articles quiz has been completed with a perfect score
                         answers = quiz[j][1];
                         //render question
                         html += '<div class="item item-text-wrap item-divider item-icon-right">' + question + '<i class="icon ion-volume-medium" ng-click="speak(&quot;' + question + '&quot;)"></i></div>';
+                        if (quiz[j][4] != null) {
+                            html += '<img class="col no-padding" src="../img/quizContent/' + quiz[j][4] + '" style="max-width=100%;max-height=auto">'
+                        }
                         //render answers
                         html += '<form id="' + String(j) + '">'
                         html += '<ion-list>'
@@ -5436,6 +5665,7 @@ the articles quiz has been completed with a perfect score
         });
     };
 
+
     /*
     Grades the selected quiz, if a perfect score is achieved, the article is then moved to history
     */
@@ -5512,6 +5742,7 @@ the articles quiz has been completed with a perfect score
         })
     };
 
+
     /*
     Returns image based on article format (text, audio, video, etc.)
     */
@@ -5539,67 +5770,6 @@ the articles quiz has been completed with a perfect score
         }
     };
 
-    /*
-    Returns image based on article category
-    */
-    $scope.getCategoryImg = function (type) {
-        switch (type) {
-            case 'Safe Sleep':
-                return '../img/topics/sleep_big.png';
-            case 'Safety':
-                return '../img/formats/baby-proof-home.png';
-            case 'HUGS':
-                return '../img/topics/HUGS.jpg';
-            case 'Nutrition':
-                return '../img/formats/Nutrition.png';
-            case 'First Time Moms':
-                return '../img/topics/firstimemoms.jpg';
-            case 'Parenting':
-                return '../img/formats/WCC_south bend.jpg';
-            case 'Abstinence':
-                return '../img/topics/abstinence.jpg';
-            case 'Anticipatory Guidance':
-                return '../img/formats/nesting.jpg';
-            case 'Breastfeeding':
-                return '../img/topics/breastfeeding.jpg';
-            case 'Child Abuse':
-                return '../img/topics/childabuse.jpg';
-            case 'Community Resources':
-                return '../img/topics/communityresources.jpeg';
-            case 'Coping Skills':
-                return '../img/topics/coping.jpg';
-            case 'Dental Health':
-                return '../img/topics/dentalhealth copy.jpg';
-            case 'Domestic Violence':
-                return '../img/topics/domesticviolence.jpg';
-            case 'HIV Risks':
-                return '../img/topics/hivrisk.png';
-            case 'Family Planning':
-                return '../img/topics/familyplanning.jpg';
-            case 'Financial Planning':
-                return '../img/topics/financialplanning.jpg';
-            case 'Drug Cessation':
-                return '../img/topics/drugcessation.jpg';
-            case 'General Advice':
-                return '../img/topics/unnamed-chunk-5-1.png';
-            case 'Prenatal Care':
-                return '../img/topics/prenatalcare.jpg';
-            case 'Prenatal Weight':
-                return '../img/topics/prenatalweight.jpg';
-            case 'Baby Growth':
-                return '../img/topics/babygrowth.png';
-            case 'Labor and Delivery':
-                return '../img/topics/labor-delivery.jpg';
-            case 'Managing Pregnancy Discomforts':
-                return '../img/topics/pregdiscomforts.jpg';
-            case 'Health Care':
-                return '../img/topics/healthcare.jpg';
-            case 'Infant Stimulation':
-                return '../img/topics/infantstimulation.jpg';
-            case 'Infant Feeding':
-                return '../img/topics/infantfeeding.jpg';
-        }
-    };
 
     /*
     Used in conjunction with record time, starts the timer
@@ -5607,6 +5777,7 @@ the articles quiz has been completed with a perfect score
     $scope.startSessionTimer = function () {
         timer = setInterval(function () { sessionTime++; }, 1000);
     };
+
 
     /*
     Records the amount of time the user has spent reading the quiz
@@ -5636,12 +5807,14 @@ the articles quiz has been completed with a perfect score
         });
     };
 
+
     /*
     Opens modal
     */
     $scope.openModal = function () {
         $scope.modal.show();
     };
+
 
     /*
     Closes modal and removes it from memory
@@ -5651,6 +5824,8 @@ the articles quiz has been completed with a perfect score
             $scope.modal.remove();
         });
     };
+
+
 
     $scope.openFile = function (file) {
         console.log(JSON.stringify(file))
@@ -5668,6 +5843,7 @@ the articles quiz has been completed with a perfect score
         open(file, success, error);
     }
 
+
     $scope.updateArticles = function (category) {
         var db = PouchDB('momlink');
         db.get('articles').then(function (doc) {
@@ -5681,6 +5857,7 @@ the articles quiz has been completed with a perfect score
             $scope.downloadCategory(categoryID, category)
         })
     }
+
 
     $scope.downloadArticle = function (articleURL, articleID) {
         //The directory to store data
@@ -5706,6 +5883,8 @@ the articles quiz has been completed with a perfect score
             console.log('deletion was not successful')
         }
     }
+
+
     $scope.deleteArticle = function (articleID) {
         window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dir) {
             dir.getFile(articleID.concat('.html'), { create: false }, function (fileEntry) {
@@ -5753,7 +5932,7 @@ the articles quiz has been completed with a perfect score
 
 /*
             
-            */
+*/
 .controller('TrackCtrl', function ($scope, $ionicModal, $ionicPopup, $compile) {
     $scope.showTrackers = function () {
         var db = PouchDB('momlink');
@@ -7092,7 +7271,7 @@ the articles quiz has been completed with a perfect score
 
 /*
                 
-                */
+*/
 .controller('NutritionCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.refreshNutritionPage = function () {
         //clean canvases
@@ -7381,8 +7560,8 @@ the articles quiz has been completed with a perfect score
 
 
 /*
-                Handler for javascript clock used in addActivityTime page
-                */
+Handler for javascript clock used in addActivityTime page
+*/
 .controller('ClockCtrl', function () {
     function Clock(IN_szContainerID, IN_objOptions) {
         this.init();
@@ -7606,7 +7785,7 @@ the articles quiz has been completed with a perfect score
 
 /*
                 
-                */
+*/
 .controller('CarePlanCtrl', function ($scope, $compile, $ionicPopup) {
     $scope.renderCareplan = function () {
         var db = PouchDB('momlink');
@@ -7651,7 +7830,7 @@ the articles quiz has been completed with a perfect score
 
 /*
                 
-                */
+*/
 .controller('JournalCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.renderPhotoJournal = function () {
         var start;
@@ -7970,7 +8149,7 @@ the articles quiz has been completed with a perfect score
 
 /*
                 
-                */
+*/
 .controller('ProfileCtrl', function ($scope) {
     $scope.updateProfile = function () {
         var db = PouchDB('momlink');
@@ -8043,7 +8222,7 @@ the articles quiz has been completed with a perfect score
 
 /*
             
-            */
+*/
 .controller('SettingsCtrl', function ($scope, $ionicModal, $ionicPopup, $compile, $ionicListDelegate) {
     $scope.listTrackers = function () {
         var db = PouchDB('momlink');
@@ -8135,7 +8314,7 @@ the articles quiz has been completed with a perfect score
 
 /*
                 
-                */
+*/
 .controller('CameraCtrl', function ($scope) {
     var pictureSource;
     var destinationType; // sets the format of returned value
@@ -8231,8 +8410,8 @@ the articles quiz has been completed with a perfect score
 
 
 /*
-                Handler for popOver features
-                */
+Handler for popOver features
+*/
 .controller('PopOverCtrl', function ($scope, $ionicPopover) {
     $ionicPopover.fromTemplateUrl('popover.html', {
         scope: $scope

@@ -1,26 +1,26 @@
 ﻿<ion-pane>
     <ion-view overflow-scroll="true">
-        <ion-nav-view></ion-nav-view>
-        <ion-tabs class="has-header tabs-positive tabs-icon-top" ng-controller="SurveyCtrl">
-            <ion-tab title="Recent" icon-on="ion-ios-paper" icon-off="ion-ios-paper-outline">
-                <ion-view>
-                    <ion-content overflow-scroll="true" class="has-header" ng-init="renderSurveys()">
+        <!--<ion-nav-view></ion-nav-view>-->
+        <!--<ion-tabs class="has-header tabs-positive tabs-icon-top" ng-controller="SurveyCtrl">
+            <ion-tab title="Recent" icon-on="ion-ios-paper" icon-off="ion-ios-paper-outline">--->
+                <!--<ion-view>-->
+                    <ion-content overflow-scroll="true" class="has-header" ng-controller="SurveyCtrl" ng-init="renderSurveys()">
                         <div id="recent"></div>
                     </ion-content>
-                    <div class="float-button-hasFooter">
+                    <div class="float-button">
                         <span class="height-fix">
                             <button class="button button-positive button-rounded content" ng-click="updateAllSurveys()"><i class="icon ion-loop"></i></button>
                         </span>
                     </div>
-                </ion-view>
-            </ion-tab>
-            <!--<ion-tab title="History" icon-on="ion-ios-bookmarks" icon-off="ion-ios-bookmarks-outline">
+                <!--</ion-view>-->
+            <!--</ion-tab>
+            <ion-tab title="History" icon-on="ion-ios-bookmarks" icon-off="ion-ios-bookmarks-outline">
                 <ion-view>
                     <ion-content overflow-scroll="true" class="has-header" ng-init="renderPastSurveys()">
                         <div id="history"></div>
                     </ion-content>
                 </ion-view>
             </ion-tab>-->
-        </ion-tabs>
+        <!--</ion-tabs>-->
     </ion-view>
 </ion-pane>
