@@ -145,7 +145,7 @@ across the app instead of just the calendar page
                     "weight": [],
                 });
             }
-        });
+        }); 
         db.get('nutrition').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -2253,9 +2253,9 @@ across the app instead of just the calendar page
                 $compile($('#articlesHeader'))($scope);
             }
             else {
-                for(i in recommended){
+                for (i in recommended) {
                     for (j in doc['articles']) {
-                        if (i == doc['articles'][j]['id']) {
+                        if (recommended[i] == doc['articles'][j]['id']) {
                             articles.push(doc['articles'][j])
                         }
                     }
@@ -2265,11 +2265,10 @@ across the app instead of just the calendar page
                 console.log(JSON.stringify(articles))
                 renderHeaderArticle = function () {
                     articleHtml = '<div class="row centerWhite" ng-controller="EducationCtrl">';
-                    var img = $scope.getCategoryImg(articles[cycle]['category']);
-                    articleHtml += '<div class="col-15" align="left"><img src="' + img + '" style="height:60%;"></div>';
-                    articleHtml += '<div class="col no-padding" align="left">';
-                    console.log('article Header')
-                    console.log(articles[cycle]['title'])
+                    var img = $scope.getFormatImg(articles[cycle]['filename'])
+                    console.log(img)
+                    articleHtml += '<div class="col-15" align="left"><img src="../img/formats/' + img + '" style="width:auto;"></div>';
+                    articleHtml += '<div class="col" align="left">';
                     articleHtml += '<p>' + articles[cycle]['title'] + '</p>'
                     if (articles[cycle]['description'] != '' && articles[cycle]['description'] != null) {
                         articleHtml += '<span style="display: inline-block; max-height:75%; overflow:hidden">' + articles[cycle]['description'] + '</span>';
@@ -2298,7 +2297,7 @@ across the app instead of just the calendar page
         })
     };
 
-
+    
     /*
     Back button handler, keeps a queue of pages to trace back through
     empties the stack whenever the homepage is visited
@@ -4072,6 +4071,30 @@ across the app instead of just the calendar page
     }
 
 
+    $scope.getFormatImg = function (type) {
+        if (type == 'Website') {
+            return 'website.png';
+        }
+        switch (type.substr(type.length - 3)) {
+            case 'pdf':
+                return 'pdf.png';
+            case 'png':
+                return 'image.png';
+            case 'jpg':
+                return 'image.png';
+            case 'peg':
+                return 'image.png';
+            case 'iff':
+                return 'image.png';
+            case 'mp3':
+                return 'audio.png';
+            case 'mp4':
+                return 'video.png';
+            case '3gp':
+                return 'video.png';
+        }
+    };
+
     //Temporary function for study, emails a log of user behavior
     /*$scope.sendLog = function () {
         var db = PouchDB('momlink');
@@ -5685,9 +5708,10 @@ Also allows users to download articles from a library based on category
                         selectedAnswer = $('input[name="' + String(j) + '"]:checked', '#'.concat(j)).val();
                         confidenceAnswer = $('input[name="C' + String(j) + '"]:checked', '#C'.concat(j)).val();
                         //get correct answer at index
-                        correctAnswer = quiz[j][2]
+                        correctAnswers = quiz[j][2]
                         questionID = quiz[j][3];
-                        if (selectedAnswer == correctAnswer) {
+                        //if selectedAnswer is in correctAnswers;
+                        if ($.inArray(selectedAnswer, correctAnswers) != -1) {
                             usersAnswers.push([selectedAnswer, 1, confidenceAnswer, questionID]);
                             score++;
                         }
