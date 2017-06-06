@@ -112,7 +112,8 @@ across the app instead of just the calendar page
             if (err.status === 404) {
                 db.put({
                     "_id": "careplan",
-                    'careplan': []
+                    'careplan': [],
+                    'trimesterplan': []
                 });
             }
         });
@@ -145,7 +146,7 @@ across the app instead of just the calendar page
                     "weight": [],
                 });
             }
-        }); 
+        });
         db.get('nutrition').catch(function (err) {
             if (err.status === 404) {
                 db.put({
@@ -563,6 +564,7 @@ across the app instead of just the calendar page
     Called when clicking 'Test' button on the home page, used for debugging purposes
     */
     $scope.testPHP = function () {
+        $scope.updateTrimesterplan()
         /*cordova.plugins.notification.badge.set(1);*/
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
@@ -624,6 +626,8 @@ across the app instead of just the calendar page
         $scope.getCareplan();
         $scope.updateCareplan();
         $scope.getConditions();
+        $scope.getTrimesterplan();
+        $scope.updateTrimesterplan();
         $scope.getAlerts()
         $scope.sendClickData();
         $scope.sendPushData();
@@ -1841,6 +1845,54 @@ across the app instead of just the calendar page
 
 
     /*
+    Pull trimester plans from server
+    */
+    $scope.getTrimesterplan = function () {
+        var db = PouchDB('momlink');
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getTrimesterPlans.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                if (data.length > 0) {
+                    //&& data[0]['id'] != null
+                    //console.log(JSON.stringify(data))
+                    db.get('careplan').then(function (doc) {
+                        for (i in data) {
+                            //check if careplan is already in local db
+                            var isUnique = true;
+                            for (j in doc['trimesterplan']) {
+                                if (data[i]['id'] == doc['trimesterplan'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                var tp = {
+                                    "id": data[i]['id'],
+                                    "goal": data[i]['goal'],
+                                    "trimester": data[i]['trimester'],
+                                    "status": '0',
+                                    "upload": '1'
+                                };
+                                doc['trimesterplan'].push(tp);
+                            }
+                        }
+                        console.log('Trimester plans downloaded')
+                        return db.put(doc);
+                    });
+                }
+                else {
+                    console.log('No new goals for trimester plan')
+                }
+            }
+        });
+    };
+
+
+    /*
     Pull conditions from server that client can track
     */
     $scope.getConditions = function () {
@@ -2062,6 +2114,56 @@ across the app instead of just the calendar page
         })
     };
 
+    /*
+    Send info to server on whether client completed task
+    */
+    $scope.updateTrimesterplan = function () {
+        var db = PouchDB('momlink');
+        var uploadGoals = [];
+        db.get('careplan').then(function (doc) {
+            for (i in doc['trimesterplan']) {
+                if (doc['trimesterplan'][i]['upload'] == 0) {
+                    uploadGoals.push(doc['trimesterplan'][i])
+                }
+            }
+        }).then(function () {
+            if (uploadGoals.length > 0) {
+                var post_information = {};
+                post_information.goals = uploadGoals;
+                post_information.cid = window.localStorage.getItem('cid');
+                console.log(JSON.stringify(post_information))
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updateTrimesterplan.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async: false,
+                    success: function (data) {
+                        //console.log(JSON.stringify(data))
+                        //for each goal updated, update uploaded value to 1
+                        if (data == true) {
+                            db.get('careplan').then(function (doc) {
+                                //set upload value so it is not reuploaded
+                                for (k in uploadGoals) {
+                                    for (m in doc['trimesterplan']) {
+                                        if (uploadGoals[k]['id'] == doc['trimesterplan'][m]['id']) {
+                                            doc['trimesterplan'][m]['upload'] = '1';
+                                        }
+                                    }
+                                }
+                                console.log('Trimesterplan updated')
+                                return db.put(doc);
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('Trimesterplans already up to date')
+            }
+        })
+    };
+
 
     /*
     Sends tracking data to server
@@ -2238,7 +2340,6 @@ across the app instead of just the calendar page
     $scope.renderArticlesHeader = function () {
         //if function is already running, stop the previous instance before starting a new one
         if (angular.isDefined(cycleHandler)) {
-            console.log('check')
             $interval.cancel(cycleHandler)
             cycleHandler = undefined;
         }
@@ -2261,12 +2362,9 @@ across the app instead of just the calendar page
                     }
                 }
                 //check article contents
-                console.log('list articles')
-                console.log(JSON.stringify(articles))
                 renderHeaderArticle = function () {
                     articleHtml = '<div class="row centerWhite" ng-controller="EducationCtrl">';
                     var img = $scope.getFormatImg(articles[cycle]['filename'])
-                    console.log(img)
                     articleHtml += '<div class="col-15" align="left"><img src="../img/formats/' + img + '" style="width:auto;"></div>';
                     articleHtml += '<div class="col" align="left">';
                     articleHtml += '<p>' + articles[cycle]['title'] + '</p>'
@@ -2297,7 +2395,7 @@ across the app instead of just the calendar page
         })
     };
 
-    
+
     /*
     Back button handler, keeps a queue of pages to trace back through
     empties the stack whenever the homepage is visited
@@ -7816,7 +7914,7 @@ Handler for javascript clock used in addActivityTime page
         var html = '<ion-list>';
         db.get('careplan').then(function (doc) {
             for (i in doc['careplan']) {
-                html += '<div class="item item-checkbox item-icon-right item-text-wrap" ng-click="updateGoal(&quot;' + doc['careplan'][i]['id'] + '&quot;)">' + doc['careplan'][i]['goal'] + '<label class="checkbox">';
+                html += '<div class="item item-checkbox item-icon-right item-text-wrap" ng-click="updateGoal(&quot;' + doc['careplan'][i]['id'] + '&quot;, &quot;careplan&quot;)">' + doc['careplan'][i]['goal'] + '<label class="checkbox">';
                 if (doc['careplan'][i]['status'] == '1') {
                     html += '<input type="checkbox" name="G" checked></label></div>'
                 }
@@ -7830,23 +7928,66 @@ Handler for javascript clock used in addActivityTime page
             $compile($('#careplan'))($scope);
         })
     }
-    $scope.updateGoal = function (id) {
+    $scope.updateGoal = function (id, plan) {
+        console.log(plan)
         var db = PouchDB('momlink');
         db.get('careplan').then(function (doc) {
-            for (i in doc['careplan']) {
-                if (doc['careplan'][i]['id'] == id) {
+            for (i in doc[plan]) {
+                if (doc[plan][i]['id'] == id) {
                     break;
                 }
             }
-            if (doc['careplan'][i]['status'] == '1') {
-                doc['careplan'][i]['status'] = '0'
-                doc['careplan'][i]['upload'] = '0'
+            if (doc[plan][i]['status'] == '1') {
+                doc[plan][i]['status'] = '0'
+                doc[plan][i]['upload'] = '0'
             }
             else {
-                doc['careplan'][i]['status'] = '1'
-                doc['careplan'][i]['upload'] = '0'
+                doc[plan][i]['status'] = '1'
+                doc[plan][i]['upload'] = '0'
             }
             return db.put(doc)
+        })
+    }
+
+    $scope.navCareplan = function (nav) {
+        var db = PouchDB('momlink');
+        var html = '<ion-list>';
+        var trimester = $("#trimester").html().slice(-2);
+        trimester = parseInt(trimester);
+        if (nav == '+') {
+            if (trimester > 2) {
+                trimester = 3;
+            }
+            else {
+                trimester++;
+            }
+        }
+        if (nav == '-') {
+            if (trimester <= 1) {
+                trimester = 1;
+            }
+            else {
+                trimester--;
+            }
+        }
+        db.get('careplan').then(function (doc) {
+            $('#trimester').html('Trimester ' + trimester);
+            tri = doc['trimesterplan'];
+            for (i in tri) {
+                if (trimester == parseInt(tri[i]['trimester'])) {
+                    html += '<div class="item item-checkbox item-icon-right item-text-wrap" ng-click="updateGoal(&quot;' + tri[i]['id'] + '&quot;, &quot;trimesterplan&quot;)">' + tri[i]['goal'] + '<label class="checkbox">';
+                    if (tri[i]['status'] == '1') {
+                        html += '<input type="checkbox" name="G" checked></label></div>'
+                    }
+                    else {
+                        html += '<input type="checkbox" name="G"></label></div>'
+                    }
+                }
+            }
+        }).then(function () {
+            html += '</ion-list>';
+            $('#trimesterPlans').html(html);
+            $compile($('#trimesterPlans'))($scope);
         })
     }
 })
