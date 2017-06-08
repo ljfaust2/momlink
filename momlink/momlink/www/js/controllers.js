@@ -564,7 +564,6 @@ across the app instead of just the calendar page
     Called when clicking 'Test' button on the home page, used for debugging purposes
     */
     $scope.testPHP = function () {
-        $scope.updateTrimesterplan()
         /*cordova.plugins.notification.badge.set(1);*/
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
@@ -628,7 +627,8 @@ across the app instead of just the calendar page
         $scope.getConditions();
         $scope.getTrimesterplan();
         $scope.updateTrimesterplan();
-        $scope.getAlerts()
+        $scope.getAlerts();
+        $scope.updateEvents();
         $scope.sendClickData();
         $scope.sendPushData();
     };
@@ -640,6 +640,7 @@ across the app instead of just the calendar page
     $scope.updateAllEvents = function () {
         $scope.getEvents();
         $scope.updateClientEvents();
+        $scope.updateEvents();
         $scope.deleteClientEvents();
         $scope.sendClickData();
         $scope.toNewPage('calendar.html', 'Calendar');
@@ -1026,92 +1027,225 @@ across the app instead of just the calendar page
     */
     $scope.getEvents = function () {
         var db = PouchDB('momlink');
-        var recentID = '';
-        db.get('login').then(function (doc) {
+        //var recentID = '';
+        /*db.get('login').then(function (doc) {
             triage_level = doc['triage_level'];
-        }).then(function () {
-            db.get('events').then(function (doc) {
-                var post_information = { 'cid': window.localStorage.getItem('cid'), 'triage_level': triage_level };
+        }).then(function () {*/
+        //db.get('events').then(function (doc) {
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getEvents.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                console.log(JSON.stringify(data))
+                if (data.length > 0 && data[0]['id'] != null) {
+                    db.get('events').then(function (doc) {
+                        for (i in data) {
+                            //check if event is already in local db
+                            var isUnique = true;
+                            for (j in doc['events']) {
+                                if (data[i]['id'] == doc['events'][j]['id']) {
+                                    isUnique = false;
+                                }
+                            }
+                            if (isUnique == true) {
+                                var dateFormatted = moment(data[i]['edate']);
+                                dateFormatted = dateFormatted.format('YYYY-MM-DD');
+                                //check that time is in the right format (times are stored in multiple ways on the server)
+                                if (data[i]['start'] != "" && (data[i]['start'].indexOf("AM") >= 0 || data[i]['start'].indexOf("am") >= 0 || data[i]['start'].indexOf("PM") >= 0 || data[i]['start'].indexOf("pm") >= 0)) {
+                                    var startTime = moment(data[i]['start'], ["h:mm A"]).format("HH:mm");
+                                }
+                                else {
+                                    var startTime = data[i]['start'];
+                                }
+                                if (data[i]['end'] != "" && (data[i]['end'].indexOf("AM") >= 0 || data[i]['end'].indexOf("am") >= 0 || data[i]['end'].indexOf("PM") >= 0 || data[i]['end'].indexOf("pm") >= 0)) {
+                                    var endTime = moment(data[i]['end'], ["h:mm A"]).format("HH:mm");
+                                }
+                                else {
+                                    var endTime = data[i]['end'];
+                                }
+                                var event = {
+                                    "id": data[i]['id'],
+                                    "title": data[i]['title'],
+                                    "category": data[i]['category'],
+                                    "day": dateFormatted,
+                                    "start": dateFormatted + 'T' + startTime,
+                                    "end": dateFormatted + 'T' + endTime,
+                                    "venue": data[i]['venue'],
+                                    "description": data[i]['description'],
+                                    "questions": [],
+                                    "notes": '',
+                                    "color": $scope.getColor(data[i]['category']),
+                                    "viewed": '1',
+                                    "scheduledBy": '1',
+                                    "attended": '-1',
+                                    "upload": '-1'
+                                };
+                                doc['events'].push(event);
+                            }
+                        }
+                        console.log('new events added')
+                        return db.put(doc);
+                    });
+                }
+                else {
+                    console.log('No new events')
+                }
+            }
+        });
+    }
+    //});
+    /*$.ajax({
+        url: 'https://momlink.crc.nd.edu/~jonathan/current/getEventIDs.php',
+        type: 'POST',
+        dataType: 'json',
+        data: post_information,
+        async: false,
+        success: function (data) {
+            console.log(JSON.stringify(data))
+            dbIDs = []
+            eventIDs = []
+            //get ids in db
+            for (j in doc['events']) {
+                dbIDs.push(doc['events'][j]['id'])
+            }
+            //check if events are already in database
+            for (i in data) {
+                //if event is not in the db flag as one to be added
+                if ($.inArray(data[i]['id'], dbIDs) == -1) {
+                    eventIDs.push(data[i]['id'])
+                }
+            }
+            if (eventIDs.length != 0) {
+                var post_information2 = { 'ids': JSON.stringify(eventIDs) };
                 $.ajax({
-                    url: 'https://momlink.crc.nd.edu/~jonathan/current/getEventIDs.php',
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/getEvents.php',
                     type: 'POST',
                     dataType: 'json',
-                    data: post_information,
+                    data: post_information2,
                     async: false,
                     success: function (data) {
                         console.log(JSON.stringify(data))
-                        dbIDs = []
-                        eventIDs = []
-                        //get ids in db
-                        for (j in doc['events']) {
-                            dbIDs.push(doc['events'][j]['id'])
-                        }
-                        //check if events are already in database
-                        for (i in data) {
-                            //if event is not in the db flag as one to be added
-                            if ($.inArray(data[i]['id'], dbIDs) == -1) {
-                                eventIDs.push(data[i]['id'])
-                            }
-                        }
-                        if (eventIDs.length != 0) {
-                            var post_information2 = { 'ids': JSON.stringify(eventIDs) };
-                            $.ajax({
-                                url: 'https://momlink.crc.nd.edu/~jonathan/current/getEvents.php',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: post_information2,
-                                async: false,
-                                success: function (data) {
-                                    console.log(JSON.stringify(data))
-                                    db.get('events').then(function (doc) {
-                                        for (i in data) {
-                                            var dateFormatted = moment(data[i]['edate']);
-                                            dateFormatted = dateFormatted.format('YYYY-MM-DD');
-                                            //check that time is in the right format (times are stored in multiple ways on the server)
-                                            if (data[i]['start'] != "" && (data[i]['start'].indexOf("AM") >= 0 || data[i]['start'].indexOf("am") >= 0 || data[i]['start'].indexOf("PM") >= 0 || data[i]['start'].indexOf("pm") >= 0)) {
-                                                var startTime = moment(data[i]['start'], ["h:mm A"]).format("HH:mm");
-                                            }
-                                            else {
-                                                var startTime = data[i]['start'];
-                                            }
-                                            if (data[i]['end'] != "" && (data[i]['end'].indexOf("AM") >= 0 || data[i]['end'].indexOf("am") >= 0 || data[i]['end'].indexOf("PM") >= 0 || data[i]['end'].indexOf("pm") >= 0)) {
-                                                var endTime = moment(data[i]['end'], ["h:mm A"]).format("HH:mm");
-                                            }
-                                            else {
-                                                var endTime = data[i]['end'];
-                                            }
-                                            var event = {
-                                                "id": data[i]['id'],
-                                                "title": data[i]['title'],
-                                                "category": data[i]['category'],
-                                                "day": dateFormatted,
-                                                "start": dateFormatted + 'T' + startTime,
-                                                "end": dateFormatted + 'T' + endTime,
-                                                "venue": data[i]['venue'],
-                                                "description": data[i]['description'],
-                                                "questions": [],
-                                                "color": $scope.getColor(data[i]['category']),
-                                                "viewed": '1',
-                                                "scheduledBy": '1'
-                                            };
-                                            doc['events'].push(event);
-                                        }
-                                        return db.put(doc).then(function () {
-                                            console.log('new events added')
-                                        })
-                                    });
+                        db.get('events').then(function (doc) {
+                            for (i in data) {
+                                var dateFormatted = moment(data[i]['edate']);
+                                dateFormatted = dateFormatted.format('YYYY-MM-DD');
+                                //check that time is in the right format (times are stored in multiple ways on the server)
+                                if (data[i]['start'] != "" && (data[i]['start'].indexOf("AM") >= 0 || data[i]['start'].indexOf("am") >= 0 || data[i]['start'].indexOf("PM") >= 0 || data[i]['start'].indexOf("pm") >= 0)) {
+                                    var startTime = moment(data[i]['start'], ["h:mm A"]).format("HH:mm");
                                 }
-                            });
-                        }
-                        else {
-                            console.log('shared events already up to date')
-                        }
+                                else {
+                                    var startTime = data[i]['start'];
+                                }
+                                if (data[i]['end'] != "" && (data[i]['end'].indexOf("AM") >= 0 || data[i]['end'].indexOf("am") >= 0 || data[i]['end'].indexOf("PM") >= 0 || data[i]['end'].indexOf("pm") >= 0)) {
+                                    var endTime = moment(data[i]['end'], ["h:mm A"]).format("HH:mm");
+                                }
+                                else {
+                                    var endTime = data[i]['end'];
+                                }
+                                var event = {
+                                    "id": data[i]['id'],
+                                    "title": data[i]['title'],
+                                    "category": data[i]['category'],
+                                    "day": dateFormatted,
+                                    "start": dateFormatted + 'T' + startTime,
+                                    "end": dateFormatted + 'T' + endTime,
+                                    "venue": data[i]['venue'],
+                                    "description": data[i]['description'],
+                                    "questions": [],
+                                    "notes": '',
+                                    "color": $scope.getColor(data[i]['category']),
+                                    "viewed": '1',
+                                    "scheduledBy": '1',
+                                    "attended": '-1',
+                                    "upload": '-1'
+                                };
+                                doc['events'].push(event);
+                            }
+                            return db.put(doc).then(function () {
+                                console.log('new events added')
+                            })
+                        });
                     }
                 });
-            })
-        });
-    };
+            }
+            else {
+                console.log('shared events already up to date')
+            }
+        }
+    });*/
+    //})
 
+
+    /*
+    Update pncc events if attended or not
+    */
+    $scope.updateEvents = function () {
+        var db = PouchDB('momlink');
+        var uploadEvents = [];
+        db.get('events').then(function (doc) {
+            //get all events where attended != -1 AND attended != null AND upload = 0
+            for (i in doc['events']) {
+                if (doc['events'][i]['attended'] != -1 && doc['events'][i]['attended'] != null && doc['events'][i]['upload'] == 0) {
+                    uploadEvents.push(doc['events'][i])
+                }
+            }
+            //trim events before uploading
+            for (j in uploadEvents) {
+                delete uploadEvents[j]['title'];
+                delete uploadEvents[j]['category'];
+                delete uploadEvents[j]['day'];
+                delete uploadEvents[j]['start'];
+                delete uploadEvents[j]['end'];
+                delete uploadEvents[j]['venue'];
+                delete uploadEvents[j]['description'];
+                delete uploadEvents[j]['scheduledBy'];
+                delete uploadEvents[j]['color'];
+                delete uploadEvents[j]['viewed'];
+                delete uploadEvents[j]['scheduledBy'];
+                delete uploadEvents[j]['questions'];
+            }
+            console.log(JSON.stringify(uploadEvents))
+        }).then(function () {
+            if (uploadEvents.length > 0) {
+                var post_information = {};
+                post_information.events = uploadEvents;
+                post_information.cid = window.localStorage.getItem('cid');
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updatePNCCEvents.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async: false,
+                    success: function (data) {
+                        console.log('output')
+                        console.log(JSON.stringify(data))
+                        //for each event in events, update uploaded value to 1
+                        db.get('events').then(function (doc) {
+                            index = 0;
+                            //set upload value so it is not reuploaded, set server id in case of modifications
+                            for (k in uploadEvents) {
+                                uploadEvents[k]['upload'] = '1';
+                                for (m in doc['events']) {
+                                    if (uploadEvents[k]['id'] == doc['events'][m]['id']) {
+                                        doc['events'][m]['upload'] = '1';
+                                    }
+                                }
+                            }
+                            console.log('Events uploaded')
+                            return db.put(doc);
+                        });
+                    }
+                });
+            }
+            else {
+                console.log('pncc events already up to date')
+            }
+        })
+    };
 
     /*
     Push client made events to server
@@ -1258,6 +1392,7 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
+                console.log(JSON.stringify(data))
                 if (data.length > 0 && data[0]['id'] != null) {
                     db.get('referrals').then(function (doc) {
                         for (i in data) {
@@ -3326,6 +3461,9 @@ across the app instead of just the calendar page
             if (doc['events'][i].description != '') {
                 templateHTML += '<p><b>Description</b>: ' + doc['events'][i]['description'] + '</p>'
             }
+            if (doc['events'][i].notes != '') {
+                templateHTML += '<p><b>Notes</b>: ' + doc['events'][i]['notes'] + '</p>'
+            }
             if (doc['events'][i]['questions'].size != 0) {
                 templateHTML += '<p><b>Questions</b>:</p>'
                 for (j in doc['events'][i].questions) {
@@ -3731,6 +3869,110 @@ across the app instead of just the calendar page
                 }
             }
             loopReferrals(followups)
+        })
+    };
+
+
+    /*
+    Asks client upon login whether they've attended an event
+    */
+    $scope.checkEvents = function () {
+        var db = PouchDB('momlink');
+        var events = []
+        //get referrals to check
+        db.get('events').then(function (doc) {
+            console.log(JSON.stringify(doc['events']))
+            for (i in doc['events']) {
+                meetDay = moment(doc['events'][i]['day']);
+                //popup event if day has passed or it is passed 7pm on the day of the event
+                if (doc['events'][i]['attended'] == -1 && meetDay < moment() || (meetDay.isSame(moment(), 'day') && moment('19:00:00', 'hh:mm:ss').isBefore(moment()))) {
+                    //console.log('check events')
+                    //console.log(JSON.stringify(doc['events'][i]['attended']))
+                    //console.log(JSON.stringify(doc['events'][i]['day']))
+                    //console.log(JSON.stringify($scope.parseTime(doc['events'][i]['end'])))
+                    events.push(doc['events'][i])
+                }
+            }
+        }).then(function () {
+            var x = 0;
+            var loopEvents = function (arr) {
+                console.log(JSON.stringify(arr))
+                checkEvent(arr[x], function () {
+                    x++;
+                    if (x < arr.length) {
+                        loopEvents(arr);
+                    }
+                    else {
+                        console.log('finished!')
+                    }
+                });
+            }
+            function checkEvent(event, callback) {
+                //ask if they attended the event
+                $ionicPopup.show({
+                    title: 'Did you meet attend ' + event['title'] + '?',
+                    scope: $scope,
+                    buttons: [
+                      {
+                          text: 'Yes',
+                          type: 'button-stable',
+                          onTap: function (e) {
+                              $ionicPopup.show({
+                                  template: '<textarea id="notes" placeholder="notes..." rows="7"></textarea>',
+                                  title: 'Add notes?',
+                                  scope: $scope,
+                                  buttons: [
+                                    {
+                                        text: 'Save',
+                                        type: 'button-positive',
+                                        onTap: function (e) {
+                                            db.get('events').then(function (doc) {
+                                                for (k in doc['events']) {
+                                                    if (doc['events'][k]['id'] == event['id']) {
+                                                        console.log('hit')
+                                                        break;
+                                                    }
+                                                }
+                                                console.log('continue')
+                                                doc['events'][k]['notes'] = $('#notes').val();
+                                                doc['events'][k]['attended'] = '1'
+                                                doc['events'][k]['upload'] = '0'
+                                                return db.put(doc).then(function () {
+                                                    callback();
+                                                })
+                                            })
+                                        }
+                                    }
+                                  ]
+                              })
+                          }
+                      },
+                      {
+                          text: 'No',
+                          type: 'button-stable',
+                          onTap: function (e) {
+                              db.get('events').then(function (doc) {
+                                  for (k in doc['events']) {
+                                      if (doc['events'][k]['id'] == event['id']) {
+                                          console.log('hit')
+                                          break;
+                                      }
+                                  }
+
+                                  console.log('continue')
+                                  doc['events'][k]['notes'] = '0'
+                                  doc['events'][k]['attended'] = '0'
+                                  doc['events'][k]['upload'] = '0'
+                                  return db.put(doc).then(function () {
+                                      callback();
+                                  })
+                              })
+                          }
+                      },
+                    ]
+                });
+            }
+            loopEvents(events)
         })
     };
 
