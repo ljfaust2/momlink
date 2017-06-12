@@ -1961,6 +1961,7 @@ across the app instead of just the calendar page
                                 var cp = {
                                     "id": data[i]['record_id'],
                                     "goal": data[i]['goal'],
+                                    "plan": data[i]['plan'],
                                     "status": data[i]['careplan_status'],
                                     "upload": '1'
                                 };
@@ -8156,7 +8157,7 @@ Handler for javascript clock used in addActivityTime page
         var html = '<ion-list>';
         db.get('careplan').then(function (doc) {
             for (i in doc['careplan']) {
-                html += '<div class="item item-checkbox item-icon-right item-text-wrap" ng-click="updateGoal(&quot;' + doc['careplan'][i]['id'] + '&quot;, &quot;careplan&quot;)">' + doc['careplan'][i]['goal'] + '<label class="checkbox">';
+                html += '<div class="item item-checkbox item-icon-right item-text-wrap" ng-click="updateGoal(&quot;' + doc['careplan'][i]['id'] + '&quot;, &quot;careplan&quot;)">' + doc['careplan'][i]['goal'] + ' - ' + doc['careplan'][i]['plan'] + '<label class="checkbox">';
                 if (doc['careplan'][i]['status'] == '1') {
                     html += '<input type="checkbox" name="G" checked></label></div>'
                 }
