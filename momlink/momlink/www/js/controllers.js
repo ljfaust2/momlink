@@ -533,7 +533,7 @@ across the app instead of just the calendar page
                 });
             }
         });*/
-        //Uncomment and logout on the app to reset the database in the ripple emulator
+        //Uncomment and logout on the app to reset the database in the emulator
         //db.destroy();
     }
 
@@ -564,6 +564,7 @@ across the app instead of just the calendar page
     Called when clicking 'Test' button on the home page, used for debugging purposes
     */
     $scope.testPHP = function () {
+        $scope.getSurveys();
         /*cordova.plugins.notification.badge.set(1);*/
         /*document.addEventListener("deviceready", function () {
             var date = new Date();
@@ -675,7 +676,7 @@ across the app instead of just the calendar page
     $scope.updateAllSurveys = function () {
         $scope.getSurveys();
         $scope.sendClickData();
-        $scope.toNewPage('survey.html', 'Survey');
+        $scope.toNewPage('survey.html', 'Surveys');
     };
 
 
@@ -1700,105 +1701,99 @@ across the app instead of just the calendar page
     $scope.getSurveys = function () {
         var db = PouchDB('momlink');
         var downloads = [];
-        var agency;
-        db.get('login').then(function (doc) {
-            agency = doc['agency']
-        }).then(function () {
-            var post_information = { 'cid': window.localStorage.getItem('cid'), 'agency': agency };
-            console.log(JSON.stringify(post_information))
-            $.ajax({
-                url: 'https://momlink.crc.nd.edu/~jonathan/current/getSurveys.php',
-                type: 'POST',
-                dataType: 'json',
-                data: post_information,
-                async: false,
-                success: function (data) {
-                    console.log(JSON.stringify(data))
-                    if (data.length > 0) {
-                        db.get('surveys').then(function (doc) {
-                            //console.log(JSON.stringify(doc['surveys']))
-                            for (i in data) {
-                                var add = true;
-                                //check if survey is already in local db
-                                for (j in doc['surveys']) {
-                                    if (doc['surveys'][j]['id'] == data[i]['questionnaire_id']) {
-                                        add = false;
-                                        break;
-                                    }
-                                }
-                                if (add) {
-                                    //makes quiz suitable for json parse
-                                    //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
-                                    data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
-                                    var survey = {
-                                        "id": data[i]['questionnaire_id'],
-                                        "title": data[i]['title'],
-                                        "content": JSON.parse(data[i]['quiz']),
-                                        "surveyHistory": {},
-                                        "upload": '0',
-                                        "dateTaken": ''
-                                    };
-                                    //console.log(JSON.stringify(survey))
-                                    doc['surveys'].push(survey);
+        var post_information = { 'cid': window.localStorage.getItem('cid') };
+        console.log(JSON.stringify(post_information))
+        $.ajax({
+            url: 'https://momlink.crc.nd.edu/~jonathan/current/getSurveys.php',
+            type: 'POST',
+            dataType: 'json',
+            data: post_information,
+            async: false,
+            success: function (data) {
+                console.log(JSON.stringify(data))
+                if (data.length > 0) {
+                    db.get('surveys').then(function (doc) {
+                        //console.log(JSON.stringify(doc['surveys']))
+                        for (i in data) {
+                            var add = true;
+                            //check if survey is already in local db
+                            for (j in doc['surveys']) {
+                                if (doc['surveys'][j]['id'] == data[i]['survey_id']) {
+                                    add = false;
+                                    break;
                                 }
                             }
-                            return db.put(doc);
-                            console.log('Surveys downloaded')
-                        })
-                    }
-                    else {
-                        console.log('No new surveys')
-                    }
-                }
-            });
-        }).then(function (doc) {
-            var uploadSurveys = [];
-            db.get('surveys').then(function (doc) {
-                //get all surveys where upload == 0 and survey_status == 1 (surveys not previously updated but have been completed)
-                for (i in doc['surveys']) {
-                    if (doc['surveys'][i]['upload'] == 0 && doc['surveys'][i]['survey_status'] == 1) {
-                        uploadSurveys.push(doc['surveys'][i])
-                    }
-                }
-            }).then(function () {
-                if (uploadSurveys.length > 0) {
-                    var post_information = {};
-                    post_information.surveys = uploadSurveys;
-                    post_information.cid = window.localStorage.getItem('cid');
-                    console.log('update')
-                    console.log(JSON.stringify(post_information))
-                    $.ajax({
-                        url: 'https://momlink.crc.nd.edu/~jonathan/current/updateSurveys.php',
-                        type: 'POST',
-                        dataType: 'json',
-                        data: { data: encodeURIComponent(JSON.stringify(post_information)) },
-                        async: false,
-                        success: function (data) {
-                            console.log('output')
-                            console.log(JSON.stringify(data))
-                            //for each survey updated, update uploaded value to 1
-                            if (data == true) {
-                                db.get('surveys').then(function (doc) {
-                                    //set upload value so it is not reuploaded
-                                    for (k in uploadSurveys) {
-                                        for (m in doc['surveys']) {
-                                            if (uploadSurveys[k]['id'] == doc['surveys'][m]['id']) {
-                                                doc['surveys'][m]['upload'] = '1';
-                                                doc['surveys'][m]['surveysHistory'] = {};
-                                            }
-                                        }
-                                    }
-                                    console.log('Surveys updated')
-                                    return db.put(doc);
-                                });
+                            if (add) {
+                                //makes quiz suitable for json parse
+                                //data[i]['quiz'] = data[i]['quiz'].replace(/'/g, `"`);
+                                data[i]['quiz'] = JSON.stringify(data[i]['quiz']);
+                                var survey = {
+                                    "recordID": data[i]['uid'],
+                                    "id": data[i]['survey_id'],
+                                    "title": data[i]['title'],
+                                    "content": JSON.parse(data[i]['quiz']),
+                                    "surveyHistory": {},
+                                    "upload": '0',
+                                    "dateTaken": ''
+                                };
+                                //console.log(JSON.stringify(survey))
+                                doc['surveys'].push(survey);
                             }
                         }
-                    });
+                        return db.put(doc);
+                        console.log('Surveys downloaded')
+                    })
                 }
                 else {
-                    console.log('Surveys already up to date')
+                    console.log('No new surveys')
                 }
-            })
+            }
+        });
+        var uploadSurveys = [];
+        db.get('surveys').then(function (doc) {
+            //get all surveys where upload == 0 and survey_status == 1 (surveys not previously updated but have been completed)
+            for (i in doc['surveys']) {
+                if (doc['surveys'][i]['upload'] == 0 && doc['surveys'][i]['survey_status'] == 1) {
+                    uploadSurveys.push(doc['surveys'][i])
+                }
+            }
+        }).then(function () {
+            if (uploadSurveys.length > 0) {
+                var post_information = {};
+                post_information.surveys = uploadSurveys;
+                post_information.cid = window.localStorage.getItem('cid');
+                console.log('update')
+                console.log(JSON.stringify(post_information))
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/updateSurveys.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { data: encodeURIComponent(JSON.stringify(post_information)) },
+                    async: false,
+                    success: function (data) {
+                        console.log('output')
+                        console.log(JSON.stringify(data))
+                        //for each survey updated, update uploaded value to 1
+                        if (data == true) {
+                            db.get('surveys').then(function (doc) {
+                                //set upload value so it is not reuploaded
+                                for (k in uploadSurveys) {
+                                    for (m in doc['surveys']) {
+                                        if (uploadSurveys[k]['id'] == doc['surveys'][m]['id']) {
+                                            doc['surveys'].splice(m, 1);
+                                        }
+                                    }
+                                }
+                                console.log('Surveys updated')
+                                return db.put(doc);
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                console.log('Surveys already up to date')
+            }
         })
     };
 
@@ -2686,10 +2681,10 @@ across the app instead of just the calendar page
         });
     };
 
-
     /*
     Saves a copy of each notification recieved to the db
     */
+
     $scope.pushTracker = function (title, body) {
         var db = PouchDB('momlink');
         db.get('userData').then(function (doc) {
@@ -6954,6 +6949,7 @@ Also allows users to download articles from a library based on category
     }
     $scope.submit = function (type) {
         var db = PouchDB('momlink');
+        var phone;
         value = $('#count').html();
         db.get('track').then(function (doc) {
             var element = {
@@ -6965,33 +6961,46 @@ Also allows users to download articles from a library based on category
             doc[type].push(element);
             return db.put(doc);
         }).then(function (doc) {
-            db.get('alerts').then(function (doc) {
-                if (doc[type].length > 0) {
-                    for (i in doc[type]) {
-                        console.log(JSON.stringify(doc[type][i]))
-                        if (doc[type][i]['type'] == ">") {
-                            if (parseInt(value) > parseInt(doc[type][i]['value'])) {
+            db.get('profile').then(function (doc) {
+                phone = doc['doctorsPhone'];
+            }).then(function (doc) {
+                db.get('alerts').then(function (doc) {
+                    if (doc[type].length > 0) {
+                        for (i in doc[type]) {
+                            var alert = "<center><b>" + doc[type][i]['message'] + "</b>";
+                            if (phone != '') {
+                                call = function () {
+                                    window.location.href = "tel://" + '1-' + phone;
+                                }
+                                alert += "<br> Call <a onclick='call()'>" + phone + "</a> to speak with your provider</center>";
+                            }
+                            if (doc[type][i]['type'] == ">") {
+                                if (parseInt(value) > parseInt(doc[type][i]['value'])) {
+                                    $ionicPopup.alert({
+                                        title: 'Attention',
+                                        template: alert
+                                    });
+                                }
+                            }
+                            else if (doc[type][i]['type'] == "<") {
+                                if (parseInt(value) < parseInt(doc[type][i]['value'])) {
+                                    $ionicPopup.alert({
+                                        title: 'Attention',
+                                        template: alert
+                                    });
+                                }
+                            }
+                            else if (doc[type][i]['type'] == "1") {
                                 $ionicPopup.alert({
-                                    title: doc[type][i]['message']
+                                    title: 'Attention',
+                                    template: alert
                                 });
                             }
-                        }
-                        else if (doc[type][i]['type'] == "<") {
-                            if (parseInt(value) < parseInt(doc[type][i]['value'])) {
-                                $ionicPopup.alert({
-                                    title: doc[type][i]['message']
-                                });
-                            }
-                        }
-                        else if (doc[type][i]['type'] == "1") {
-                            $ionicPopup.alert({
-                                title: doc[type][i]['message']
-                            });
                         }
                     }
-                }
-            }).then(function (doc) {
-                $scope.toNewPage('history.html', 'History');
+                }).then(function (doc) {
+                    $scope.toNewPage('history.html', 'History');
+                })
             })
         });
     }
@@ -8038,13 +8047,18 @@ Handler for javascript clock used in addActivityTime page
 .controller('SurveyCtrl', function ($scope, $ionicPopup, $ionicModal, $compile) {
     $scope.renderSurveys = function () {
         var db = PouchDB('momlink');
-        var html = '<div class="list">';
+        var html = '';
         db.get('surveys').then(function (doc) {
+            html += '<div class="list">';
             for (i in doc['surveys']) {
                 html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + '</a>';
                 //html += '<a class="item" ng-click="renderSurvey(&quot;' + doc['surveys'][i]['id'] + '&quot;)">' + doc['surveys'][i]['title'] + ' <p> Given on: ' + doc['surveys'][i]['dateGiven'] + '</p></a>';
             }
             html += '</div>';
+            if (html == '<div class="list"></div>') {
+                console.log('hit')
+                html = '<center>No Surveys to Show</center>'
+            }
             $('#recent').html(html);
             $compile($('#recent'))($scope);
         })
@@ -8070,23 +8084,90 @@ Handler for javascript clock used in addActivityTime page
         db.get('surveys').then(function (doc) {
             for (i in doc['surveys']) {
                 //get survey
+                console.log(JSON.stringify(doc['surveys']))
+                console.log(surveyID)
                 if (doc['surveys'][i]['id'] == surveyID) {
                     var formID = 0;
                     for (j in doc['surveys'][i]['content']) {
-                        question = doc['surveys'][i]['content'][j][0];
-                        answers = doc['surveys'][i]['content'][j][1];
                         //render question
+                        question = doc['surveys'][i]['content'][j][0];
                         html += '  <div class="item item-text-wrap item-icon-right item-divider">' + question + '<i class="icon ion-volume-medium" ng-click="speak(&quot;' + question + '&quot;)"></i></div>';
+
+                        answerType = doc['surveys'][i]['content'][j][3];
                         //render answers
-                        html += '<form id="' + String(formID) + '">';
-                        html += '<ion-list>';
-                        for (k = 0; k < answers.length; k++) {
-                            answer = answers[k][0];
-                            answerID = answers[k][1];
-                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(formID) + '" value="' + String(answerID) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                        
+                        //1 - text
+                        if (answerType == 1) {
+                            html += '<div class="row no-padding"><input id="' + String(formID) + '" type="text"></div>';
                         }
-                        html += '</ion-list>';
-                        html += '</form>';
+                        //2 - text (long)
+                        if (answerType == 2) {
+                            html += '<div class="row no-padding"><textarea id="' + String(formID) + '" rows="3"></textarea></div>';
+                        }
+                        //3 - radio
+                        if (answerType == 3) {
+                            html += '<form id="' + String(formID) + '">';
+                            answers = doc['surveys'][i]['content'][j][1];
+                            html += '<ion-list>';
+                            for (k = 0; k < answers.length; k++) {
+                                answer = answers[k][0];
+                                answerID = answers[k][1];
+                                html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(formID) + '" value="' + String(answerID) + '">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                            }
+                            html += '</ion-list>';
+                            html += '</form>';
+                        }
+                        //4 - multiple selection
+                        if (answerType == 4) {
+                            //html += '<form id="' + String(formID) + '">';
+                            answers = doc['surveys'][i]['content'][j][1];
+                            html += '<ion-list>';
+                            for (k = 0; k < answers.length; k++) {
+                                answer = answers[k][0];
+                                answerID = answers[k][1];
+                                html += '<div class="row no-padding"><div class="col-90 item item-checkbox item-icon-right item-text-wrap">' + answer + '<label class="checkbox"><input type="checkbox" name="' + String(formID) + '" value="' + String(answerID) + '"></label></div><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>'
+                            }
+                            html += '</ion-list>';
+                            //html += '</form>';
+                        }
+                        //5 - date
+                        if (answerType == 5) {
+                            html += '<div class="row no-padding"><input id="' + String(formID) + '" type="date"></div>';
+                        }
+                        //6 - numeric
+                        if (answerType == 6) {
+                            html += '<div class="row no-padding"><input id="' + String(formID) + '" type="number"></div>';
+                        }
+                        //7 - radio w/write option
+                        if (answerType == 7) {
+                            html += '<form id="' + String(formID) + '">';
+                            answers = doc['surveys'][i]['content'][j][1];
+                            html += '<ion-list ng-controller="SurveyCtrl">';
+                            for (k = 0; k < answers.length; k++) {
+                                answer = answers[k][0];
+                                answerID = answers[k][1];
+                                html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(formID) + '" value="' + String(answerID) + '" ng-click="toggleWriteOFF(&quot;writeRadio&quot;)">' + answer + '</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                            }
+                            html += '<div class="row no-padding"><ion-radio class="col-90 item-text-wrap" name="' + String(formID) + '" value="write" ng-click="toggleWriteON(&quot;writeRadio&quot;)">Write-in</ion-radio><button class="col icon ion-volume-medium" ng-click="speak(&quot;Write-in&quot;)"></button></div>';
+                            html += '<div class="row no-padding"><input id="writeRadio" type="text" placeholder="write in answer" style="display:none"></div>';
+                            html += '</ion-list>';
+                            html += '</form>';
+                        }
+                        //8 - multiple selection w/write option
+                        if (answerType == 8) {
+                            html += '<form id="' + String(formID) + '">';
+                            answers = doc['surveys'][i]['content'][j][1];
+                            html += '<ion-list ng-controller="SurveyCtrl">';
+                            for (k = 0; k < answers.length; k++) {
+                                answer = answers[k][0];
+                                answerID = answers[k][1];
+                                html += '<div class="row no-padding"><div class="col-90 item item-checkbox item-icon-right item-text-wrap">' + answer + '<label class="checkbox"><input type="checkbox" name="' + String(formID) + '" value="' + String(answerID) + '"></label></div><button class="col icon ion-volume-medium" ng-click="speak(&quot;' + answer + '&quot;)"></button></div>';
+                            }
+                            html += '<div class="row no-padding"><div class="col-90 item item-checkbox item-icon-right item-text-wrap" ng-click="toggleWrite(&quot;writeCheckbox&quot;)">Write-in<label class="checkbox"><input type="checkbox" name="' + String(formID) + '" value="write"></label></div><button class="col icon ion-volume-medium" ng-click="speak(&quot;Write-in&quot;)"></button></div>';
+                            html += '<div class="row no-padding"><input id="writeCheckbox" type="text" placeholder="write in answer" style="display:none"></div>';
+                            html += '</ion-list>';
+                            html += '</form>';
+                        }
                         formID++;
                     }
                 }
@@ -8116,24 +8197,84 @@ Handler for javascript clock used in addActivityTime page
             });
         });
     };
+
     $scope.saveSurvey = function (surveyID) {
         var db = PouchDB('momlink');
         db.get('surveys').then(function (doc) {
             for (i in doc['surveys']) {
                 if (doc['surveys'][i]['id'] == surveyID) {
                     var formID = 0;
+                    //upload type places an answerID or answer into the appropriate column when uploaded to server
+                    var uploadType;
                     var usersAnswers = []
                     for (j in doc['surveys'][i]['content']) {
                         questionID = doc['surveys'][i]['content'][j][2]
-                        selectedAnswer = $('input[name="' + String(formID) + '"]:checked', '#'.concat(formID)).val();
-                        //prune all other answers != selectedAnswer
-                        usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss'))]);
-                        console.log(questionID)
-                        console.log(selectedAnswer)
-                        doc['surveys'][i]['survey_status'] = '1';
+                        answerType = doc['surveys'][i]['content'][j][3];
+                        if (answerType == 1) {
+                            uploadType = '2';
+                            selectedAnswer = $('#' + String(formID)).val();
+                            usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss')), uploadType]);
+                        }
+                        //2 - text (long)
+                        if (answerType == 2) {
+                            uploadType = '2';
+                            selectedAnswer = $('#' + String(formID)).val();
+                            usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss')), uploadType]);
+                        }
+                        //3 - radio
+                        if (answerType == 3) {
+                            uploadType = '1';
+                            selectedAnswer = $('input[name="' + String(formID) + '"]:checked', '#'.concat(formID)).val();
+                            usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss')), uploadType]);
+                        }
+                        //4 - multiple selection
+                        if (answerType == 4) {
+                            uploadType = '1';
+                            $('input:checkbox[name="' + String(formID) + '"]:checked').each(function () {
+                                selectedAnswer = $(this).val();
+                                usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss')), uploadType]);
+                            });
+                        }
+                        //5 - date
+                        if (answerType == 5) {
+                            uploadType = '2';
+                            selectedAnswer = $('#' + String(formID)).val();
+                            usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss')), uploadType]);
+                        }
+                        //6 - numeric
+                        if (answerType == 6) {
+                            uploadType = '2';
+                            selectedAnswer = $('#' + String(formID)).val();
+                            usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss')), uploadType]);
+                        }
+                        //7 - radio w/write option
+                        if (answerType == 7) {
+                            uploadType = '1';
+                            selectedAnswer = $('input[name="' + String(formID) + '"]:checked', '#'.concat(formID)).val();
+                            if (selectedAnswer == 'write') {
+                                uploadType = '2';
+                                selectedAnswer = $('#writeRadio').val();
+                            }
+                            usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss')), uploadType]);
+                        }
+                        //8 - multiple selection w/write option
+                        if (answerType == 8) {
+                            $('input:checkbox[name="' + String(formID) + '"]:checked').each(function () {
+                                selectedAnswer = $(this).val();
+                                uploadType = '1';
+                                if (selectedAnswer == 'write') {
+                                    uploadType = '2';
+                                    selectedAnswer = $('#writeCheckbox').val();
+                                }
+                                usersAnswers.push([questionID, selectedAnswer, String(moment().format('YYYY-MM-DDTHH:mm:ss')), uploadType]);
+                            });
+                        }
                         formID++;
                     }
-                    //console.log(JSON.stringify(usersAnswers))
+                    console.log('output')
+                    console.log(JSON.stringify(usersAnswers))
+                    
+                    doc['surveys'][i]['survey_status'] = '1';
                     doc['surveys'][i]['surveyHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = usersAnswers;
                     doc['surveys'][i]['upload'] = '0';
                     doc['surveys'][i]['dateTaken'] = moment().format('YYYY-MM-DD');
@@ -8144,6 +8285,23 @@ Handler for javascript clock used in addActivityTime page
             $scope.renderSurveys();
             $scope.toNewPage('survey.html', 'Surveys')
         })
+    };
+
+    $scope.toggleWrite = function (id) {
+        if (document.getElementById(id).style.display == 'none') {
+            $('#' + id).css('display', '')
+        }
+        else {
+            $('#' + id).css('display', 'none')
+        }
+    };
+
+    $scope.toggleWriteON = function (id) {
+        $('#' + id).css('display', '')
+    };
+
+    $scope.toggleWriteOFF = function (id) {
+        $('#' + id).css('display', 'none')
     };
 })
 
