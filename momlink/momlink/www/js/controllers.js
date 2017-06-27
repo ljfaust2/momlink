@@ -6294,7 +6294,7 @@ Also allows users to download articles from a library based on category
             
 */
 .controller('TrackCtrl', function ($scope, $ionicModal, $ionicPopup, $compile) {
-    $scope.showTrackers = function () {
+    $scope.showTrackers = function (group) {
         var db = PouchDB('momlink');
         var checked = [];
         var date;
@@ -6321,6 +6321,28 @@ Also allows users to download articles from a library based on category
                 //need to first "sort" the dictionary
                 var sortTrackers = Object.keys(doc).map(function (key) { return [key, parseInt(doc[key]['status']), parseInt(doc[key]['order'])] });
                 sortTrackers.splice(-2, 2)
+                //remove trackers depending on group
+                if (group == 1) {
+                    group1 = ['bloodGlucose', 'cigarette', 'babyHeartRate', 'kicks', 'bloodPressure', 'bloodIron', 'pills']
+                    for (var remove in group1) {
+                        for (var index in sortTrackers) {
+                            if (group1[remove] == sortTrackers[index][0]) {
+                                sortTrackers.splice(index, 1)
+                            }
+                        }
+                    }
+                }
+                if (group == 2) {
+                    group2 = ['nutrition', 'caffeine', 'mood', 'stress', 'pain', 'activity', 'weight', 'conditions']
+                    for (var remove in group2) {
+                        for (var index in sortTrackers) {
+                            if (group2[remove] == sortTrackers[index][0]) {
+                                sortTrackers.splice(index, 1)
+                            }
+                        }
+                    }
+                }
+
                 sortTrackers = sortTrackers.sort(sortFunction)
                 function sortFunction(a, b) {
                     if (a[2] === b[2]) {
@@ -6356,8 +6378,14 @@ Also allows users to download articles from a library based on category
                 }
             }).then(function () {
                 html5 += '</div>'
-                $('#trackers').html(html5);
-                $compile($('#trackers'))($scope);
+                if (group == 1) {
+                    $('#trackers').html(html5);
+                    $compile($('#trackers'))($scope);
+                }
+                else {
+                    $('#trackers2').html(html5);
+                    $compile($('#trackers2'))($scope);
+                }
             })
             function capitalizeFirstLetter(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1);
@@ -6787,10 +6815,10 @@ Also allows users to download articles from a library based on category
         }
     };
     /*$scope.getPainImg = function () {
-
+    
     }
     $scope.getStressorImg = function () {
-
+    
     };*/
     $scope.updateFace = function (value) {
         face = "";
@@ -7198,7 +7226,7 @@ Also allows users to download articles from a library based on category
             //add alert for pill
             /*if ($scope.notify == true) {
                 document.addEventListener('deviceready', function () {
-
+    
                 }, false);
             }*/
         }).then(function (doc) {
@@ -8095,7 +8123,7 @@ Handler for javascript clock used in addActivityTime page
 
                         answerType = doc['surveys'][i]['content'][j][3];
                         //render answers
-                        
+
                         //1 - text
                         if (answerType == 1) {
                             html += '<div class="row no-padding"><input id="' + String(formID) + '" type="text"></div>';
@@ -8273,7 +8301,7 @@ Handler for javascript clock used in addActivityTime page
                     }
                     console.log('output')
                     console.log(JSON.stringify(usersAnswers))
-                    
+
                     doc['surveys'][i]['survey_status'] = '1';
                     doc['surveys'][i]['surveyHistory'][String(moment().format('YYYY-MM-DDTHH:mm:ss'))] = usersAnswers;
                     doc['surveys'][i]['upload'] = '0';
