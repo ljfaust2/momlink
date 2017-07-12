@@ -544,8 +544,10 @@ across the app instead of just the calendar page
         var db = new PouchDB('momlink')
         var pbHtml = '';
         db.get('profile').then(function (doc) {
-            if (doc['deliveryDate'] != '' && doc['startDate'] != '') {
-                difference = moment.duration(moment().diff(moment(doc['startDate']))).asMonths();
+            if (doc['deliveryDate'] != '') {
+                //delivery data - 9 months
+                startDate = moment(doc['deliveryDate']).subtract(9, 'months')
+                difference = moment.duration(moment().diff(startDate)).asMonths();
                 month = parseInt(difference) + 1;
                 if (month > 9) {
                     //show the final page
@@ -1415,12 +1417,13 @@ across the app instead of just the calendar page
                                     "address": data[i]['address'],
                                     "phone": data[i]['phone'],
                                     "email": data[i]['email'],
+                                    "url": data[i]['url'],
                                     "date": moment().format('MM/DD/YYYY'),
                                     "category": data[i]['category_label'],
                                     "img": filename,
                                     "meeting": '',
                                     "upload": '1',
-                                    "referral_status": '',
+                                    "referral_status": '4',
                                 };
                                 doc['referrals'].push(referral);
                             }
@@ -1444,12 +1447,13 @@ across the app instead of just the calendar page
         var db = PouchDB('momlink');
         var uploadReferrals = [];
         db.get('referrals').then(function (doc) {
-            //get all referrals where upload == 0 and referral_status == 1 (referrals not previously updated but have meetings scheduled)
+            //get all referrals where upload == 0 (referrals not previously updated)
             for (i in doc['referrals']) {
                 if (doc['referrals'][i]['upload'] == 0) {
                     uploadReferrals.push(doc['referrals'][i])
                 }
             }
+            console.log(JSON.stringify(uploadReferrals))
             //minimize data sent to sever
             for (j in uploadReferrals) {
                 delete uploadReferrals[j]['name'];
@@ -1473,7 +1477,7 @@ across the app instead of just the calendar page
                     success: function (data) {
                         console.log(JSON.stringify(data))
                         //for each referral updated, update uploaded value to 1
-                        if (data == true) {
+                        /*if (data == true) {
                             db.get('referrals').then(function (doc) {
                                 //set upload value so it is not reuploaded
                                 for (k in uploadReferrals) {
@@ -1486,7 +1490,7 @@ across the app instead of just the calendar page
                                 console.log('Referrals updated')
                                 return db.put(doc);
                             });
-                        }
+                        }*/
                     }
                 });
             }
@@ -1656,6 +1660,8 @@ across the app instead of just the calendar page
             }
         }).then(function () {
             if (uploadArticles.length > 0) {
+                console.log('UPLOAD ARTICLES')
+                console.log(JSON.stringify(uploadArticles))
                 var post_information = {};
                 post_information.articles = uploadArticles;
                 post_information.cid = window.localStorage.getItem('cid');
@@ -1688,7 +1694,6 @@ across the app instead of just the calendar page
                 });
             }
             else {
-
                 console.log('Articles already up to date')
             }
         })
@@ -1710,6 +1715,7 @@ across the app instead of just the calendar page
             data: post_information,
             async: false,
             success: function (data) {
+                console.log('here')
                 console.log(JSON.stringify(data))
                 if (data.length > 0) {
                     db.get('surveys').then(function (doc) {
@@ -2062,41 +2068,43 @@ across the app instead of just the calendar page
         db.get('login').then(function (doc) {
             agency = doc['agency']
         }).then(function () {
-            var post_information = { 'agency': agency };
-            console.log(JSON.stringify(post_information))
-            $.ajax({
-                url: 'https://momlink.crc.nd.edu/~jonathan/current/getCategories.php',
-                type: 'POST',
-                dataType: 'json',
-                data: post_information,
-                async: false,
-                success: function (data) {
-                    console.log(JSON.stringify(data))
-                    if (data.length > 0) {
-                        db.get('articles').then(function (doc) {
-                            for (i in data) {
-                                //check if category is already in local db
-                                var isUnique = true;
-                                for (j in doc['categories']) {
-                                    if (data[i]['id'] == doc['categories'][j][0]) {
-                                        isUnique = false;
+            if (agency != '') {
+                var post_information = { 'agency': agency };
+                console.log(JSON.stringify(post_information))
+                $.ajax({
+                    url: 'https://momlink.crc.nd.edu/~jonathan/current/getCategories.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: post_information,
+                    async: false,
+                    success: function (data) {
+                        console.log(JSON.stringify(data))
+                        if (data.length > 0) {
+                            db.get('articles').then(function (doc) {
+                                for (i in data) {
+                                    //check if category is already in local db
+                                    var isUnique = true;
+                                    for (j in doc['categories']) {
+                                        if (data[i]['id'] == doc['categories'][j][0]) {
+                                            isUnique = false;
+                                        }
+                                    }
+                                    if (isUnique == true) {
+                                        filename = data[i]['image'].substring(data[i]['image'].lastIndexOf("/") + 1);
+                                        var category = [data[i]['id'], data[i]['title'], filename, data[i]['ranking'], data[i]['description']]
+                                        doc['categories'].push(category);
                                     }
                                 }
-                                if (isUnique == true) {
-                                    filename = data[i]['image'].substring(data[i]['image'].lastIndexOf("/") + 1);
-                                    var category = [data[i]['id'], data[i]['title'], filename, data[i]['ranking'], data[i]['description']]
-                                    doc['categories'].push(category);
-                                }
-                            }
-                            console.log('Categories downloaded')
-                            return db.put(doc);
-                        });
+                                console.log('Categories downloaded')
+                                return db.put(doc);
+                            });
+                        }
+                        else {
+                            console.log('No new categories')
+                        }
                     }
-                    else {
-                        console.log('No new categories')
-                    }
-                }
-            });
+                });
+            }
         })
     };
 
@@ -2468,7 +2476,7 @@ across the app instead of just the calendar page
     Displays unread articles in the slider of the home page
     */
     var cycleHandler;
-    $scope.renderArticlesHeader = function () {
+    /*$scope.renderArticlesHeader = function () {
         //if function is already running, stop the previous instance before starting a new one
         if (angular.isDefined(cycleHandler)) {
             $interval.cancel(cycleHandler)
@@ -2524,7 +2532,7 @@ across the app instead of just the calendar page
                 }, 9000);
             }
         })
-    };
+    };*/
 
 
     /*
@@ -2811,6 +2819,7 @@ across the app instead of just the calendar page
                         FCMPlugin.getToken(function (token) {
                             // save this server-side and use it to push notifications to this device
                             var post_information = { 'username': user, 'password': pass, 'token': token };
+                            console.log('LOGIN')
                             console.log(JSON.stringify(post_information))
                             $.ajax({
                                 url: 'https://momlink.crc.nd.edu/~jonathan/current/firstTimeLogin.php',
@@ -2818,6 +2827,7 @@ across the app instead of just the calendar page
                                 dataType: 'json',
                                 data: post_information,
                                 success: function (data) {
+                                    console.log('LOGIN INFO')
                                     console.log(JSON.stringify(data))
                                     if (data[0]['success'] != 0) {
                                         doc['client_id'] = data[1]['client_id']
@@ -2831,7 +2841,22 @@ across the app instead of just the calendar page
                                         window.localStorage.setItem('username', user)
                                         window.localStorage.setItem('password', pass)
                                         return db.put(doc).then(function () {
-                                            window.location = "templates/main.html";
+                                            db.get('profile').then(function (doc) {
+                                                doc['name'] = data[1]['firstname'] + ' ' + data[1]['lastname'];
+                                                doc['deliveryDate'] = moment(data[1]['edc']).format('YYYY-MM-DD');
+                                                //convert dob to age
+                                                var today = new Date();
+                                                var birthDate = new Date(data[1]['dob']);
+                                                var age = today.getFullYear() - birthDate.getFullYear();
+                                                var m = today.getMonth() - birthDate.getMonth();
+                                                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                                                    age--;
+                                                }
+                                                doc['age'] = age;
+                                                return db.put(doc).then(function () {
+                                                    window.location = "templates/main.html";
+                                                })
+                                            })
                                         })
                                     }
                                     else {
@@ -3386,7 +3411,8 @@ across the app instead of just the calendar page
                         }
                     }
                     doc['referrals'][i]['meeting'] = $scope.eventID;
-                    //doc['referrals'][i]['referral_status'] = 1;
+                    doc['referrals'][i]['referral_status'] = 1;
+                    doc['referrals'][i]['upload'] = 0;
                     return db.put(doc);
                 }).then(function (doc) {
                     $scope.toNewPage('referrals.html', 'Referrals');
@@ -3731,7 +3757,7 @@ across the app instead of just the calendar page
         //get referrals to check
         db.get('referrals').then(function (doc) {
             for (i in doc['referrals']) {
-                if (doc['referrals'][i]['referral_status'] == '') {
+                if (doc['referrals'][i]['referral_status'] == '1') {
                     followups.push(doc['referrals'][i])
                 }
             }
@@ -3760,61 +3786,54 @@ across the app instead of just the calendar page
                                 break;
                             }
                         }
+                    }).then(function () {
+                        //check if event has passed
+                        if (meetDay < moment()) {
+                            //ask if they attended the event
+                            $ionicPopup.show({
+                                title: 'Did you meet with ' + referral['name'] + '?',
+                                scope: $scope,
+                                buttons: [
+                                  {
+                                      text: 'Yes',
+                                      type: 'button-stable',
+                                      onTap: function (e) {
+                                          db.get('referrals').then(function (doc) {
+                                              for (k in doc['referrals']) {
+                                                  if (doc['referrals'][k]['id'] == referral['id']) {
+                                                      break;
+                                                  }
+                                              }
+                                              doc['referrals'][k]['referral_status'] = '2'
+                                              doc['referrals'][k]['upload'] = '0'
+                                              return db.put(doc).then(function () {
+                                                  callback();
+                                              })
+                                          })
+                                      }
+                                  },
+                                  {
+                                      text: 'No',
+                                      type: 'button-stable',
+                                      onTap: function (e) {
+                                          db.get('referrals').then(function (doc) {
+                                              for (k in doc['referrals']) {
+                                                  if (doc['referrals'][k]['id'] == referral['id']) {
+                                                      break;
+                                                  }
+                                              }
+                                              doc['referrals'][k]['referral_status'] = '3'
+                                              doc['referrals'][k]['upload'] = '0'
+                                              return db.put(doc).then(function () {
+                                                  callback();
+                                              })
+                                          })
+                                      }
+                                  },
+                                ]
+                            });
+                        }
                     })
-                    //check if event has passed
-                    if (meetDay < moment()) {
-                        //ask if they attended the event
-                        $ionicPopup.show({
-                            title: 'Did you meet with ' + referral['name'] + '?',
-                            scope: $scope,
-                            buttons: [
-                              {
-                                  text: 'Yes',
-                                  type: 'button-stable',
-                                  onTap: function (e) {
-                                      db.get('referrals').then(function (doc) {
-                                          for (k in doc['referrals']) {
-                                              if (doc['referrals'][k]['id'] == referral['id']) {
-                                                  console.log('hit')
-                                                  break;
-                                              }
-                                          }
-                                          console.log('continue')
-                                          console.log(doc['referrals'][k]['referral_status'])
-                                          console.log(doc['referrals'][k]['upload'])
-                                          doc['referrals'][k]['referral_status'] = '1'
-                                          doc['referrals'][k]['upload'] = '0'
-                                          return db.put(doc).then(function () {
-                                              callback();
-                                          })
-                                      })
-                                  }
-                              },
-                              {
-                                  text: 'No',
-                                  type: 'button-stable',
-                                  onTap: function (e) {
-                                      db.get('referrals').then(function (doc) {
-                                          for (k in doc['referrals']) {
-                                              if (doc['referrals'][k]['id'] == referral['id']) {
-                                                  console.log('hit')
-                                                  break;
-                                              }
-                                          }
-                                          console.log('continue')
-                                          console.log(doc['referrals'][k]['referral_status'])
-                                          console.log(doc['referrals'][k]['upload'])
-                                          doc['referrals'][k]['referral_status'] = '0'
-                                          doc['referrals'][k]['upload'] = '0'
-                                          return db.put(doc).then(function () {
-                                              callback();
-                                          })
-                                      })
-                                  }
-                              },
-                            ]
-                        });
-                    }
                 }
                 else {
                     //check if 3 days have passed
@@ -3833,7 +3852,7 @@ across the app instead of just the calendar page
                                                   break;
                                               }
                                           }
-                                          doc['referrals'][k]['referral_status'] = '1'
+                                          doc['referrals'][k]['referral_status'] = '2'
                                           doc['referrals'][k]['upload'] = '0'
                                           return db.put(doc).then(function () {
                                               callback();
@@ -3851,7 +3870,7 @@ across the app instead of just the calendar page
                                                   break;
                                               }
                                           }
-                                          doc['referrals'][k]['referral_status'] = '0'
+                                          doc['referrals'][k]['referral_status'] = '3'
                                           doc['referrals'][k]['upload'] = '0'
                                           return db.put(doc).then(function () {
                                               callback();
@@ -3925,7 +3944,6 @@ across the app instead of just the calendar page
                                             db.get('events').then(function (doc) {
                                                 for (k in doc['events']) {
                                                     if (doc['events'][k]['id'] == event['id']) {
-                                                        console.log('hit')
                                                         break;
                                                     }
                                                 }
@@ -3950,7 +3968,6 @@ across the app instead of just the calendar page
                               db.get('events').then(function (doc) {
                                   for (k in doc['events']) {
                                       if (doc['events'][k]['id'] == event['id']) {
-                                          console.log('hit')
                                           break;
                                       }
                                   }
@@ -4243,17 +4260,16 @@ across the app instead of just the calendar page
         var deliveryDate, startDate = '';
         //get current week
         db.get('profile').then(function (doc) {
-            if (doc['deliveryDate'] != '' && doc['startDate'] != '') {
+            if (doc['deliveryDate'] != '') {
                 deliveryDate = doc['deliveryDate'];
-                startDate = doc['startDate'];
             }
         }).then(function () {
             db.get('progress').then(function (doc) {
-                if (deliveryDate != '' && startDate != '') {
-                    text = doc['Week ' + week];
-                    console.log('Week ' + week)
-                    difference = moment.duration(moment().diff(moment(startDate))).asWeeks();
+                if (deliveryDate != '') {
+                    startDate = moment(deliveryDate).subtract(9, 'months')
+                    difference = moment.duration(moment().diff(startDate)).asWeeks();
                     week = parseInt(difference) + 1;
+                    text = doc['Week ' + week];
                     html = '<img src="../img/progress/week' + week + '.jpg" style="max-width:50%;height:auto;padding:0.5em;" align="left" ng-click="imagePopup(&quot;../img/progress/week' + week + '.jpg&quot;)">';
                     html += '<p>' + text + '</p>';
                     week = 'Week ' + week;
@@ -4261,7 +4277,6 @@ across the app instead of just the calendar page
                 else {
                     html = '<img src="../img/progress/week1.jpg" style="max-width:50%;height:auto;padding:0.5em;" align="left" ng-click="imagePopup(&quot;../img/progress/week1.jpg&quot;)">';
                     html += '<p>' + doc['Week 1'] + '</p>';
-                    console.log(html)
                     week = 'Week 1';
                 }
                 $('#week').html(week);
@@ -5039,7 +5054,6 @@ allows user to call/text/email them and render sms conversations
                         html += '<div class="item item-text-wrap" style="color: #e6005c;">' + data[i].body + '</div>';
                     }
                     else {
-                        console.log('hit2')
                         html += '<div class="item item-text-wrap"><p style="text-align:right; color: #0866c6;">' + data[i].body + '</p></div>';
                     }
                 }
@@ -5301,18 +5315,30 @@ Shows all referrals and option to schedule meetings with them
                         if (referrals[i]['address'] != '') {
                             html += '<p>Address: ' + referrals[i]['address'] + '</p>';
                         }
-                        if (referrals[i]['phone'] != '') {
+                        if (referrals[i]['phone'] != '' && referrals[i]['phone'] != null) {
                             html += '<p>Phone: ' + referrals[i]['phone'] + '</p>';
                         }
-                        if (referrals[i]['email'] != '') {
+                        if (referrals[i]['email'] != '' && referrals[i]['email'] != null) {
                             html += '<p>Email: ' + referrals[i]['email'] + '</p>';
                         }
+
                         if (referrals[i]['referral_status'] == '1') {
-                            html += '<p style="display: inline-block;">Status: Followed-up</p>&nbsp;<button class="button button-small" ng-click="changeStatus(&quot;' + referrals[i]['id'] + '&quot;); $event.stopPropagation();" style="display: inline-block;">Change Status?</button>';
+                            html += '<p style="display: inline-block;">Status: Follow-up scheduled</p>';
+                        }
+                        else if (referrals[i]['referral_status'] == '2') {
+                            html += '<p style="display: inline-block;">Status: Follow-up completed</p>';
+                        }
+                        else if (referrals[i]['referral_status'] == '3') {
+                            html += '<p style="display: inline-block;">Status: Did not follow-up</p>';
                         }
                         else {
-                            html += '<p style="display: inline-block;">Status: Have not followed-up</p>&nbsp;<button class="button button-small" ng-click="changeStatus(&quot;' + referrals[i]['id'] + '&quot;); $event.stopPropagation();" style="display: inline-block;">Change Status?</button>';
+                            html += '<p style="display: inline-block;">Status: Follow-up pending</p>';
                         }
+
+                        if (referrals[i]['url'] != '' && referrals[i]['url'] != null) {
+                            html += '<p><button class="button button-small" ng-click="openWebsite(&quot;' + referrals[i]['url'] + '&quot;); $event.stopPropagation();" style="display: inline-block;">Website</button></p>';
+                        }
+                        html += '<p><button class="button button-small" ng-click="changeStatus(&quot;' + referrals[i]['id'] + '&quot;); $event.stopPropagation();" style="display: inline-block;">Change Status</button></p>';
                         html += '</a>';
                     }
                     meetingTime = '';
@@ -5325,7 +5351,6 @@ Shows all referrals and option to schedule meetings with them
         });
     };
 
-
     /*
     Change status of whether referral was met
     */
@@ -5335,22 +5360,74 @@ Shows all referrals and option to schedule meetings with them
             for (i in doc['referrals']) {
                 if (doc['referrals'][i]['id'] === id) { break; }
             }
-            if (doc['referrals'][i]['referral_status'] == '1') {
-                doc['referrals'][i]['referral_status'] = '0'
-                doc['referrals'][i]['upload'] = '0'
-                $scope.clickTracker('changeStatus(0)');
-            }
-            else {
-                doc['referrals'][i]['referral_status'] = '1'
-                doc['referrals'][i]['upload'] = '0'
-                $scope.clickTracker('changeStatus(1)');
-            }
-            return db.put(doc).then(function () {
-                $scope.toNewPage('referrals.html', 'Referrals');
-            })
+
+            $ionicPopup.show({
+                title: 'Contact via',
+                cssClass: 'popup-vertical-buttons',
+                buttons: [
+                    {
+                        text: 'Follow-up Pending', onTap: function (e) {
+                            doc['referrals'][i]['referral_status'] = '4'
+                            doc['referrals'][i]['upload'] = '0'
+                            return db.put(doc).then(function () {
+                                $scope.toNewPage('referrals.html', 'Referrals');
+                            })
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Follow-up Scheduled', onTap: function (e) {
+                            doc['referrals'][i]['referral_status'] = '1'
+                            doc['referrals'][i]['upload'] = '0'
+                            return db.put(doc).then(function () {
+                                $scope.toNewPage('referrals.html', 'Referrals');
+                            })
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Follow-up Completed', onTap: function (e) {
+                            doc['referrals'][i]['referral_status'] = '2'
+                            doc['referrals'][i]['upload'] = '0'
+                            return db.put(doc).then(function () {
+                                $scope.toNewPage('referrals.html', 'Referrals');
+                            })
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Refuse Follow-up', onTap: function (e) {
+                            doc['referrals'][i]['referral_status'] = '3'
+                            doc['referrals'][i]['upload'] = '0'
+                            return db.put(doc).then(function () {
+                                $scope.toNewPage('referrals.html', 'Referrals');
+                            })
+                        },
+                        type: 'button-positive'
+                    },
+                    {
+                        text: 'Cancel', onTap: function (e) {
+                        },
+                        type: 'button-stable'
+                    }
+                ],
+            });
         })
     }
 
+    $scope.openWebsite = function (url) {
+        console.log(url)
+        var html = '';
+        html += '<ion-modal-view>';
+        html += '<div class="float-button"><span class="height-fix"><button class="button button-positive button-rounded content" ng-click="closeModal();"><i class="icon ion-close-round"></i></button></span></div>';
+        html += '<iframe id="frame" src="' + url + '" style="width:100%; height: 100%;"></iframe>';
+        html += '</ion-modal-view>';
+        $scope.modal = $ionicModal.fromTemplate(html, {
+            scope: $scope,
+            animation: 'slide-in-up'
+        });
+        $scope.openModal();
+    }
 
     /*
     Ask the user if they have already contacted/scheduled a meeting,
@@ -5418,6 +5495,22 @@ Shows all referrals and option to schedule meetings with them
             });
         }
     }
+
+    /*
+    Opens modal
+    */
+    $scope.openModal = function () {
+        $scope.modal.show();
+    };
+
+    /*
+    Closes modal and removes it from memory
+    */
+    $scope.closeModal = function () {
+        $scope.modal.hide().then(function () {
+            $scope.modal.remove();
+        });
+    };
 })
 
 
@@ -5554,7 +5647,7 @@ Also allows users to download articles from a library based on category
                 //read more/take quiz buttons
                 html += '<button class="button button-small button-positive" ng-click="openArticle(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + categoryName + '&quot;)">Read More... <i class="ion-ios-book-outline"></i></button>&nbsp;';
                 if (article['quiz'].length != 0) {
-                    html += '<button class="button button-small button-positive" ng-click="renderQuiz(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + categoryName + '&quot;)">Take Quiz <i class="ion-help"></i></button>';
+                    html += '<button class="button button-small button-positive" ng-click="renderQuiz(&quot;' + type + '&quot;,&quot;' + article['id'] + '&quot;,&quot;' + categoryName + '&quot;,&quot;0&quot;)">Take Quiz <i class="ion-help"></i></button>';
                     html += '<p>Best Score: ' + article['bestScore'] + '</p>';
                     html += '<p>Quiz Attempts: ' + article['quizAttempts'] + '</p>';
                 }
@@ -5710,7 +5803,6 @@ Also allows users to download articles from a library based on category
                                         }
                                         else {
                                             var articleIds = new Array();
-                                            console.log('hit')
                                             for (k in doc['articles']) {
                                                 if (doc['articles'][k]['category'] == categoryName) {
                                                     articleIds.push(doc['articles'][k]['id'])
@@ -6057,10 +6149,6 @@ Also allows users to download articles from a library based on category
                     }
                     finalScore = score;
                     maxScore = quiz.length;
-                    //prequiz will either be 1 or undefined, set as 0 to indicate the quiz was not a prequiz
-                    if (prequiz != 1) {
-                        prequiz = 0;
-                    }
                     //check if new score is best score
                     var bestScore = 0;
                     if (parseInt(article['bestScore']) < score) {
@@ -6342,7 +6430,6 @@ Also allows users to download articles from a library based on category
                         }
                     }
                 }
-
                 sortTrackers = sortTrackers.sort(sortFunction)
                 function sortFunction(a, b) {
                     if (a[2] === b[2]) {
@@ -6964,7 +7051,7 @@ Also allows users to download articles from a library based on category
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('YYYY/MM/DD'),
+                "date": moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "type": $scope.selectAct,
                 "value": value
@@ -6982,7 +7069,7 @@ Also allows users to download articles from a library based on category
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('YYYY/MM/DD'),
+                "date": moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "value": value
             };
@@ -7038,7 +7125,7 @@ Also allows users to download articles from a library based on category
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('YYYY/MM/DD'),
+                "date": moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "value": document.getElementById('pain').value
             };
@@ -7053,7 +7140,7 @@ Also allows users to download articles from a library based on category
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('YYYY/MM/DD'),
+                "date": moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "systolic": $('#count').html(),
                 "diastolic": $('#count2').html()
@@ -7069,7 +7156,7 @@ Also allows users to download articles from a library based on category
         db.get('track').then(function (doc) {
             var element = {
                 "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                "date": moment().format('YYYY/MM/DD'),
+                "date": moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD'),
                 "time": moment().format('HH:mm:ss'),
                 "value": value
             };
@@ -7507,7 +7594,7 @@ Also allows users to download articles from a library based on category
             for (j in array) {
                 var element = {
                     "id": moment().format('MM-DD-YYYYThh:mm:ssa'),
-                    "date": moment().format('YYYY/MM/DD'),
+                    "date": moment(window.localStorage.getItem('currentDate')).format('YYYY/MM/DD'),
                     "time": moment().format('HH:mm:ss'),
                     "value": array[j]
                 };
@@ -8084,7 +8171,6 @@ Handler for javascript clock used in addActivityTime page
             }
             html += '</div>';
             if (html == '<div class="list"></div>') {
-                console.log('hit')
                 html = '<center>No Surveys to Show</center>'
             }
             $('#recent').html(html);
