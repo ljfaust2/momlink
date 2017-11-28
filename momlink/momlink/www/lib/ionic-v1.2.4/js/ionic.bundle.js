@@ -23124,7 +23124,7 @@ function $HttpProvider() {
      *
      * A [JSON vulnerability](http://haacked.com/archive/2008/11/20/anatomy-of-a-subtle-json-vulnerability.aspx)
      * allows third party website to turn your JSON resource URL into
-     * [JSONP](http://en.wikipedia.org/wiki/JSONP) request under some conditions. To
+     * [JSONP](http://en.wikipedia.org/wiki/JSONP) request under some symptoms. To
      * counter this your server can prefix all JSON requests with following string `")]}',\n"`.
      * Angular will automatically strip the prefix before processing it as JSON.
      *

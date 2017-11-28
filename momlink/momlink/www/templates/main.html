@@ -12,7 +12,11 @@
     <!-- cordova script (this will be a 404 during development) -->
     <script src="../cordova.js"></script>
     <script src="../lib/pouchdb-5.4.1.js"></script>
+    <script src="../lib/pouchdb.load.js"></script>
+    <script src="../lib/pouchdb.replication-stream.js"></script>
+    <script src="../lib/memorystream.js"></script>
     <script src="../lib/raphael-min.js"></script>
+    <script src="../lib/b64toBlob.js"></script>
     <!--Calendar-->
     <script src="../lib/moment/min/moment.min.js"></script>
     <script src="../lib/fullcalendar-2.9.0/fullcalendar.min.js"></script>
@@ -39,19 +43,21 @@
                 <ion-pane>
                     <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="renderSubheaderDate()">
                         <h2 class="title" id="todaysDate"></h2>
+                        <div class="buttons">
+                            <button class="button button-icon" ng-click="syncAll(false)"><i class="icon ion-loop"></i></button>
+                        </div>
                     </ion-subheader-bar>
                     <ion-view>
-                        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderBadges();checkReferrals();checkQuizzes();checkEvents();" style="background-color: black;background: linear-gradient(#ffffff 50%, #f9f9f9 50%); background-size: 100% 5%; background-repeat: repeat-y;">
-                            <ion-slides style="height:30%; background-color:deeppink;">
+                        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderBadges();checkReferrals();checkQuizzes();checkEvents();" style="background-color: black;background: linear-gradient(#ffffff 50%, #f9f9f9 50%); background-size: 100% 5%; background-repeat: repeat-y;">
+                            <!--<ion-slides style="height:30%; background-color:deeppink;">
                                 <ion-slide-page>
                                     <div id="appointmentsHeader" class="centerWhite"></div>
                                 </ion-slide-page>
                                 <ion-slide-page>
                                     <div id="articlesHeader" class="centerWhite"></div>
                                 </ion-slide-page>
-                            </ion-slides>
+                            </ion-slides>-->
                             <center>
-                                <div id="progressBar" ng-init="renderProgressBar()" style="margin-top: -5px;"></div>
                                 <div class="row">
                                     <div id="inbox" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="max-width:100%;height:auto;vertical-align:middle"><p>Inbox</p></div>
                                     <div id="calendar" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="max-width:100%;height:auto;vertical-align:middle"><p>Calendar</p></div>
@@ -62,20 +68,22 @@
                                     <div class="col"><img src="../img/mainIcons/track.png" ng-click="toNewPage('track.html', 'Track')" style="max-width:100%; height:auto;vertical-align:middle"><p>Track</p></div>
                                     <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-32.png" ng-click="toNewPage('survey.html', 'Surveys')" style="max-width:100%; height:auto;vertical-align:middle"><p>Surveys</p></div>
                                 </div>
-                                <div class="row">
+                                <!--<div class="row">
                                     <div class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="toNewPage('journal.html', 'Journal')" style="max-width:100%; height:auto;vertical-align:middle"><p>Journal</p></div>
                                     <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('careplan.html', 'Goals')" style="max-width:100%; height:auto;vertical-align:middle"><p>Goals</p></div>
                                     <div class="col" style="position:relative"><img src="../img/mainIcons/mybaby.png" ng-click="toNewPage('progress.html', 'Progress')" style="max-width:100%; height:auto;vertical-align:middle"><p>Baby's Progress</p></div>
-                                </div>
-                                <!--<button ng-click="inspectDB()">Show DB</button>
-                                <button ng-click="testPHP()">Test PHP</button>-->
+                                 </div>-->
+                                <button ng-click="inspectDB()">Show DB</button>
+                                <button ng-click="testPHP()">Test PHP</button>
                             </center>
                         </ion-content>
+                        <div id="progressBar" ng-init="renderProgressBar()" style="position: fixed; bottom:0%;"></div>
                     </ion-view>
                 </ion-pane>
             </div>
         </ion-side-menu-content>
         <ion-side-menu side="right" style="background-color: #f2f2f2;">
+            <ion-content overflow-scroll="true">
             <div class="list">
                 <a class="item item-icon-left" ng-click="toNewPage('inbox.html', 'Inbox');toggleRightSideMenu()"><i class="icon ion-email"></i>Inbox</a>
                 <a class="item item-icon-left" ng-click="toNewPage('calendar.html', 'Calendar');toggleRightSideMenu()"><i class="icon ion-calendar"></i>Calendar</a>
@@ -85,11 +93,13 @@
                 <a class="item item-icon-left" ng-click="toNewPage('survey.html', 'Surveys');toggleRightSideMenu()"><i class="icon ion-clipboard"></i>Surveys</a>
                 <a class="item item-icon-left" ng-click="toNewPage('careplan.html', 'Goals');toggleRightSideMenu()"><i class="icon ion-checkmark-round"></i>Goals</a>
                 <a class="item item-icon-left" ng-click="toNewPage('journal.html', 'My Journal');toggleRightSideMenu()"><i class="icon ion-ios-bookmarks"></i>Journal</a>
+                <a class="item item-icon-left" ng-click="toNewPage('progress.html', 'Progress');toggleRightSideMenu()"><i class="icon ion-heart"></i>In Utero</a>
                 <a class="item item-icon-left" ng-click="toNewPage('myProfile.html', 'My Profile');toggleRightSideMenu()"><i class="icon ion-person"></i>My Profile</a>
-                <a class="item item-icon-left" ng-click="updateAll()"><i class="icon ion-loop"></i>Update</a>
+                <a class="item item-icon-left" ng-click="syncAll(false)"><i class="icon ion-loop"></i>Sync</a>
                 <a class="item item-icon-left" ng-click="toNewPage('settings.html', 'Settings');toggleRightSideMenu()"><i class="icon ion-gear-b"></i>Settings</a>
-                <a class="item item-icon-left" ng-click="logout()"><i class="icon ion-locked"></i>Logout</a>
+                <a class="item item-icon-left" ng-click="syncAll('logout')"><i class="icon ion-locked"></i>Logout</a>
             </div>
+            </ion-content>
         </ion-side-menu>
     </ion-side-menus>
 </body>

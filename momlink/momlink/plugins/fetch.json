@@ -262,5 +262,32 @@
         },
         "is_top_level": true,
         "variables": {}
+    },
+    "cordova-plugin-secure-storage": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/Crypho/cordova-plugin-secure-storage",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "com.disusered.simplecrypto": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/VJAI/simple-crypto",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "com.abdsoft.Hash": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/Abdsoft/phonegap-hash",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
     }
 }

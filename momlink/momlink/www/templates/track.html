@@ -1,8 +1,8 @@
 ﻿<ion-pane>
     <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-controller="TrackCtrl" ng-init="renderTrackSubheaderDate()">
-        <button class="button button-icon icon ion-arrow-left-a" ng-click="decreaseDate(); showTrackers();"></button>
+        <!--<button class="button button-icon icon ion-arrow-left-a" ng-click="decreaseDate(); showTrackers();"></button>-->
         <h2 class="title" id="todaysDate"></h2>
-        <button class="button button-icon icon ion-arrow-right-a" ng-click="increaseDate(); showTrackers();"></button>
+        <!--<button class="button button-icon icon ion-arrow-right-a" ng-click="increaseDate(); showTrackers();"></button>-->
     </ion-subheader-bar>
     <ion-view>
         <ion-nav-view></ion-nav-view>
@@ -14,7 +14,7 @@
                     </ion-content>
                     <div class="float-button-hasFooter">
                         <span class="height-fix">
-                            <button class="button button-positive button-rounded content" ng-click="uploadTrackers();getConditions()"><i class="icon ion-loop"></i></button>
+                            <button class="button button-positive button-rounded content" ng-click="syncTrackers(false)"><i class="icon ion-loop"></i></button>
                         </span>
                     </div>
                 </ion-view>
@@ -26,7 +26,7 @@
                     </ion-content>
                     <div class="float-button-hasFooter">
                         <span class="height-fix">
-                            <button class="button button-positive button-rounded content" ng-click="uploadTrackers();getConditions()"><i class="icon ion-loop"></i></button>
+                            <button class="button button-positive button-rounded content" ng-click="syncTrackers(false)"><i class="icon ion-loop"></i></button>
                         </span>
                     </div>
                 </ion-view>

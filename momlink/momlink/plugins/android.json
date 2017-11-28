@@ -57,6 +57,15 @@
         },
         "de.appplant.cordova.plugin.local-notification": {
             "PACKAGE_NAME": "io.cordova.momlink"
+        },
+        "com.disusered.simplecrypto": {
+            "PACKAGE_NAME": "io.cordova.momlink"
+        },
+        "cordova-plugin-secure-storage": {
+            "PACKAGE_NAME": "io.cordova.momlink"
+        },
+        "com.abdsoft.Hash": {
+            "PACKAGE_NAME": "io.cordova.momlink"
         }
     },
     "dependent_plugins": {}

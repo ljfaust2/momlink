@@ -1,21 +1,23 @@
 ﻿<ion-pane>
     <ion-subheader-bar id="subheader" class="bar bar-subheader" ng-init="renderSubheaderDate()">
         <h2 class="title" id="todaysDate"></h2>
+        <div class="buttons">
+            <button class="button button-icon" ng-click="syncAll(false)"><i class="icon ion-loop"></i></button>
+        </div>
     </ion-subheader-bar>
     <ion-view>
-        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderAppointmentsHeader();renderArticlesHeader();renderBadges();checkReferrals();renderGraph();checkEvents();" style="background-color: black;background: linear-gradient(#ffffff 50%, #f9f9f9 50%); background-size: 100% 5%; background-repeat: repeat-y;">
-            <ion-slides style="height:30%; background-color:deeppink;">
+        <ion-content overflow-scroll="true" class="has-header has-subheader" ng-init="renderBadges();checkReferrals();renderGraph();checkEvents();" style="background-color: black;background: linear-gradient(#ffffff 50%, #f9f9f9 50%); background-size: 100% 5%; background-repeat: repeat-y;">
+            <!--<ion-slides style="height:30%; background-color:deeppink;">
                 <ion-slide-page>
                     <div id="appointmentsHeader" class="centerWhite"></div>
                 </ion-slide-page>
                 <ion-slide-page>
                     <div id="articlesHeader" class="centerWhite"></div>
                 </ion-slide-page>
-            </ion-slides>
+            </ion-slides>-->
             <div class="ct-chart"></div>
             <div style="max-height:100%; width:auto">
                 <center>
-                    <div id="progressBar" ng-init="renderProgressBar()" style="margin-top: -5px;"></div>
                     <div class="row">
                         <div id="inbox" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-16.png" ng-click="toNewPage('inbox.html', 'Inbox')" style="max-width:100%;height:auto;vertical-align:middle"><p>Inbox</p></div>
                         <div id="calendar" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-17.png" ng-click="toNewPage('calendar.html', 'Calendar')" style="max-width:100%;height:auto;vertical-align:middle"><p>Calendar</p></div>
@@ -27,14 +29,14 @@
                         <div id="survey" class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-32.png" ng-click="toNewPage('survey.html', 'Surveys')" style="max-width:100%; height:auto;vertical-align:middle"><p>Surveys</p></div>
                         <!--<div class="col"><img src="../img/mainIcons/momlink_icon-20.png" ng-click="toNewPage('coupons.html', 'Coupons')" style="width:75px;height:75px;vertical-align:middle"><p>Coupons</p></div>-->
                     </div>
-                    <div class="row">
+                    <!--<div class="row">
                         <div class="col" style="position:relative"><img src="../img/mainIcons/momlink_icon-22.png" ng-click="toNewPage('journal.html', 'Journal')" style="max-width:100%; height:auto;vertical-align:middle"><p>Journal</p></div>
                         <div class="col"><img src="../img/mainIcons/momlink_icon-19.png" ng-click="toNewPage('careplan.html', 'Goals')" style="max-width:100%; height:auto;vertical-align:middle"><p>Goals</p></div>
                         <div class="col" style="position:relative"><img src="../img/mainIcons/mybaby.png" ng-click="toNewPage('progress.html', 'Progress')" style="max-width:100%; height:auto;vertical-align:middle"><p>Baby's Progress</p></div>
-                    </div>
-                    <!--<button ng-click="inspectDB()">Show DB</button>
-                    <button ng-click="testPHP()">Test</button>-->
-                    <div id="progressBar" ng-init="renderProgressBar()"></div>
+                    </div>-->
+                    <button ng-click="inspectDB()">Show DB</button>
+                    <button ng-click="testPHP()">Test</button>
+                    <div id="progressBar" ng-init="renderProgressBar()" style="position: fixed; bottom:0%;"></div>
                 </center>
             </div>
         </ion-content>
